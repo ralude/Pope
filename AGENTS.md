@@ -33,7 +33,8 @@ Justificación de cada pieza: [`docs/adr/`](docs/adr/README.md).
 
 ## Mapa del repositorio (objetivo)
 
-Aún no hay código. Esta es la estructura acordada ([ADR-0002](docs/adr/0002-monorepo-typescript.md)):
+El monorepo (pnpm + Turborepo) ya existe; los paquetes se crean a medida que los pide cada
+spec. Esta es la estructura acordada ([ADR-0002](docs/adr/0002-monorepo-typescript.md)):
 
 | Ruta | Contenido | Lenguaje |
 |---|---|---|
@@ -42,6 +43,7 @@ Aún no hay código. Esta es la estructura acordada ([ADR-0002](docs/adr/0002-mo
 | `apps/shell-ui` | Interfaz que ve el cliente en la PC | TS/React |
 | `apps/native` | Agente (servicio) y host del Shell (WebView2) | C# |
 | `packages/shared` | Tipos, esquemas `zod`, reglas de negocio compartidas | TS |
+| `tools/*` | Herramientas de desarrollo (p. ej. `tools/agent-sim`, simulador de PCs) | TS |
 | `docs/adr` | Decisiones de arquitectura | — |
 | `docs/specs` | Especificaciones SDD (spec → plan → tasks) | — |
 
@@ -138,8 +140,23 @@ El mantenedor domina TypeScript pero **no C#**:
 
 ## Comandos
 
-Pendientes hasta que exista el monorepo. Se documentarán aquí (instalar, compilar, test,
-lint) en el mismo commit que los introduzca.
+Requisitos: **Node 24 LTS** (ver `.nvmrc`) y **pnpm 12** (fijado en `packageManager`;
+con `corepack enable` se usa la versión correcta). Todo se lanza desde la raíz y Turborepo
+lo reparte entre los paquetes:
+
+| Comando | Qué hace |
+|---|---|
+| `pnpm install` | Instala las dependencias de todo el monorepo |
+| `pnpm build` | Compila todos los paquetes, respetando las dependencias entre ellos |
+| `pnpm typecheck` | Comprueba los tipos con TypeScript estricto |
+| `pnpm lint` | Pasa el linter |
+| `pnpm test` | Ejecuta los tests |
+
+Para un solo paquete: `pnpm --filter <paquete> <script>`.
+
+Cada paquete define sus propios scripts `build`, `typecheck`, `lint` y `test`, y su
+`tsconfig.json` extiende `tsconfig.base.json`. TypeScript está fijado en 6.0.x porque
+`typescript-eslint` aún no admite versiones posteriores.
 
 ## Ante la duda
 

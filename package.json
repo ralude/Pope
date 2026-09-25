@@ -1,0 +1,20 @@
+{
+  "name": "pope",
+  "private": true,
+  "description": "Sistema de gestión de cibercafés (monorepo)",
+  "packageManager": "pnpm@12.4.2",
+  "engines": {
+    "node": ">=24.11.0 <25",
+    "pnpm": ">=12.4.2"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck"
+  },
+  "devDependencies": {
+    "turbo": "~2.11.3",
+    "typescript": "~6.0.3"
+  }
+}

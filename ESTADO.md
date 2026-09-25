@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · tareas de la spec 001 aprobadas
+**Última actualización:** 2026-09-25 · T01 terminada (monorepo)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T01: Crear el monorepo** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 0 / 51 tareas · fase 1 de 9 (Monorepo) |
+| **Siguiente tarea** | **T02: Lint y formato** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 1 / 51 tareas · fase 1 de 9 (Monorepo) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -40,7 +40,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 0 / 51 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 1 / 51 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -53,5 +53,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T01. Monorepo con pnpm 12 y Turborepo 2.11, Node 24 LTS y
+  `tsconfig.base.json` estricto. TypeScript fijado en 6.0.x (no 7) porque
+  `typescript-eslint` aún no lo admite. Aún no hay paquetes.
 - **2026-09-25:** Diseño completo. ADR 0000–0015 (13 aceptados, 3 propuestos). Specs
   001–008 redactadas. Spec 001 con spec, plan y tareas aprobados. Aún no hay código.

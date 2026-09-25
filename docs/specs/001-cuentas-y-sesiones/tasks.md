@@ -10,7 +10,7 @@ antes de seguir.
 
 ## Fase 1: Monorepo
 
-- [ ] **T01: Crear el monorepo**
+- [x] **T01: Crear el monorepo**
   - **Cubre:** ADR-0002
   - **Hacer:** `package.json` raíz, `pnpm-workspace.yaml`, `turbo.json`, `tsconfig.base.json` (`strict`), versión de Node LTS fijada (`engines` + `.nvmrc`), scripts `build`, `test`, `lint`, `typecheck`. Documentar los comandos en la sección "Comandos" de `AGENTS.md`.
   - **Verificar:** `pnpm install && pnpm typecheck` sin errores.
