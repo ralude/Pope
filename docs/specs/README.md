@@ -76,3 +76,4 @@ Cada documento se entrega en **su propio commit** (`docs(specs): ...`).
 | [003](003-bloqueo-de-pc/spec.md) | Arranque y bloqueo de la PC cliente | Borrador |
 | [004](004-lista-blanca-de-aplicaciones/spec.md) | Lista blanca de aplicaciones y herramientas | Borrador |
 | [005](005-inventario-y-caja/spec.md) | Inventario de productos y caja | Borrador |
+| [006](006-sincronizacion-y-web-del-dueno/spec.md) | Sincronización con la nube y web del dueño | Borrador |
