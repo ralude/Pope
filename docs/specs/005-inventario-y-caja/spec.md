@@ -40,7 +40,7 @@ bolívares, pago móvil, transferencia).
 
 **Punto de venta (panel del encargado)**
 - **REQ-005-20:** Venta con carrito, lector de código de barras opcional y pago con uno o varios métodos.
-- **REQ-005-21:** Métodos de pago configurables: efectivo, pago móvil, transferencia y **saldo de la cuenta del cliente**.
+- **REQ-005-21:** Métodos de pago configurables. Por defecto: **efectivo** (USD o Bs), **pago móvil**, **punto de venta** y **saldo de la cuenta del cliente**. El sistema no verifica pagos externos; los confirma el encargado (la verificación automática del pago móvil es la spec 007).
 - **REQ-005-22:** Cada pago registra su **moneda** y, si se paga en una moneda distinta de la del precio, la **tasa de cambio aplicada**.
 - **REQ-005-23:** Una venta solo la anula un administrador, con motivo. La anulación genera movimientos inversos; nunca se borra nada.
 
@@ -107,5 +107,5 @@ bolívares, pago móvil, transferencia).
 - [x] ¿Cuál es la moneda base de los precios? **Resuelta: USD, con equivalente en Bs** (REQ-005-30).
 - [x] ¿La tasa se introduce a mano o se consulta? **Resuelta: automática desde el BCV, con opción manual** (REQ-005-31 a REQ-005-34).
 - [ ] ¿La tasa nueva se aplica **cuando llega su fecha valor** o **en cuanto se publica**? (Propuesta: por fecha valor, que es cuando entra en vigor oficialmente.)
-- [ ] ¿Qué métodos de pago usa hoy el local?
+- [x] ¿Qué métodos de pago usa hoy el local? **Resuelta: pago móvil, punto de venta y efectivo** (REQ-005-21).
 - [ ] ¿Se necesita imprimir tickets?

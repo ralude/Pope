@@ -37,7 +37,7 @@ cuando se apaga todo.
 
 - **REQ-001-01:** Las cuentas de cliente solo se crean en el nodo local (desde el panel). La PC nunca crea ni guarda cuentas.
 - **REQ-001-02:** Una cuenta debe tener usuario único y contraseña. Nombre y teléfono son opcionales.
-- **REQ-001-03:** El encargado debe poder recargar saldo indicando importe y método de pago. La recarga queda asociada a su turno de caja (spec 005).
+- **REQ-001-03:** El encargado debe poder recargar saldo indicando importe y método de pago. La recarga queda asociada a su turno de caja (spec 005). El sistema **no verifica el pago**: el encargado lo comprueba por su cuenta (pago móvil, punto de venta o efectivo) y decide cuándo recargar.
 - **REQ-001-04:** El encargado debe poder bloquear o desactivar una cuenta.
 
 **Tarifas**
@@ -140,7 +140,9 @@ cuando se apaga todo.
 
 ## Fuera de alcance
 
-- Paquetes de horas, bonos y programa de fidelidad.
+- Sesiones **postpago**: el sistema es solo prepago. Si el encargado fía, lo controla fuera del sistema y recarga cuando quiera.
+- Recarga automática desde el Shell con verificación de pago móvil (spec 007, futura).
+- Paquetes de horas o combos (pendientes de definir, ver spec 007), bonos y programa de fidelidad.
 - Tarifas distintas por PC o categorías de PC (Normal, VIP).
 - Tarifas por franja horaria o por día de la semana.
 - Registro de cuentas por el propio cliente desde la PC.
@@ -152,7 +154,7 @@ cuando se apaga todo.
 - [x] ¿El saldo se guarda en dinero o en tiempo? **Resuelta: en dinero, y el Shell muestra ambos** (REQ-001-11, REQ-001-12).
 - [x] ¿En qué moneda se cobra? **Resuelta: USD, mostrando el equivalente en Bs a la tasa BCV** (REQ-001-13, spec 005).
 - [ ] ¿Cómo se cobra la **fracción de minuto** cuando un cliente con cuenta cierra sesión? Ejemplo con 1 USD/hora, si usó 10 min 20 s: *por minuto empezado* cobra 11 min (0,18 USD); *por minuto completo* cobra 10 min (0,17 USD); *por segundo* cobra 10:20 exactos (0,172 USD). (Propuesta: por segundo.)
-- [ ] ¿Se permiten sesiones **postpago** (se usa y se paga al final)?
+- [x] ¿Se permiten sesiones postpago? **Resuelta: no; solo prepago, y el encargado gestiona el cobro por fuera** (REQ-001-03).
 - [ ] Si en el futuro se abre **otro cibercafé** del mismo dueño, ¿un cliente con cuenta en uno podría usar la misma cuenta y saldo en el otro? (Propuesta: no; cada local tiene sus propias cuentas.)
 - [x] ¿El respaldo mínimo de 3 sesiones temporales es por PC o en total? **Resuelta: por PC** (REQ-001-64).
 - [x] Si el cliente de una sesión temporal se va antes de tiempo, ¿qué pasa con el tiempo sobrante? **Resuelta: se pierde** (REQ-001-69).
