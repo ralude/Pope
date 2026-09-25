@@ -153,7 +153,7 @@ antes de seguir.
   - **Verificar:** test de 5 fallos → bloqueado 5 min → desbloqueado después.
   - **Commit:** `feat(server): bloquea el login de clientes tras 5 intentos fallidos`
 
-- [ ] **T16a: Desbloqueo manual del login**
+- [x] **T16a: Desbloqueo manual del login**
   - **Cubre:** REQ-001-52
   - **Hacer:** `POST /customers/:id/unlock` (encargado y administrador) que quita el bloqueo por intentos y emite `customer.login_unlocked`; el cliente del panel indica hasta cuándo está bloqueado.
   - **Verificar:** tests e2e de desbloqueo, del evento, de los roles y de que sin bloqueo no emite nada.

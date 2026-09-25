@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import {
   type Customer,
   type CustomerCreateRequest,
@@ -15,6 +15,7 @@ import {
 import { CurrentStaff, Roles } from '../auth/decorators.js';
 import { staffActor } from '../auth/staff.controller.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
+import { CustomerAuthService } from './customer-auth.service.js';
 import { CustomersService } from './customers.service.js';
 
 /**
@@ -23,7 +24,10 @@ import { CustomersService } from './customers.service.js';
  */
 @Controller('customers')
 export class CustomersController {
-  constructor(private readonly customers: CustomersService) {}
+  constructor(
+    private readonly customers: CustomersService,
+    private readonly customerAuth: CustomerAuthService,
+  ) {}
 
   @Roles('encargado', 'administrador')
   @Post()
@@ -56,5 +60,16 @@ export class CustomersController {
     @CurrentStaff() member: StaffProfile,
   ): Promise<Customer> {
     return this.customers.setStatus(id, body.status, staffActor(member));
+  }
+
+  /** Quita el bloqueo por intentos fallidos antes de que pasen los 5 min (T16a, REQ-001-52). */
+  @Roles('encargado', 'administrador')
+  @Post(':id/unlock')
+  @HttpCode(200)
+  unlock(
+    @Param('id', new ZodValidationPipe(idSchema)) id: string,
+    @CurrentStaff() member: StaffProfile,
+  ): Promise<Customer> {
+    return this.customerAuth.unlock(id, staffActor(member));
   }
 }

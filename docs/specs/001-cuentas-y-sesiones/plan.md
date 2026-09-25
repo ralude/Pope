@@ -99,7 +99,8 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 - `sessions`: activas, abrir temporal, añadir tiempo, cerrar, interrumpidas, restaurar.
 - `shifts`: abrir y cerrar turno.
 
-**Eventos** (versionados): `customer.created`, `customer.status_changed`, `customer.login_locked`, `wallet.recharged`,
+**Eventos** (versionados): `customer.created`, `customer.status_changed`, `customer.login_locked`,
+`customer.login_unlocked`, `wallet.recharged`,
 `combo.created`, `combo.updated`, `combo.purchased`, `tariff.changed`, `session.started`,
 `session.ended`, `session.time_added`, `session.restored`, `shift.opened`, `shift.closed`.
 

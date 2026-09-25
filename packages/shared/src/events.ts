@@ -105,6 +105,13 @@ export const customerLoginLockedEventSchema = event(
   z.strictObject({ customer: customerRefSchema, lockedUntil: utcInstantSchema }),
 );
 
+/** El encargado quita el bloqueo por intentos antes de tiempo (T16a). */
+export const customerLoginUnlockedEventSchema = event(
+  'customer.login_unlocked',
+  1,
+  z.strictObject({ customer: customerRefSchema }),
+);
+
 /** Recarga en caja (REQ-001-03), ligada al turno del encargado. */
 export const walletRechargedEventSchema = event(
   'wallet.recharged',
@@ -320,6 +327,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   customerCreatedEventSchema,
   customerStatusChangedEventSchema,
   customerLoginLockedEventSchema,
+  customerLoginUnlockedEventSchema,
   walletRechargedEventSchema,
   comboCreatedEventSchema,
   comboUpdatedEventSchema,

@@ -37,6 +37,7 @@ const examples = {
     { customer: JUAN, lockedUntil: '2026-09-25T22:35:00Z' },
     { kind: 'system' },
   ),
+  'customer.login_unlocked': envelope('customer.login_unlocked', { customer: JUAN }),
   'wallet.recharged': envelope('wallet.recharged', {
     customer: JUAN,
     amount: usd(3_000_000),

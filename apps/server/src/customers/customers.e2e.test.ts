@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { events } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
+import { CustomerAuthService, MAX_FAILED_LOGINS } from './customer-auth.service.js';
 
 describe('cuentas de cliente (e2e, REQ-001-01, REQ-001-02, REQ-001-04)', () => {
   let testApp: TestApp;
@@ -159,6 +160,11 @@ describe('cuentas de cliente (e2e, REQ-001-01, REQ-001-02, REQ-001-04)', () => {
       expect(response.statusCode).toBe(403);
     });
 
+    it('un cliente nuevo no tiene bloqueo por intentos', async () => {
+      const juan = await createCustomer({ username: 'juan', password: '1234' });
+      expect(juan.loginLockedUntil).toBeNull();
+    });
+
     it('responde 400 con un estado no válido y 404 si el cliente no existe', async () => {
       const juan = await createCustomer({ username: 'juan', password: '1234' });
       const invalid = await request('PATCH', `/customers/${juan.id}/status`, ana, {
@@ -170,6 +176,65 @@ describe('cuentas de cliente (e2e, REQ-001-01, REQ-001-02, REQ-001-04)', () => {
         '/customers/0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a99/status',
         ana,
         { status: 'blocked' },
+      );
+      expect(missing.statusCode).toBe(404);
+    });
+  });
+
+  describe('desbloqueo manual del login (T16a, REQ-001-52)', () => {
+    async function lockOut(username: string) {
+      const auth = testApp.app.get(CustomerAuthService);
+      for (let i = 0; i < MAX_FAILED_LOGINS; i++) {
+        await auth.verify(username, 'mala');
+      }
+    }
+
+    it('el panel ve hasta cuándo está bloqueado y la encargada lo desbloquea', async () => {
+      const juan = await createCustomer({ username: 'juan', password: '1234' });
+      await lockOut('juan');
+      const locked = (await request('GET', `/customers/${juan.id}`, dueno)).json<Customer>();
+      expect(locked.loginLockedUntil).not.toBeNull();
+
+      const response = await request('POST', `/customers/${juan.id}/unlock`, ana);
+      expect(response.statusCode).toBe(200);
+      expect(response.json<Customer>().loginLockedUntil).toBeNull();
+      expect(await lastEvent()).toMatchObject({
+        type: 'customer.login_unlocked',
+        actor: { kind: 'staff', name: 'Ana' },
+        payload: { customer: { id: juan.id, username: 'juan' } },
+      });
+      expect(await testApp.app.get(CustomerAuthService).verify('juan', '1234')).toMatchObject({
+        ok: true,
+      });
+    });
+
+    it('tras desbloquear, vuelve a tener 5 intentos', async () => {
+      const juan = await createCustomer({ username: 'juan', password: '1234' });
+      await lockOut('juan');
+      await request('POST', `/customers/${juan.id}/unlock`, ana);
+      const auth = testApp.app.get(CustomerAuthService);
+      for (let i = 0; i < MAX_FAILED_LOGINS - 1; i++) {
+        await auth.verify('juan', 'mala');
+      }
+      expect(await auth.verify('juan', '1234')).toMatchObject({ ok: true });
+    });
+
+    it('sin bloqueo vigente no hace nada ni emite evento', async () => {
+      const juan = await createCustomer({ username: 'juan', password: '1234' });
+      const before = await lastEvent();
+      const response = await request('POST', `/customers/${juan.id}/unlock`, ana);
+      expect(response.statusCode).toBe(200);
+      expect((await lastEvent())?.seq).toBe(before?.seq);
+    });
+
+    it('el dueño no puede desbloquear y un cliente inexistente da 404', async () => {
+      const juan = await createCustomer({ username: 'juan', password: '1234' });
+      await lockOut('juan');
+      expect((await request('POST', `/customers/${juan.id}/unlock`, dueno)).statusCode).toBe(403);
+      const missing = await request(
+        'POST',
+        '/customers/0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a99/unlock',
+        ana,
       );
       expect(missing.statusCode).toBe(404);
     });

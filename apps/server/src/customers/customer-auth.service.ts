@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
-import { Inject, Injectable } from '@nestjs/common';
-import type { Customer } from '@pope/shared';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import type { Actor, Customer } from '@pope/shared';
 import { eq } from 'drizzle-orm';
 
 import { PasswordService } from '../auth/password.service.js';
@@ -112,7 +112,35 @@ export class CustomerAuthService {
       if (row.status !== 'active') {
         return { ok: false, reason: 'account_inactive', status: row.status } as const;
       }
-      return { ok: true, customer: toCustomer(row) } as const;
+      return { ok: true, customer: toCustomer(row, this.clock.now()) } as const;
+    });
+  }
+
+  /**
+   * El encargado quita el bloqueo por intentos antes de tiempo (T16a) y emite
+   * `customer.login_unlocked`. Si no hay un bloqueo vigente, no hace nada.
+   */
+  async unlock(id: string, actor: Actor): Promise<Customer> {
+    return this.events.inTransaction(async (tx, emit) => {
+      const [row] = await tx.select().from(customers).where(eq(customers.id, id)).for('update');
+      if (!row) {
+        throw new NotFoundException('No existe ese cliente');
+      }
+      const now = this.clock.now();
+      if (!this.activeLock(row.lockedUntil)) {
+        return toCustomer(row, now);
+      }
+      await tx
+        .update(customers)
+        .set({ failedLogins: 0, lockedUntil: null })
+        .where(eq(customers.id, id));
+      emit({
+        type: 'customer.login_unlocked',
+        version: 1,
+        actor,
+        payload: { customer: { id: row.id, username: row.username } },
+      });
+      return toCustomer({ ...row, failedLogins: 0, lockedUntil: null }, now);
     });
   }
 

@@ -11,6 +11,7 @@ import {
 import { asc, count, eq, ilike, or, type SQL, sql } from 'drizzle-orm';
 
 import { PasswordService } from '../auth/password.service.js';
+import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { customers } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
@@ -41,13 +42,16 @@ function searchCondition(q: string): SQL | undefined {
   return or(...conditions);
 }
 
-export function toCustomer(row: typeof customers.$inferSelect): Customer {
+/** Cliente para el panel. `now` decide si el bloqueo por intentos sigue vigente. */
+export function toCustomer(row: typeof customers.$inferSelect, now: Date): Customer {
   return {
     id: row.id,
     username: row.username,
     name: row.name,
     phone: row.phone,
     status: row.status,
+    loginLockedUntil:
+      row.lockedUntil && row.lockedUntil > now ? row.lockedUntil.toISOString() : null,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -59,6 +63,7 @@ export class CustomersService {
     @Inject(DATABASE) private readonly db: Database,
     private readonly events: EventsService,
     private readonly passwords: PasswordService,
+    private readonly clock: Clock,
   ) {}
 
   /** Da de alta un cliente y emite `customer.created` (REQ-001-02, REQ-001-30). */
@@ -96,7 +101,7 @@ export class CustomersService {
           phone: row.phone,
         },
       });
-      return toCustomer(row);
+      return toCustomer(row, this.clock.now());
     });
   }
 
@@ -113,7 +118,8 @@ export class CustomersService {
         .offset(query.offset),
       this.db.select({ total: count() }).from(customers).where(where),
     ]);
-    return { items: rows.map(toCustomer), total: totals?.total ?? 0 };
+    const now = this.clock.now();
+    return { items: rows.map((row) => toCustomer(row, now)), total: totals?.total ?? 0 };
   }
 
   /** Un cliente; 404 si no existe. */
@@ -122,7 +128,7 @@ export class CustomersService {
     if (!row) {
       throw new NotFoundException('No existe ese cliente');
     }
-    return toCustomer(row);
+    return toCustomer(row, this.clock.now());
   }
 
   /**
@@ -136,7 +142,7 @@ export class CustomersService {
         throw new NotFoundException('No existe ese cliente');
       }
       if (row.status === status) {
-        return toCustomer(row);
+        return toCustomer(row, this.clock.now());
       }
       await tx.update(customers).set({ status }).where(eq(customers.id, id));
       emit({
@@ -149,7 +155,7 @@ export class CustomersService {
           to: status,
         },
       });
-      return toCustomer({ ...row, status });
+      return toCustomer({ ...row, status }, this.clock.now());
     });
   }
 }

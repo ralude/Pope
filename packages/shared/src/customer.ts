@@ -99,6 +99,8 @@ export const customerSchema = z.object({
   name: z.string().nullable(),
   phone: z.string().nullable(),
   status: customerStatusSchema,
+  /** Fin del bloqueo por intentos fallidos si sigue vigente (REQ-001-52); si no, `null`. */
+  loginLockedUntil: z.iso.datetime().nullable(),
   createdAt: z.iso.datetime(),
 });
 export type Customer = z.infer<typeof customerSchema>;

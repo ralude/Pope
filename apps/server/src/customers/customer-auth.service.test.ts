@@ -26,7 +26,7 @@ describe('CustomerAuthService: credenciales y bloqueo por intentos (REQ-001-51, 
     const eventsService = new EventsService(handle.db);
     const passwords = new PasswordService();
     auth = new CustomerAuthService(handle.db, eventsService, passwords, clock);
-    customersService = new CustomersService(handle.db, eventsService, passwords);
+    customersService = new CustomersService(handle.db, eventsService, passwords, clock);
     juan = await customersService.create(
       { username: 'Juan', password: '1234', name: null, phone: null },
       SYSTEM,
