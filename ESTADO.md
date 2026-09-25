@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T09b terminada (eventos de sesión)
+**Última actualización:** 2026-09-25 · anotadas las decisiones pendientes de la conexión PC ↔ nodo
 
 ## Ahora
 
@@ -32,6 +32,9 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 - [ ] **T11 y T37:** ejecutar las mediciones en el PC servidor del local (i5 de 2ª gen, 8 GB).
+- [ ] **Antes de T24:** decidir el transporte WebSocket (`ws` puro recomendado, en vez de Socket.IO), cómo se enruta `type` en NestJS y si se añade `requestId` al protocolo. Detalle en la nota de T24 de [tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md).
+- [ ] **Antes de T29:** decidir qué pasa si se corta la red entre una PC y el nodo más que el tiempo de gracia (choque entre ADR-0007 y REQ-001-27). Pregunta abierta en la [spec 001](docs/specs/001-cuentas-y-sesiones/spec.md).
+- [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **REQ-001-13:** el equivalente en Bs espera a la tasa BCV de la spec 005.
 - [ ] **Antes de la spec 003:** decidir los ADR propuestos [0005](docs/adr/0005-shell-react-en-webview2.md), [0009](docs/adr/0009-escritorio-separado-para-bloqueo-y-pausa.md) y [0010](docs/adr/0010-lista-blanca-y-restauracion.md) (cliente Windows).
@@ -54,6 +57,9 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** Revisada la conexión NestJS ↔ .NET ↔ WebView2. Decisiones pendientes
+  anotadas antes de T24 (transporte `ws`, `requestId`) y T29 (corte de red), y en las
+  preguntas abiertas de la spec 003.
 - **2026-09-25:** T09b. Eventos de sesión (`started`, `ended` con `billedUntil`, `time_added`,
   `restored`). **Fin de la fase 2:** `@pope/shared` tiene dinero, tiempo, tarifas, motor de
   cobro, avisos, protocolo PC ↔ nodo y eventos, con 102 tests.
@@ -77,8 +83,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
   y un test de humo. Fin de la fase 1: el monorepo compila, pasa lint y ejecuta tests.
 - **2026-09-25:** T02. ESLint 10 (configuración plana única en la raíz, `strictTypeChecked`)
   y Prettier 3. `pnpm lint` comprueba el formato y luego lanza ESLint en cada paquete.
-- **2026-09-25:** T01. Monorepo con pnpm 12 y Turborepo 2.11, Node 24 LTS y
-  `tsconfig.base.json` estricto. TypeScript fijado en 6.0.x (no 7) porque
-  `typescript-eslint` aún no lo admite. Aún no hay paquetes.
-- **2026-09-25:** Diseño completo. ADR 0000–0015 (13 aceptados, 3 propuestos). Specs
-  001–008 redactadas. Spec 001 con spec, plan y tareas aprobados. Aún no hay código.

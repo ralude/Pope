@@ -86,3 +86,13 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - [ ] ¿Qué versión y edición de Windows tienen las PCs del local?
 - [ ] ¿Cuántas PCs hay, y tienen congelador de disco (Deep Freeze o similar)?
 - [ ] ¿Wake-on-LAN para encender las PCs desde el panel?
+
+Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La cadena prevista es: `shell-ui` ⇄ puente de WebView2 ⇄ `Pope.ShellHost` ⇄ named pipe ⇄ `Pope.Agent` ⇄ WebSocket ⇄ nodo, con los mensajes de `packages/shared` (T08 de la spec 001) reenviados sin cambios.
+
+- [ ] **Cifrado en la LAN (REQ-003-63).** Con `ws://`, la contraseña del cliente del mensaje `login` viaja en claro y cualquier equipo de la red (p. ej. un portátil en el Wi-Fi) podría capturarla. Propuesta: `wss://` con un certificado del nodo que el agente reconozca expresamente (fijado en la instalación).
+- [ ] **Credencial de la PC (REQ-003-10, REQ-003-11).** ¿Dónde viaja? Propuesta: en la conexión inicial del WebSocket (cabecera, que `ClientWebSocket` permite), no dentro de `hello`. Solo la guarda el agente (LocalSystem), nunca el Shell ni el usuario restringido.
+- [ ] **Seguridad del named pipe.** Agente y host corren con usuarios distintos, así que cualquier proceso del usuario restringido podría abrir el pipe. Propuesta: el agente comprueba que quien se conecta es el `Pope.ShellHost` que él lanzó (`GetNamedPipeClientProcessId`). Por el pipe pasa la contraseña del login: el C# nunca la registra (REQ-001-51).
+- [ ] **Origen de la interfaz del Shell.** Si WebView2 cargara `shell-ui` desde el nodo, sin nodo no habría pantalla y no se cumpliría REQ-003-04. Propuesta: empaquetarla junto al host (`SetVirtualHostNameToFolderMapping`). Enlaza con las actualizaciones de los clientes (fuera de alcance).
+- [ ] **Quién aplica el bloqueo al recibir `state`.** Según ADR-0009 cambia de escritorio el host, pero si el host muere el agente debe garantizar el bloqueo (REQ-003-32) y seguir la cuenta atrás sin red (ADR-0007). Ambos tendrán que entender `state`, `sessionEnded` y el tiempo restante; conviene acotar exactamente qué hace cada uno.
+- [ ] **Validar el protocolo en C# (ADR-0002).** .NET no trae un validador de JSON Schema (solo exporta). Hará falta un paquete en el proyecto de tests (JsonSchema.Net o NJsonSchema), justificado en el plan, o generar las clases C# a partir del schema.
+- [ ] **Dirección del nodo.** ¿Cómo encuentra el agente al nodo? Propuesta: IP fija del nodo configurada por el instalador (REQ-003-50).

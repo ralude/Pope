@@ -168,6 +168,10 @@ antes de seguir.
   - **Hacer:** gateway con `hello` (identidad de desarrollo; el registro real es la spec 003), registro de conexiones y envío de `state` bloqueado.
   - **Verificar:** test e2e: una PC se conecta y recibe `state` bloqueado.
   - **Commit:** `feat(server): conecta las PCs por WebSocket`
+  - **Antes de empezar, decidir con el mantenedor** (y dejarlo escrito en ADR-0003, que lo aplazaba al plan de la spec 003):
+    - **Transporte:** `ws` puro (`@nestjs/platform-ws`) o Socket.IO. Recomendado `ws`: el agente en C# puede usar `System.Net.WebSockets.ClientWebSocket` de la biblioteca estándar (ADR-0006) y los mensajes viajan tal cual los describe el JSON Schema de T08. Socket.IO exigiría una librería de terceros en C# y envuelve los mensajes en su propio formato.
+    - **Enrutado:** el adaptador `ws` de NestJS espera `{ event, data }`; nuestro protocolo usa `{ type, … }`. Hay que configurar su traductor de mensajes o manejar el socket directamente.
+    - **`requestId`:** hoy `error` no dice a qué petición responde (el Shell no sabe si falló el login o la compra de un combo). Valorar un `requestId` opcional en `login`, `logout` y `buyCombo` que se devuelva en `error`, antes de que el protocolo llegue al C# (spec 003).
 
 - [ ] **T25: Login desde la PC**
   - **Cubre:** REQ-001-20, REQ-001-21, REQ-001-14, REQ-001-16
@@ -198,6 +202,7 @@ antes de seguir.
   - **Hacer:** proceso periódico de cierre por falta de latidos, revisión al arrancar el nodo y cierre inmediato si la PC dice "no tengo sesión".
   - **Verificar:** test de CA-001-03.
   - **Commit:** `feat(server): cierra las sesiones sin latidos cobrando hasta el último`
+  - **Bloqueada** hasta resolver la pregunta abierta de la spec 001 sobre el corte de red entre la PC y el nodo (qué pasa cuando un agente reconecta con una sesión ya cerrada por falta de latidos).
 
 - [ ] **T30: Compra de combo desde el Shell**
   - **Cubre:** REQ-001-85
@@ -308,6 +313,7 @@ antes de seguir.
   - **Hacer:** Vite + React y cliente del canal PC (en desarrollo, WebSocket directo; con la spec 003 pasará por el host). Pantalla de bloqueo con login y mensajes de error en español.
   - **Verificar:** login en el navegador contra el servidor local.
   - **Commit:** `feat(shell-ui): crea el Shell con la pantalla de login`
+  - **Nota de diseño:** el cliente del canal va detrás de una interfaz con dos implementaciones: WebSocket directo al nodo (desarrollo) y puente de WebView2 (`chrome.webview.postMessage`, spec 003). Así el paso a la spec 003 no toca las pantallas. En producción, la conexión con el nodo la mantiene el agente, no el Shell (REQ-003-63).
 
 - [ ] **T47: Estado de la sesión**
   - **Cubre:** REQ-001-12, REQ-001-13, REQ-001-88
