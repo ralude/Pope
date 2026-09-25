@@ -44,8 +44,13 @@ bolívares, pago móvil, transferencia).
 - **REQ-005-22:** Cada pago registra su **moneda** y, si se paga en una moneda distinta de la del precio, la **tasa de cambio aplicada**.
 - **REQ-005-23:** Una venta solo la anula un administrador, con motivo. La anulación genera movimientos inversos; nunca se borra nada.
 
-**Tasa de cambio**
-- **REQ-005-30:** El administrador registra la tasa del día (p. ej. USD → VES). Queda guardada con fecha y actor, y es la que usan las ventas desde ese momento.
+**Moneda y tasa de cambio (BCV)**
+- **REQ-005-30:** Todos los precios, tarifas y saldos están en **USD**. Donde se muestre un importe, aparece primero en USD y a su lado el **equivalente en bolívares** a la tasa vigente.
+- **REQ-005-31:** El nodo local obtiene automáticamente la **tasa oficial USD → VES del BCV**. El BCV la publica los días hábiles bancarios **por la tarde** (aprox. 16:00–18:00, hora de Caracas), con **fecha valor del siguiente día hábil**.
+- **REQ-005-32:** Los días hábiles, el nodo consulta cada 30 min entre las 15:00 y las 20:00 (hora de Caracas) hasta obtener la tasa nueva, y una vez más a las 08:00 por si se publicó tarde. El horario es configurable.
+- **REQ-005-33:** Cada tasa se guarda con su fecha valor, su fuente y la hora a la que se obtuvo. La **tasa vigente** de un día es la más reciente cuya fecha valor sea hoy o anterior. Fines de semana y feriados sigue vigente la última.
+- **REQ-005-34:** Sin internet o si el BCV no responde, se mantiene la última tasa vigente y el panel muestra su fecha. El administrador puede introducir la tasa a mano; queda registrada con actor y fuente "manual".
+- **REQ-005-35:** El panel avisa si la tasa vigente tiene más de 1 día hábil de antigüedad.
 
 **Turnos de caja**
 - **REQ-005-40:** El encargado abre turno declarando el fondo inicial en cada moneda.
@@ -77,6 +82,14 @@ bolívares, pago móvil, transferencia).
   - **Dado** un refresco a 1,00 USD y una tasa de 40 VES/USD
   - **Cuando** se paga en efectivo en VES
   - **Entonces** se registran 40,00 VES con la tasa 40 aplicada.
+- **CA-005-04** (REQ-005-31, REQ-005-33)
+  - **Dado** que el martes a las 16:30 el BCV publica 41 VES/USD con fecha valor del miércoles
+  - **Cuando** se vende algo el martes a las 17:00
+  - **Entonces** se usa la tasa anterior, y desde el miércoles a las 00:00 se usa 41.
+- **CA-005-05** (REQ-005-34)
+  - **Dado** el local sin internet desde el lunes
+  - **Cuando** es miércoles
+  - **Entonces** se sigue usando la tasa del lunes, el panel muestra "Tasa del lunes" y avisa de que está desactualizada.
 - **CA-005-03** (REQ-005-42)
   - **Dado** un turno con 50 USD esperados en efectivo
   - **Cuando** el encargado declara 45 USD al cerrar
@@ -91,7 +104,8 @@ bolívares, pago móvil, transferencia).
 
 ## Preguntas abiertas
 
-- [ ] ¿Cuál es la **moneda base** de los precios: USD o VES?
-- [ ] ¿La tasa se introduce a mano o se consulta a una fuente (BCV) cuando haya internet?
+- [x] ¿Cuál es la moneda base de los precios? **Resuelta: USD, con equivalente en Bs** (REQ-005-30).
+- [x] ¿La tasa se introduce a mano o se consulta? **Resuelta: automática desde el BCV, con opción manual** (REQ-005-31 a REQ-005-34).
+- [ ] ¿La tasa nueva se aplica **cuando llega su fecha valor** o **en cuanto se publica**? (Propuesta: por fecha valor, que es cuando entra en vigor oficialmente.)
 - [ ] ¿Qué métodos de pago usa hoy el local?
 - [ ] ¿Se necesita imprimir tickets?

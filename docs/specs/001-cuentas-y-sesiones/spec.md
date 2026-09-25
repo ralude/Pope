@@ -45,6 +45,7 @@ cuando se apaga todo.
 - **REQ-001-10:** Todas las PCs del local tienen la **misma tarifa**: un único precio por hora que configura el administrador. No hay categorías de PC (Normal, VIP, etc.).
 - **REQ-001-11:** El saldo se guarda en **dinero**. Como la tarifa es única, saldo y tiempo son equivalentes: tiempo restante = saldo ÷ tarifa.
 - **REQ-001-12:** El Shell muestra al cliente **los dos valores**, tiempo restante y saldo, y los actualiza mientras consume. Ejemplo con 1 USD/hora: empieza con 1,00 USD = 1:00:00 y, tras 30 min, ve 0,50 USD = 0:30:00.
+- **REQ-001-13:** La tarifa, el saldo y las recargas están en **USD**. El Shell y el panel muestran primero el importe en USD y a su lado el equivalente en bolívares a la tasa BCV vigente (REQ-005-30).
 
 **Sesiones**
 
@@ -149,7 +150,7 @@ cuando se apaga todo.
 ## Preguntas abiertas
 
 - [x] ¿El saldo se guarda en dinero o en tiempo? **Resuelta: en dinero, y el Shell muestra ambos** (REQ-001-11, REQ-001-12).
-- [ ] ¿En qué **moneda** se cobra: USD, VES o ambas? Afecta también a la spec 005.
+- [x] ¿En qué moneda se cobra? **Resuelta: USD, mostrando el equivalente en Bs a la tasa BCV** (REQ-001-13, spec 005).
 - [ ] ¿Cómo se cobra la **fracción de minuto** cuando un cliente con cuenta cierra sesión? Ejemplo con 1 USD/hora, si usó 10 min 20 s: *por minuto empezado* cobra 11 min (0,18 USD); *por minuto completo* cobra 10 min (0,17 USD); *por segundo* cobra 10:20 exactos (0,172 USD). (Propuesta: por segundo.)
 - [ ] ¿Se permiten sesiones **postpago** (se usa y se paga al final)?
 - [ ] Si en el futuro se abre **otro cibercafé** del mismo dueño, ¿un cliente con cuenta en uno podría usar la misma cuenta y saldo en el otro? (Propuesta: no; cada local tiene sus propias cuentas.)
