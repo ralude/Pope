@@ -141,7 +141,7 @@ antes de seguir.
   - **Commit:** `feat(shared): define las cuentas de cliente`
   - **Nota:** la T15 original se dividió en T15 (`shared`) y T15a (servidor) porque superaba las 400 líneas.
 
-- [ ] **T15a: Clientes**
+- [x] **T15a: Clientes**
   - **Cubre:** REQ-001-01, REQ-001-02, REQ-001-04, REQ-001-30
   - **Hacer:** tabla `customers` y endpoints para crear, listar, buscar y cambiar estado, con eventos.
   - **Verificar:** tests de usuario duplicado (sin distinguir mayúsculas), bloqueo y eventos.

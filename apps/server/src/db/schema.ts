@@ -3,7 +3,7 @@
 //
 // Convenciones (plan 001): ids UUIDv7, fechas `timestamptz` en UTC, importes `bigint` en
 // micro-unidades (ADR-0015) y tiempos en segundos `integer`.
-import type { Actor, StaffRole } from '@pope/shared';
+import type { Actor, CustomerStatus, StaffRole } from '@pope/shared';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -75,4 +75,28 @@ export const staffSessions = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
   },
   (t) => [index('staff_sessions_staff_id_idx').on(t.staffId)],
+);
+
+/**
+ * Cuentas de cliente (REQ-001-01, REQ-001-02, REQ-001-04). Se crean solo desde el panel.
+ * El contador de intentos fallidos y el bloqueo temporal llegan con T16.
+ */
+export const customers = pgTable(
+  'customers',
+  {
+    id: uuid('id').primaryKey(),
+    /** Tal cual lo escribieron; es único sin distinguir mayúsculas. */
+    username: text('username').notNull(),
+    /** Hash argon2id (REQ-001-51). */
+    passwordHash: text('password_hash').notNull(),
+    name: text('name'),
+    /** Teléfono venezolano normalizado: +58XXXXXXXXXX. */
+    phone: text('phone'),
+    status: text('status').$type<CustomerStatus>().notNull().default('active'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('customers_username_lower_idx').on(sql`lower(${t.username})`),
+    check('customers_status_check', sql`${t.status} in ('active', 'blocked', 'disabled')`),
+  ],
 );
