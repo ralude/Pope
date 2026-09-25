@@ -68,7 +68,7 @@ bolívares, pago móvil, transferencia).
 
 ## Requisitos no funcionales
 
-- **REQ-005-70:** Los importes se guardan como enteros en la unidad mínima, con su código de moneda. Nunca como decimales flotantes.
+- **REQ-005-70:** Los importes se guardan como enteros en micro-unidades (ADR-0015), con su código de moneda. Nunca como decimales flotantes.
 - **REQ-005-71:** Una venta se registra en < 500 ms en el hardware del ADR-0011.
 - **REQ-005-72:** Todo funciona sin internet (ADR-0001).
 

@@ -66,8 +66,10 @@ Proceso completo: [`docs/specs/README.md`](docs/specs/README.md).
   el Shell solo muestran y obedecen; nunca deciden un cobro ([ADR-0007](docs/adr/0007-nodo-local-fuente-de-verdad.md)).
 - **Local-first:** login, cobro, pausa y ventas nunca dependen de internet ni de la nube
   ([ADR-0001](docs/adr/0001-arquitectura-local-first.md)).
-- **Dinero en enteros** (unidad mínima, p. ej. céntimos) + código de moneda ISO 4217.
-  Prohibido `float`/`number` decimal para dinero.
+- **Dinero en micro-unidades enteras** (6 decimales: `1 USD = 1 000 000`) + código de
+  moneda ISO 4217. Prohibido `float`/`number` decimal para dinero. El tiempo va en
+  segundos enteros. Solo se redondea a céntimos al mostrar, con `formatMoney`
+  ([ADR-0015](docs/adr/0015-dinero-en-micro-unidades.md)).
 - **Fechas en UTC** en base de datos y eventos. Se muestran en la zona de quien mira
   (`America/Caracas` en el local, la del navegador para el dueño).
 - **Todo cambio de estado genera un evento** inmutable con `actor` (cliente, encargado,
