@@ -54,7 +54,7 @@ antes de seguir.
   - **Verificar:** tests con combo + dinero, solo dinero y sesión temporal.
   - **Commit:** `feat(shared): calcula el agotamiento del saldo y los avisos`
 
-- [ ] **T08: Contrato del canal PC ↔ nodo**
+- [x] **T08: Contrato del canal PC ↔ nodo**
   - **Cubre:** plan 001 (Contratos)
   - **Hacer:** esquemas zod de `hello`, `heartbeat`, `login`, `logout`, `buyCombo`, `state`, `warning`, `sessionEnded` y `error`. Exportar también a JSON Schema (para el agente C# de la spec 003).
   - **Verificar:** tests de mensajes válidos e inválidos.

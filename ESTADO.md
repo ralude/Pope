@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T07 terminada (agotamiento y avisos)
+**Última actualización:** 2026-09-25 · T08 terminada (protocolo PC ↔ nodo)
 
 ## Ahora
 
@@ -12,7 +12,7 @@
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
 | **Siguiente tarea** | **T06: Motor de cobro (checkpoint)** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 7 / 51 tareas · fase 2 de 9 (Dominio compartido) |
+| **Progreso** | 8 / 51 tareas · fase 2 de 9 (Dominio compartido) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -40,7 +40,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 7 / 51 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 8 / 51 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -53,6 +53,9 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T08. Protocolo PC ↔ nodo en zod (`hello`, `heartbeat`, `login`, `logout`,
+  `buyCombo`, `state`, `warning`, `sessionEnded`, `error`); el build genera su JSON Schema
+  en `packages/shared/dist/json-schema/` para el agente en C#.
 - **2026-09-25:** T07. `secondsUntilExhausted` (mismo tope que el cobro), checkpoint y restante
   de sesiones temporales, y `pendingWarnings` (5 y 1 min, con rearme).
 - **2026-09-25:** T06. Motor de cobro `applyCheckpoint`: combo antes que dinero, importe
