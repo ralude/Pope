@@ -22,7 +22,7 @@ antes de seguir.
   - **Verificar:** `pnpm lint` pasa.
   - **Commit:** `build: añade ESLint y Prettier`
 
-- [ ] **T03: Paquete `shared` con Vitest**
+- [x] **T03: Paquete `shared` con Vitest**
   - **Cubre:** ADR-0002
   - **Hacer:** `packages/shared` con Vitest y un test de humo.
   - **Verificar:** `pnpm test` ejecuta y pasa el test.

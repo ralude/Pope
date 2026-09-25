@@ -153,11 +153,17 @@ lo reparte entre los paquetes:
 | `pnpm format` | Reformatea todo con Prettier |
 | `pnpm test` | Ejecuta los tests |
 
-Para un solo paquete: `pnpm --filter <paquete> <script>`.
+Para un solo paquete: `pnpm --filter <paquete> <script>` (p. ej. `pnpm --filter @pope/shared test`).
 
 Cada paquete define sus propios scripts `build`, `typecheck`, `lint` (`eslint --max-warnings=0 .`)
-y `test`, y su `tsconfig.json` extiende `tsconfig.base.json`. TypeScript está fijado en
-6.0.x porque `typescript-eslint` aún no admite versiones posteriores.
+y `test`. TypeScript está fijado en 6.0.x porque `typescript-eslint` aún no admite
+versiones posteriores. Convenciones de un paquete TS (modelo: `packages/shared`):
+
+- Módulos ESM (`"type": "module"`); los imports relativos llevan extensión `.js`.
+- `tsconfig.json`: extiende `tsconfig.base.json`, sin emitir; incluye `src` y los
+  `*.config.ts`. Lo usan `typecheck` y ESLint.
+- `tsconfig.build.json`: compila solo `src` a `dist`, sin los tests.
+- Tests con Vitest junto al código: `src/**/*.test.ts`.
 
 - **ESLint:** un único `eslint.config.mjs` en la raíz (configuración plana) con
   `strictTypeChecked` de `typescript-eslint`. Un paquete solo tiene configuración propia

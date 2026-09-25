@@ -1,0 +1,25 @@
+{
+  "name": "@pope/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Tipos, esquemas zod y reglas de negocio puras compartidas por todo Pope",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings=0 .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "~5.0.1"
+  }
+}
