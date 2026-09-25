@@ -15,7 +15,7 @@ encargado. El dueño lo revisa desde España.
 
 - **Cliente:** tiene cuenta y saldo; inicia sesión en la PC.
 - **Encargado:** crea cuentas, recarga saldo y abre o cierra sesiones.
-- **Administrador del local:** configura tarifas, grupos de PC y encargados.
+- **Administrador del local:** configura la tarifa y los encargados.
 - **Sistema:** descuenta tiempo y cierra sesiones.
 
 ## Historias de usuario
@@ -28,16 +28,19 @@ encargado. El dueño lo revisa desde España.
 ## Requisitos funcionales
 
 **Cuentas**
+
 - **REQ-001-01:** Las cuentas de cliente solo se crean en el nodo local (desde el panel). La PC nunca crea ni guarda cuentas.
 - **REQ-001-02:** Una cuenta debe tener usuario único y contraseña. Nombre y teléfono son opcionales.
 - **REQ-001-03:** El encargado debe poder recargar saldo indicando importe y método de pago. La recarga queda asociada a su turno de caja (spec 005).
 - **REQ-001-04:** El encargado debe poder bloquear o desactivar una cuenta.
 
 **Tarifas**
-- **REQ-001-10:** Las PCs se agrupan (p. ej. Normal, VIP) y cada grupo tiene un precio por hora.
-- **REQ-001-11:** El tiempo disponible que se muestra al cliente se calcula como saldo ÷ tarifa del grupo de la PC.
+
+- **REQ-001-10:** Todas las PCs del local tienen la **misma tarifa**: un único precio por hora que configura el administrador. No hay categorías de PC (Normal, VIP, etc.).
+- **REQ-001-11:** El tiempo disponible que se muestra al cliente se calcula como saldo ÷ tarifa.
 
 **Sesiones**
+
 - **REQ-001-20:** El cliente debe iniciar sesión en el Shell con usuario y contraseña. El nodo local valida y abre la sesión si hay saldo suficiente para al menos 1 minuto.
 - **REQ-001-21:** Una cuenta solo puede tener **una** sesión activa a la vez.
 - **REQ-001-22:** El encargado debe poder abrir una sesión **sin cuenta** en una PC, por tiempo fijo o importe cobrado en caja. Queda registrado como actor.
@@ -48,10 +51,12 @@ encargado. El dueño lo revisa desde España.
 - **REQ-001-27:** Si una PC deja de enviar latidos más tiempo del de gracia (por defecto 3 min, configurable), el nodo cierra la sesión y cobra solo hasta el último latido.
 
 **Auditoría**
+
 - **REQ-001-30:** Cada acción (cuenta creada, recarga, sesión abierta, sesión cerrada, tarifa cambiada) genera un evento con actor, PC y hora en UTC (ADR-0008).
 - **REQ-001-31:** Cada sesión registra **quién la abrió** (el cliente o el encargado X) y **por qué se cerró** (cliente, encargado, saldo agotado o sin latidos).
 
 **Personal**
+
 - **REQ-001-40:** Roles mínimos: `encargado`, `administrador` (del local) y `dueño`. Cada miembro del personal tiene credenciales propias; no se comparten.
 
 ## Requisitos no funcionales
@@ -64,7 +69,7 @@ encargado. El dueño lo revisa desde España.
 ## Criterios de aceptación
 
 - **CA-001-01** (REQ-001-20, REQ-001-11)
-  - **Dado** un cliente con 2,00 de saldo y una PC Normal a 1,00/hora
+  - **Dado** un cliente con 2,00 de saldo y una tarifa de 1,00/hora
   - **Cuando** inicia sesión
   - **Entonces** la PC se desbloquea y muestra 2:00:00 restantes.
 - **CA-001-02** (REQ-001-21)
@@ -82,6 +87,7 @@ encargado. El dueño lo revisa desde España.
 ## Fuera de alcance
 
 - Paquetes de horas, bonos y programa de fidelidad.
+- Tarifas distintas por PC o categorías de PC (Normal, VIP).
 - Tarifas por franja horaria o por día de la semana.
 - Registro de cuentas por el propio cliente desde la PC.
 - Reservas de PC.

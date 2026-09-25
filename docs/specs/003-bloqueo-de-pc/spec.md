@@ -32,7 +32,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-04:** Si el nodo local no responde, la pantalla lo indica ("Sin conexión con el servidor") y reintenta sola. No se puede iniciar sesión sin nodo.
 
 **Registro de PCs**
-- **REQ-003-10:** Una PC nueva se registra con un **código de instalación** de un solo uso generado en el panel. El nodo le asigna un nombre (PC 01…) y un grupo.
+- **REQ-003-10:** Una PC nueva se registra con un **código de instalación** de un solo uso generado en el panel. El nodo le asigna un nombre (PC 01…).
 - **REQ-003-11:** El nodo rechaza agentes no registrados o con credencial revocada.
 
 **Control remoto desde el panel**

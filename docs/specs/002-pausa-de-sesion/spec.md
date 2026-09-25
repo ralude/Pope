@@ -40,7 +40,7 @@ saldo, y la pausa no puede usarse para ocupar una PC gratis durante horas.
 - **REQ-002-12:** Tras 3 intentos fallidos, la reanudación se bloquea 1 minuto y el panel avisa al encargado.
 - **REQ-002-13:** El encargado puede reanudar o cerrar una sesión en pausa desde el panel.
 
-**Límites** (configurables por grupo de PC)
+**Límites** (configurables por el administrador, iguales para todas las PCs)
 - **REQ-002-20:** Duración máxima de cada pausa. Por defecto: 15 min.
 - **REQ-002-21:** Número máximo de pausas por sesión. Por defecto: 3.
 - **REQ-002-22:** Qué pasa al superar la duración máxima, a elegir entre:
@@ -48,7 +48,7 @@ saldo, y la pausa no puede usarse para ocupar una PC gratis durante horas.
   b) cerrar la sesión y liberar la PC,
   c) cobrar una tarifa de "reserva" reducida mientras siga en pausa.
   Por defecto: a).
-- **REQ-002-23:** El administrador puede desactivar la pausa por completo en un grupo de PC.
+- **REQ-002-23:** El administrador puede desactivar la pausa por completo en el local.
 
 **Robustez**
 - **REQ-002-30:** Si la PC pierde la conexión estando en pausa, sigue bloqueada en pausa. El nodo aplica los límites con su propio reloj.

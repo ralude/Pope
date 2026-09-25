@@ -27,8 +27,8 @@ que ajuste un cliente no debe quedarle al siguiente.
 ## Requisitos funcionales
 
 **Catálogo**
-- **REQ-004-01:** El administrador gestiona desde el panel un catálogo con: nombre, categoría (juego o herramienta), icono, ruta del ejecutable, argumentos, editor de la firma digital (opcional), grupos de PC donde aparece y rutas de configuración a restaurar.
-- **REQ-004-02:** El catálogo se distribuye automáticamente a las PCs del grupo.
+- **REQ-004-01:** El administrador gestiona desde el panel un catálogo con: nombre, categoría (juego o herramienta), icono, ruta del ejecutable, argumentos, editor de la firma digital (opcional) y rutas de configuración a restaurar.
+- **REQ-004-02:** El catálogo es el mismo para todas las PCs y se distribuye automáticamente a cada una.
 - **REQ-004-03:** El Shell muestra el catálogo por categorías con buscador y solo lanza lo que está en él.
 - **REQ-004-04:** Pope incluye plantillas predefinidas para Razer Synapse, Logitech G Hub, SteelSeries GG y Corsair iCUE, con sus procesos auxiliares y rutas de configuración.
 
