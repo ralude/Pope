@@ -1,0 +1,9 @@
+# Generados
+pnpm-lock.yaml
+dist/
+build/
+coverage/
+.turbo/
+
+# La documentación se redacta a mano (tablas compactas y saltos de línea propios).
+*.md

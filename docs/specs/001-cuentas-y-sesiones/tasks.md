@@ -16,7 +16,7 @@ antes de seguir.
   - **Verificar:** `pnpm install && pnpm typecheck` sin errores.
   - **Commit:** `build: crea el monorepo con pnpm y Turborepo`
 
-- [ ] **T02: Lint y formato**
+- [x] **T02: Lint y formato**
   - **Cubre:** AGENTS.md (estilo)
   - **Hacer:** ESLint (configuración plana, TypeScript estricto) y Prettier. Script `pnpm lint`.
   - **Verificar:** `pnpm lint` pasa.

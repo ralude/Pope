@@ -149,14 +149,22 @@ lo reparte entre los paquetes:
 | `pnpm install` | Instala las dependencias de todo el monorepo |
 | `pnpm build` | Compila todos los paquetes, respetando las dependencias entre ellos |
 | `pnpm typecheck` | Comprueba los tipos con TypeScript estricto |
-| `pnpm lint` | Pasa el linter |
+| `pnpm lint` | Comprueba el formato (Prettier) y pasa ESLint en todos los paquetes |
+| `pnpm format` | Reformatea todo con Prettier |
 | `pnpm test` | Ejecuta los tests |
 
 Para un solo paquete: `pnpm --filter <paquete> <script>`.
 
-Cada paquete define sus propios scripts `build`, `typecheck`, `lint` y `test`, y su
-`tsconfig.json` extiende `tsconfig.base.json`. TypeScript está fijado en 6.0.x porque
-`typescript-eslint` aún no admite versiones posteriores.
+Cada paquete define sus propios scripts `build`, `typecheck`, `lint` (`eslint --max-warnings=0 .`)
+y `test`, y su `tsconfig.json` extiende `tsconfig.base.json`. TypeScript está fijado en
+6.0.x porque `typescript-eslint` aún no admite versiones posteriores.
+
+- **ESLint:** un único `eslint.config.mjs` en la raíz (configuración plana) con
+  `strictTypeChecked` de `typescript-eslint`. Un paquete solo tiene configuración propia
+  si añade reglas (p. ej. React).
+- **Prettier:** `.prettierrc.json` en la raíz. Los `.md` no se formatean: la documentación
+  se redacta a mano.
+- Antes de cada commit: `pnpm format` y luego `pnpm lint`, `pnpm typecheck` y `pnpm test`.
 
 ## Ante la duda
 
