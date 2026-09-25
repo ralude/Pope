@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T05 terminada (tarifa semanal)
+**Última actualización:** 2026-09-25 · T06 terminada (motor de cobro)
 
 ## Ahora
 
@@ -12,7 +12,7 @@
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
 | **Siguiente tarea** | **T06: Motor de cobro (checkpoint)** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 5 / 51 tareas · fase 2 de 9 (Dominio compartido) |
+| **Progreso** | 6 / 51 tareas · fase 2 de 9 (Dominio compartido) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -40,7 +40,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 5 / 51 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 6 / 51 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -53,6 +53,9 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T06. Motor de cobro `applyCheckpoint`: combo antes que dinero, importe
+  recalculado sobre el total (sin deriva, probado con 500 casos aleatorios) y tope en
+  `floor(saldo × 3600 / tarifa)` segundos, que coincide con el tiempo que ve el cliente.
 - **2026-09-25:** T05. `weekdayInCaracas` (ISO 8601: 1 = lunes) con `Intl`, `rateFor` y el
   esquema de la tabla de 7 días.
 - **2026-09-25:** T04. `Micros`, `Seconds`, `formatMoney` (`3,00 USD (≈ 120,00 VES)`, mitad

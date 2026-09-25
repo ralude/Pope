@@ -42,7 +42,7 @@ antes de seguir.
   - **Verificar:** tests en el cambio de día a las 00:00 de Caracas (04:00 UTC) y de miércoles a jueves.
   - **Commit:** `feat(shared): calcula la tarifa según el día de la semana`
 
-- [ ] **T06: Motor de cobro (checkpoint)**
+- [x] **T06: Motor de cobro (checkpoint)**
   - **Cubre:** REQ-001-11, REQ-001-23, REQ-001-87, ADR-0015
   - **Hacer:** `applyCheckpoint(sesión, saldos, d)`: primero combo, luego dinero con recálculo acumulado `floor(money_seconds × rate / 3600)`, y saldos en vivo. `d` negativo → 0.
   - **Verificar:** tests de combo antes que dinero, paso de combo a dinero dentro de un mismo checkpoint, y test de propiedad: sumar N checkpoints parciales da lo mismo que uno total (sin deriva).
