@@ -42,10 +42,12 @@ cuando se apaga todo.
 
 **Tarifas**
 
-- **REQ-001-10:** La tarifa por hora depende del **día de la semana** y es la misma para todas las PCs (no hay categorías como Normal o VIP). El administrador la configura. Valores actuales: **lunes a miércoles 1,50 USD/h** y **jueves a domingo 2,00 USD/h**. Cada cambio de tarifa genera un evento.
-- **REQ-001-11:** El saldo se guarda en **dinero**. Su equivalente en tiempo se calcula con la tarifa del día: tiempo restante = saldo ÷ tarifa de hoy.
+- **REQ-001-10:** La tarifa por hora se define en una **tabla semanal**: cada uno de los 7 días tiene su propio precio, igual para todas las PCs (no hay categorías como Normal o VIP). Ejemplo actual: lunes a miércoles 1,50 USD/h y jueves a domingo 2,00 USD/h.
+- **REQ-001-15:** El administrador puede cambiar el precio de cualquier día **en cualquier momento** y tantas veces como quiera (p. ej. pasar a lunes–jueves 1,50 y viernes–domingo 2,00, y más adelante subir el domingo a 3,00). El panel permite asignar un precio a varios días de una vez. Cada cambio genera un evento con los valores anteriores y los nuevos.
+- **REQ-001-16:** Un cambio de tarifa se aplica a las sesiones que **empiecen después** de guardarlo. Las sesiones en curso mantienen su tarifa.
+- **REQ-001-11:** El saldo se guarda en **dinero**. Su equivalente en tiempo se calcula con la tarifa aplicable: la de la sesión en curso o, si no hay sesión, la de hoy. Tiempo restante = saldo ÷ tarifa.
 - **REQ-001-12:** El Shell muestra al cliente **los dos valores**, tiempo restante y saldo, y los actualiza mientras consume. Ejemplo un lunes (1,50 USD/h): empieza con 3,00 USD = 2:00:00 y, tras 30 min, ve 2,25 USD = 1:30:00.
-- **REQ-001-14:** Si una sesión cruza la medianoche hacia un día con otra tarifa, cada tramo se cobra con la tarifa de su día. (El local abre de 10:00 a 22:00, pero a veces se alarga hasta las 00:00, así que puede ocurrir, p. ej. de miércoles a jueves.)
+- **REQ-001-14:** Una sesión **mantiene la tarifa del día en que empezó**, aunque pase la medianoche. (El local abre de 10:00 a 22:00, pero a veces se alarga hasta las 00:00.)
 - **REQ-001-13:** La tarifa, el saldo y las recargas están en **USD**. El Shell y el panel muestran primero el importe en USD y a su lado el equivalente en bolívares a la tasa BCV vigente (REQ-005-30).
 
 **Sesiones**
@@ -71,7 +73,7 @@ cuando se apaga todo.
 - **REQ-001-67:** El encargado puede **restaurar** una sesión interrumpida en la misma PC o en otra. La nueva sesión continúa con el tiempo restante, **sin nuevo cobro**, y queda enlazada a la original.
 - **REQ-001-68:** Una sesión interrumpida solo se puede restaurar **una vez**. La restauración genera un evento con el actor, visible para el dueño (spec 006). La sesión restaurada es una sesión temporal nueva: si vuelve a interrumpirse, también se puede restaurar.
 - **REQ-001-69:** Si la sesión temporal se cierra antes de agotar el tiempo (lo cierra el cliente o el encargado), **el tiempo sobrante se pierde**: no se devuelve ni se puede restaurar. Antes de cerrar, el Shell pide confirmación con el aviso "Perderás X min". Solo se restauran las sesiones cerradas "sin latidos" (REQ-001-66).
-- **REQ-001-70:** El encargado puede **añadir tiempo** a una sesión temporal en curso cobrando un importe adicional o indicando minutos (el otro valor se calcula con la tarifa). El cobro va a su turno de caja y genera un evento.
+- **REQ-001-70:** El encargado puede **añadir tiempo** a una sesión temporal en curso cobrando un importe adicional o indicando minutos (el otro valor se calcula con la tarifa de la sesión). El cobro va a su turno de caja y genera un evento.
 - **REQ-001-71:** Una sesión interrumpida se puede restaurar durante **48 horas** desde el corte. Después queda en el respaldo como **"caducada"** y ya no se puede restaurar. Mientras esté pendiente de restaurar, no sale del respaldo aunque la PC acumule más de 3 sesiones temporales nuevas (REQ-001-64).
 
 **Combos** (ADR-0014)
@@ -173,6 +175,18 @@ cuando se apaga todo.
 - **CA-001-18** (REQ-001-82)
   - **Dado** una sesión temporal
   - **Entonces** el panel no ofrece combos, solo tiempo a la tarifa del día.
+- **CA-001-19** (REQ-001-14)
+  - **Dado** una sesión que empieza el miércoles a las 23:00 (1,50 USD/h)
+  - **Cuando** son las 00:30 del jueves (2,00 USD/h)
+  - **Entonces** se sigue cobrando a 1,50 USD/h y el tiempo restante no cambia de golpe a medianoche.
+- **CA-001-20** (REQ-001-15)
+  - **Dado** la tabla lunes–miércoles 1,50 y jueves–domingo 2,00
+  - **Cuando** el administrador selecciona lunes a jueves, pone 1,50 y guarda; después cambia el domingo a 3,00 y guarda
+  - **Entonces** la tabla queda: lunes–jueves 1,50, viernes–sábado 2,00, domingo 3,00, y hay dos eventos de cambio de tarifa.
+- **CA-001-21** (REQ-001-16)
+  - **Dado** una sesión en curso un domingo a 2,00 USD/h
+  - **Cuando** el administrador cambia el domingo a 3,00
+  - **Entonces** esa sesión sigue a 2,00 y las sesiones que empiecen después cuestan 3,00.
 
 ## Fuera de alcance
 
@@ -182,6 +196,7 @@ cuando se apaga todo.
 - Bonos y programa de fidelidad.
 - Tarifas distintas por PC o categorías de PC (Normal, VIP).
 - Tarifas por franja horaria (p. ej. nocturna). Solo varía por día de la semana.
+- Programar cambios de tarifa para una fecha futura o tarifas para fechas concretas (feriados). Los cambios se aplican al guardarlos.
 - Registro de cuentas por el propio cliente desde la PC.
 - Cierre automático de sesiones a la hora de cierre del local: lo decide el encargado, porque a veces se alarga hasta las 00:00.
 - Cuentas compartidas entre sedes: hoy hay una sola sede. El modelo de la nube ya distingue sedes (REQ-006-30) por si se abre otra.
@@ -202,4 +217,5 @@ cuando se apaga todo.
 - [x] ¿Cómo funcionan los combos? **Resuelta: se guardan en horas, no vencen, valen cualquier día, solo para cuentas y se consumen antes que el saldo** (REQ-001-80 a 89, ADR-0014).
 - [x] ¿Qué sistema usa hoy el local y cómo se migra? **Resuelta en parte: usan SENET; la migración va en la spec 008.**
 - [x] ¿Quién cierra las sesiones a la hora de cierre? **Resuelta: el encargado; el sistema no cierra nada solo.**
-- [ ] Si una sesión que empezó el miércoles sigue pasada la medianoche, ¿el saldo empieza a gastarse a la tarifa del jueves (REQ-001-14) o se mantiene la del día en que empezó? (Propuesta: la del día en que empezó; si no, el cliente vería bajar su tiempo restante de golpe a las 00:00.)
+- [x] ¿Qué tarifa se aplica si una sesión pasa de la medianoche? **Resuelta: la del día en que empezó** (REQ-001-14).
+- [x] ¿Las tarifas son fijas? **Resuelta: no; el administrador cambia el precio de cada día cuando quiera** (REQ-001-15, REQ-001-16).
