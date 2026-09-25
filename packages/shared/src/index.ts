@@ -4,3 +4,4 @@ export * from './money.js';
 export * from './time.js';
 export * from './tariff.js';
 export * from './billing.js';
+export * from './exhaustion.js';

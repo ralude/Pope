@@ -48,7 +48,7 @@ antes de seguir.
   - **Verificar:** tests de combo antes que dinero, paso de combo a dinero dentro de un mismo checkpoint, y test de propiedad: sumar N checkpoints parciales da lo mismo que uno total (sin deriva).
   - **Commit:** `feat(shared): añade el motor de cobro por segundo`
 
-- [ ] **T07: Agotamiento y avisos**
+- [x] **T07: Agotamiento y avisos**
   - **Cubre:** REQ-001-24, REQ-001-25, REQ-001-62, REQ-001-63
   - **Hacer:** `secondsUntilExhausted`, `pendingWarnings` (5 y 1 min) y el restante de sesiones temporales.
   - **Verificar:** tests con combo + dinero, solo dinero y sesión temporal.
