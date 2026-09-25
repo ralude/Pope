@@ -106,7 +106,7 @@ antes de seguir.
   - **Commit:** `feat(server): añade el personal del local`
   - **Nota:** la T14 original se dividió en T14, T14a, T14b y T14c porque superaba las 400 líneas.
 
-- [ ] **T14a: Sesiones del panel**
+- [x] **T14a: Sesiones del panel**
   - **Cubre:** REQ-001-40
   - **Hacer:** tabla `staff_sessions` (hash del token) y `AuthService`: login, validación con renovación de 7 días y logout, según las preguntas resueltas de la spec. Reloj inyectable (`Clock`) para probar la caducidad.
   - **Verificar:** tests de login correcto e incorrecto, personal desactivado, caducidad, renovación y logout.

@@ -9,6 +9,7 @@ import {
   bigint,
   boolean,
   check,
+  index,
   integer,
   jsonb,
   pgTable,
@@ -54,4 +55,24 @@ export const staff = pgTable(
     uniqueIndex('staff_username_lower_idx').on(sql`lower(${t.username})`),
     check('staff_role_check', sql`${t.role} in ('encargado', 'administrador', 'dueno')`),
   ],
+);
+
+/**
+ * Sesiones del personal en el panel (pregunta resuelta de la spec 001): la cookie lleva un
+ * token aleatorio y aquí solo se guarda su hash. Borrar la fila cierra la sesión.
+ */
+export const staffSessions = pgTable(
+  'staff_sessions',
+  {
+    id: uuid('id').primaryKey(),
+    staffId: uuid('staff_id')
+      .notNull()
+      .references(() => staff.id, { onDelete: 'cascade' }),
+    /** SHA-256 del token de la cookie. */
+    tokenHash: text('token_hash').notNull().unique(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    /** Se renueva con el uso: 7 días desde la última renovación. */
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('staff_sessions_staff_id_idx').on(t.staffId)],
 );

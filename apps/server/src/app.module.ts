@@ -1,6 +1,7 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 
 import { AuthModule } from './auth/auth.module.js';
+import { Clock, SystemClock } from './common/clock.js';
 import { APP_CONFIG, type AppConfig, type PopeMode } from './config.js';
 import type { DatabaseHandle } from './db/database.js';
 import { DatabaseModule } from './db/database.module.js';
@@ -31,8 +32,11 @@ export class AppModule {
         ...COMMON_MODULES,
         ...(MODULES_BY_MODE[config.mode] ?? []),
       ],
-      providers: [{ provide: APP_CONFIG, useValue: config }],
-      exports: [APP_CONFIG],
+      providers: [
+        { provide: APP_CONFIG, useValue: config },
+        { provide: Clock, useClass: SystemClock },
+      ],
+      exports: [APP_CONFIG, Clock],
     };
   }
 }
