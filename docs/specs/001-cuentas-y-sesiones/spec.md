@@ -19,7 +19,7 @@ cuando se apaga todo.
 
 - **Cliente:** tiene cuenta y saldo; inicia sesión en la PC.
 - **Encargado:** crea cuentas, recarga saldo y abre o cierra sesiones.
-- **Administrador del local:** configura la tarifa y los encargados.
+- **Administrador del local:** configura las tarifas, los combos y los encargados.
 - **Sistema:** descuenta tiempo y cierra sesiones.
 
 ## Historias de usuario
@@ -42,9 +42,10 @@ cuando se apaga todo.
 
 **Tarifas**
 
-- **REQ-001-10:** Todas las PCs del local tienen la **misma tarifa**: un único precio por hora que configura el administrador. No hay categorías de PC (Normal, VIP, etc.).
-- **REQ-001-11:** El saldo se guarda en **dinero**. Como la tarifa es única, saldo y tiempo son equivalentes: tiempo restante = saldo ÷ tarifa.
-- **REQ-001-12:** El Shell muestra al cliente **los dos valores**, tiempo restante y saldo, y los actualiza mientras consume. Ejemplo con 1 USD/hora: empieza con 1,00 USD = 1:00:00 y, tras 30 min, ve 0,50 USD = 0:30:00.
+- **REQ-001-10:** La tarifa por hora depende del **día de la semana** y es la misma para todas las PCs (no hay categorías como Normal o VIP). El administrador la configura. Valores actuales: **lunes a miércoles 1,50 USD/h** y **jueves a domingo 2,00 USD/h**. Cada cambio de tarifa genera un evento.
+- **REQ-001-11:** El saldo se guarda en **dinero**. Su equivalente en tiempo se calcula con la tarifa del día: tiempo restante = saldo ÷ tarifa de hoy.
+- **REQ-001-12:** El Shell muestra al cliente **los dos valores**, tiempo restante y saldo, y los actualiza mientras consume. Ejemplo un lunes (1,50 USD/h): empieza con 3,00 USD = 2:00:00 y, tras 30 min, ve 2,25 USD = 1:30:00.
+- **REQ-001-14:** Si una sesión cruza la medianoche hacia un día con otra tarifa, cada tramo se cobra con la tarifa de su día. (El local abre de 10:00 a 22:00, así que es un caso raro, pero el sistema no debe fallar si ocurre.)
 - **REQ-001-13:** La tarifa, el saldo y las recargas están en **USD**. El Shell y el panel muestran primero el importe en USD y a su lado el equivalente en bolívares a la tasa BCV vigente (REQ-005-30).
 
 **Sesiones**
@@ -60,7 +61,7 @@ cuando se apaga todo.
 
 **Sesiones temporales (sin cuenta)**
 
-- **REQ-001-60:** El cliente puede pagar al encargado y usar una PC **sin crear cuenta**. El encargado abre la sesión temporal indicando el **tiempo** o el **importe** (el otro valor se calcula con la tarifa) y el método de pago. El cobro queda en su turno de caja (spec 005).
+- **REQ-001-60:** El cliente puede pagar al encargado y usar una PC **sin crear cuenta**. El encargado abre la sesión temporal indicando el **tiempo** o el **importe** (el otro valor se calcula con la tarifa del día) y el método de pago. El cobro queda en su turno de caja (spec 005).
 - **REQ-001-61:** El encargado puede ponerle un **nombre** (p. ej. "Carlos") para identificarla en el panel y en el Shell. Si no lo pone, se usa "Temporal · PC 05 · 18:30".
 - **REQ-001-62:** La sesión temporal termina cuando se agota el tiempo pagado y la PC se bloquea (REQ-001-25).
 - **REQ-001-63:** El nodo local guarda en disco el **tiempo restante** de cada sesión temporal en cada latido, como mínimo cada 30 s. El agente guarda además una copia en la propia PC. Así un corte de luz hace perder como mucho 30 s.
@@ -92,13 +93,17 @@ cuando se apaga todo.
 ## Criterios de aceptación
 
 - **CA-001-01** (REQ-001-20, REQ-001-11, REQ-001-12)
-  - **Dado** un cliente con 2,00 USD de saldo y una tarifa de 1,00 USD/hora
+  - **Dado** un cliente con 3,00 USD de saldo, un lunes (1,50 USD/h)
   - **Cuando** inicia sesión
-  - **Entonces** la PC se desbloquea y muestra 2:00:00 y 2,00 USD.
+  - **Entonces** la PC se desbloquea y muestra 2:00:00 y 3,00 USD.
 - **CA-001-12** (REQ-001-12)
   - **Dado** la sesión anterior
   - **Cuando** lleva 30 min de uso
-  - **Entonces** el Shell muestra 1:30:00 y 1,50 USD.
+  - **Entonces** el Shell muestra 1:30:00 y 2,25 USD.
+- **CA-001-13** (REQ-001-10, REQ-001-11)
+  - **Dado** un cliente con 3,00 USD de saldo
+  - **Cuando** inicia sesión un jueves (2,00 USD/h)
+  - **Entonces** el Shell muestra 1:30:00 y 3,00 USD.
 - **CA-001-02** (REQ-001-21)
   - **Dado** un cliente con sesión activa en la PC 03
   - **Cuando** intenta iniciar sesión en la PC 07
@@ -130,8 +135,8 @@ cuando se apaga todo.
   - **Cuando** el cliente cierra la sesión y confirma el aviso "Perderás 25 min"
   - **Entonces** la PC se bloquea, los 25 min se pierden y la sesión no aparece en "Sesiones interrumpidas".
 - **CA-001-10** (REQ-001-70)
-  - **Dado** la sesión temporal "Carlos" con 10 min restantes y una tarifa de 1,00/hora
-  - **Cuando** el encargado cobra 0,50 adicionales
+  - **Dado** la sesión temporal "Carlos" con 10 min restantes, un lunes (1,50 USD/h)
+  - **Cuando** el encargado cobra 0,75 USD adicionales
   - **Entonces** la sesión pasa a 40 min restantes y el cobro aparece en su turno.
 - **CA-001-11** (REQ-001-71)
   - **Dado** una sesión interrumpida por un corte del lunes a las 18:00
@@ -144,7 +149,7 @@ cuando se apaga todo.
 - Recarga automática desde el Shell con verificación de pago móvil (spec 007, futura).
 - Paquetes de horas o combos (pendientes de definir, ver spec 007), bonos y programa de fidelidad.
 - Tarifas distintas por PC o categorías de PC (Normal, VIP).
-- Tarifas por franja horaria o por día de la semana.
+- Tarifas por franja horaria (p. ej. nocturna). Solo varía por día de la semana.
 - Registro de cuentas por el propio cliente desde la PC.
 - Reservas de PC.
 - Pagos en línea.
