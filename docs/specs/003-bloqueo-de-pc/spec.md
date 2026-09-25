@@ -86,6 +86,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - [ ] ¿Qué versión y edición de Windows tienen las PCs del local?
 - [ ] ¿Cuántas PCs hay, y tienen congelador de disco (Deep Freeze o similar)?
 - [ ] ¿Wake-on-LAN para encender las PCs desde el panel?
+- [ ] **WebView2 en Windows 10 (ADR-0005).** No viene de serie en Windows 10: llegó después por Windows Update y puede faltar (PCs sin actualizar, LTSC, WSUS, congelador de disco). Propuesta: el instalador (REQ-003-50) comprueba si está y, si no, lo instala con el instalador completo sin conexión de Microsoft (~150 MB). Decidir también si se usa la versión "Evergreen" (se actualiza sola) o una versión fija empaquetada con Pope, y confirmar hasta cuándo da Microsoft soporte a WebView2 en Windows 10. Depende de la pregunta anterior sobre la versión y edición de Windows de las PCs.
 
 Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La cadena prevista es: `shell-ui` ⇄ puente de WebView2 ⇄ `Pope.ShellHost` ⇄ named pipe ⇄ `Pope.Agent` ⇄ WebSocket ⇄ nodo, con los mensajes de `packages/shared` (T08 de la spec 001) reenviados sin cambios.
 

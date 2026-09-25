@@ -34,7 +34,14 @@ TypeScript, no C#.
 
 - ✅ Interfaz moderna, personalizable, iterable con Vite y herramientas web.
 - ✅ Puede reutilizar componentes y estilos del panel.
-- ✅ El runtime de WebView2 viene con Windows 10 y 11 y se actualiza solo.
+- ✅ El runtime de WebView2 viene incluido en Windows 11 y se actualiza solo.
+- ⚠️ En **Windows 10 no está garantizado**: no venía de serie y Microsoft lo distribuyó
+  después por Windows Update (desde 2021). Puede faltar en PCs sin actualizar o sin
+  internet, en ediciones LTSC, en equipos con actualizaciones gestionadas (WSUS) o con
+  congelador de disco. Por eso el instalador de Pope (REQ-003-50) debe comprobarlo e
+  instalarlo si falta, con el **instalador completo sin conexión** de Microsoft (~150 MB),
+  porque la conexión del local es inestable. Microsoft anunció soporte de WebView2 en
+  Windows 10 hasta al menos 2028 (dato por confirmar en la spec 003).
 - ⚠️ Consume unos 80–120 MB mientras está visible. Durante el juego se minimiza su
   actividad (sin animaciones, sin sondeos).
 - ⚠️ **Riesgo a validar en el prototipo:** que WebView2 renderice correctamente en el
