@@ -200,6 +200,6 @@ cuando se apaga todo.
 - [x] ¿Se puede añadir tiempo a una sesión temporal en curso? **Resuelta: sí, cobrando un importe adicional** (REQ-001-70).
 - [x] ¿Durante cuánto tiempo se puede restaurar una sesión interrumpida? **Resuelta: 48 horas** (REQ-001-71).
 - [x] ¿Cómo funcionan los combos? **Resuelta: se guardan en horas, no vencen, valen cualquier día, solo para cuentas y se consumen antes que el saldo** (REQ-001-80 a 89, ADR-0014).
-- [ ] **Migración:** ¿qué sistema usa hoy el local? ¿Se pueden exportar los clientes con su saldo y sus horas de combo pendientes? Tras 3 años de combos sin vencimiento, habrá clientes con horas por usar que no se pueden perder.
+- [x] ¿Qué sistema usa hoy el local y cómo se migra? **Resuelta en parte: usan SENET; la migración va en la spec 008.**
 - [x] ¿Quién cierra las sesiones a la hora de cierre? **Resuelta: el encargado; el sistema no cierra nada solo.**
 - [ ] Si una sesión que empezó el miércoles sigue pasada la medianoche, ¿el saldo empieza a gastarse a la tarifa del jueves (REQ-001-14) o se mantiene la del día en que empezó? (Propuesta: la del día en que empezó; si no, el cliente vería bajar su tiempo restante de golpe a las 00:00.)

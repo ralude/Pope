@@ -78,3 +78,4 @@ Cada documento se entrega en **su propio commit** (`docs(specs): ...`).
 | [005](005-inventario-y-caja/spec.md) | Inventario de productos y caja | Borrador |
 | [006](006-sincronizacion-y-web-del-dueno/spec.md) | Sincronización con la nube y web del dueño | Borrador |
 | [007](007-autorrecarga-pago-movil/spec.md) | Autorrecarga desde el Shell con verificación de pago móvil | Borrador (futura) |
+| [008](008-migracion-desde-senet/spec.md) | Migración de clientes desde SENET | Borrador |
