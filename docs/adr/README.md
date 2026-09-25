@@ -50,3 +50,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0012](0012-web-del-dueno-sin-instalacion.md) | La web del dueño es solo navegador, sin instalación | Aceptado |
 | [0013](0013-spec-driven-development.md) | Desarrollo guiado por especificaciones (SDD) para agentes de IA | Aceptado |
 | [0014](0014-dos-saldos-dinero-y-horas-de-combo.md) | Dos saldos por cuenta, dinero y horas de combo | Aceptado |
+| [0015](0015-dinero-en-micro-unidades.md) | Importes en micro-unidades enteras | Propuesto |
