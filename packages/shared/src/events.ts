@@ -10,6 +10,7 @@
 // contraseña que se colara por error, hace fallar la validación (REQ-001-51).
 import { z } from 'zod';
 
+import { customerStatusSchema } from './customer.js';
 import { microsSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
 import { staffRoleSchema, staffStatusSchema } from './staff.js';
@@ -46,10 +47,6 @@ export const actorSchema = z.discriminatedUnion('kind', [
 export type Actor = z.infer<typeof actorSchema>;
 
 // ─── Enumeraciones del dominio ──────────────────────────────────────────────────────────
-
-/** Estado de una cuenta de cliente (REQ-001-04). */
-export const customerStatusSchema = z.enum(['active', 'blocked', 'disabled']);
-export type CustomerStatus = z.infer<typeof customerStatusSchema>;
 
 /**
  * Métodos de pago en caja (REQ-005-21): efectivo en USD o en Bs, pago móvil y punto de

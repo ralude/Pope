@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T14d terminada (gestión del personal)
+**Última actualización:** 2026-09-25 · T15 terminada (esquemas de clientes)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T15: Clientes** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 19 / 57 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
+| **Siguiente tarea** | **T15a: Clientes** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 20 / 58 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 19 / 57 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 20 / 58 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T15 (dividida en T15 y T15a; 58 tareas). Esquemas de clientes en `shared`:
+  usuario de 3–32 `[A-Za-z0-9._-]`, contraseña ≥ 4 y teléfono venezolano normalizado.
 - **2026-09-25:** T14d. `POST /staff`, `GET /staff` y `PATCH /staff/:id/status` (solo
   administrador) con `staff.status_changed`. **Fin de la fase 3** (servidor base).
 - **2026-09-25:** T14c. CLI `staff:create-admin` (contraseña sin eco; admite entrada
@@ -75,6 +77,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
   En la máquina de desarrollo: 10 ms por hash. **Falta medir en el i5 de 2ª gen.**
 - **2026-09-25:** T10. `apps/server` (ESM, NestJS 12 + Fastify) con `POPE_MODE` obligatoria,
   configuración validada con zod y `/health`. En reposo ocupa ~87 MB (límite: 384 MB).
-- **2026-09-25:** Revisada la conexión NestJS ↔ .NET ↔ WebView2. Decisiones pendientes
-  anotadas antes de T24 (transporte `ws`, `requestId`) y T29 (corte de red), y en las
-  preguntas abiertas de la spec 003.

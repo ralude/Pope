@@ -134,7 +134,14 @@ antes de seguir.
 
 ## Fase 4: Clientes, saldos, tarifas y combos
 
-- [ ] **T15: Clientes**
+- [x] **T15: Esquemas de clientes**
+  - **Cubre:** REQ-001-02, REQ-001-04
+  - **Hacer:** en `shared`, estados de la cuenta, formato del usuario, contraseña mínima, teléfono venezolano normalizado y esquemas de alta, cambio de estado y búsqueda, según las preguntas resueltas de la spec.
+  - **Verificar:** tests de cada formato válido e inválido.
+  - **Commit:** `feat(shared): define las cuentas de cliente`
+  - **Nota:** la T15 original se dividió en T15 (`shared`) y T15a (servidor) porque superaba las 400 líneas.
+
+- [ ] **T15a: Clientes**
   - **Cubre:** REQ-001-01, REQ-001-02, REQ-001-04, REQ-001-30
   - **Hacer:** tabla `customers` y endpoints para crear, listar, buscar y cambiar estado, con eventos.
   - **Verificar:** tests de usuario duplicado (sin distinguir mayúsculas), bloqueo y eventos.
