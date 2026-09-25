@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint --max-warnings=0 .",
     "test": "vitest run",
-    "bench:argon2": "node scripts/bench-argon2.mjs"
+    "bench:argon2": "node scripts/bench-argon2.mjs",
+    "test:pg": "node scripts/test-pg.mjs",
+    "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
     "@nestjs/common": "^12.1.0",
@@ -18,14 +20,19 @@
     "@nestjs/platform-fastify": "^12.1.0",
     "@node-rs/argon2": "^2.2.1",
     "@pope/shared": "workspace:*",
+    "drizzle-orm": "^0.45.3",
+    "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@nestjs/testing": "^12.1.0",
     "@swc/core": "^1.16.2",
     "@types/node": "^24.13.6",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
     "unplugin-swc": "^2.0.0",
     "vitest": "~5.0.1"
   }

@@ -6,10 +6,13 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 
 import { AppModule } from './app.module.js';
 import { loadConfig } from './config.js';
+import { openPostgresDatabase } from './db/postgres.js';
 
 const config = loadConfig(process.env);
+// Aplica las migraciones pendientes antes de aceptar conexiones.
+const database = await openPostgresDatabase(config.databaseUrl);
 const app = await NestFactory.create<NestFastifyApplication>(
-  AppModule.register(config),
+  AppModule.register(config, database),
   new FastifyAdapter(),
 );
 app.enableShutdownHooks();

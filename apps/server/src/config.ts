@@ -13,12 +13,15 @@ const configSchema = z.object({
   PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
   // Por defecto escucha en todas las interfaces: las PCs llegan por la LAN.
   HOST: z.string().min(1).default('0.0.0.0'),
+  // Cadena de conexión de PostgreSQL, p. ej. postgres://pope:clave@127.0.0.1:5432/pope.
+  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
 });
 
 export interface AppConfig {
   mode: PopeMode;
   port: number;
   host: string;
+  databaseUrl: string;
 }
 
 /** Token de inyección de la configuración. */
@@ -33,6 +36,6 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       .join('\n');
     throw new Error(`Configuración no válida:\n${problems}`);
   }
-  const { POPE_MODE, PORT, HOST } = result.data;
-  return { mode: POPE_MODE, port: PORT, host: HOST };
+  const { POPE_MODE, PORT, HOST, DATABASE_URL } = result.data;
+  return { mode: POPE_MODE, port: PORT, host: HOST, databaseUrl: DATABASE_URL };
 }

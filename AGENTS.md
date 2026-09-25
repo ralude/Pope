@@ -167,9 +167,18 @@ versiones posteriores. Convenciones de un paquete TS (modelo: `packages/shared`)
 
 Servidor (`apps/server`, NestJS sobre Fastify):
 
-- Arrancar tras compilar: `POPE_MODE=local pnpm --filter @pope/server start` (variables:
-  `POPE_MODE` obligatoria, `local` o `cloud`; `PORT`, por defecto 3000; `HOST`, por
-  defecto `0.0.0.0`). Comprobar: `GET /health`.
+- Arrancar tras compilar: `POPE_MODE=local DATABASE_URL=postgres://… pnpm --filter
+  @pope/server start` (variables: `POPE_MODE` obligatoria, `local` o `cloud`;
+  `DATABASE_URL` obligatoria; `PORT`, por defecto 3000; `HOST`, por defecto `0.0.0.0`).
+  Al arrancar aplica las migraciones pendientes. Comprobar: `GET /health`.
+- Base de datos (Drizzle): el esquema está en `src/db/schema.ts`. Tras cambiarlo,
+  `pnpm --filter @pope/server db:generate` crea la migración SQL en `apps/server/drizzle/`
+  (se sube al repo). Nunca edites una migración ya subida: crea otra.
+- Tests: por defecto con PGlite (PostgreSQL en WASM, sin instalar nada), usando
+  `createTestDatabase()` de `src/testing/database.ts`. Contra PostgreSQL real:
+  `TEST_DATABASE_URL=postgres://postgres@127.0.0.1:5432/postgres pnpm --filter
+  @pope/server test:pg` (crea y borra una base temporal por test; el usuario necesita
+  permiso `CREATEDB`). Pásalo antes de cada entrega al local.
 - Sus tests usan `unplugin-swc`, porque esbuild no emite los metadatos de decoradores que
   necesita la inyección de dependencias de NestJS.
 - No uses `import type` para clases que se inyectan en un constructor: se perderían esos

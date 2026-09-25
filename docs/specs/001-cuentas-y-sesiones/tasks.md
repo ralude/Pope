@@ -87,7 +87,7 @@ antes de seguir.
   - **Verificar:** tests de hash y verificación. **Ejecutar el benchmark en el i5 de 2ª gen** y apuntar el resultado en el cuerpo del commit.
   - **Commit:** `feat(server): añade el hash de contraseñas con argon2id`
 
-- [ ] **T12: Base de datos y pruebas con PGlite**
+- [x] **T12: Base de datos y pruebas con PGlite**
   - **Cubre:** ADR-0004
   - **Hacer:** Drizzle + `pg`, ejecutor de migraciones, utilidad de tests con PGlite y script `test:pg` contra PostgreSQL real (`DATABASE_URL`).
   - **Verificar:** un test crea la BD en PGlite y aplica las migraciones.
