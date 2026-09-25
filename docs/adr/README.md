@@ -39,3 +39,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0001](0001-arquitectura-local-first.md) | Arquitectura local-first con copia en la nube | Aceptado |
 | [0007](0007-nodo-local-fuente-de-verdad.md) | El nodo local es la fuente de verdad del tiempo y el saldo | Aceptado |
 | [0008](0008-sincronizacion-por-eventos.md) | Sincronización local → nube por eventos (outbox) | Propuesto |
+| [0011](0011-presupuesto-de-recursos-nodo-local.md) | Presupuesto de recursos del nodo local | Aceptado |
