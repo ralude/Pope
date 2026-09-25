@@ -1,6 +1,6 @@
 # Plan 001: Cuentas y sesiones
 
-- **Estado:** En revisión
+- **Estado:** Aprobado
 - **Spec:** [spec.md](spec.md)
 - **ADRs que aplican:** ADR-0001, ADR-0007, ADR-0011, ADR-0014, y los **propuestos**
   ADR-0002, ADR-0003, ADR-0004, ADR-0008 y ADR-0015. **Aprobar este plan implica
