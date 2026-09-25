@@ -48,3 +48,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0010](0010-lista-blanca-y-restauracion.md) | Lista blanca de aplicaciones y restauración de configuración | Propuesto |
 | [0011](0011-presupuesto-de-recursos-nodo-local.md) | Presupuesto de recursos del nodo local | Aceptado |
 | [0012](0012-web-del-dueno-sin-instalacion.md) | La web del dueño es solo navegador, sin instalación | Aceptado |
+| [0013](0013-spec-driven-development.md) | Desarrollo guiado por especificaciones (SDD) para agentes de IA | Aceptado |
