@@ -5,6 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { AppModule } from './app.module.js';
+import { configureApp } from './bootstrap.js';
 import { loadConfig } from './config.js';
 import { openPostgresDatabase } from './db/postgres.js';
 
@@ -15,5 +16,6 @@ const app = await NestFactory.create<NestFastifyApplication>(
   AppModule.register(config, database),
   new FastifyAdapter(),
 );
+await configureApp(app);
 app.enableShutdownHooks();
 await app.listen(config.port, config.host);

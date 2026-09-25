@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T14a terminada (sesiones del panel)
+**Última actualización:** 2026-09-25 · T14b terminada (login del personal y guard de roles)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T14b: Login del personal y guard de roles** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 16 / 57 tareas · fase 3 de 9 (Servidor base) |
+| **Siguiente tarea** | **T14c: CLI del primer administrador** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 17 / 57 tareas · fase 3 de 9 (Servidor base) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -45,7 +45,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 16 / 57 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 17 / 57 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -58,6 +58,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T14b. `/auth/login`, `/auth/logout` y `/auth/me` con cookie httpOnly
+  (`SameSite=Strict`, `Secure` solo en la nube) y guard global con `@Public()` y `@Roles()`.
 - **2026-09-25:** T14a. `staff_sessions` (solo el hash del token) y `AuthService`: login sin
   revelar qué falló, 7 días renovables (como mucho una escritura por hora) y logout.
 - **2026-09-25:** T14 (dividida en T14, T14a, T14b y T14c; se añadió T14d para gestionar el
@@ -79,6 +81,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-25:** T09 (dividida en T09 y T09b por tamaño; ahora son 52 tareas). Eventos con
   formato común, actor con copia del nombre y objetos estrictos: cuentas, saldo, combos,
   tarifas y turno. Método de pago como lista fija.
-- **2026-09-25:** T08. Protocolo PC ↔ nodo en zod (`hello`, `heartbeat`, `login`, `logout`,
-  `buyCombo`, `state`, `warning`, `sessionEnded`, `error`); el build genera su JSON Schema
-  en `packages/shared/dist/json-schema/` para el agente en C#.

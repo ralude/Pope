@@ -187,6 +187,11 @@ Servidor (`apps/server`, NestJS sobre Fastify):
   los cambios usan `tx` y cada `emit(evento)` se valida con los esquemas de
   `@pope/shared` y se guarda en la misma transacción (ADR-0008). Nunca insertes en
   `events` a mano.
+- Todo endpoint HTTP del nodo local exige sesión del personal (guard global). Marca con
+  `@Public()` los que no la necesitan y con `@Roles(...)` los restringidos por rol
+  (encargado opera, administrador además configura, dueño solo lee). Valida los cuerpos con
+  `new ZodValidationPipe(esquema)` y esquemas de `@pope/shared`.
+- Los tests e2e levantan el servidor completo con `createTestApp()` de `src/testing/app.ts`.
 
 - **ESLint:** un único `eslint.config.mjs` en la raíz (configuración plana) con
   `strictTypeChecked` de `typescript-eslint`. Un paquete solo tiene configuración propia

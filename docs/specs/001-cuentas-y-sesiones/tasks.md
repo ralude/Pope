@@ -112,7 +112,7 @@ antes de seguir.
   - **Verificar:** tests de login correcto e incorrecto, personal desactivado, caducidad, renovación y logout.
   - **Commit:** `feat(server): añade las sesiones del personal`
 
-- [ ] **T14b: Login del personal y guard de roles**
+- [x] **T14b: Login del personal y guard de roles**
   - **Cubre:** REQ-001-40
   - **Hacer:** `POST /auth/login`, `POST /auth/logout` y `GET /auth/me` con cookie httpOnly, y guard global (en modo local) con `@Public()` y `@Roles(...)`.
   - **Verificar:** tests e2e de login correcto e incorrecto, cookie, logout y acceso denegado por rol.
