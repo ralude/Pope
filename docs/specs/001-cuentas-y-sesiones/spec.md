@@ -53,7 +53,7 @@ cuando se apaga todo.
 - **REQ-001-20:** El cliente debe iniciar sesión en el Shell con usuario y contraseña. El nodo local valida y abre la sesión si hay saldo suficiente para al menos 1 minuto.
 - **REQ-001-21:** Una cuenta solo puede tener **una** sesión activa a la vez.
 - **REQ-001-22:** El encargado debe poder abrir una **sesión temporal** sin cuenta (ver "Sesiones temporales"). Queda registrado como actor.
-- **REQ-001-23:** El cobro se calcula con el reloj del nodo local, por minuto (ADR-0007).
+- **REQ-001-23:** El cobro se calcula con el reloj del nodo local, **por segundo**: se descuenta exactamente el tiempo usado (ADR-0007). Por ejemplo, 10 min 20 s a 1,50 USD/h descuentan 0,2583 USD. Internamente se guarda con más precisión que el céntimo, y el Shell muestra el saldo redondeado a céntimos.
 - **REQ-001-24:** El Shell debe avisar al cliente cuando le queden 5 minutos y 1 minuto.
 - **REQ-001-25:** Al agotarse el saldo o el tiempo, la sesión se cierra y la PC se bloquea.
 - **REQ-001-26:** El cliente puede cerrar su sesión desde el Shell. El encargado puede cerrar cualquier sesión desde el panel.
@@ -190,7 +190,7 @@ cuando se apaga todo.
 
 - [x] ¿El saldo se guarda en dinero o en tiempo? **Resuelta: en dinero, y el Shell muestra ambos** (REQ-001-11, REQ-001-12).
 - [x] ¿En qué moneda se cobra? **Resuelta: USD, mostrando el equivalente en Bs a la tasa BCV** (REQ-001-13, spec 005).
-- [ ] ¿Cómo se cobra la **fracción de minuto** cuando un cliente con cuenta cierra sesión? Ejemplo con 1 USD/hora, si usó 10 min 20 s: *por minuto empezado* cobra 11 min (0,18 USD); *por minuto completo* cobra 10 min (0,17 USD); *por segundo* cobra 10:20 exactos (0,172 USD). (Propuesta: por segundo.)
+- [x] ¿Cómo se cobra la fracción de minuto? **Resuelta: por segundo** (REQ-001-23).
 - [x] ¿Se permiten sesiones postpago? **Resuelta: no; solo prepago, y el encargado gestiona el cobro por fuera** (REQ-001-03).
 - [ ] Si en el futuro se abre **otro cibercafé** del mismo dueño, ¿un cliente con cuenta en uno podría usar la misma cuenta y saldo en el otro? (Propuesta: no; cada local tiene sus propias cuentas.)
 - [x] ¿El respaldo mínimo de 3 sesiones temporales es por PC o en total? **Resuelta: por PC** (REQ-001-64).
