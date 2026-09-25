@@ -72,3 +72,4 @@ Cada documento se entrega en **su propio commit** (`docs(specs): ...`).
 | # | Spec | Estado |
 |---|---|---|
 | [001](001-cuentas-y-sesiones/spec.md) | Cuentas y sesiones | Borrador |
+| [002](002-pausa-de-sesion/spec.md) | Pausa de sesión | Borrador |
