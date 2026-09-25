@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+# Archivos que Windows necesita con CRLF
+*.sln  text eol=crlf
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+
+# Binarios
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.exe  binary
+*.dll  binary

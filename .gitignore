@@ -1,0 +1,30 @@
+# Dependencias y builds (TypeScript)
+node_modules/
+dist/
+build/
+.turbo/
+coverage/
+*.tsbuildinfo
+
+# .NET / C#
+bin/
+obj/
+.vs/
+*.user
+*.suo
+
+# Entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Logs y temporales
+*.log
+npm-debug.log*
+pnpm-debug.log*
+tmp/
+
+# Sistema / editores
+.DS_Store
+Thumbs.db
+.idea/
