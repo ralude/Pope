@@ -30,7 +30,7 @@ antes de seguir.
 
 ## Fase 2: Dominio compartido (`packages/shared`)
 
-- [ ] **T04: Dinero y tiempo**
+- [x] **T04: Dinero y tiempo**
   - **Cubre:** ADR-0015, REQ-001-12, REQ-001-13
   - **Hacer:** tipos `Micros` y `Seconds` con validación de entero seguro, conversiones (`usd(1.5)` → `1 500 000`), `formatMoney` (USD con 2 decimales y Bs opcional) y `formatDuration` (`1:30:00`). Esquemas zod.
   - **Verificar:** tests de conversión, redondeo al mostrar y rechazo de no enteros.

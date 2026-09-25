@@ -1,3 +1,4 @@
-// Punto de entrada de @pope/shared. Cada módulo (dinero, tiempo, cobro, protocolo,
-// eventos) se reexporta desde aquí a medida que se implementa (spec 001, fase 2).
-export const SHARED_PACKAGE = '@pope/shared';
+// Punto de entrada de @pope/shared: tipos, esquemas zod y reglas de negocio puras
+// compartidas por el servidor, el panel y el Shell.
+export * from './money.js';
+export * from './time.js';

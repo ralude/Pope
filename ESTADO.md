@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T03 terminada (paquete `shared`)
+**Última actualización:** 2026-09-25 · T04 terminada (dinero y tiempo)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T04: Dinero y tiempo** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 3 / 51 tareas · fase 2 de 9 (Dominio compartido) |
+| **Siguiente tarea** | **T05: Tarifa semanal** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 4 / 51 tareas · fase 2 de 9 (Dominio compartido) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -40,7 +40,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 3 / 51 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 4 / 51 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -53,6 +53,9 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T04. `Micros`, `Seconds`, `formatMoney` (`3,00 USD (≈ 120,00 VES)`, mitad
+  hacia arriba) y `formatDuration`. Resueltas en la spec 4 dudas de la fase 2 (redondeo,
+  formato VES, tope de saldo y avisos).
 - **2026-09-25:** T03. Primer paquete, `@pope/shared` (ESM, build con `tsc`), con Vitest 5
   y un test de humo. Fin de la fase 1: el monorepo compila, pasa lint y ejecuta tests.
 - **2026-09-25:** T02. ESLint 10 (configuración plana única en la raíz, `strictTypeChecked`)
