@@ -93,7 +93,7 @@ antes de seguir.
   - **Verificar:** un test crea la BD en PGlite y aplica las migraciones.
   - **Commit:** `feat(server): conecta PostgreSQL con Drizzle y migraciones`
 
-- [ ] **T13: Tabla de eventos y transacciones**
+- [x] **T13: Tabla de eventos y transacciones**
   - **Cubre:** REQ-001-30, ADR-0008
   - **Hacer:** tabla `events` (con `seq`) y un helper `inTransaction(tx => …, emit)` que escribe los eventos en la misma transacción.
   - **Verificar:** test de que un rollback no deja eventos.

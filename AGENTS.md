@@ -183,6 +183,10 @@ Servidor (`apps/server`, NestJS sobre Fastify):
   necesita la inyección de dependencias de NestJS.
 - No uses `import type` para clases que se inyectan en un constructor: se perderían esos
   metadatos.
+- Todo cambio de estado se hace dentro de `EventsService.inTransaction((tx, emit) => …)`:
+  los cambios usan `tx` y cada `emit(evento)` se valida con los esquemas de
+  `@pope/shared` y se guarda en la misma transacción (ADR-0008). Nunca insertes en
+  `events` a mano.
 
 - **ESLint:** un único `eslint.config.mjs` en la raíz (configuración plana) con
   `strictTypeChecked` de `typescript-eslint`. Un paquete solo tiene configuración propia

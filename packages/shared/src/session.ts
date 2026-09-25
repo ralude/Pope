@@ -1,8 +1,14 @@
 // Conceptos de sesión compartidos por el protocolo de la PC y los eventos.
+import { v7 as uuidv7 } from 'uuid';
 import { z } from 'zod';
 
 /** Identificador de Pope: UUIDv7 (ordenable por fecha de creación). */
 export const idSchema = z.uuidv7();
+
+/** Genera un id nuevo (UUIDv7). Los generados en el mismo proceso salen en orden. */
+export function newId(): string {
+  return uuidv7();
+}
 
 /** Instante en UTC, en formato ISO 8601 con `Z` (AGENTS.md: fechas en UTC). */
 export const utcInstantSchema = z.iso.datetime();

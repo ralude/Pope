@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T12 terminada (PostgreSQL, Drizzle y PGlite)
+**Última actualización:** 2026-09-25 · T13 terminada (tabla de eventos y transacciones)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T13: Tabla de eventos y transacciones** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 13 / 52 tareas · fase 3 de 9 (Servidor base) |
+| **Siguiente tarea** | **T14: Personal y autenticación** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 14 / 52 tareas · fase 3 de 9 (Servidor base) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 13 / 52 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 14 / 52 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T13. Tabla `events` (`seq` en orden de confirmación gracias a un bloqueo
+  consultivo) y `EventsService.inTransaction((tx, emit) => …)`; `newId()` (UUIDv7) en `shared`.
 - **2026-09-25:** T12. Drizzle + `pg` (pool de 10) con migraciones al arrancar, PGlite para los
   tests y `test:pg` contra PostgreSQL real (18.6, instalado con scoop en desarrollo).
 - **2026-09-25:** T11. `PasswordService` con argon2id (m=19 MiB, t=2, p=1) y `bench:argon2`.
