@@ -40,3 +40,27 @@ export const staffProfileSchema = z.object({
   role: staffRoleSchema,
 });
 export type StaffProfile = z.infer<typeof staffProfileSchema>;
+
+/** Cuerpo de `POST /staff`: alta de personal por el administrador (T14d). */
+export const staffCreateRequestSchema = z.object({
+  username: staffUsernameSchema,
+  displayName: staffDisplayNameSchema,
+  role: staffRoleSchema,
+  password: staffPasswordSchema,
+});
+export type StaffCreateRequest = z.infer<typeof staffCreateRequestSchema>;
+
+/** Cuerpo de `PATCH /staff/:id/status`: activar o desactivar a un miembro del personal. */
+export const staffStatusRequestSchema = z.object({ active: z.boolean() });
+export type StaffStatusRequest = z.infer<typeof staffStatusRequestSchema>;
+
+/** Estado de un miembro del personal en los eventos. */
+export const staffStatusSchema = z.enum(['active', 'inactive']);
+export type StaffStatus = z.infer<typeof staffStatusSchema>;
+
+/** Fila de la lista de personal del panel. */
+export const staffListItemSchema = staffProfileSchema.extend({
+  active: z.boolean(),
+  createdAt: z.iso.datetime(),
+});
+export type StaffListItem = z.infer<typeof staffListItemSchema>;

@@ -12,7 +12,7 @@ import { z } from 'zod';
 
 import { microsSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
-import { staffRoleSchema } from './staff.js';
+import { staffRoleSchema, staffStatusSchema } from './staff.js';
 import { weekdaySchema } from './tariff.js';
 
 const positiveSeconds = z.int().positive().brand<'Seconds'>();
@@ -278,6 +278,20 @@ export const staffCreatedEventSchema = event(
   }),
 );
 
+/**
+ * Activación o desactivación de un miembro del personal (T14d, pregunta resuelta de la
+ * spec 001), con el estado anterior y el nuevo.
+ */
+export const staffStatusChangedEventSchema = event(
+  'staff.status_changed',
+  1,
+  z.strictObject({
+    staff: z.strictObject({ id: idSchema, username: z.string().min(1) }),
+    from: staffStatusSchema,
+    to: staffStatusSchema,
+  }),
+);
+
 // ─── Turno de caja (mínimo; lo amplía la spec 005) ──────────────────────────────────────
 
 export const shiftOpenedEventSchema = event(
@@ -309,6 +323,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   shiftOpenedEventSchema,
   shiftClosedEventSchema,
   staffCreatedEventSchema,
+  staffStatusChangedEventSchema,
 ]);
 export type DomainEvent = z.infer<typeof domainEventSchema>;
 export type DomainEventType = DomainEvent['type'];

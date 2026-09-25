@@ -109,6 +109,11 @@ const examples = {
     { staff: { id: id(9), username: 'ana' }, name: 'Ana', role: 'encargado' },
     { kind: 'system' },
   ),
+  'staff.status_changed': envelope('staff.status_changed', {
+    staff: { id: id(9), username: 'ana' },
+    from: 'active',
+    to: 'inactive',
+  }),
 };
 
 describe('eventos de auditoría (REQ-001-30, ADR-0008)', () => {

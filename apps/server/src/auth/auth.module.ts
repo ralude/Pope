@@ -5,6 +5,7 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { PasswordService } from './password.service.js';
 import { StaffAuthGuard } from './staff-auth.guard.js';
+import { StaffController } from './staff.controller.js';
 import { StaffService } from './staff.service.js';
 
 /**
@@ -12,7 +13,7 @@ import { StaffService } from './staff.service.js';
  * como guard global: todo endpoint HTTP exige sesión salvo los marcados con `@Public()`.
  */
 @Module({
-  controllers: [AuthController],
+  controllers: [AuthController, StaffController],
   providers: [
     PasswordService,
     StaffService,

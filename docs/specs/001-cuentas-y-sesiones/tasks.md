@@ -124,7 +124,7 @@ antes de seguir.
   - **Verificar:** tests de creación, evento `staff.created` y rechazo si ya existe un administrador.
   - **Commit:** `feat(server): añade la CLI para crear el primer administrador`
 
-- [ ] **T14d: Gestión del personal**
+- [x] **T14d: Gestión del personal**
   - **Cubre:** REQ-001-40
   - **Hacer:** endpoints solo para `administrador`: alta de personal (usuario, nombre, rol y contraseña, con evento `staff.created`), lista y activar o desactivar. Al desactivar, sus sesiones del panel dejan de valer.
   - **Antes de empezar:** resolver la pregunta abierta de la spec sobre el evento al desactivar personal.
