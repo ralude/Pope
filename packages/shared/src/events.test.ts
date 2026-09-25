@@ -32,6 +32,11 @@ const examples = {
     from: 'active',
     to: 'blocked',
   }),
+  'customer.login_locked': envelope(
+    'customer.login_locked',
+    { customer: JUAN, lockedUntil: '2026-09-25T22:35:00Z' },
+    { kind: 'system' },
+  ),
   'wallet.recharged': envelope('wallet.recharged', {
     customer: JUAN,
     amount: usd(3_000_000),

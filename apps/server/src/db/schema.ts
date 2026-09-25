@@ -79,7 +79,6 @@ export const staffSessions = pgTable(
 
 /**
  * Cuentas de cliente (REQ-001-01, REQ-001-02, REQ-001-04). Se crean solo desde el panel.
- * El contador de intentos fallidos y el bloqueo temporal llegan con T16.
  */
 export const customers = pgTable(
   'customers',
@@ -93,6 +92,10 @@ export const customers = pgTable(
     /** Teléfono venezolano normalizado: +58XXXXXXXXXX. */
     phone: text('phone'),
     status: text('status').$type<CustomerStatus>().notNull().default('active'),
+    /** Intentos fallidos seguidos desde el último login correcto o el último bloqueo. */
+    failedLogins: integer('failed_logins').notNull().default(0),
+    /** Bloqueo temporal por intentos (REQ-001-52): no puede entrar hasta esta hora. */
+    lockedUntil: timestamp('locked_until', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

@@ -16,7 +16,7 @@ import { customers } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
 
 /** Condición "mismo usuario sin distinguir mayúsculas" (índice `customers_username_lower_idx`). */
-function sameUsername(username: string): SQL {
+export function sameUsername(username: string): SQL {
   return eq(sql`lower(${customers.username})`, username.toLowerCase());
 }
 
@@ -41,7 +41,7 @@ function searchCondition(q: string): SQL | undefined {
   return or(...conditions);
 }
 
-function toCustomer(row: typeof customers.$inferSelect): Customer {
+export function toCustomer(row: typeof customers.$inferSelect): Customer {
   return {
     id: row.id,
     username: row.username,

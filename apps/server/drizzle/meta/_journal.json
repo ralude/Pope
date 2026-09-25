@@ -36,6 +36,13 @@
       "when": 1790369862960,
       "tag": "0004_customers",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790370436183,
+      "tag": "0005_customer_login_lock",
+      "breakpoints": true
     }
   ]
 }

@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T15a terminada (clientes)
+**Última actualización:** 2026-09-25 · T16 terminada (bloqueo del login de clientes por intentos)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T16: Credenciales de cliente y bloqueo por intentos** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 21 / 58 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
+| **Siguiente tarea** | **T16a: Desbloqueo manual del login** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 22 / 59 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 21 / 58 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 22 / 59 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T16 (se añade T16a; 59 tareas). `CustomerAuthService.verify`: 5 fallos seguidos bloquean el login 5 min (fijo; un acierto pone el contador a cero) y emiten `customer.login_locked`. Motivos iguales a los códigos del protocolo; el estado de la cuenta solo se revela con la contraseña correcta. Cuatro preguntas resueltas en la spec.
 - **2026-09-25:** T15a. Tabla `customers` y `/customers`: alta (encargado y administrador), búsqueda
   paginada por usuario, nombre o teléfono (también el dueño) y cambio de estado con eventos.
 - **2026-09-25:** T15 (dividida en T15 y T15a; 58 tareas). Esquemas de clientes en `shared`:
@@ -75,5 +76,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
   consultivo) y `EventsService.inTransaction((tx, emit) => …)`; `newId()` (UUIDv7) en `shared`.
 - **2026-09-25:** T12. Drizzle + `pg` (pool de 10) con migraciones al arrancar, PGlite para los
   tests y `test:pg` contra PostgreSQL real (18.6, instalado con scoop en desarrollo).
-- **2026-09-25:** T11. `PasswordService` con argon2id (m=19 MiB, t=2, p=1) y `bench:argon2`.
-  En la máquina de desarrollo: 10 ms por hash. **Falta medir en el i5 de 2ª gen.**

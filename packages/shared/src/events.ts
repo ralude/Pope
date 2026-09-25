@@ -94,6 +94,17 @@ export const customerStatusChangedEventSchema = event(
   }),
 );
 
+/**
+ * Bloqueo temporal del login tras 5 intentos fallidos (REQ-001-52). Lo decide el sistema:
+ * los intentos pueden no ser del cliente. Los fallos sueltos no generan evento (pregunta
+ * resuelta de la spec 001).
+ */
+export const customerLoginLockedEventSchema = event(
+  'customer.login_locked',
+  1,
+  z.strictObject({ customer: customerRefSchema, lockedUntil: utcInstantSchema }),
+);
+
 /** Recarga en caja (REQ-001-03), ligada al turno del encargado. */
 export const walletRechargedEventSchema = event(
   'wallet.recharged',
@@ -308,6 +319,7 @@ export const shiftClosedEventSchema = event(
 export const domainEventSchema = z.discriminatedUnion('type', [
   customerCreatedEventSchema,
   customerStatusChangedEventSchema,
+  customerLoginLockedEventSchema,
   walletRechargedEventSchema,
   comboCreatedEventSchema,
   comboUpdatedEventSchema,
