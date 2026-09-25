@@ -33,12 +33,12 @@ cuánto se vendió y si la caja cuadra.
 **Web del dueño** (solo lectura en esta versión)
 - **REQ-006-10:** Login con usuario, contraseña y **2FA (TOTP)**.
 - **REQ-006-11:** **Estado en vivo:** PCs libres, en uso, en pausa, sin conexión y en mantenimiento, con el porcentaje de ocupación.
-- **REQ-006-12:** **Sesiones activas:** PC, cliente o "sin cuenta", **quién la abrió** (el cliente o el encargado X), hora de inicio y tiempo consumido.
+- **REQ-006-12:** **Sesiones activas:** PC, cliente o nombre de la sesión temporal, **quién la abrió** (el cliente o el encargado X), hora de inicio y tiempo consumido.
 - **REQ-006-13:** **Historial de sesiones** filtrable por fecha, PC, encargado y motivo de cierre.
 - **REQ-006-14:** **Ocupación** por hora del día y por día de la semana.
 - **REQ-006-15:** **Caja:** turnos con encargado, esperado, contado y diferencia por moneda.
 - **REQ-006-16:** **Ventas e inventario:** ventas del día, productos más vendidos, stock actual y alertas de stock bajo.
-- **REQ-006-17:** **Auditoría del personal:** recargas, sesiones sin cuenta, anulaciones, ajustes de stock, cambios de precio y modos mantenimiento, por encargado.
+- **REQ-006-17:** **Auditoría del personal:** recargas, sesiones temporales, **restauraciones de sesiones interrumpidas**, anulaciones, ajustes de stock, cambios de precio y modos mantenimiento, por encargado.
 - **REQ-006-18:** Cada pantalla muestra **"Última actualización del local: hace X"**, y un aviso visible si pasan más de 5 minutos.
 - **REQ-006-19:** Las horas se muestran en la zona horaria del navegador del dueño, indicando también la hora del local.
 
@@ -59,8 +59,8 @@ cuánto se vendió y si la caja cuadra.
   - **Cuando** vuelve la conexión
   - **Entonces** la web muestra toda la actividad de esas 3 horas, sin duplicados, en < 5 min.
 - **CA-006-02** (REQ-006-12)
-  - **Dado** que el encargado Ana abrió una sesión sin cuenta en la PC 05
-  - **Entonces** el dueño la ve como "PC 05 · abierta por Ana".
+  - **Dado** que el encargado Ana abrió la sesión temporal "Carlos" en la PC 05
+  - **Entonces** el dueño la ve como "PC 05 · Carlos · abierta por Ana".
 - **CA-006-03** (REQ-006-18)
   - **Dado** que el local lleva 20 min sin internet
   - **Entonces** la web muestra "Sin datos nuevos del local desde hace 20 min".

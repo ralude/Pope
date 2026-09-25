@@ -36,7 +36,7 @@ saldo, y la pausa no puede usarse para ocupar una PC gratis durante horas.
 
 **Reanudar**
 - **REQ-002-10:** Para reanudar, el cliente debe introducir la **contraseña de su cuenta**.
-- **REQ-002-11:** En sesiones abiertas por el encargado sin cuenta (REQ-001-22), el cliente fija un **PIN temporal de 4 dígitos** al pausar, y lo usa para reanudar.
+- **REQ-002-11:** En las sesiones temporales sin cuenta (REQ-001-60), el cliente fija un **PIN temporal de 4 dígitos** al pausar, y lo usa para reanudar.
 - **REQ-002-12:** Tras 3 intentos fallidos, la reanudación se bloquea 1 minuto y el panel avisa al encargado.
 - **REQ-002-13:** El encargado puede reanudar o cerrar una sesión en pausa desde el panel.
 

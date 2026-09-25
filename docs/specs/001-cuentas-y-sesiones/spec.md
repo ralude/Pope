@@ -11,6 +11,10 @@ El local necesita que solo quien tenga saldo use una PC, que el tiempo se cobre 
 exactitud y que quede registrado quién abrió cada sesión: el propio cliente o un
 encargado. El dueño lo revisa desde España.
 
+Muchos clientes no quieren crear una cuenta: pagan al encargado y usan la PC el tiempo
+pagado. Como los cortes de luz son frecuentes, ese tiempo pagado no se puede perder
+cuando se apaga todo.
+
 ## Actores
 
 - **Cliente:** tiene cuenta y saldo; inicia sesión en la PC.
@@ -22,7 +26,9 @@ encargado. El dueño lo revisa desde España.
 
 - Como **cliente**, quiero iniciar sesión en cualquier PC con mi usuario para usar mi saldo.
 - Como **encargado**, quiero crear una cuenta y recargarla en segundos desde el panel.
-- Como **encargado**, quiero abrir una sesión en una PC para un cliente sin cuenta que paga en efectivo.
+- Como **encargado**, quiero abrir una sesión en una PC para un cliente sin cuenta que paga y no quiere Crear Cuenta (Session temporal).
+- Como **encargado**, quiero ponerle un nombre a cada sesión temporal para saber de quién es.
+- Como **cliente sin cuenta**, quiero que si se va la luz me devuelvan el tiempo que me quedaba.
 - Como **dueño**, quiero saber qué sesiones abrió cada encargado para detectar abusos.
 
 ## Requisitos funcionales
@@ -43,12 +49,24 @@ encargado. El dueño lo revisa desde España.
 
 - **REQ-001-20:** El cliente debe iniciar sesión en el Shell con usuario y contraseña. El nodo local valida y abre la sesión si hay saldo suficiente para al menos 1 minuto.
 - **REQ-001-21:** Una cuenta solo puede tener **una** sesión activa a la vez.
-- **REQ-001-22:** El encargado debe poder abrir una sesión **sin cuenta** en una PC, por tiempo fijo o importe cobrado en caja. Queda registrado como actor.
+- **REQ-001-22:** El encargado debe poder abrir una **sesión temporal** sin cuenta (ver "Sesiones temporales"). Queda registrado como actor.
 - **REQ-001-23:** El cobro se calcula con el reloj del nodo local, por minuto (ADR-0007).
 - **REQ-001-24:** El Shell debe avisar al cliente cuando le queden 5 minutos y 1 minuto.
 - **REQ-001-25:** Al agotarse el saldo o el tiempo, la sesión se cierra y la PC se bloquea.
 - **REQ-001-26:** El cliente puede cerrar su sesión desde el Shell. El encargado puede cerrar cualquier sesión desde el panel.
 - **REQ-001-27:** Si una PC deja de enviar latidos más tiempo del de gracia (por defecto 3 min, configurable), el nodo cierra la sesión y cobra solo hasta el último latido.
+
+**Sesiones temporales (sin cuenta)**
+
+- **REQ-001-60:** El cliente puede pagar al encargado y usar una PC **sin crear cuenta**. El encargado abre la sesión temporal indicando el **tiempo** o el **importe** (el otro valor se calcula con la tarifa) y el método de pago. El cobro queda en su turno de caja (spec 005).
+- **REQ-001-61:** El encargado puede ponerle un **nombre** (p. ej. "Carlos") para identificarla en el panel y en el Shell. Si no lo pone, se usa "Temporal · PC 05 · 18:30".
+- **REQ-001-62:** La sesión temporal termina cuando se agota el tiempo pagado y la PC se bloquea (REQ-001-25).
+- **REQ-001-63:** El nodo local guarda en disco el **tiempo restante** de cada sesión temporal en cada latido, como mínimo cada 30 s. El agente guarda además una copia en la propia PC. Así un corte de luz hace perder como mucho 30 s.
+- **REQ-001-64:** El nodo local conserva un **respaldo de, como mínimo, las 3 últimas sesiones temporales de cada PC**, con: nombre, PC, tiempo pagado, tiempo restante según el último registro, importe, quién la abrió, hora de inicio, hora de fin y motivo de cierre. El administrador puede ampliar este número.
+- **REQ-001-65:** El respaldo sobrevive a reinicios y cortes de luz del nodo local y de las PCs: se guarda en disco, nunca solo en memoria.
+- **REQ-001-66:** Tras un corte, las sesiones temporales cerradas "sin latidos" (REQ-001-27) que tenían tiempo restante aparecen en el panel en **"Sesiones interrumpidas"**.
+- **REQ-001-67:** El encargado puede **restaurar** una sesión interrumpida en la misma PC o en otra. La nueva sesión continúa con el tiempo restante, **sin nuevo cobro**, y queda enlazada a la original.
+- **REQ-001-68:** Una sesión interrumpida solo se puede restaurar **una vez**. La restauración genera un evento con el actor, visible para el dueño (spec 006).
 
 **Auditoría**
 
@@ -83,6 +101,21 @@ encargado. El dueño lo revisa desde España.
 - **CA-001-04** (REQ-001-22, REQ-001-31)
   - **Dado** el encargado Ana abre 30 min en la PC 05 sin cuenta
   - **Entonces** la sesión figura como "abierta por Ana" en el panel y en los eventos.
+- **CA-001-05** (REQ-001-60, REQ-001-61)
+  - **Dado** un cliente que paga 1 hora al encargado Ana, que escribe el nombre "Carlos"
+  - **Cuando** Ana abre la sesión temporal en la PC 05
+  - **Entonces** la PC 05 se desbloquea con 1:00:00, el panel muestra "Carlos · PC 05 · abierta por Ana" y el cobro aparece en el turno de Ana.
+- **CA-001-06** (REQ-001-63, REQ-001-66, REQ-001-67)
+  - **Dado** la sesión temporal "Carlos", cuyo último registro a las 18:00 fue de 40 min restantes
+  - **Cuando** se va la luz, vuelve a las 18:30 y el encargado restaura "Carlos" en la PC 02
+  - **Entonces** la PC 02 se desbloquea con 40 min (± 30 s) y no se registra ningún cobro nuevo en caja.
+- **CA-001-07** (REQ-001-64)
+  - **Dado** que la PC 05 ha tenido 5 sesiones temporales hoy
+  - **Entonces** el panel muestra, como mínimo, las 3 últimas con todos sus datos.
+- **CA-001-08** (REQ-001-68)
+  - **Dado** una sesión interrumpida que ya se restauró
+  - **Cuando** alguien intenta restaurarla otra vez
+  - **Entonces** se rechaza con el mensaje "Esta sesión ya fue restaurada por Ana a las 18:31".
 
 ## Fuera de alcance
 
@@ -100,3 +133,7 @@ encargado. El dueño lo revisa desde España.
 - [ ] ¿Redondeo del cobro: por minuto iniciado o por minuto completo?
 - [ ] ¿Se permiten sesiones **postpago** (se usa y se paga al final)?
 - [ ] ¿Las cuentas valen en varias sucursales en el futuro?
+- [ ] ¿El respaldo mínimo de 3 sesiones temporales es **por PC** o **en total**? (Asumido: por PC, porque un apagón afecta a todas las PCs a la vez.)
+- [ ] Si el cliente de una sesión temporal se va antes de tiempo, ¿el tiempo sobrante se pierde, se devuelve o queda restaurable?
+- [ ] ¿Se puede añadir tiempo a una sesión temporal en curso (el cliente paga más)?
+- [ ] ¿Durante cuánto tiempo se puede restaurar una sesión interrumpida (el mismo día, 24 h)?
