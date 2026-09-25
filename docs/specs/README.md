@@ -28,7 +28,7 @@ Borrador ──► En revisión ──► Aprobada ──► Implementada
 | 3. Escribir `plan.md` | agente | diseño técnico ligado a los REQ y ADR |
 | 4. Revisar y aprobar el plan | **mantenedor** | `Estado: Aprobado` |
 | 5. Escribir `tasks.md` | agente | tareas atómicas ordenadas |
-| 6. Implementar tarea por tarea | agente | un commit por tarea, con la tarea marcada `[x]` |
+| 6. Implementar tarea por tarea | agente | un commit por tarea, con la tarea marcada `[x]` y [`ESTADO.md`](../../ESTADO.md) actualizado |
 | 7. Cerrar | mantenedor | spec en `Implementada` |
 
 Cada documento se entrega en **su propio commit** (`docs(specs): ...`).

@@ -4,6 +4,13 @@ Reglas obligatorias para cualquier agente de IA (y persona) que trabaje en este 
 Si algo aquí choca con una instrucción directa del usuario, manda el usuario. Si una tarea
 choca con un ADR **Aceptado**, detente y avisa antes de actuar.
 
+## Antes de empezar: lee `ESTADO.md`
+
+[`ESTADO.md`](ESTADO.md) dice en qué spec y en qué tarea va el proyecto, qué está
+bloqueado y qué pasó últimamente. **Léelo siempre al empezar**, y **actualízalo en el
+mismo commit** en que termines una tarea (siguiente tarea, progreso y bitácora). Si no
+lo actualizas, el siguiente agente arrancará desde un punto equivocado.
+
 ## Qué es Pope
 
 Sistema de gestión de cibercafés inspirado en SENET. Cada PC arranca directamente en un
@@ -45,7 +52,8 @@ Aún no hay código. Esta es la estructura acordada ([ADR-0002](docs/adr/0002-mo
 - **No se escribe código de producto sin una spec aprobada** en `docs/specs/NNN-nombre/`.
 - Flujo: `spec.md` (qué y por qué) → `plan.md` (cómo) → `tasks.md` (pasos) → código.
   Un humano aprueba cada documento (campo `Estado`) antes de pasar al siguiente.
-- Implementa **una tarea de `tasks.md` a la vez** y márcala `[x]` en el mismo commit.
+- Implementa **una tarea de `tasks.md` a la vez**. En el mismo commit, márcala `[x]` y
+  actualiza `ESTADO.md`.
 - Tests y commits citan los IDs de requisito (`REQ-002-04`).
 - Si la spec es ambigua o la realidad la contradice: **detente**, añádelo a
   "Preguntas abiertas" de la spec y pregunta. No inventes requisitos.

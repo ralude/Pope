@@ -11,10 +11,11 @@ Sistema de gestión para cibercafés, inspirado en SENET:
 
 | Documento | Para qué |
 |---|---|
+| [`ESTADO.md`](ESTADO.md) | **Empieza aquí:** en qué tarea va el proyecto y cómo retomarlo |
 | [`AGENTS.md`](AGENTS.md) | Reglas obligatorias para agentes de IA y personas que trabajen en el repo |
 | [`docs/adr/`](docs/adr/README.md) | Decisiones de arquitectura (ADR) y su justificación |
 | [`docs/specs/`](docs/specs/README.md) | Especificaciones de funcionalidades (Spec-Driven Development) |
 
 ## Estado
 
-Fase de diseño: solo documentación. El código empieza cuando las specs estén aprobadas.
+Ver [`ESTADO.md`](ESTADO.md).
