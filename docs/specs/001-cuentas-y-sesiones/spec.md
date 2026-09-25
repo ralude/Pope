@@ -66,7 +66,10 @@ cuando se apaga todo.
 - **REQ-001-65:** El respaldo sobrevive a reinicios y cortes de luz del nodo local y de las PCs: se guarda en disco, nunca solo en memoria.
 - **REQ-001-66:** Tras un corte, las sesiones temporales cerradas "sin latidos" (REQ-001-27) que tenían tiempo restante aparecen en el panel en **"Sesiones interrumpidas"**.
 - **REQ-001-67:** El encargado puede **restaurar** una sesión interrumpida en la misma PC o en otra. La nueva sesión continúa con el tiempo restante, **sin nuevo cobro**, y queda enlazada a la original.
-- **REQ-001-68:** Una sesión interrumpida solo se puede restaurar **una vez**. La restauración genera un evento con el actor, visible para el dueño (spec 006).
+- **REQ-001-68:** Una sesión interrumpida solo se puede restaurar **una vez**. La restauración genera un evento con el actor, visible para el dueño (spec 006). La sesión restaurada es una sesión temporal nueva: si vuelve a interrumpirse, también se puede restaurar.
+- **REQ-001-69:** Si la sesión temporal se cierra antes de agotar el tiempo (lo cierra el cliente o el encargado), **el tiempo sobrante se pierde**: no se devuelve ni se puede restaurar. Antes de cerrar, el Shell pide confirmación con el aviso "Perderás X min". Solo se restauran las sesiones cerradas "sin latidos" (REQ-001-66).
+- **REQ-001-70:** El encargado puede **añadir tiempo** a una sesión temporal en curso cobrando un importe adicional o indicando minutos (el otro valor se calcula con la tarifa). El cobro va a su turno de caja y genera un evento.
+- **REQ-001-71:** Una sesión interrumpida se puede restaurar durante **48 horas** desde el corte. Después queda en el respaldo como **"caducada"** y ya no se puede restaurar. Mientras esté pendiente de restaurar, no sale del respaldo aunque la PC acumule más de 3 sesiones temporales nuevas (REQ-001-64).
 
 **Auditoría**
 
@@ -116,6 +119,18 @@ cuando se apaga todo.
   - **Dado** una sesión interrumpida que ya se restauró
   - **Cuando** alguien intenta restaurarla otra vez
   - **Entonces** se rechaza con el mensaje "Esta sesión ya fue restaurada por Ana a las 18:31".
+- **CA-001-09** (REQ-001-69)
+  - **Dado** la sesión temporal "Carlos" con 25 min restantes
+  - **Cuando** el cliente cierra la sesión y confirma el aviso "Perderás 25 min"
+  - **Entonces** la PC se bloquea, los 25 min se pierden y la sesión no aparece en "Sesiones interrumpidas".
+- **CA-001-10** (REQ-001-70)
+  - **Dado** la sesión temporal "Carlos" con 10 min restantes y una tarifa de 1,00/hora
+  - **Cuando** el encargado cobra 0,50 adicionales
+  - **Entonces** la sesión pasa a 40 min restantes y el cobro aparece en su turno.
+- **CA-001-11** (REQ-001-71)
+  - **Dado** una sesión interrumpida por un corte del lunes a las 18:00
+  - **Cuando** el encargado intenta restaurarla el miércoles a las 18:01
+  - **Entonces** se rechaza porque está "caducada", pero sigue visible en el respaldo.
 
 ## Fuera de alcance
 
@@ -133,7 +148,7 @@ cuando se apaga todo.
 - [ ] ¿Redondeo del cobro: por minuto iniciado o por minuto completo?
 - [ ] ¿Se permiten sesiones **postpago** (se usa y se paga al final)?
 - [ ] ¿Las cuentas valen en varias sucursales en el futuro?
-- [ ] ¿El respaldo mínimo de 3 sesiones temporales es **por PC** o **en total**? (Asumido: por PC, porque un apagón afecta a todas las PCs a la vez.)
-- [ ] Si el cliente de una sesión temporal se va antes de tiempo, ¿el tiempo sobrante se pierde, se devuelve o queda restaurable?
-- [ ] ¿Se puede añadir tiempo a una sesión temporal en curso (el cliente paga más)?
-- [ ] ¿Durante cuánto tiempo se puede restaurar una sesión interrumpida (el mismo día, 24 h)?
+- [x] ¿El respaldo mínimo de 3 sesiones temporales es por PC o en total? **Resuelta: por PC** (REQ-001-64).
+- [x] Si el cliente de una sesión temporal se va antes de tiempo, ¿qué pasa con el tiempo sobrante? **Resuelta: se pierde** (REQ-001-69).
+- [x] ¿Se puede añadir tiempo a una sesión temporal en curso? **Resuelta: sí, cobrando un importe adicional** (REQ-001-70).
+- [x] ¿Durante cuánto tiempo se puede restaurar una sesión interrumpida? **Resuelta: 48 horas** (REQ-001-71).
