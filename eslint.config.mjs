@@ -24,6 +24,14 @@ export default defineConfig(
     },
   },
 
+  // NestJS define módulos como clases vacías con decoradores (`@Module({...})`).
+  {
+    files: ['apps/server/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
+    },
+  },
+
   // Los archivos JavaScript (configuraciones) no tienen tipos que comprobar.
   {
     files: ['**/*.{js,mjs,cjs}'],

@@ -1,0 +1,30 @@
+{
+  "name": "@pope/server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "API de Pope: nodo local y nube con el mismo código (POPE_MODE)",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings=0 .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@nestjs/common": "^12.1.0",
+    "@nestjs/core": "^12.1.0",
+    "@nestjs/platform-fastify": "^12.1.0",
+    "@pope/shared": "workspace:*",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@nestjs/testing": "^12.1.0",
+    "@swc/core": "^1.16.2",
+    "@types/node": "^24.13.6",
+    "unplugin-swc": "^2.0.0",
+    "vitest": "~5.0.1"
+  }
+}

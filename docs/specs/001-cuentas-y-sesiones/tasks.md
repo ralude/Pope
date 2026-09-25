@@ -75,7 +75,7 @@ antes de seguir.
 
 ## Fase 3: Servidor base (`apps/server`)
 
-- [ ] **T10: Esqueleto NestJS + Fastify**
+- [x] **T10: Esqueleto NestJS + Fastify**
   - **Cubre:** ADR-0003
   - **Hacer:** app con `POPE_MODE`, configuración validada con zod y endpoint `/health`.
   - **Verificar:** test e2e de `/health`.

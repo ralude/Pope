@@ -165,6 +165,16 @@ versiones posteriores. Convenciones de un paquete TS (modelo: `packages/shared`)
 - `tsconfig.build.json`: compila solo `src` a `dist`, sin los tests.
 - Tests con Vitest junto al código: `src/**/*.test.ts`.
 
+Servidor (`apps/server`, NestJS sobre Fastify):
+
+- Arrancar tras compilar: `POPE_MODE=local pnpm --filter @pope/server start` (variables:
+  `POPE_MODE` obligatoria, `local` o `cloud`; `PORT`, por defecto 3000; `HOST`, por
+  defecto `0.0.0.0`). Comprobar: `GET /health`.
+- Sus tests usan `unplugin-swc`, porque esbuild no emite los metadatos de decoradores que
+  necesita la inyección de dependencias de NestJS.
+- No uses `import type` para clases que se inyectan en un constructor: se perderían esos
+  metadatos.
+
 - **ESLint:** un único `eslint.config.mjs` en la raíz (configuración plana) con
   `strictTypeChecked` de `typescript-eslint`. Un paquete solo tiene configuración propia
   si añade reglas (p. ej. React).
