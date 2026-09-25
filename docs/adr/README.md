@@ -36,3 +36,6 @@ anterior, y en el viejo solo se actualiza el estado.
 | # | Título | Estado |
 |---|---|---|
 | [0000](0000-registrar-decisiones-con-adr.md) | Registrar las decisiones con ADR | Aceptado |
+| [0001](0001-arquitectura-local-first.md) | Arquitectura local-first con copia en la nube | Aceptado |
+| [0007](0007-nodo-local-fuente-de-verdad.md) | El nodo local es la fuente de verdad del tiempo y el saldo | Aceptado |
+| [0008](0008-sincronizacion-por-eventos.md) | Sincronización local → nube por eventos (outbox) | Propuesto |
