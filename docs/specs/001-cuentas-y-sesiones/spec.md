@@ -45,7 +45,7 @@ cuando se apaga todo.
 - **REQ-001-10:** La tarifa por hora depende del **día de la semana** y es la misma para todas las PCs (no hay categorías como Normal o VIP). El administrador la configura. Valores actuales: **lunes a miércoles 1,50 USD/h** y **jueves a domingo 2,00 USD/h**. Cada cambio de tarifa genera un evento.
 - **REQ-001-11:** El saldo se guarda en **dinero**. Su equivalente en tiempo se calcula con la tarifa del día: tiempo restante = saldo ÷ tarifa de hoy.
 - **REQ-001-12:** El Shell muestra al cliente **los dos valores**, tiempo restante y saldo, y los actualiza mientras consume. Ejemplo un lunes (1,50 USD/h): empieza con 3,00 USD = 2:00:00 y, tras 30 min, ve 2,25 USD = 1:30:00.
-- **REQ-001-14:** Si una sesión cruza la medianoche hacia un día con otra tarifa, cada tramo se cobra con la tarifa de su día. (El local abre de 10:00 a 22:00, así que es un caso raro, pero el sistema no debe fallar si ocurre.)
+- **REQ-001-14:** Si una sesión cruza la medianoche hacia un día con otra tarifa, cada tramo se cobra con la tarifa de su día. (El local abre de 10:00 a 22:00, pero a veces se alarga hasta las 00:00, así que puede ocurrir, p. ej. de miércoles a jueves.)
 - **REQ-001-13:** La tarifa, el saldo y las recargas están en **USD**. El Shell y el panel muestran primero el importe en USD y a su lado el equivalente en bolívares a la tasa BCV vigente (REQ-005-30).
 
 **Sesiones**
@@ -183,6 +183,8 @@ cuando se apaga todo.
 - Tarifas distintas por PC o categorías de PC (Normal, VIP).
 - Tarifas por franja horaria (p. ej. nocturna). Solo varía por día de la semana.
 - Registro de cuentas por el propio cliente desde la PC.
+- Cierre automático de sesiones a la hora de cierre del local: lo decide el encargado, porque a veces se alarga hasta las 00:00.
+- Cuentas compartidas entre sedes: hoy hay una sola sede. El modelo de la nube ya distingue sedes (REQ-006-30) por si se abre otra.
 - Reservas de PC.
 - Pagos en línea.
 
@@ -192,11 +194,12 @@ cuando se apaga todo.
 - [x] ¿En qué moneda se cobra? **Resuelta: USD, mostrando el equivalente en Bs a la tasa BCV** (REQ-001-13, spec 005).
 - [x] ¿Cómo se cobra la fracción de minuto? **Resuelta: por segundo** (REQ-001-23).
 - [x] ¿Se permiten sesiones postpago? **Resuelta: no; solo prepago, y el encargado gestiona el cobro por fuera** (REQ-001-03).
-- [ ] Si en el futuro se abre **otro cibercafé** del mismo dueño, ¿un cliente con cuenta en uno podría usar la misma cuenta y saldo en el otro? (Propuesta: no; cada local tiene sus propias cuentas.)
+- [x] ¿Las cuentas valen en otras sedes? **Resuelta: hoy hay una sola sede; cada local tiene sus propias cuentas.**
 - [x] ¿El respaldo mínimo de 3 sesiones temporales es por PC o en total? **Resuelta: por PC** (REQ-001-64).
 - [x] Si el cliente de una sesión temporal se va antes de tiempo, ¿qué pasa con el tiempo sobrante? **Resuelta: se pierde** (REQ-001-69).
 - [x] ¿Se puede añadir tiempo a una sesión temporal en curso? **Resuelta: sí, cobrando un importe adicional** (REQ-001-70).
 - [x] ¿Durante cuánto tiempo se puede restaurar una sesión interrumpida? **Resuelta: 48 horas** (REQ-001-71).
 - [x] ¿Cómo funcionan los combos? **Resuelta: se guardan en horas, no vencen, valen cualquier día, solo para cuentas y se consumen antes que el saldo** (REQ-001-80 a 89, ADR-0014).
 - [ ] **Migración:** ¿qué sistema usa hoy el local? ¿Se pueden exportar los clientes con su saldo y sus horas de combo pendientes? Tras 3 años de combos sin vencimiento, habrá clientes con horas por usar que no se pueden perder.
-- [ ] El local abre de 10:00 a 22:00. ¿El sistema debe avisar y cerrar las sesiones a la hora de cierre, o lo hace el encargado?
+- [x] ¿Quién cierra las sesiones a la hora de cierre? **Resuelta: el encargado; el sistema no cierra nada solo.**
+- [ ] Si una sesión que empezó el miércoles sigue pasada la medianoche, ¿el saldo empieza a gastarse a la tarifa del jueves (REQ-001-14) o se mantiene la del día en que empezó? (Propuesta: la del día en que empezó; si no, el cliente vería bajar su tiempo restante de golpe a las 00:00.)
