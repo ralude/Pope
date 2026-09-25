@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T08 terminada (protocolo PC ↔ nodo)
+**Última actualización:** 2026-09-25 · T09 terminada (eventos de cuentas, combos, tarifas y turno)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T06: Motor de cobro (checkpoint)** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 8 / 51 tareas · fase 2 de 9 (Dominio compartido) |
+| **Siguiente tarea** | **T09b: Esquemas de eventos de sesión** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 9 / 52 tareas · fase 2 de 9 (Dominio compartido) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -40,7 +40,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 8 / 51 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 9 / 52 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -53,6 +53,9 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T09 (dividida en T09 y T09b por tamaño; ahora son 52 tareas). Eventos con
+  formato común, actor con copia del nombre y objetos estrictos: cuentas, saldo, combos,
+  tarifas y turno. Método de pago como lista fija.
 - **2026-09-25:** T08. Protocolo PC ↔ nodo en zod (`hello`, `heartbeat`, `login`, `logout`,
   `buyCombo`, `state`, `warning`, `sessionEnded`, `error`); el build genera su JSON Schema
   en `packages/shared/dist/json-schema/` para el agente en C#.
