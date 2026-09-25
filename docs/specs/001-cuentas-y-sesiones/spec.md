@@ -2,7 +2,7 @@
 
 - **Estado:** Borrador
 - **Fecha:** 2026-09-25
-- **ADRs relacionados:** ADR-0001, ADR-0007, ADR-0008
+- **ADRs relacionados:** ADR-0001, ADR-0007, ADR-0008, ADR-0014
 - **Specs relacionadas:** 002, 003, 006
 
 ## Problema
@@ -74,6 +74,19 @@ cuando se apaga todo.
 - **REQ-001-70:** El encargado puede **añadir tiempo** a una sesión temporal en curso cobrando un importe adicional o indicando minutos (el otro valor se calcula con la tarifa). El cobro va a su turno de caja y genera un evento.
 - **REQ-001-71:** Una sesión interrumpida se puede restaurar durante **48 horas** desde el corte. Después queda en el respaldo como **"caducada"** y ya no se puede restaurar. Mientras esté pendiente de restaurar, no sale del respaldo aunque la PC acumule más de 3 sesiones temporales nuevas (REQ-001-64).
 
+**Combos** (ADR-0014)
+
+- **REQ-001-80:** El administrador crea combos indicando **nombre**, **precio** (USD) y **horas** (p. ej. "Combo 20 horas", 20 USD, 20 h). El panel muestra lo que sale la hora con ese combo y el descuento frente a cada tarifa del día.
+- **REQ-001-81:** Un combo se puede editar o desactivar. Los cambios no afectan a las horas ya vendidas y generan un evento.
+- **REQ-001-82:** Solo los clientes **con cuenta** pueden comprar combos. Las sesiones temporales siempre usan la tarifa del día.
+- **REQ-001-83:** Cada cuenta tiene **dos saldos**: saldo en dinero (USD) y **horas de combo** (tiempo).
+- **REQ-001-84:** **Compra en caja:** el encargado carga un combo a la cuenta indicando el método de pago. Se suman las horas y el cobro queda en su turno (spec 005).
+- **REQ-001-85:** **Compra con saldo:** si el saldo en dinero alcanza, el cliente (desde el Shell, con confirmación) o el encargado (desde el panel) puede cambiarlo por un combo. Se descuenta el precio del saldo y se suman las horas.
+- **REQ-001-86:** Las horas de combo **no vencen nunca** y valen **cualquier día a cualquier hora**, aunque cambie la tarifa. Se descuenta el tiempo real usado.
+- **REQ-001-87:** **Orden de consumo:** primero se gastan las horas de combo. Cuando se agotan, la sesión sigue **sin cortes** gastando el saldo en dinero a la tarifa del día.
+- **REQ-001-88:** El Shell muestra por separado las horas de combo, el saldo en dinero (con su equivalente en tiempo a la tarifa de hoy) y el **tiempo total** disponible.
+- **REQ-001-89:** Los saldos nunca se editan directamente. Recargas, compras de combo, consumos y ajustes (con motivo) son movimientos con actor y hora.
+
 **Auditoría**
 
 - **REQ-001-30:** Cada acción (cuenta creada, recarga, sesión abierta, sesión cerrada, tarifa cambiada) genera un evento con actor, PC y hora en UTC (ADR-0008).
@@ -142,12 +155,31 @@ cuando se apaga todo.
   - **Dado** una sesión interrumpida por un corte del lunes a las 18:00
   - **Cuando** el encargado intenta restaurarla el miércoles a las 18:01
   - **Entonces** se rechaza porque está "caducada", pero sigue visible en el respaldo.
+- **CA-001-14** (REQ-001-80)
+  - **Dado** que el administrador crea "Combo 20 horas" a 20 USD por 20 h
+  - **Entonces** el panel muestra "1,00 USD/h: 33 % menos que de lunes a miércoles y 50 % menos que de jueves a domingo".
+- **CA-001-15** (REQ-001-86)
+  - **Dado** que Juan compró el combo de 20 h y usó 2 h
+  - **Cuando** vuelve 6 meses después, un sábado
+  - **Entonces** tiene 18:00:00 de horas de combo, las mismas que al irse.
+- **CA-001-16** (REQ-001-87, REQ-001-88)
+  - **Dado** que Juan tiene 0:30:00 de combo y 3,00 USD de saldo, un jueves (2,00 USD/h)
+  - **Cuando** inicia sesión
+  - **Entonces** el Shell muestra combo 0:30:00, saldo 3,00 USD (≈ 1:30:00) y total 2:00:00. A los 30 min empieza a gastar saldo sin que se corte la sesión.
+- **CA-001-17** (REQ-001-85)
+  - **Dado** que Juan tiene 25,00 USD de saldo
+  - **Cuando** compra desde el Shell el "Combo 20 horas" y confirma
+  - **Entonces** le quedan 5,00 USD de saldo y suma 20:00:00 de horas de combo.
+- **CA-001-18** (REQ-001-82)
+  - **Dado** una sesión temporal
+  - **Entonces** el panel no ofrece combos, solo tiempo a la tarifa del día.
 
 ## Fuera de alcance
 
 - Sesiones **postpago**: el sistema es solo prepago. Si el encargado fía, lo controla fuera del sistema y recarga cuando quiera.
 - Recarga automática desde el Shell con verificación de pago móvil (spec 007, futura).
-- Paquetes de horas o combos (pendientes de definir, ver spec 007), bonos y programa de fidelidad.
+- Combos con vencimiento o limitados a ciertos días (los combos actuales no tienen restricciones).
+- Bonos y programa de fidelidad.
 - Tarifas distintas por PC o categorías de PC (Normal, VIP).
 - Tarifas por franja horaria (p. ej. nocturna). Solo varía por día de la semana.
 - Registro de cuentas por el propio cliente desde la PC.
@@ -165,3 +197,6 @@ cuando se apaga todo.
 - [x] Si el cliente de una sesión temporal se va antes de tiempo, ¿qué pasa con el tiempo sobrante? **Resuelta: se pierde** (REQ-001-69).
 - [x] ¿Se puede añadir tiempo a una sesión temporal en curso? **Resuelta: sí, cobrando un importe adicional** (REQ-001-70).
 - [x] ¿Durante cuánto tiempo se puede restaurar una sesión interrumpida? **Resuelta: 48 horas** (REQ-001-71).
+- [x] ¿Cómo funcionan los combos? **Resuelta: se guardan en horas, no vencen, valen cualquier día, solo para cuentas y se consumen antes que el saldo** (REQ-001-80 a 89, ADR-0014).
+- [ ] **Migración:** ¿qué sistema usa hoy el local? ¿Se pueden exportar los clientes con su saldo y sus horas de combo pendientes? Tras 3 años de combos sin vencimiento, habrá clientes con horas por usar que no se pueden perder.
+- [ ] El local abre de 10:00 a 22:00. ¿El sistema debe avisar y cerrar las sesiones a la hora de cierre, o lo hace el encargado?

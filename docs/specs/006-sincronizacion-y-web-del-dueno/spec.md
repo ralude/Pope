@@ -41,6 +41,7 @@ cuánto se vendió y si la caja cuadra.
 - **REQ-006-17:** **Auditoría del personal:** recargas, sesiones temporales, **restauraciones de sesiones interrumpidas**, anulaciones, ajustes de stock, cambios de precio y modos mantenimiento, por encargado.
 - **REQ-006-18:** Cada pantalla muestra **"Última actualización del local: hace X"**, y un aviso visible si pasan más de 5 minutos.
 - **REQ-006-19:** Las horas se muestran en la zona horaria del navegador del dueño, indicando también la hora del local.
+- **REQ-006-20:** **Combos:** combos vendidos por periodo, horas consumidas y **total de horas de combo vendidas y aún sin usar** (compromiso pendiente del local, ADR-0014).
 
 **Preparado para varias sucursales**
 - **REQ-006-30:** El modelo de datos de la nube distingue sucursales desde el principio, aunque al empezar solo haya una.

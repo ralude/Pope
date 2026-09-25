@@ -49,6 +49,6 @@ gente, el encargado se convierte en un cuello de botella.
 ## Preguntas abiertas
 
 - [ ] ¿En qué **banco** está la cuenta del comercio? ¿Ofrece una **API de consulta de pagos móviles recibidos** para comercios? Sin eso no se puede verificar de forma automática y fiable.
-- [ ] ¿Qué **combos** tiene hoy el local (p. ej. "3 horas por 2,50 USD")? Hay que definirlos también en la spec 001.
+- [x] ¿Cómo funcionan los combos? **Resuelta en la spec 001** (REQ-001-80 a 89): el cliente podrá elegir cualquier combo activo al autorrecargarse.
 - [ ] ¿Qué tolerancia se acepta si el cliente paga unos céntimos de menos o de más?
 - [ ] ¿Límite de recargas automáticas por cliente o por día, como medida antifraude?
