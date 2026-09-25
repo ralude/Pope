@@ -44,5 +44,7 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0006](0006-agente-nativo-en-csharp.md) | Agente y host nativos en C# (.NET), reducidos al mínimo | Aceptado |
 | [0007](0007-nodo-local-fuente-de-verdad.md) | El nodo local es la fuente de verdad del tiempo y el saldo | Aceptado |
 | [0008](0008-sincronizacion-por-eventos.md) | Sincronización local → nube por eventos (outbox) | Propuesto |
+| [0009](0009-escritorio-separado-para-bloqueo-y-pausa.md) | Bloqueo y pausa en un escritorio Win32 separado | Propuesto |
+| [0010](0010-lista-blanca-y-restauracion.md) | Lista blanca de aplicaciones y restauración de configuración | Propuesto |
 | [0011](0011-presupuesto-de-recursos-nodo-local.md) | Presupuesto de recursos del nodo local | Aceptado |
 | [0012](0012-web-del-dueno-sin-instalacion.md) | La web del dueño es solo navegador, sin instalación | Aceptado |
