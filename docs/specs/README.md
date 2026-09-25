@@ -73,3 +73,4 @@ Cada documento se entrega en **su propio commit** (`docs(specs): ...`).
 |---|---|---|
 | [001](001-cuentas-y-sesiones/spec.md) | Cuentas y sesiones | Borrador |
 | [002](002-pausa-de-sesion/spec.md) | Pausa de sesión | Borrador |
+| [003](003-bloqueo-de-pc/spec.md) | Arranque y bloqueo de la PC cliente | Borrador |
