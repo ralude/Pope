@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T09 terminada (eventos de cuentas, combos, tarifas y turno)
+**Última actualización:** 2026-09-25 · T09b terminada (eventos de sesión)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T09b: Esquemas de eventos de sesión** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 9 / 52 tareas · fase 2 de 9 (Dominio compartido) |
+| **Siguiente tarea** | **T10: Esqueleto NestJS + Fastify** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 10 / 52 tareas · fase 3 de 9 (Servidor base) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -32,6 +32,7 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 - [ ] **T11 y T37:** ejecutar las mediciones en el PC servidor del local (i5 de 2ª gen, 8 GB).
+- [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **REQ-001-13:** el equivalente en Bs espera a la tasa BCV de la spec 005.
 - [ ] **Antes de la spec 003:** decidir los ADR propuestos [0005](docs/adr/0005-shell-react-en-webview2.md), [0009](docs/adr/0009-escritorio-separado-para-bloqueo-y-pausa.md) y [0010](docs/adr/0010-lista-blanca-y-restauracion.md) (cliente Windows).
 - [ ] **Spec 008:** averiguar si el plan de SENET del local incluye acceso a la API y quién tiene las credenciales.
@@ -40,7 +41,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 9 / 52 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 10 / 52 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -53,6 +54,9 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T09b. Eventos de sesión (`started`, `ended` con `billedUntil`, `time_added`,
+  `restored`). **Fin de la fase 2:** `@pope/shared` tiene dinero, tiempo, tarifas, motor de
+  cobro, avisos, protocolo PC ↔ nodo y eventos, con 102 tests.
 - **2026-09-25:** T09 (dividida en T09 y T09b por tamaño; ahora son 52 tareas). Eventos con
   formato común, actor con copia del nombre y objetos estrictos: cuentas, saldo, combos,
   tarifas y turno. Método de pago como lista fija.

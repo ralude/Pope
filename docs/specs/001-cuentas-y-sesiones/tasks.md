@@ -67,7 +67,7 @@ antes de seguir.
   - **Commit:** `feat(shared): define los eventos de auditoría y sincronización`
   - **Nota:** dividida en T09 y T09b porque superaba las 400 líneas.
 
-- [ ] **T09b: Esquemas de eventos de sesión**
+- [x] **T09b: Esquemas de eventos de sesión**
   - **Cubre:** REQ-001-30, REQ-001-31, ADR-0008
   - **Hacer:** `session.started`, `session.ended`, `session.time_added` y `session.restored`, con la PC y el motivo de cierre.
   - **Verificar:** tests de validación de cada tipo de evento de sesión y de CA-001-04.

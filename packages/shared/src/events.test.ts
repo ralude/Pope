@@ -7,6 +7,7 @@ const id = (n: number) => `0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a${n.toString(16).pa
 
 const ANA = { kind: 'staff', staffId: id(1), name: 'Ana' };
 const JUAN = { id: id(2), username: 'juan' };
+const PC05 = { id: id(3), name: 'PC 05' };
 const SHIFT = id(4);
 const usd = (micros: number) => ({ micros, currency: 'USD' });
 
@@ -59,6 +60,48 @@ const examples = {
   'tariff.changed': envelope('tariff.changed', {
     changes: [{ weekday: 4, from: usd(2_000_000), to: usd(1_500_000) }],
   }),
+  'session.started': envelope('session.started', {
+    kind: 'temporary',
+    sessionId: id(6),
+    pc: PC05,
+    name: 'Carlos',
+    rate: usd(1_500_000),
+    purchasedSeconds: 3600,
+    amount: usd(1_500_000),
+    paymentMethod: 'cash_usd',
+    shiftId: SHIFT,
+  }),
+  'session.ended': envelope(
+    'session.ended',
+    {
+      sessionId: id(6),
+      pc: PC05,
+      reason: 'no_heartbeat',
+      billedUntil: '2026-09-25T22:00:00Z',
+      usage: {
+        kind: 'temporary',
+        purchasedSeconds: 3600,
+        usedSeconds: 1200,
+        remainingSeconds: 2400,
+      },
+    },
+    { kind: 'system' },
+  ),
+  'session.time_added': envelope('session.time_added', {
+    sessionId: id(6),
+    pc: PC05,
+    seconds: 1800,
+    amount: usd(750_000),
+    paymentMethod: 'pos',
+    shiftId: SHIFT,
+  }),
+  'session.restored': envelope('session.restored', {
+    sessionId: id(7),
+    restoredFrom: id(6),
+    pc: { id: id(8), name: 'PC 02' },
+    name: 'Carlos',
+    seconds: 2400,
+  }),
   'shift.opened': envelope('shift.opened', { shiftId: SHIFT }),
   'shift.closed': envelope('shift.closed', { shiftId: SHIFT }),
 };
@@ -100,6 +143,11 @@ describe('actor (REQ-001-31, CA-001-04)', () => {
     ).toBe(true);
     expect(actorSchema.safeParse({ kind: 'system' }).success).toBe(true);
     expect(actorSchema.safeParse({ kind: 'pc' }).success).toBe(false);
+  });
+
+  it('CA-001-04: la sesión temporal figura como abierta por Ana', () => {
+    const event = domainEventSchema.parse(examples['session.started']);
+    expect(event.actor).toEqual({ kind: 'staff', staffId: id(1), name: 'Ana' });
   });
 });
 
@@ -147,6 +195,25 @@ describe('importes y tiempos en los eventos (ADR-0015)', () => {
       valid({
         ...changed,
         payload: { changes: [{ weekday: 8, from: usd(1), to: usd(2) }] },
+      }),
+    ).toBe(false);
+  });
+
+  it('el cierre de una sesión con cuenta trae lo consumido', () => {
+    const ended = examples['session.ended'];
+    const usage = {
+      kind: 'account',
+      comboSecondsUsed: 1800,
+      moneySeconds: 620,
+      moneyCharged: usd(258_333),
+    };
+    expect(valid({ ...ended, payload: { ...ended.payload, reason: 'customer', usage } })).toBe(
+      true,
+    );
+    expect(
+      valid({
+        ...ended,
+        payload: { ...ended.payload, usage: { ...usage, moneySeconds: -1 } },
       }),
     ).toBe(false);
   });

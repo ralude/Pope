@@ -11,10 +11,11 @@
 import { z } from 'zod';
 
 import { microsSchema } from './money.js';
-import { idSchema, utcInstantSchema } from './session.js';
+import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
 import { weekdaySchema } from './tariff.js';
 
 const positiveSeconds = z.int().positive().brand<'Seconds'>();
+const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
 
 /** Importe en USD: precios, tarifas, saldos y recargas están en USD (REQ-001-13). */
 const usdSchema = z.strictObject({
@@ -28,6 +29,7 @@ const positiveUsdSchema = z.strictObject({
 
 // ─── Referencias con copia del nombre ───────────────────────────────────────────────────
 
+export const pcRefSchema = z.strictObject({ id: idSchema, name: z.string().min(1) });
 export const customerRefSchema = z.strictObject({ id: idSchema, username: z.string().min(1) });
 
 /** Quién hizo la acción (REQ-001-30, REQ-001-31). */
@@ -169,6 +171,96 @@ export const tariffChangedEventSchema = event(
   }),
 );
 
+// ─── Sesiones ───────────────────────────────────────────────────────────────────────────
+
+/**
+ * Sesión abierta. Quién la abrió es el `actor`: el cliente o el encargado (REQ-001-31,
+ * CA-001-04). Las temporales llevan el cobro en caja (REQ-001-60).
+ */
+export const sessionStartedEventSchema = event(
+  'session.started',
+  1,
+  z.discriminatedUnion('kind', [
+    z.strictObject({
+      kind: z.literal('account'),
+      sessionId: idSchema,
+      pc: pcRefSchema,
+      customer: customerRefSchema,
+      rate: usdSchema,
+    }),
+    z.strictObject({
+      kind: z.literal('temporary'),
+      sessionId: idSchema,
+      pc: pcRefSchema,
+      name: z.string().min(1),
+      rate: usdSchema,
+      purchasedSeconds: positiveSeconds,
+      amount: positiveUsdSchema,
+      paymentMethod: paymentMethodSchema,
+      shiftId: idSchema,
+    }),
+  ]),
+);
+
+/**
+ * Sesión cerrada, con el motivo (REQ-001-31) y lo consumido. `billedUntil` es el último
+ * instante cobrado: en un cierre sin latidos, el último latido (REQ-001-27, CA-001-03).
+ */
+export const sessionEndedEventSchema = event(
+  'session.ended',
+  1,
+  z.strictObject({
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    reason: sessionEndReasonSchema,
+    billedUntil: utcInstantSchema,
+    usage: z.discriminatedUnion('kind', [
+      z.strictObject({
+        kind: z.literal('account'),
+        comboSecondsUsed: nonNegativeSeconds,
+        moneySeconds: nonNegativeSeconds,
+        moneyCharged: usdSchema,
+      }),
+      z.strictObject({
+        kind: z.literal('temporary'),
+        purchasedSeconds: nonNegativeSeconds,
+        usedSeconds: nonNegativeSeconds,
+        remainingSeconds: nonNegativeSeconds,
+      }),
+    ]),
+  }),
+);
+
+/** Tiempo añadido a una sesión temporal, cobrado en caja (REQ-001-70). */
+export const sessionTimeAddedEventSchema = event(
+  'session.time_added',
+  1,
+  z.strictObject({
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    seconds: positiveSeconds,
+    amount: positiveUsdSchema,
+    paymentMethod: paymentMethodSchema,
+    shiftId: idSchema,
+  }),
+);
+
+/**
+ * Restauración de una sesión temporal interrumpida en una PC libre, sin nuevo cobro y
+ * enlazada a la original (REQ-001-67, REQ-001-68).
+ */
+export const sessionRestoredEventSchema = event(
+  'session.restored',
+  1,
+  z.strictObject({
+    sessionId: idSchema,
+    restoredFrom: idSchema,
+    pc: pcRefSchema,
+    name: z.string().min(1),
+    seconds: positiveSeconds,
+  }),
+);
+
 // ─── Turno de caja (mínimo; lo amplía la spec 005) ──────────────────────────────────────
 
 export const shiftOpenedEventSchema = event(
@@ -193,6 +285,10 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   comboUpdatedEventSchema,
   comboPurchasedEventSchema,
   tariffChangedEventSchema,
+  sessionStartedEventSchema,
+  sessionEndedEventSchema,
+  sessionTimeAddedEventSchema,
+  sessionRestoredEventSchema,
   shiftOpenedEventSchema,
   shiftClosedEventSchema,
 ]);
