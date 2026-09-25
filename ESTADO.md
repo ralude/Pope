@@ -12,7 +12,7 @@
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
 | **Siguiente tarea** | **T14: Personal y autenticación** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 14 / 52 tareas · fase 3 de 9 (Servidor base) |
+| **Progreso** | 14 / 54 tareas · fase 3 de 9 (Servidor base) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -33,6 +33,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 - [ ] **T11 y T37:** ejecutar las mediciones en el PC servidor del local (i5 de 2ª gen, 8 GB).
 - [ ] **Antes de T24:** decidir el transporte WebSocket (`ws` puro recomendado, en vez de Socket.IO), cómo se enruta `type` en NestJS y si se añade `requestId` al protocolo. Detalle en la nota de T24 de [tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md).
+- [ ] **Antes de T14b:** decidir si desactivar o reactivar personal genera el evento `staff.status_changed` (pregunta abierta en la [spec 001](docs/specs/001-cuentas-y-sesiones/spec.md)).
 - [ ] **Antes de T29:** decidir qué pasa si se corta la red entre una PC y el nodo más que el tiempo de gracia (choque entre ADR-0007 y REQ-001-27). Pregunta abierta en la [spec 001](docs/specs/001-cuentas-y-sesiones/spec.md).
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
@@ -44,7 +45,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 14 / 52 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 14 / 54 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |

@@ -105,6 +105,14 @@ antes de seguir.
   - **Verificar:** tests de login correcto e incorrecto y de acceso denegado por rol.
   - **Commit:** `feat(server): añade el login del personal con roles`
 
+- [ ] **T14b: Gestión del personal**
+  - **Cubre:** REQ-001-40
+  - **Hacer:** endpoints solo para `administrador`: alta de personal (usuario, nombre, rol y contraseña, con evento `staff.created`), lista y activar o desactivar. Al desactivar, sus sesiones del panel dejan de valer.
+  - **Antes de empezar:** resolver la pregunta abierta de la spec sobre el evento al desactivar personal.
+  - **Verificar:** tests de alta, usuario duplicado, desactivación (su cookie deja de valer) y acceso denegado a quien no es administrador.
+  - **Commit:** `feat(server): gestiona el personal del local`
+  - **Nota:** añadida al empezar T14; ninguna tarea permitía crear encargados.
+
 ## Fase 4: Clientes, saldos, tarifas y combos
 
 - [ ] **T15: Clientes**
@@ -293,6 +301,13 @@ antes de seguir.
   - **Hacer:** lista, alta y edición, mostrando el precio por hora y el descuento en vivo mientras se escribe.
   - **Verificar:** CA-001-14 a mano.
   - **Commit:** `feat(panel): administra los combos`
+
+- [ ] **T43b: Administración del personal**
+  - **Cubre:** REQ-001-40
+  - **Hacer:** lista del personal, alta (usuario, nombre, rol y contraseña) y activar o desactivar (solo administrador).
+  - **Verificar:** a mano: crear un encargado, iniciar sesión con él y desactivarlo.
+  - **Commit:** `feat(panel): administra el personal`
+  - **Nota:** añadida junto con T14b.
 
 - [ ] **T44: Sesiones temporales en el panel**
   - **Cubre:** REQ-001-60, REQ-001-61, REQ-001-70, REQ-001-69
