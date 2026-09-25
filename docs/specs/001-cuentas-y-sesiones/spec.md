@@ -219,3 +219,7 @@ cuando se apaga todo.
 - [x] ¿Quién cierra las sesiones a la hora de cierre? **Resuelta: el encargado; el sistema no cierra nada solo.**
 - [x] ¿Qué tarifa se aplica si una sesión pasa de la medianoche? **Resuelta: la del día en que empezó** (REQ-001-14).
 - [x] ¿Las tarifas son fijas? **Resuelta: no; el administrador cambia el precio de cada día cuando quiera** (REQ-001-15, REQ-001-16).
+- [x] ¿Cómo se redondea el saldo a céntimos al mostrarlo? **Resuelta: al céntimo más cercano, la mitad hacia arriba** (2,245833 → 2,25 USD). Los negativos, igual en valor absoluto (REQ-001-23, ADR-0015).
+- [x] ¿Cómo se muestra el equivalente en bolívares? **Resuelta: `3,00 USD (≈ 120,00 VES)`**, con el código `VES`, miles con punto y decimales con coma; en tarifas, `1,50 USD/h (≈ 60,00 VES/h)` (REQ-001-13).
+- [x] Si un latido llega tarde y el tiempo transcurrido supera el saldo, ¿qué se cobra? **Resuelta: como mucho lo que había.** El saldo nunca queda negativo y los segundos de más no se cobran, porque el sistema es solo prepago (REQ-001-23, REQ-001-25).
+- [x] Si una sesión empieza con menos de 5 min, ¿qué avisos recibe? **Resuelta: el de 5 min al empezar y el de 1 min al llegar.** Si después compra tiempo y vuelve a superar un umbral, ese aviso se rearma y se repite al cruzarlo otra vez (REQ-001-24).
