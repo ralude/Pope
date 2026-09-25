@@ -43,7 +43,8 @@ cuando se apaga todo.
 **Tarifas**
 
 - **REQ-001-10:** Todas las PCs del local tienen la **misma tarifa**: un único precio por hora que configura el administrador. No hay categorías de PC (Normal, VIP, etc.).
-- **REQ-001-11:** El tiempo disponible que se muestra al cliente se calcula como saldo ÷ tarifa.
+- **REQ-001-11:** El saldo se guarda en **dinero**. Como la tarifa es única, saldo y tiempo son equivalentes: tiempo restante = saldo ÷ tarifa.
+- **REQ-001-12:** El Shell muestra al cliente **los dos valores**, tiempo restante y saldo, y los actualiza mientras consume. Ejemplo con 1 USD/hora: empieza con 1,00 USD = 1:00:00 y, tras 30 min, ve 0,50 USD = 0:30:00.
 
 **Sesiones**
 
@@ -89,10 +90,14 @@ cuando se apaga todo.
 
 ## Criterios de aceptación
 
-- **CA-001-01** (REQ-001-20, REQ-001-11)
-  - **Dado** un cliente con 2,00 de saldo y una tarifa de 1,00/hora
+- **CA-001-01** (REQ-001-20, REQ-001-11, REQ-001-12)
+  - **Dado** un cliente con 2,00 USD de saldo y una tarifa de 1,00 USD/hora
   - **Cuando** inicia sesión
-  - **Entonces** la PC se desbloquea y muestra 2:00:00 restantes.
+  - **Entonces** la PC se desbloquea y muestra 2:00:00 y 2,00 USD.
+- **CA-001-12** (REQ-001-12)
+  - **Dado** la sesión anterior
+  - **Cuando** lleva 30 min de uso
+  - **Entonces** el Shell muestra 1:30:00 y 1,50 USD.
 - **CA-001-02** (REQ-001-21)
   - **Dado** un cliente con sesión activa en la PC 03
   - **Cuando** intenta iniciar sesión en la PC 07
@@ -143,11 +148,11 @@ cuando se apaga todo.
 
 ## Preguntas abiertas
 
-- [ ] ¿El saldo se guarda en **dinero** o en **tiempo**? (Propuesta: dinero.)
+- [x] ¿El saldo se guarda en dinero o en tiempo? **Resuelta: en dinero, y el Shell muestra ambos** (REQ-001-11, REQ-001-12).
 - [ ] ¿En qué **moneda** se cobra: USD, VES o ambas? Afecta también a la spec 005.
-- [ ] ¿Redondeo del cobro: por minuto iniciado o por minuto completo?
+- [ ] ¿Cómo se cobra la **fracción de minuto** cuando un cliente con cuenta cierra sesión? Ejemplo con 1 USD/hora, si usó 10 min 20 s: *por minuto empezado* cobra 11 min (0,18 USD); *por minuto completo* cobra 10 min (0,17 USD); *por segundo* cobra 10:20 exactos (0,172 USD). (Propuesta: por segundo.)
 - [ ] ¿Se permiten sesiones **postpago** (se usa y se paga al final)?
-- [ ] ¿Las cuentas valen en varias sucursales en el futuro?
+- [ ] Si en el futuro se abre **otro cibercafé** del mismo dueño, ¿un cliente con cuenta en uno podría usar la misma cuenta y saldo en el otro? (Propuesta: no; cada local tiene sus propias cuentas.)
 - [x] ¿El respaldo mínimo de 3 sesiones temporales es por PC o en total? **Resuelta: por PC** (REQ-001-64).
 - [x] Si el cliente de una sesión temporal se va antes de tiempo, ¿qué pasa con el tiempo sobrante? **Resuelta: se pierde** (REQ-001-69).
 - [x] ¿Se puede añadir tiempo a una sesión temporal en curso? **Resuelta: sí, cobrando un importe adicional** (REQ-001-70).
