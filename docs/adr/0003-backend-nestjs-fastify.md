@@ -1,6 +1,6 @@
 # ADR-0003: Backend con NestJS sobre Fastify, un código en dos modos
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0001, ADR-0002, ADR-0008, ADR-0011
 

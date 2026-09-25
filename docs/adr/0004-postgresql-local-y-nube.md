@@ -1,6 +1,6 @@
 # ADR-0004: PostgreSQL en el nodo local y en la nube, con Drizzle ORM
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0003, ADR-0008, ADR-0011
 

@@ -1,6 +1,6 @@
 # ADR-0008: Sincronización local → nube por eventos (outbox)
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0001, ADR-0004, spec 006
 

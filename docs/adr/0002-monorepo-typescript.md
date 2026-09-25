@@ -1,6 +1,6 @@
 # ADR-0002: Monorepo con pnpm y Turborepo
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0003, ADR-0005, ADR-0006
 

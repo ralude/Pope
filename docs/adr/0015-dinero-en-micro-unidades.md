@@ -1,6 +1,6 @@
 # ADR-0015: Importes en micro-unidades enteras
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0014, spec 001 (REQ-001-23), spec 005 (REQ-005-70)
 
