@@ -118,7 +118,7 @@ antes de seguir.
   - **Verificar:** tests e2e de login correcto e incorrecto, cookie, logout y acceso denegado por rol.
   - **Commit:** `feat(server): añade el login del personal con roles`
 
-- [ ] **T14c: CLI del primer administrador**
+- [x] **T14c: CLI del primer administrador**
   - **Cubre:** REQ-001-40
   - **Hacer:** comando que crea el primer administrador pidiendo usuario, nombre y contraseña (sin mostrarla). Se niega si ya hay un administrador.
   - **Verificar:** tests de creación, evento `staff.created` y rechazo si ya existe un administrador.

@@ -192,6 +192,9 @@ Servidor (`apps/server`, NestJS sobre Fastify):
   (encargado opera, administrador además configura, dueño solo lee). Valida los cuerpos con
   `new ZodValidationPipe(esquema)` y esquemas de `@pope/shared`.
 - Los tests e2e levantan el servidor completo con `createTestApp()` de `src/testing/app.ts`.
+- Primer administrador del local (tras compilar): `DATABASE_URL=postgres://… pnpm --filter
+  @pope/server staff:create-admin`. Pide usuario, nombre y contraseña, y se niega si ya
+  hay un administrador activo.
 
 - **ESLint:** un único `eslint.config.mjs` en la raíz (configuración plana) con
   `strictTypeChecked` de `typescript-eslint`. Un paquete solo tiene configuración propia

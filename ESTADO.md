@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T14b terminada (login del personal y guard de roles)
+**Última actualización:** 2026-09-25 · T14c terminada (CLI del primer administrador)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T14c: CLI del primer administrador** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 17 / 57 tareas · fase 3 de 9 (Servidor base) |
+| **Siguiente tarea** | **T14d: Gestión del personal** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 18 / 57 tareas · fase 3 de 9 (Servidor base) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -45,7 +45,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 17 / 57 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 18 / 57 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -58,6 +58,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-25:** T14c. CLI `staff:create-admin` (contraseña sin eco; admite entrada
+  redirigida). Probada de punta a punta con PostgreSQL 18: CLI → login → `/auth/me`.
 - **2026-09-25:** T14b. `/auth/login`, `/auth/logout` y `/auth/me` con cookie httpOnly
   (`SameSite=Strict`, `Secure` solo en la nube) y guard global con `@Public()` y `@Roles()`.
 - **2026-09-25:** T14a. `staff_sessions` (solo el hash del token) y `AuthService`: login sin
@@ -78,6 +80,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-25:** T09b. Eventos de sesión (`started`, `ended` con `billedUntil`, `time_added`,
   `restored`). **Fin de la fase 2:** `@pope/shared` tiene dinero, tiempo, tarifas, motor de
   cobro, avisos, protocolo PC ↔ nodo y eventos, con 102 tests.
-- **2026-09-25:** T09 (dividida en T09 y T09b por tamaño; ahora son 52 tareas). Eventos con
-  formato común, actor con copia del nombre y objetos estrictos: cuentas, saldo, combos,
-  tarifas y turno. Método de pago como lista fija.
