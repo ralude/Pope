@@ -1,6 +1,6 @@
 # Spec 001: Cuentas y sesiones
 
-- **Estado:** Borrador
+- **Estado:** Aprobada
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0001, ADR-0007, ADR-0008, ADR-0014
 - **Specs relacionadas:** 002, 003, 006
