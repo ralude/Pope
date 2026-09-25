@@ -2,3 +2,4 @@
 // compartidas por el servidor, el panel y el Shell.
 export * from './money.js';
 export * from './time.js';
+export * from './tariff.js';

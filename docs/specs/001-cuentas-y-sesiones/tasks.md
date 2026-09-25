@@ -36,7 +36,7 @@ antes de seguir.
   - **Verificar:** tests de conversión, redondeo al mostrar y rechazo de no enteros.
   - **Commit:** `feat(shared): añade los tipos de dinero y tiempo`
 
-- [ ] **T05: Tarifa semanal**
+- [x] **T05: Tarifa semanal**
   - **Cubre:** REQ-001-10, REQ-001-14
   - **Hacer:** `weekdayInCaracas(instante)` con `Intl`, `rateFor(tabla, instante)` y el esquema de la tabla de 7 días.
   - **Verificar:** tests en el cambio de día a las 00:00 de Caracas (04:00 UTC) y de miércoles a jueves.
