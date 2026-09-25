@@ -71,7 +71,7 @@ Cada documento se entrega en **su propio commit** (`docs(specs): ...`).
 
 | # | Spec | Estado |
 |---|---|---|
-| [001](001-cuentas-y-sesiones/spec.md) | Cuentas y sesiones | Aprobada · plan aprobado · tareas en revisión |
+| [001](001-cuentas-y-sesiones/spec.md) | Cuentas y sesiones | En curso (tareas aprobadas) |
 | [002](002-pausa-de-sesion/spec.md) | Pausa de sesión | Borrador |
 | [003](003-bloqueo-de-pc/spec.md) | Arranque y bloqueo de la PC cliente | Borrador |
 | [004](004-lista-blanca-de-aplicaciones/spec.md) | Lista blanca de aplicaciones y herramientas | Borrador |

@@ -1,6 +1,6 @@
 # Tareas 001: Cuentas y sesiones
 
-- **Estado:** En revisión
+- **Estado:** Aprobado
 - **Plan:** [plan.md](plan.md)
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa. Cada
