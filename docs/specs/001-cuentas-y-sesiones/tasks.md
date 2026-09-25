@@ -81,7 +81,7 @@ antes de seguir.
   - **Verificar:** test e2e de `/health`.
   - **Commit:** `feat(server): crea el servidor NestJS sobre Fastify`
 
-- [ ] **T11: Servicio de contraseñas**
+- [x] **T11: Servicio de contraseñas**
   - **Cubre:** REQ-001-51
   - **Hacer:** `PasswordService` con `@node-rs/argon2` (argon2id, `m=19 MiB, t=2, p=1`) y script `bench:argon2` para medir en el hardware del local.
   - **Verificar:** tests de hash y verificación. **Ejecutar el benchmark en el i5 de 2ª gen** y apuntar el resultado en el cuerpo del commit.
