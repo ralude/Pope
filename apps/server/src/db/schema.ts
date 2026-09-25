@@ -3,8 +3,20 @@
 //
 // Convenciones (plan 001): ids UUIDv7, fechas `timestamptz` en UTC, importes `bigint` en
 // micro-unidades (ADR-0015) y tiempos en segundos `integer`.
-import type { Actor } from '@pope/shared';
-import { bigint, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import type { Actor, StaffRole } from '@pope/shared';
+import { sql } from 'drizzle-orm';
+import {
+  bigint,
+  boolean,
+  check,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 /**
  * Eventos inmutables de auditoría y sincronización (REQ-001-30, ADR-0008). Se escriben en
@@ -23,3 +35,23 @@ export const events = pgTable('events', {
   payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
   sentAt: timestamp('sent_at', { withTimezone: true }),
 });
+
+/** Personal del local: encargados, administradores y dueño (REQ-001-40). */
+export const staff = pgTable(
+  'staff',
+  {
+    id: uuid('id').primaryKey(),
+    /** Tal cual lo escribieron; es único sin distinguir mayúsculas. */
+    username: text('username').notNull(),
+    displayName: text('display_name').notNull(),
+    role: text('role').$type<StaffRole>().notNull(),
+    /** Hash argon2id (REQ-001-51). */
+    passwordHash: text('password_hash').notNull(),
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('staff_username_lower_idx').on(sql`lower(${t.username})`),
+    check('staff_role_check', sql`${t.role} in ('encargado', 'administrador', 'dueno')`),
+  ],
+);

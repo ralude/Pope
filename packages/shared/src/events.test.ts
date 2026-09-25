@@ -104,6 +104,11 @@ const examples = {
   }),
   'shift.opened': envelope('shift.opened', { shiftId: SHIFT }),
   'shift.closed': envelope('shift.closed', { shiftId: SHIFT }),
+  'staff.created': envelope(
+    'staff.created',
+    { staff: { id: id(9), username: 'ana' }, name: 'Ana', role: 'encargado' },
+    { kind: 'system' },
+  ),
 };
 
 describe('eventos de auditoría (REQ-001-30, ADR-0008)', () => {
@@ -216,5 +221,19 @@ describe('importes y tiempos en los eventos (ADR-0015)', () => {
         payload: { ...ended.payload, usage: { ...usage, moneySeconds: -1 } },
       }),
     ).toBe(false);
+  });
+});
+
+describe('personal (REQ-001-40)', () => {
+  it('staff.created solo admite los roles del personal y nunca la contraseña', () => {
+    const created = examples['staff.created'];
+    const withPayload = (payload: object) => ({
+      ...created,
+      payload: { ...created.payload, ...payload },
+    });
+    expect(valid(withPayload({ role: 'administrador' }))).toBe(true);
+    expect(valid(withPayload({ role: 'dueno' }))).toBe(true);
+    expect(valid(withPayload({ role: 'cliente' }))).toBe(false);
+    expect(valid(withPayload({ password: 'secreto' }))).toBe(false);
   });
 });

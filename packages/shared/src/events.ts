@@ -12,6 +12,7 @@ import { z } from 'zod';
 
 import { microsSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
+import { staffRoleSchema } from './staff.js';
 import { weekdaySchema } from './tariff.js';
 
 const positiveSeconds = z.int().positive().brand<'Seconds'>();
@@ -261,6 +262,22 @@ export const sessionRestoredEventSchema = event(
   }),
 );
 
+// ─── Personal (REQ-001-40) ─────────────────────────────────────────────────────────────
+
+/**
+ * Alta de un miembro del personal, también la del primer administrador por la CLI (actor
+ * `system`). Los logins no generan eventos (pregunta resuelta de la spec 001).
+ */
+export const staffCreatedEventSchema = event(
+  'staff.created',
+  1,
+  z.strictObject({
+    staff: z.strictObject({ id: idSchema, username: z.string().min(1) }),
+    name: z.string().min(1),
+    role: staffRoleSchema,
+  }),
+);
+
 // ─── Turno de caja (mínimo; lo amplía la spec 005) ──────────────────────────────────────
 
 export const shiftOpenedEventSchema = event(
@@ -291,6 +308,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   sessionRestoredEventSchema,
   shiftOpenedEventSchema,
   shiftClosedEventSchema,
+  staffCreatedEventSchema,
 ]);
 export type DomainEvent = z.infer<typeof domainEventSchema>;
 export type DomainEventType = DomainEvent['type'];

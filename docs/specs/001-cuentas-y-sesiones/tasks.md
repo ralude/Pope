@@ -99,13 +99,32 @@ antes de seguir.
   - **Verificar:** test de que un rollback no deja eventos.
   - **Commit:** `feat(server): registra los eventos en la misma transacción`
 
-- [ ] **T14: Personal y autenticación**
+- [x] **T14: Personal**
+  - **Cubre:** REQ-001-40, REQ-001-51
+  - **Hacer:** roles y esquemas del personal y evento `staff.created` en `shared`; tabla `staff` y `StaffService.create`, con usuario único sin distinguir mayúsculas.
+  - **Verificar:** tests de alta con contraseña en hash y evento, y de usuario repetido.
+  - **Commit:** `feat(server): añade el personal del local`
+  - **Nota:** la T14 original se dividió en T14, T14a, T14b y T14c porque superaba las 400 líneas.
+
+- [ ] **T14a: Sesiones del panel**
   - **Cubre:** REQ-001-40
-  - **Hacer:** tabla `staff`, login y logout con cookie httpOnly, guard de roles y comando CLI para crear el primer administrador.
-  - **Verificar:** tests de login correcto e incorrecto y de acceso denegado por rol.
+  - **Hacer:** tabla `staff_sessions` (hash del token) y `AuthService`: login, validación con renovación de 7 días y logout, según las preguntas resueltas de la spec. Reloj inyectable (`Clock`) para probar la caducidad.
+  - **Verificar:** tests de login correcto e incorrecto, personal desactivado, caducidad, renovación y logout.
+  - **Commit:** `feat(server): añade las sesiones del personal`
+
+- [ ] **T14b: Login del personal y guard de roles**
+  - **Cubre:** REQ-001-40
+  - **Hacer:** `POST /auth/login`, `POST /auth/logout` y `GET /auth/me` con cookie httpOnly, y guard global (en modo local) con `@Public()` y `@Roles(...)`.
+  - **Verificar:** tests e2e de login correcto e incorrecto, cookie, logout y acceso denegado por rol.
   - **Commit:** `feat(server): añade el login del personal con roles`
 
-- [ ] **T14b: Gestión del personal**
+- [ ] **T14c: CLI del primer administrador**
+  - **Cubre:** REQ-001-40
+  - **Hacer:** comando que crea el primer administrador pidiendo usuario, nombre y contraseña (sin mostrarla). Se niega si ya hay un administrador.
+  - **Verificar:** tests de creación, evento `staff.created` y rechazo si ya existe un administrador.
+  - **Commit:** `feat(server): añade la CLI para crear el primer administrador`
+
+- [ ] **T14d: Gestión del personal**
   - **Cubre:** REQ-001-40
   - **Hacer:** endpoints solo para `administrador`: alta de personal (usuario, nombre, rol y contraseña, con evento `staff.created`), lista y activar o desactivar. Al desactivar, sus sesiones del panel dejan de valer.
   - **Antes de empezar:** resolver la pregunta abierta de la spec sobre el evento al desactivar personal.
@@ -307,7 +326,7 @@ antes de seguir.
   - **Hacer:** lista del personal, alta (usuario, nombre, rol y contraseña) y activar o desactivar (solo administrador).
   - **Verificar:** a mano: crear un encargado, iniciar sesión con él y desactivarlo.
   - **Commit:** `feat(panel): administra el personal`
-  - **Nota:** añadida junto con T14b.
+  - **Nota:** añadida junto con T14d.
 
 - [ ] **T44: Sesiones temporales en el panel**
   - **Cubre:** REQ-001-60, REQ-001-61, REQ-001-70, REQ-001-69

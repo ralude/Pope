@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 
+import { AuthModule } from './auth/auth.module.js';
 import { APP_CONFIG, type AppConfig, type PopeMode } from './config.js';
 import type { DatabaseHandle } from './db/database.js';
 import { DatabaseModule } from './db/database.module.js';
@@ -11,7 +12,7 @@ const COMMON_MODULES = [HealthModule];
 
 /** Módulos propios de cada modo (ADR-0003). Cada spec añade aquí los suyos. */
 const MODULES_BY_MODE: Record<PopeMode, DynamicModule['imports']> = {
-  local: [EventsModule],
+  local: [EventsModule, AuthModule],
   cloud: [],
 };
 
