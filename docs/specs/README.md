@@ -71,3 +71,4 @@ Cada documento se entrega en **su propio commit** (`docs(specs): ...`).
 
 | # | Spec | Estado |
 |---|---|---|
+| [001](001-cuentas-y-sesiones/spec.md) | Cuentas y sesiones | Borrador |
