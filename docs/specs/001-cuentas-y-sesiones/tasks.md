@@ -288,11 +288,12 @@ antes de seguir.
   - **Commit:** `feat(server): conserva el respaldo de sesiones temporales`
   - **Decidido al implementarla (2026-09-30):** `GET /sessions/temporary/backup` y `GET /sessions/temporary/interrupted`, de solo lectura para todo el personal (también el dueño). Las sesiones nunca se borran; el respaldo solo decide cuáles se muestran: las últimas N por PC más las interrumpidas pendientes. Las 48 h de REQ-001-71 cuentan desde el **último latido** (el corte), no desde el cierre del nodo: así CA-001-11 (corte a las 18:00, caducada el miércoles a las 18:01) se cumple. Cada sesión lleva `interruption` (`pending`, `restored` o `expired`, con quién restauró y cuándo) o `null`.
 
-- [ ] **T35: Restaurar sesiones interrumpidas**
+- [x] **T35: Restaurar sesiones interrumpidas**
   - **Cubre:** REQ-001-67, REQ-001-68, REQ-001-71
   - **Hacer:** endpoint de restauración en cualquier PC libre, sin cobro, enlazada a la original. Solo una vez y dentro de 48 h.
   - **Verificar:** tests de CA-001-06, CA-001-08 y CA-001-11.
   - **Commit:** `feat(server): restaura sesiones temporales interrumpidas`
+  - **Decidido al implementarla (2026-09-30):** `POST /sessions/:id/restore` con `{ pcId }` (encargado y administrador, sin exigir turno porque no cobra). La sesión nueva conserva el nombre y la tarifa de la original, tiene como tiempo el restante y no genera fila en `session_topups`. La PC de destino debe estar libre y conectada, como al abrir. Cada rechazo dice por qué: ya restaurada (con quién y a qué hora), caducada, no interrumpida por un corte, sin tiempo restante, en curso, con cuenta o PC no disponible. La decisión de si se puede restaurar sale de `interruptionOf` (la misma que usa el respaldo).
 
 ## Fase 7: Simulador y rendimiento
 

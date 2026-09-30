@@ -7,6 +7,8 @@ import {
   temporaryAddTimeRequestSchema,
   type TemporaryOpenRequest,
   temporaryOpenRequestSchema,
+  type TemporaryRestoreRequest,
+  temporaryRestoreRequestSchema,
   type TemporarySession,
 } from '@pope/shared';
 
@@ -52,5 +54,18 @@ export class TemporarySessionsController {
     @CurrentStaff() member: StaffProfile,
   ): Promise<TemporarySession> {
     return this.temporary.addTime(id, body, shift, staffActor(member));
+  }
+
+  /**
+   * Restaura una sesión interrumpida en una PC libre, sin cobrar nada (REQ-001-67): no pide
+   * turno abierto. Solo una vez y hasta 48 h después del corte (REQ-001-68, REQ-001-71).
+   */
+  @Post(':id/restore')
+  restore(
+    @Param('id', new ZodValidationPipe(idSchema)) id: string,
+    @Body(new ZodValidationPipe(temporaryRestoreRequestSchema)) body: TemporaryRestoreRequest,
+    @CurrentStaff() member: StaffProfile,
+  ): Promise<TemporarySession> {
+    return this.temporary.restore(id, body, staffActor(member));
   }
 }

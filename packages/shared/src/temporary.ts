@@ -125,6 +125,13 @@ export const temporaryAddTimeRequestSchema = z
   .refine(exactlyOne, EXACTLY_ONE_MESSAGE);
 export type TemporaryAddTimeRequest = z.infer<typeof temporaryAddTimeRequestSchema>;
 
+/**
+ * Cuerpo de `POST /sessions/:id/restore`: la PC donde continúa la sesión interrumpida, la
+ * misma u otra que esté libre (REQ-001-67).
+ */
+export const temporaryRestoreRequestSchema = z.strictObject({ pcId: idSchema });
+export type TemporaryRestoreRequest = z.infer<typeof temporaryRestoreRequestSchema>;
+
 const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
 
 /**

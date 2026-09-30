@@ -9,6 +9,7 @@ import {
   type Actor,
   type CashShift,
   defaultTemporaryName,
+  formatLocalTime,
   interruptionOf,
   MAX_TEMPORARY_SECONDS,
   micros,
@@ -20,6 +21,7 @@ import {
   type TemporaryPurchase,
   temporaryPurchase,
   temporaryRemaining,
+  type TemporaryRestoreRequest,
   type TemporarySession,
 } from '@pope/shared';
 import { and, desc, eq, gt, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
@@ -219,6 +221,122 @@ export class TemporarySessionsService {
     const [described] = await this.describe([row]);
     if (!described) {
       throw new Error('No se pudo leer la sesión');
+    }
+    return described;
+  }
+
+  /**
+   * Restaura una sesión interrumpida por un corte en una PC libre y conectada, la misma u
+   * otra (REQ-001-67, CA-001-06). La sesión nueva sigue con el tiempo restante, sin cobrar
+   * nada, y queda enlazada a la original; emite `session.restored` con quien la restaura.
+   * Solo se puede una vez (REQ-001-68, CA-001-08) y hasta 48 h después del corte
+   * (REQ-001-71, CA-001-11). Cada rechazo dice por qué.
+   */
+  async restore(
+    sessionId: string,
+    input: TemporaryRestoreRequest,
+    actor: Actor,
+  ): Promise<TemporarySession> {
+    const row = await this.events.inTransaction(async (tx, emit) => {
+      // Bloquea la original: dos restauraciones a la vez esperan y la segunda ve la primera.
+      const [original] = await tx
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, sessionId))
+        .for('update');
+      if (!original) {
+        throw new NotFoundException('No existe esa sesión');
+      }
+      if (original.kind !== 'temporary') {
+        throw new ConflictException('Solo se restauran las sesiones temporales');
+      }
+      if (original.status === 'active') {
+        throw new ConflictException('Esa sesión sigue en curso');
+      }
+      const remaining = temporaryRemaining(temporaryUsageOf(original));
+      const [restoring] = await tx
+        .select()
+        .from(sessions)
+        .where(eq(sessions.restoredFrom, original.id));
+      const interruption = interruptionOf({
+        endReason: original.endReason,
+        remainingSeconds: remaining,
+        lastBeatAt: original.lastHeartbeatAt,
+        restoredBy: restoring
+          ? {
+              name: actorName(restoring.openedBy),
+              at: restoring.startedAt,
+              sessionId: restoring.id,
+            }
+          : null,
+        now: this.clock.now(),
+      });
+      if (!interruption) {
+        throw new ConflictException(
+          original.endReason === 'no_heartbeat'
+            ? 'Esta sesión no tenía tiempo restante'
+            : 'Solo se restauran las sesiones interrumpidas por un corte',
+        );
+      }
+      if (interruption.status === 'restored' && interruption.restoredBy) {
+        const at = formatLocalTime(new Date(interruption.restoredBy.at));
+        throw new ConflictException(
+          `Esta sesión ya fue restaurada por ${interruption.restoredBy.name} a las ${at}`,
+        );
+      }
+      if (interruption.status === 'expired') {
+        throw new ConflictException('Esta sesión caducó: pasaron más de 48 horas desde el corte');
+      }
+
+      const [pc] = await tx.select().from(pcs).where(eq(pcs.id, input.pcId)).for('update');
+      if (!pc) {
+        throw new NotFoundException('No existe esa PC');
+      }
+      if (await this.sessions.activeOnPc(pc.id, tx)) {
+        throw new ConflictException(`La ${pc.name} ya tiene una sesión abierta`);
+      }
+      if (!this.connections.isConnected(pc.id)) {
+        throw new ConflictException(`La ${pc.name} no está conectada al nodo`);
+      }
+
+      const now = this.clock.now();
+      const name = original.tempName ?? defaultTemporaryName(pc.name, now);
+      const [created] = await tx
+        .insert(sessions)
+        .values({
+          id: newId(),
+          pcId: pc.id,
+          kind: 'temporary',
+          tempName: name,
+          rateMicrosPerHour: original.rateMicrosPerHour,
+          startedAt: now,
+          lastHeartbeatAt: now,
+          openedBy: actor,
+          purchasedSeconds: remaining,
+          restoredFrom: original.id,
+        })
+        .returning();
+      if (!created) {
+        throw new Error('No se pudo restaurar la sesión');
+      }
+      emit({
+        type: 'session.restored',
+        version: 1,
+        actor,
+        payload: {
+          sessionId: created.id,
+          restoredFrom: original.id,
+          pc: { id: pc.id, name: pc.name },
+          name,
+          seconds: remaining,
+        },
+      });
+      return created;
+    });
+    this.sessions.announce(row);
+    const [described] = await this.describe([row]);
+    if (!described) {
+      throw new Error('No se pudo leer la sesión restaurada');
     }
     return described;
   }
