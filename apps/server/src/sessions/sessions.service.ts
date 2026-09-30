@@ -527,10 +527,11 @@ export class SessionsService implements OnModuleDestroy {
   async heartbeat(pcId: string, claim: SessionClaim): Promise<NodeToPcMessage> {
     this.touch(pcId);
     await this.confirm(pcId, claim.sessionId);
-    const state = await this.review(eq(sessions.pcId, pcId));
+    const { state, closedId } = await this.review(eq(sessions.pcId, pcId));
     const activeId =
       state.type === 'state' && state.status === 'active' ? state.session.sessionId : null;
-    if (claim.sessionId !== null && claim.sessionId !== activeId) {
+    // Si la revisión acaba de cerrarla, la PC ya recibió su `sessionEnded`.
+    if (claim.sessionId !== null && claim.sessionId !== activeId && claim.sessionId !== closedId) {
       await this.rejectClaim(pcId, claim.sessionId, claim.localRemainingSeconds ?? null);
     }
     return state;
@@ -672,9 +673,10 @@ export class SessionsService implements OnModuleDestroy {
    * Cobra la sesión activa que cumple `target` hasta ahora y actúa según lo que le queda
    * (REQ-001-24, REQ-001-25): si se agotó, la cierra; si toca, avisa a 5 y 1 min; y
    * programa la próxima revisión. La llaman el latido de la PC y el temporizador de la
-   * sesión. Devuelve el `state` que debe ver la PC.
+   * sesión. Devuelve el `state` que debe ver la PC y, si la cerró por agotamiento, su id
+   * (la PC ya recibió su `sessionEnded`).
    */
-  private async review(target: SQL): Promise<NodeToPcMessage> {
+  private async review(target: SQL): Promise<{ state: NodeToPcMessage; closedId: string | null }> {
     const checked = await this.events.inTransaction(async (tx) => {
       // Bloquea la fila: un cierre o una revisión simultáneos esperan a que termine esta.
       const [locked] = await tx
@@ -685,7 +687,7 @@ export class SessionsService implements OnModuleDestroy {
       return locked ? this.checkpoint(locked, tx) : null;
     });
     if (!checked) {
-      return LOCKED_STATE;
+      return { state: LOCKED_STATE, closedId: null };
     }
     const { row, account } = checked;
     const remaining = remainingSeconds(row, account?.balances ?? null);
@@ -699,12 +701,15 @@ export class SessionsService implements OnModuleDestroy {
       );
       // Si no cerró, justo entonces le añadieron tiempo o saldo (o ya la habían cerrado):
       // se revisa de nuevo con los datos al día.
-      return closed ? LOCKED_STATE : this.review(target);
+      return closed ? { state: LOCKED_STATE, closedId: closed.id } : this.review(target);
     }
     this.sendWarning(row, remaining);
     this.watch(row, remaining);
     // Si la cerraron mientras tanto, la PC ya recibió `sessionEnded`: no hay que desbloquearla.
-    return this.ended.has(row.id) ? LOCKED_STATE : activeState(row, account);
+    return {
+      state: this.ended.has(row.id) ? LOCKED_STATE : activeState(row, account),
+      closedId: null,
+    };
   }
 
   /** Envía el aviso de 5 o 1 min si toca. Si la PC no está conectada, se reintenta luego. */

@@ -127,6 +127,20 @@ describe('latidos y checkpoint (e2e, REQ-001-11, REQ-001-12, REQ-001-23)', () =>
     });
   });
 
+  it('si el latido que nombra la sesión la agota, la PC recibe un solo sessionEnded', async () => {
+    world = await PcWorld.start(MONDAY);
+    await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
+    const pc = await world.pc(5);
+    const { sessionId } = activeSession(await login(pc, 'juan'));
+
+    world.clock.advance(3 * 60 * MINUTE);
+    pc.send({ type: 'heartbeat', sessionId, localRemainingSeconds: 0 });
+    expect(await pc.next()).toEqual({ type: 'sessionEnded', sessionId, reason: 'exhausted' });
+    expect(await pc.next()).toEqual({ type: 'state', status: 'locked' });
+    // Lo siguiente que recibe es la respuesta a otro latido, sin un segundo sessionEnded.
+    expect(await heartbeat(pc)).toEqual({ type: 'state', status: 'locked' });
+  });
+
   it('un reloj que retrocede no cobra ni mueve la marca', async () => {
     world = await PcWorld.start(MONDAY);
     await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
