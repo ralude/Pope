@@ -326,7 +326,7 @@ antes de seguir.
   - **Verificar:** tests unitarios con una conexión falsa y `vi.useFakeTimers()`: contenido del `hello` al principio (sin sesión) y tras adoptar una; latido cada 10 s con sesión y restante; restante que baja en local; `sessionEnded` borra la sesión; un corte de red reconecta con la sesión y su restante; `reboot` manda `sessionId: null`; `powerCut` deja de latir; secuencia de espera 1, 2, 4, 8, 16, 30, 30 s; un mensaje inválido no rompe nada; `login` devuelve la latencia.
   - **Commit:** `feat(tools): añade la PC simulada`
 
-- [ ] **T36a: CLI del simulador: datos de prueba y ejecución**
+- [x] **T36a: CLI del simulador: datos de prueba y ejecución**
   - **Cubre:** plan 001 (Estrategia de pruebas)
   - **Hacer:** `src/cli.ts` con subcomandos (argumentos con `parseArgs`):
     - `seed --url http://127.0.0.1:3000 --user U --password P --customers N --money USD`: inicia sesión del personal con `POST /auth/login` (guarda la cookie), abre turno (`POST /shifts`; si ya hay uno abierto, usa ese) y, para `sim01`…`simNN` (contraseña fija `sim1234`), crea las cuentas que falten (`POST /customers`) y recarga en `cash_usd` hasta llegar a `--money` (lee el saldo con `GET /customers?…`; si ya tiene eso o más, no recarga). Al final cierra el turno que abrió. Imprime una línea por cliente.

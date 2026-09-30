@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T36 terminada (PC simulada)
+**Última actualización:** 2026-09-30 · T36a terminada (CLI del simulador)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T36a: CLI del simulador: datos de prueba y ejecución** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 45 / 64 tareas · fase 7 de 9 (Simulador y rendimiento) |
+| **Siguiente tarea** | **T36b: Consola interactiva del simulador** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 46 / 64 tareas · fase 7 de 9 (Simulador y rendimiento) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 45 / 64 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 46 / 64 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T36a. CLI del simulador: seed (crea sim01…simNN y los recarga por la API del panel, con turno propio, idempotente) y run (PCs simuladas con --login y --duration). Probado contra PostgreSQL real: 5 PCs entran con 2:00:00 y salen con 0,05 USD menos tras 2 min; el ledger y los eventos cuadran. La prueba destapó que Fastify rechaza content-type JSON sin cuerpo.
 - **2026-09-30:** T36. Paquete tools/agent-sim (@pope/agent-sim) sin dependencias nuevas y clase SimulatedPc: hello, latido cada 10 s siempre, restante local, reconexión 1-30 s, corte de red, reinicio y apagón (sin cerrar la conexión, como en la realidad), login con latencia. 15 tests con conexión falsa y reloj simulado.
 - **2026-09-30:** T35a. devPcId y devPcName pasan a shared (de 1 a 99, con RangeError fuera de rango) y seedDevPcs/dev:seed-pcs admiten --count para crear hasta 99 PCs; sin duplicar al repetir.
 - **2026-09-30:** Revisión de T25–T35: 10 correcciones (no cobrar el tiempo de una PC muerta, no cerrar una sesión que la PC no llegó a conocer con la columna pc_confirmed_at, restante local en el hello, nada llega tarde tras un cierre, un solo sessionEnded, venta de combo en el panel cobrando antes la sesión, estado de la cuenta al abrir, importes en céntimos, claves de ajustes y compra de combo sin duplicados). Fase 7 partida en T35a, T36, T36a, T36b, T37a y T37 con las decisiones del mantenedor; el plan describe el comportamiento del agente en el canal y AGENTS.md añade el ámbito tools.
@@ -66,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T32. POST /sessions/:id/time: cobra primero lo ya usado y añade el tiempo (por minutos o por importe) con la tarifa de la sesión, ligado al turno de quien cobra, con session_topup y session.time_added; la PC ve el nuevo tiempo al momento. El cierre por agotamiento ya no pisa a un cobro simultáneo (onlyIfExhausted).
 - **2026-09-30:** T31. POST /sessions/temporary (encargado y administrador, con turno abierto): abre una sesión temporal en una PC libre y conectada, por minutos (importe redondeado al céntimo) o por importe (segundos truncados), con nombre opcional (Temporal · PC 05 · 18:30). Cobro en session_topups ligado al turno y session.started con el encargado como actor; la PC se desbloquea al momento. Tope de 24 h por cobro (por confirmar).
 - **2026-09-30:** T30. buyCombo desde el Shell: cobra la sesión hasta ahora y compra con saldo en la misma transacción, responde con el state y rearma los avisos. Rechazos con código propio (sin sesión, temporal, combo no disponible, cuenta bloqueada, saldo). Fin de la fase 5. La compra con saldo, también desde el panel, descuenta lo ya consumido en la sesión activa.
-- **2026-09-30:** T29. Un proceso (cada 10 s y al arrancar el nodo) cierra como no_heartbeat las sesiones sin latidos más que el tiempo de gracia, cobrando hasta el último latido. hello sin sesión con una activa la cierra al momento; si la PC reconecta con una sesión ya cerrada recibe sessionEnded, y una temporal queda con el menor restante (evento session.remaining_corrected). Los temporizadores de T27 no cobran con la PC en silencio.
