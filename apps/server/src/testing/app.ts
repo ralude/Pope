@@ -32,7 +32,13 @@ export async function createTestApp(
   options: TestAppOptions = {},
 ): Promise<TestApp> {
   const database = await createTestDatabase();
-  const config: AppConfig = { mode, port: 0, host: '127.0.0.1', databaseUrl: 'postgres://test' };
+  const config: AppConfig = {
+    mode,
+    port: 0,
+    host: '127.0.0.1',
+    databaseUrl: 'postgres://test',
+    memoryLogMs: null,
+  };
   const builder = Test.createTestingModule({
     imports: [AppModule.register(config, database)],
     controllers: extraControllers,

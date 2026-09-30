@@ -169,7 +169,9 @@ Servidor (`apps/server`, NestJS sobre Fastify):
 
 - Arrancar tras compilar: `POPE_MODE=local DATABASE_URL=postgres://… pnpm --filter
   @pope/server start` (variables: `POPE_MODE` obligatoria, `local` o `cloud`;
-  `DATABASE_URL` obligatoria; `PORT`, por defecto 3000; `HOST`, por defecto `0.0.0.0`).
+  `DATABASE_URL` obligatoria; `PORT`, por defecto 3000; `HOST`, por defecto `0.0.0.0`;
+  `POPE_MEMORY_LOG_MS`, opcional, de 1000 como mínimo: cada ese tiempo registra una línea
+  `Memoria: rss=… MB heapUsed=… MB`, para la prueba de carga).
   Al arrancar aplica las migraciones pendientes. Comprobar: `GET /health`.
 - Base de datos (Drizzle): el esquema está en `src/db/schema.ts`. Tras cambiarlo,
   `pnpm --filter @pope/server db:generate` crea la migración SQL en `apps/server/drizzle/`

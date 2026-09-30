@@ -347,7 +347,7 @@ antes de seguir.
   - **Verificar:** tests unitarios del intérprete de órdenes. A mano con la receta de T36a: una PC entra, `red N 20` y sigue en sesión al volver; `apagon N` y, pasada la gracia de latidos (3 min por defecto), el servidor la cierra como `no_heartbeat`, y `luz N` la deja bloqueada (como tras un reinicio, según el plan); `reinicio N` con una sesión ya nombrada la cierra al momento. Para no esperar 3 min se puede bajar la gracia con `PUT /settings` (mínimo 30 s; con 30 s un corte de 20 s ya cierra la sesión, así que para ese caso usar 60 s).
   - **Commit:** `feat(tools): añade la consola interactiva del simulador`
 
-- [ ] **T37a: Registro de memoria del servidor**
+- [x] **T37a: Registro de memoria del servidor**
   - **Cubre:** ADR-0011
   - **Hacer:** variable de entorno opcional `POPE_MEMORY_LOG_MS` (validada con zod en la configuración; ausente = desactivado; mínimo 1000). Si está, el servidor registra cada ese tiempo una línea con `Logger` (`Memoria: rss=… MB heapUsed=… MB`, en MB con un decimal) a partir de `process.memoryUsage()`. El temporizador no impide cerrar el proceso (`unref`) y se cancela al cerrar la app.
   - **Verificar:** test de la configuración (valor válido, ausente, menor de 1000 rechazado) y test con reloj simulado de que registra una línea por intervalo. Documentar la variable en AGENTS.md (sección del servidor).

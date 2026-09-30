@@ -15,6 +15,9 @@ const configSchema = z.object({
   HOST: z.string().min(1).default('0.0.0.0'),
   // Cadena de conexión de PostgreSQL, p. ej. postgres://pope:clave@127.0.0.1:5432/pope.
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  // Opcional: cada cuántos ms se registra la memoria del proceso (prueba de carga, ADR-0011).
+  // Ausente = desactivado. Mínimo 1000 para no llenar el log.
+  POPE_MEMORY_LOG_MS: z.coerce.number().int().min(1000).optional(),
 });
 
 export interface AppConfig {
@@ -22,6 +25,8 @@ export interface AppConfig {
   port: number;
   host: string;
   databaseUrl: string;
+  /** Cada cuántos ms se registra la memoria del proceso; `null` si está desactivado. */
+  memoryLogMs: number | null;
 }
 
 /** Token de inyección de la configuración. */
@@ -36,6 +41,12 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       .join('\n');
     throw new Error(`Configuración no válida:\n${problems}`);
   }
-  const { POPE_MODE, PORT, HOST, DATABASE_URL } = result.data;
-  return { mode: POPE_MODE, port: PORT, host: HOST, databaseUrl: DATABASE_URL };
+  const { POPE_MODE, PORT, HOST, DATABASE_URL, POPE_MEMORY_LOG_MS } = result.data;
+  return {
+    mode: POPE_MODE,
+    port: PORT,
+    host: HOST,
+    databaseUrl: DATABASE_URL,
+    memoryLogMs: POPE_MEMORY_LOG_MS ?? null,
+  };
 }

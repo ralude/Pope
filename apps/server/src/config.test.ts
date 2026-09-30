@@ -11,6 +11,7 @@ describe('loadConfig (ADR-0003)', () => {
       port: 3000,
       host: '0.0.0.0',
       databaseUrl: DATABASE_URL,
+      memoryLogMs: null,
     });
   });
 
@@ -22,6 +23,7 @@ describe('loadConfig (ADR-0003)', () => {
       port: 8080,
       host: '127.0.0.1',
       databaseUrl: DATABASE_URL,
+      memoryLogMs: null,
     });
   });
 
@@ -33,6 +35,16 @@ describe('loadConfig (ADR-0003)', () => {
   it('rechaza un puerto no válido', () => {
     expect(() => loadConfig({ POPE_MODE: 'local', DATABASE_URL, PORT: 'abc' })).toThrow(/PORT/);
     expect(() => loadConfig({ POPE_MODE: 'local', DATABASE_URL, PORT: '70000' })).toThrow(/PORT/);
+  });
+
+  it('el registro de memoria es opcional, de 1000 ms como mínimo (ADR-0011)', () => {
+    const base = { POPE_MODE: 'local', DATABASE_URL };
+    expect(loadConfig(base).memoryLogMs).toBeNull();
+    expect(loadConfig({ ...base, POPE_MEMORY_LOG_MS: '5000' }).memoryLogMs).toBe(5000);
+    expect(loadConfig({ ...base, POPE_MEMORY_LOG_MS: '1000' }).memoryLogMs).toBe(1000);
+    for (const bad of ['999', '0', 'abc', '1500.5', '']) {
+      expect(() => loadConfig({ ...base, POPE_MEMORY_LOG_MS: bad })).toThrow(/POPE_MEMORY_LOG_MS/);
+    }
   });
 
   it('exige una DATABASE_URL de PostgreSQL', () => {
