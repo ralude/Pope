@@ -198,7 +198,7 @@ antes de seguir.
 
 ## Fase 5: Sesiones con cuenta
 
-- [ ] **T23: Tablas de PCs y sesiones**
+- [x] **T23: Tablas de PCs y sesiones**
   - **Cubre:** REQ-001-21
   - **Hacer:** tablas `pcs` (con datos de ejemplo para desarrollo) y `sessions`, con índices únicos de sesión activa por cliente y por PC.
   - **Verificar:** test de que la BD rechaza una segunda sesión activa.

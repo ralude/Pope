@@ -9,12 +9,15 @@ import type {
   CustomerStatus,
   LedgerKind,
   PaymentMethod,
+  SessionEndReason,
+  SessionKind,
   StaffRole,
   Wallet,
   Weekday,
 } from '@pope/shared';
 import { sql } from 'drizzle-orm';
 import {
+  type AnyPgColumn,
   bigint,
   boolean,
   check,
@@ -154,8 +157,8 @@ export const ledger = pgTable(
     wallet: text('wallet').$type<Wallet>().notNull(),
     amount: bigint('amount', { mode: 'number' }).notNull(),
     kind: text('kind').$type<LedgerKind>().notNull(),
-    /** Sesión que generó el consumo. La clave foránea llega con la tabla `sessions` (T23). */
-    sessionId: uuid('session_id'),
+    /** Sesión que generó el consumo. */
+    sessionId: uuid('session_id').references((): AnyPgColumn => sessions.id),
     /** Turno de caja de los cobros en mostrador (REQ-001-03, REQ-001-84). */
     shiftId: uuid('shift_id').references(() => cashShifts.id),
     paymentMethod: text('payment_method').$type<PaymentMethod>(),
@@ -231,5 +234,87 @@ export const combos = pgTable(
   (t) => [
     check('combos_price_positive', sql`${t.priceMicros} > 0`),
     check('combos_seconds_positive', sql`${t.seconds} > 0`),
+  ],
+);
+
+/**
+ * PCs del local. **Mínima**: la spec 003 añade el registro con código de instalación y las
+ * credenciales. En desarrollo se crean con `pnpm --filter @pope/server dev:seed-pcs`.
+ */
+export const pcs = pgTable(
+  'pcs',
+  {
+    id: uuid('id').primaryKey(),
+    /** Nombre que ven el panel y los eventos, p. ej. "PC 05". */
+    name: text('name').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('pcs_name_lower_idx').on(sql`lower(${t.name})`)],
+);
+
+/**
+ * Sesiones de uso de una PC (plan 001), con cuenta o temporales. Una fila por sesión: el
+ * cobro se va guardando aquí en cada latido y solo al cerrar se escribe en el ledger.
+ */
+export const sessions = pgTable(
+  'sessions',
+  {
+    id: uuid('id').primaryKey(),
+    pcId: uuid('pc_id')
+      .notNull()
+      .references(() => pcs.id),
+    kind: text('kind').$type<SessionKind>().notNull(),
+    /** Solo en las sesiones con cuenta. */
+    customerId: uuid('customer_id').references(() => customers.id),
+    /** Solo en las temporales: el nombre que puso el encargado o el de por defecto. */
+    tempName: text('temp_name'),
+    status: text('status').$type<'active' | 'ended'>().notNull().default('active'),
+    /** Tarifa del día en que empezó, copiada (REQ-001-14, REQ-001-16). */
+    rateMicrosPerHour: bigint('rate_micros_per_hour', { mode: 'number' }).notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    /**
+     * Hasta dónde está cobrada la sesión. Avanza en segundos enteros con cada latido, así
+     * que va como mucho 1 s por detrás del último latido (REQ-001-27).
+     */
+    lastHeartbeatAt: timestamp('last_heartbeat_at', { withTimezone: true }).notNull(),
+    endedAt: timestamp('ended_at', { withTimezone: true }),
+    endReason: text('end_reason').$type<SessionEndReason>(),
+    /** Quién la abrió: el cliente o el encargado (REQ-001-31). */
+    openedBy: jsonb('opened_by').$type<Actor>().notNull(),
+    /** Sesión interrumpida de la que viene, si es una restauración (REQ-001-67). */
+    restoredFrom: uuid('restored_from').references((): AnyPgColumn => sessions.id),
+    // Consumo de las sesiones con cuenta (motor de cobro de `shared`).
+    comboSecondsUsed: integer('combo_seconds_used').notNull().default(0),
+    moneySeconds: integer('money_seconds').notNull().default(0),
+    moneyChargedMicros: bigint('money_charged_micros', { mode: 'number' }).notNull().default(0),
+    // Tiempo de las temporales: el comprado y el ya usado (REQ-001-60, REQ-001-63).
+    purchasedSeconds: integer('purchased_seconds'),
+    usedSeconds: integer('used_seconds').notNull().default(0),
+  },
+  (t) => [
+    // Una sola sesión activa por cuenta (REQ-001-21) y por PC.
+    uniqueIndex('sessions_active_customer_idx')
+      .on(t.customerId)
+      .where(sql`${t.status} = 'active'`),
+    uniqueIndex('sessions_active_pc_idx')
+      .on(t.pcId)
+      .where(sql`${t.status} = 'active'`),
+    // Una sesión interrumpida solo se restaura una vez (REQ-001-68).
+    uniqueIndex('sessions_restored_from_idx')
+      .on(t.restoredFrom)
+      .where(sql`${t.restoredFrom} is not null`),
+    index('sessions_pc_started_idx').on(t.pcId, t.startedAt),
+    check('sessions_kind_check', sql`${t.kind} in ('account', 'temporary')`),
+    check('sessions_status_check', sql`${t.status} in ('active', 'ended')`),
+    check(
+      'sessions_kind_fields',
+      sql`(${t.kind} = 'account' and ${t.customerId} is not null and ${t.purchasedSeconds} is null)
+        or (${t.kind} = 'temporary' and ${t.customerId} is null and ${t.tempName} is not null
+          and ${t.purchasedSeconds} is not null)`,
+    ),
+    check(
+      'sessions_ended_fields',
+      sql`(${t.status} = 'active') = (${t.endedAt} is null and ${t.endReason} is null)`,
+    ),
   ],
 );

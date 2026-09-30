@@ -13,7 +13,8 @@
     "bench:argon2": "node scripts/bench-argon2.mjs",
     "test:pg": "node scripts/test-pg.mjs",
     "db:generate": "drizzle-kit generate",
-    "staff:create-admin": "node dist/cli/create-admin.js"
+    "staff:create-admin": "node dist/cli/create-admin.js",
+    "dev:seed-pcs": "node dist/cli/seed-dev-pcs.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.2",
