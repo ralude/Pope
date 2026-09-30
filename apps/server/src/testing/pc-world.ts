@@ -42,13 +42,15 @@ export class PcWorld {
   /**
    * Deja pasar `ms` de tiempo simulado con la PC número `n` latiendo cada `every` ms (10 s,
    * como el agente real), para que las sesiones largas no se cierren por falta de latidos.
-   * Los avisos y cierres que ocurran llegan a la PC conectada.
+   * Cada latido nombra la sesión activa, como hace el agente. Los avisos y cierres que
+   * ocurran llegan a la PC conectada.
    */
   async run(n: number, ms: number, every = 10_000): Promise<void> {
     const sessions = this.testApp.app.get(SessionsService);
     for (let left = ms; left > 0; left -= every) {
       await this.clock.tick(Math.min(every, left));
-      await sessions.heartbeat(devPcId(n), { sessionId: null });
+      const active = await sessions.activeOnPc(devPcId(n));
+      await sessions.heartbeat(devPcId(n), { sessionId: active?.id ?? null });
     }
   }
 

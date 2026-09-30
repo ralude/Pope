@@ -1,0 +1,1 @@
+ALTER TABLE "sessions" ADD COLUMN "pc_confirmed_at" timestamp with time zone;

@@ -23,7 +23,7 @@ import {
   temporaryRemaining,
   type WarningMinutes,
 } from '@pope/shared';
-import { and, eq, lte, type SQL } from 'drizzle-orm';
+import { and, eq, isNull, lte, type SQL } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
@@ -511,6 +511,7 @@ export class SessionsService implements OnModuleDestroy {
    */
   async heartbeat(pcId: string, claim: SessionClaim): Promise<NodeToPcMessage> {
     this.touch(pcId);
+    await this.confirm(pcId, claim.sessionId);
     const state = await this.review(eq(sessions.pcId, pcId));
     const activeId =
       state.type === 'state' && state.status === 'active' ? state.session.sessionId : null;
@@ -522,19 +523,42 @@ export class SessionsService implements OnModuleDestroy {
 
   /**
    * La PC se identifica con `hello` diciendo qué sesión cree tener (plan 001, "Latidos,
-   * cortes de luz y reinicios"). Si el nodo tiene una sesión activa en esa PC y ella dice
-   * que no tiene ninguna (se reinició), se cierra al momento como `no_heartbeat`: se cobra
-   * hasta el último latido y una temporal queda en "Sesiones interrumpidas". Si dice tener
-   * una sesión ya cerrada, se le avisa con `sessionEnded`.
+   * cortes de luz y reinicios"). Si el nodo tiene una sesión activa en esa PC que la PC ya
+   * conocía (`pcConfirmedAt`) y ella dice que no tiene ninguna, se reinició: la sesión se
+   * cierra al momento como `no_heartbeat`, se cobra hasta el último latido y una temporal
+   * queda en "Sesiones interrumpidas". Si la PC nunca llegó a conocerla (se perdió el `state`
+   * que la abría), sigue abierta y la PC la recibe ahora con su `state`. Si dice tener una
+   * sesión ya cerrada, se le avisa con `sessionEnded`.
    */
   async reconcile(pcId: string, claimedId: string | null): Promise<void> {
     this.touch(pcId);
+    await this.confirm(pcId, claimedId);
     const active = await this.activeOnPc(pcId);
     if (active && claimedId === null) {
-      await this.close(active.id, 'no_heartbeat', { kind: 'system' }, { billToNow: false });
+      if (active.pcConfirmedAt) {
+        await this.close(active.id, 'no_heartbeat', { kind: 'system' }, { billToNow: false });
+      }
     } else if (claimedId !== null && claimedId !== active?.id) {
       await this.rejectClaim(pcId, claimedId, null);
     }
+  }
+
+  /** La PC nombró su sesión activa: ya sabe que la tiene. Solo escribe la primera vez. */
+  private async confirm(pcId: string, sessionId: string | null): Promise<void> {
+    if (sessionId === null) {
+      return;
+    }
+    await this.db
+      .update(sessions)
+      .set({ pcConfirmedAt: this.clock.now() })
+      .where(
+        and(
+          eq(sessions.id, sessionId),
+          eq(sessions.pcId, pcId),
+          eq(sessions.status, 'active'),
+          isNull(sessions.pcConfirmedAt),
+        ),
+      );
   }
 
   /**

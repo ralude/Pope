@@ -288,6 +288,12 @@ export const sessions = pgTable(
      * que va como mucho 1 s por detrás del último latido (REQ-001-27).
      */
     lastHeartbeatAt: timestamp('last_heartbeat_at', { withTimezone: true }).notNull(),
+    /**
+     * Primera vez que la PC nombró esta sesión (en un `hello` o un latido): prueba que le
+     * llegó el `state` que la abrió. Hasta entonces, que la PC diga "no tengo sesión" no la
+     * cierra, porque puede que el mensaje se perdiera por el camino.
+     */
+    pcConfirmedAt: timestamp('pc_confirmed_at', { withTimezone: true }),
     endedAt: timestamp('ended_at', { withTimezone: true }),
     endReason: text('end_reason').$type<SessionEndReason>(),
     /** Quién la abrió: el cliente o el encargado (REQ-001-31). */

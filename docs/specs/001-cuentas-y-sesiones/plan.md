@@ -81,7 +81,7 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 | Un temporizador de aviso o de agotamiento salta con la PC en silencio (> 15 s sin latidos) | No cobra ni cierra: espera al siguiente latido o al cierre por falta de latidos, para no cobrar el hueco (REQ-001-27) |
 | La PC vuelve a conectar con una sesión ya cerrada por falta de latidos (corte de red) | Sigue cerrada: el nodo envía `sessionEnded` y la PC se bloquea. Con cuenta, el hueco sin red no se cobra. Si era temporal, su restante pasa a ser el menor entre el del nodo y el que informa la PC en su latido (pregunta resuelta de la spec; deja un evento `session.remaining_corrected` y no se hace si ya se restauró) |
 | El nodo arranca tras un apagón | Cierra como `no_heartbeat` las sesiones cuyo último latido supere el tiempo de gracia. Si un agente reconecta antes, la sesión sigue |
-| La PC se reinicia y el agente dice "no tengo sesión" | Se cierra al momento como `no_heartbeat`. Si es temporal, queda en "Sesiones interrumpidas" |
+| La PC se reinicia y el agente dice "no tengo sesión" en su `hello` | Si la PC ya había nombrado esa sesión (`pc_confirmed_at`), se cierra al momento como `no_heartbeat` y, si es temporal, queda en "Sesiones interrumpidas". Si nunca la nombró (se perdió el `state` que la abría), sigue abierta y la PC la recibe ahora |
 | Restaurar (REQ-001-67, 68, 71) | Se crea una sesión nueva con `restored_from`, `purchased_seconds` = restante de la original y sin cobro. Se rechaza si ya se restauró o si pasaron > 48 h |
 | Respaldo (REQ-001-64, 65) | Las sesiones temporales nunca se borran; el panel muestra las últimas N por PC (N ≥ 3). Las pendientes de restaurar se muestran siempre hasta que caduquen |
 

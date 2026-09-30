@@ -261,4 +261,33 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     await heartbeat(pc);
     expect(await storedSession(5)).toMatchObject({ status: 'active' });
   });
+
+  it('si la PC nunca supo de la sesión (se perdió su state), reconectar sin sesión no la cierra', async () => {
+    world = await PcWorld.start(MONDAY);
+    const ana = await world.cashier();
+    const pc = await world.pc(5);
+    // El encargado abre una temporal, pero la PC se cae antes de recibir el state.
+    pc.close();
+    await pc.closed;
+    const opened = await world.api('POST', '/sessions/temporary', ana, {
+      pcId: devPcId(5),
+      paymentMethod: 'cash_usd',
+      minutes: 30,
+    });
+    expect(opened.statusCode).toBe(201);
+    const { id } = opened.json<{ id: string }>();
+
+    // Vuelve diciendo que no tiene sesión: el nodo le manda la sesión en vez de cerrarla.
+    const { pc: back, state } = await PcTestClient.hello(world.url, devPcId(5), null);
+    expect(activeSession(state)).toMatchObject({ sessionId: id, remainingSeconds: 1800 });
+    expect(await storedSession(5)).toMatchObject({ status: 'active' });
+
+    // Desde que la nombra en un latido, un reinicio sí la cierra.
+    await back.request({ type: 'heartbeat', sessionId: id, localRemainingSeconds: 1800 });
+    back.close();
+    await back.closed;
+    const { pc: rebooted, state: after } = await PcTestClient.hello(world.url, devPcId(5), null);
+    expect(after).toMatchObject({ type: 'sessionEnded', sessionId: id, reason: 'no_heartbeat' });
+    rebooted.close();
+  });
 });
