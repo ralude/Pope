@@ -240,6 +240,22 @@ export const sessionEndedEventSchema = event(
   }),
 );
 
+/**
+ * Corrección del tiempo restante de una sesión temporal cerrada "sin latidos": la PC
+ * reconectó y informó menos tiempo del que guardaba el nodo, y se queda el menor (pregunta
+ * resuelta de la spec 001, REQ-001-27).
+ */
+export const sessionRemainingCorrectedEventSchema = event(
+  'session.remaining_corrected',
+  1,
+  z.strictObject({
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    from: nonNegativeSeconds,
+    to: nonNegativeSeconds,
+  }),
+);
+
 /** Tiempo añadido a una sesión temporal, cobrado en caja (REQ-001-70). */
 export const sessionTimeAddedEventSchema = event(
   'session.time_added',
@@ -338,6 +354,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   settingChangedEventSchema,
   sessionStartedEventSchema,
   sessionEndedEventSchema,
+  sessionRemainingCorrectedEventSchema,
   sessionTimeAddedEventSchema,
   sessionRestoredEventSchema,
   shiftOpenedEventSchema,

@@ -1,6 +1,7 @@
 import type { NodeToPcMessage } from '@pope/shared';
 
 import { devPcId, seedDevPcs } from '../pcs/dev-pcs.js';
+import { SessionsService } from '../sessions/sessions.service.js';
 import { createTestApp, type TestApp } from './app.js';
 import { FakeClock } from './clock.js';
 import { listenForPcs, PcTestClient } from './pc-client.js';
@@ -26,11 +27,28 @@ export class PcWorld {
     return new PcWorld(testApp, clock, await listenForPcs(testApp));
   }
 
-  /** Conecta la PC número `n` ("PC 0n") y descarta su primer `state`. */
-  async pc(n: number): Promise<PcTestClient> {
-    const { pc } = await PcTestClient.hello(this.url, devPcId(n));
+  /**
+   * Conecta la PC número `n` ("PC 0n") y descarta su primer `state`. `sessionId` es la
+   * sesión que la PC dice tener: al reconectar en mitad de una sesión hay que indicarla, o
+   * el nodo entiende que la PC se reinició y la cierra.
+   */
+  async pc(n: number, sessionId: string | null = null): Promise<PcTestClient> {
+    const { pc } = await PcTestClient.hello(this.url, devPcId(n), sessionId);
     this.clients.push(pc);
     return pc;
+  }
+
+  /**
+   * Deja pasar `ms` de tiempo simulado con la PC número `n` latiendo cada `every` ms (10 s,
+   * como el agente real), para que las sesiones largas no se cierren por falta de latidos.
+   * Los avisos y cierres que ocurran llegan a la PC conectada.
+   */
+  async run(n: number, ms: number, every = 10_000): Promise<void> {
+    const sessions = this.testApp.app.get(SessionsService);
+    for (let left = ms; left > 0; left -= every) {
+      await this.clock.tick(Math.min(every, left));
+      await sessions.heartbeat(devPcId(n), { sessionId: null });
+    }
   }
 
   async close(): Promise<void> {

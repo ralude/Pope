@@ -244,11 +244,12 @@ antes de seguir.
   - **Nota:** añadida por la pregunta resuelta sobre dónde se configura el respaldo.
   - **Límites elegidos (2026-09-30, por confirmar):** gracia de latidos entre 30 s y 30 min (menos cerraría sesiones por un corte de red breve); sesiones temporales conservadas entre 3 y 100. Sin fila en `settings` vale el valor por defecto de `DEFAULT_SETTINGS`; se escribe una fila solo al cambiar un ajuste.
 
-- [ ] **T29: Cierre sin latidos y recuperación al arrancar**
+- [x] **T29: Cierre sin latidos y recuperación al arrancar**
   - **Cubre:** REQ-001-27
   - **Hacer:** proceso periódico de cierre por falta de latidos (tiempo de gracia de T28a), revisión al arrancar el nodo y cierre inmediato si la PC dice "no tengo sesión". Si la PC reconecta con una sesión ya cerrada sin latidos, recibe `sessionEnded`; si era temporal, su restante pasa a ser el menor entre el del nodo y el de la PC (pregunta resuelta de la spec).
   - **Verificar:** test de CA-001-03 y de la reconexión tras un corte de red.
   - **Commit:** `feat(server): cierra las sesiones sin latidos cobrando hasta el último`
+  - **Decidido al implementarla (2026-09-30):** "no tengo sesión" se entiende solo en el `hello` (un latido con `sessionId` nulo justo tras un login diría lo mismo y cerraría la sesión recién abierta). Los temporizadores de T27 solo cobran si la PC latió hace ≤ 15 s, para no cobrar el hueco. La corrección del restante de una temporal deja el evento `session.remaining_corrected` y no se aplica si ya se restauró.
 
 - [ ] **T30: Compra de combo desde el Shell**
   - **Cubre:** REQ-001-85

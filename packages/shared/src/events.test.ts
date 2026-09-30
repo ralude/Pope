@@ -98,6 +98,11 @@ const examples = {
     },
     { kind: 'system' },
   ),
+  'session.remaining_corrected': envelope(
+    'session.remaining_corrected',
+    { sessionId: id(6), pc: PC05, from: 2400, to: 1500 },
+    { kind: 'system' },
+  ),
   'session.time_added': envelope('session.time_added', {
     sessionId: id(6),
     pc: PC05,

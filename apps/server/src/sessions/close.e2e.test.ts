@@ -197,8 +197,9 @@ describe('cierre de sesiones (e2e, REQ-001-26, REQ-001-31)', () => {
 
   it('una sesión temporal cierra sin ledger y anota lo que sobró', async () => {
     const testApp = await start();
+    const id = newId();
     await testApp.database.db.insert(sessions).values({
-      id: newId(),
+      id,
       pcId: devPcId(5),
       kind: 'temporary',
       tempName: 'Temporal · PC 05 · 18:00',
@@ -208,7 +209,7 @@ describe('cierre de sesiones (e2e, REQ-001-26, REQ-001-31)', () => {
       openedBy: { kind: 'system' },
       purchasedSeconds: 3600,
     });
-    const pc = await world.pc(5);
+    const pc = await world.pc(5, id);
     world.clock.advance(20 * MINUTE);
 
     expect(await logout(pc)).toMatchObject({ type: 'sessionEnded', reason: 'customer' });

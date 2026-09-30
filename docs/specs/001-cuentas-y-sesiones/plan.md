@@ -78,7 +78,8 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 |---|---|
 | Latido normal | El agente lo envía cada **10 s** y el nodo guarda el checkpoint en cada uno. Un corte pierde ≤ 10 s (cumple REQ-001-63, que pide ≤ 30 s) |
 | Sin latidos durante el tiempo de gracia (3 min) | Se cierra con `end_reason = no_heartbeat` y se cobra hasta `last_heartbeat_at` (REQ-001-27) |
-| La PC vuelve a conectar con una sesión ya cerrada por falta de latidos (corte de red) | Sigue cerrada: el nodo envía `sessionEnded` y la PC se bloquea. Con cuenta, el hueco sin red no se cobra. Si era temporal, su restante pasa a ser el menor entre el del nodo y el que informa la PC (pregunta resuelta de la spec) |
+| Un temporizador de aviso o de agotamiento salta con la PC en silencio (> 15 s sin latidos) | No cobra ni cierra: espera al siguiente latido o al cierre por falta de latidos, para no cobrar el hueco (REQ-001-27) |
+| La PC vuelve a conectar con una sesión ya cerrada por falta de latidos (corte de red) | Sigue cerrada: el nodo envía `sessionEnded` y la PC se bloquea. Con cuenta, el hueco sin red no se cobra. Si era temporal, su restante pasa a ser el menor entre el del nodo y el que informa la PC en su latido (pregunta resuelta de la spec; deja un evento `session.remaining_corrected` y no se hace si ya se restauró) |
 | El nodo arranca tras un apagón | Cierra como `no_heartbeat` las sesiones cuyo último latido supere el tiempo de gracia. Si un agente reconecta antes, la sesión sigue |
 | La PC se reinicia y el agente dice "no tengo sesión" | Se cierra al momento como `no_heartbeat`. Si es temporal, queda en "Sesiones interrumpidas" |
 | Restaurar (REQ-001-67, 68, 71) | Se crea una sesión nueva con `restored_from`, `purchased_seconds` = restante de la original y sin cobro. Se rechaza si ya se restauró o si pasaron > 48 h |
@@ -104,7 +105,7 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 **Eventos** (versionados): `customer.created`, `customer.status_changed`, `customer.login_locked`,
 `customer.login_unlocked`, `wallet.recharged`,
 `combo.created`, `combo.updated`, `combo.purchased`, `tariff.changed`, `session.started`,
-`session.ended`, `session.time_added`, `session.restored`, `shift.opened`, `shift.closed`, `setting.changed`.
+`session.ended`, `session.remaining_corrected`, `session.time_added`, `session.restored`, `shift.opened`, `shift.closed`, `setting.changed`.
 
 ## Seguridad
 

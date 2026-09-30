@@ -146,8 +146,9 @@ describe('latidos y checkpoint (e2e, REQ-001-11, REQ-001-12, REQ-001-23)', () =>
 
   it('REQ-001-63: una sesión temporal guarda su tiempo restante en cada latido', async () => {
     world = await PcWorld.start(MONDAY);
+    const id = newId();
     await world.testApp.database.db.insert(sessions).values({
-      id: newId(),
+      id,
       pcId: devPcId(5),
       kind: 'temporary',
       tempName: 'Temporal · PC 05 · 18:00',
@@ -157,7 +158,7 @@ describe('latidos y checkpoint (e2e, REQ-001-11, REQ-001-12, REQ-001-23)', () =>
       openedBy: { kind: 'system' },
       purchasedSeconds: 3600,
     });
-    const pc = await world.pc(5);
+    const pc = await world.pc(5, id);
 
     world.clock.advance(20 * MINUTE);
     const session = activeSession(await heartbeat(pc));

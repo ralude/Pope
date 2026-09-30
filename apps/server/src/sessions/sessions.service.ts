@@ -23,7 +23,7 @@ import {
   temporaryRemaining,
   type WarningMinutes,
 } from '@pope/shared';
-import { and, eq, type SQL } from 'drizzle-orm';
+import { and, eq, lte, type SQL } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
@@ -50,6 +50,19 @@ export const MIN_SESSION_SECONDS = 60;
 const MAX_WATCH_MS = 5 * 60_000;
 /** Margen para que el temporizador no salte unos milisegundos antes del segundo justo. */
 const WATCH_SLACK_MS = 20;
+/**
+ * Una PC cuenta como viva si su último latido fue hace menos de esto (el agente late cada
+ * 10 s). Un temporizador con la PC en silencio no cobra ni cierra: el hueco sin latidos no
+ * se cobra (REQ-001-27).
+ */
+const ALIVE_MS = 15_000;
+
+/** Lo que la PC dice de su sesión en un `hello` o un `heartbeat`. */
+export interface SessionClaim {
+  sessionId: string | null;
+  /** Solo en los latidos: el tiempo restante que guarda la PC (REQ-001-63). */
+  localRemainingSeconds?: number | null;
+}
 
 /**
  * Sesiones de uso de las PCs (plan 001). El nodo es la fuente de verdad del tiempo y del
@@ -62,6 +75,8 @@ export class SessionsService implements OnModuleDestroy {
   private readonly timers = new Map<string, () => void>();
   /** Avisos ya enviados de cada sesión (5 y 1 min). Se pierden al reiniciar el nodo. */
   private readonly warned = new Map<string, WarningMinutes[]>();
+  /** Cuándo se supo por última vez de cada PC (latido, login o `hello`), en ms. */
+  private readonly seen = new Map<string, number>();
 
   constructor(
     @Inject(DATABASE) private readonly db: Database,
@@ -71,6 +86,15 @@ export class SessionsService implements OnModuleDestroy {
     private readonly connections: PcConnections,
     private readonly clock: Clock,
   ) {}
+
+  private markSeen(pcId: string): void {
+    this.seen.set(pcId, this.clock.now().getTime());
+  }
+
+  private isAlive(pcId: string): boolean {
+    const last = this.seen.get(pcId);
+    return last !== undefined && this.clock.now().getTime() - last <= ALIVE_MS;
+  }
 
   /** Sesión activa de una PC, si tiene. */
   async activeOnPc(pcId: string, db: Database = this.db): Promise<SessionRow | undefined> {
@@ -171,6 +195,7 @@ export class SessionsService implements OnModuleDestroy {
         state: activeState(row, { username: customer.username, balances }),
       };
     });
+    this.markSeen(pc.id);
     this.watch(started.row, started.remaining);
     return started.state;
   }
@@ -218,14 +243,15 @@ export class SessionsService implements OnModuleDestroy {
    * Cierra la sesión y liquida su consumo (REQ-001-26, REQ-001-31): escribe en el ledger lo
    * gastado (hasta dos filas, combo y dinero), guarda el cierre con su motivo y emite
    * `session.ended`. Por defecto cobra antes hasta ahora; un cierre por falta de latidos
-   * pasa `billToNow: false` para cobrar solo hasta el último latido (REQ-001-27). Avisa a la
-   * PC con `sessionEnded`. Devuelve la sesión cerrada, o `null` si ya no estaba activa.
+   * pasa `billToNow: false` para cobrar solo hasta el último latido (REQ-001-27) y
+   * `ifNotBeatAfter` para no cerrar una sesión que acaba de latir. Avisa a la PC con
+   * `sessionEnded`. Devuelve la sesión cerrada, o `null` si ya no estaba activa.
    */
   async close(
     sessionId: string,
     reason: SessionEndReason,
     actor: Actor,
-    options: { billToNow?: boolean } = {},
+    options: { billToNow?: boolean; ifNotBeatAfter?: Date } = {},
   ): Promise<SessionRow | null> {
     const billToNow = options.billToNow ?? true;
     const ended = await this.events.inTransaction(async (tx, emit) => {
@@ -235,6 +261,10 @@ export class SessionsService implements OnModuleDestroy {
         .where(eq(sessions.id, sessionId))
         .for('update');
       if (locked?.status !== 'active') {
+        return null;
+      }
+      // Un latido que llegó mientras se decidía cerrar por falta de latidos la salva.
+      if (options.ifNotBeatAfter && locked.lastHeartbeatAt > options.ifNotBeatAfter) {
         return null;
       }
       if (locked.customerId) {
@@ -351,9 +381,129 @@ export class SessionsService implements OnModuleDestroy {
    * ADR-0007), guarda el consumo en su fila (REQ-001-63) y devuelve el `state` para que el
    * Shell actualice tiempo y saldo (REQ-001-12). Además revisa si toca avisar o cerrar
    * (`review`). Sin sesión activa, o si acaba de agotarse, devuelve la pantalla de bloqueo.
+   *
+   * Si la PC dice tener una sesión que el nodo ya cerró (volvió tras un corte de red), la
+   * sesión sigue cerrada: se le avisa con `sessionEnded` (`rejectClaim`). Que la PC diga que
+   * no tiene sesión no cierra nada aquí: eso lo decide el `hello`, porque un latido enviado
+   * justo antes de recibir el `state` del login diría lo mismo.
    */
-  heartbeat(pcId: string): Promise<NodeToPcMessage> {
-    return this.review(eq(sessions.pcId, pcId));
+  async heartbeat(pcId: string, claim: SessionClaim): Promise<NodeToPcMessage> {
+    this.markSeen(pcId);
+    const state = await this.review(eq(sessions.pcId, pcId));
+    const activeId =
+      state.type === 'state' && state.status === 'active' ? state.session.sessionId : null;
+    if (claim.sessionId !== null && claim.sessionId !== activeId) {
+      await this.rejectClaim(pcId, claim.sessionId, claim.localRemainingSeconds ?? null);
+    }
+    return state;
+  }
+
+  /**
+   * La PC se identifica con `hello` diciendo qué sesión cree tener (plan 001, "Latidos,
+   * cortes de luz y reinicios"). Si el nodo tiene una sesión activa en esa PC y ella dice
+   * que no tiene ninguna (se reinició), se cierra al momento como `no_heartbeat`: se cobra
+   * hasta el último latido y una temporal queda en "Sesiones interrumpidas". Si dice tener
+   * una sesión ya cerrada, se le avisa con `sessionEnded`.
+   */
+  async reconcile(pcId: string, claimedId: string | null): Promise<void> {
+    this.markSeen(pcId);
+    const active = await this.activeOnPc(pcId);
+    if (active && claimedId === null) {
+      await this.close(active.id, 'no_heartbeat', { kind: 'system' }, { billToNow: false });
+    } else if (claimedId !== null && claimedId !== active?.id) {
+      await this.rejectClaim(pcId, claimedId, null);
+    }
+  }
+
+  /**
+   * La PC cree tener la sesión `claimedId`, pero el nodo no la tiene activa. Si la cerró el
+   * nodo, se le dice cómo y por qué (`sessionEnded`) para que se bloquee. Si era temporal y
+   * se cerró por falta de latidos, su restante pasa a ser el menor entre el del nodo y el de
+   * la PC (`localRemaining`). Una sesión desconocida se ignora.
+   */
+  private async rejectClaim(
+    pcId: string,
+    claimedId: string,
+    localRemaining: number | null,
+  ): Promise<void> {
+    const [claimed] = await this.db
+      .select()
+      .from(sessions)
+      .where(and(eq(sessions.id, claimedId), eq(sessions.pcId, pcId)));
+    if (claimed?.status !== 'ended' || !claimed.endReason) {
+      return;
+    }
+    if (claimed.endReason === 'no_heartbeat' && localRemaining !== null) {
+      await this.correctRemaining(claimed.id, localRemaining);
+    }
+    this.connections.send(pcId, {
+      type: 'sessionEnded',
+      sessionId: claimed.id,
+      reason: claimed.endReason,
+    });
+  }
+
+  /**
+   * Baja el restante de una sesión temporal cerrada sin latidos al que informa la PC, si es
+   * menor. No toca las que ya se restauraron: la copia ya se llevó su tiempo (REQ-001-68).
+   */
+  private async correctRemaining(sessionId: string, localRemaining: number): Promise<void> {
+    await this.events.inTransaction(async (tx, emit) => {
+      const [row] = await tx
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, sessionId))
+        .for('update');
+      if (row?.kind !== 'temporary' || row.endReason !== 'no_heartbeat') {
+        return;
+      }
+      const [restored] = await tx
+        .select({ id: sessions.id })
+        .from(sessions)
+        .where(eq(sessions.restoredFrom, sessionId));
+      const usage = temporaryUsageOf(row);
+      const from = temporaryRemaining(usage);
+      const to = Math.min(from, localRemaining);
+      if (restored || to >= from) {
+        return;
+      }
+      await tx
+        .update(sessions)
+        .set({ usedSeconds: usage.purchasedSeconds - to })
+        .where(eq(sessions.id, sessionId));
+      const [pc] = await tx.select({ name: pcs.name }).from(pcs).where(eq(pcs.id, row.pcId));
+      emit({
+        type: 'session.remaining_corrected',
+        version: 1,
+        actor: { kind: 'system' },
+        payload: {
+          sessionId,
+          pc: { id: row.pcId, name: pc?.name ?? '' },
+          from,
+          to: seconds(to),
+        },
+      });
+    });
+  }
+
+  /**
+   * Cierra como `no_heartbeat` las sesiones activas sin latidos desde `lastBeatBefore` (el
+   * tiempo de gracia ya vencido), cobrando solo hasta su último latido (REQ-001-27,
+   * CA-001-03). Lo usan el proceso periódico y la revisión al arrancar el nodo.
+   */
+  async closeStale(lastBeatBefore: Date): Promise<void> {
+    const stale = await this.db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(and(eq(sessions.status, 'active'), lte(sessions.lastHeartbeatAt, lastBeatBefore)));
+    for (const { id } of stale) {
+      await this.close(
+        id,
+        'no_heartbeat',
+        { kind: 'system' },
+        { billToNow: false, ifNotBeatAfter: lastBeatBefore },
+      );
+    }
   }
 
   /**
@@ -423,6 +573,11 @@ export class SessionsService implements OnModuleDestroy {
       row.id,
       this.clock.schedule(delay + WATCH_SLACK_MS, async () => {
         this.timers.delete(row.id);
+        // Con la PC en silencio no se cobra ni se cierra aquí: el siguiente latido reprograma
+        // el temporizador y, si no llega, el cierre por falta de latidos cobra hasta el último.
+        if (!this.isAlive(row.pcId)) {
+          return;
+        }
         try {
           await this.review(eq(sessions.id, row.id));
         } catch (error) {

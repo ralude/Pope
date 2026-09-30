@@ -9,7 +9,7 @@ import { devPcId } from '../pcs/dev-pcs.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { PcTestClient } from '../testing/pc-client.js';
-import { heartbeat, login, PcWorld, summary } from '../testing/pc-world.js';
+import { activeSession, heartbeat, login, PcWorld, summary } from '../testing/pc-world.js';
 
 // 18:00 en Caracas (UTC−4) de cada día de la semana usado en los criterios.
 const MONDAY = '2026-09-28T22:00:00Z';
@@ -145,13 +145,13 @@ describe('login desde la PC (e2e, REQ-001-20, REQ-001-21)', () => {
     await createCustomerWithBalance(testApp, 'juan', { moneyMicros: usd(3) });
     await createCustomerWithBalance(testApp, 'maria', { moneyMicros: usd(3) });
     const client = await world.pc(5);
-    await login(client, 'juan');
+    const { sessionId } = activeSession(await login(client, 'juan'));
     expect(await login(client, 'maria')).toMatchObject({
       code: 'session_already_active',
       message: 'Esta PC ya tiene una sesión abierta',
     });
     client.close();
-    const { pc: again, state } = await PcTestClient.hello(world.url, devPcId(5));
+    const { pc: again, state } = await PcTestClient.hello(world.url, devPcId(5), sessionId);
     expect(summary(state).remainingSeconds).toBe(7200);
     again.close();
   });

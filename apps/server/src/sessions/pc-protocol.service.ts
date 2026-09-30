@@ -107,6 +107,7 @@ export class PcProtocolService {
       return;
     }
     this.connections.register(pc, connection);
+    await this.sessions.reconcile(pc.id, message.sessionId);
     connection.send(await this.sessions.stateFor(pc.id));
   }
 
@@ -118,7 +119,7 @@ export class PcProtocolService {
   ): Promise<void> {
     switch (message.type) {
       case 'heartbeat':
-        connection.send(await this.sessions.heartbeat(pc.id));
+        connection.send(await this.sessions.heartbeat(pc.id, message));
         return;
       case 'login':
         connection.send(await this.login(pc, message));
