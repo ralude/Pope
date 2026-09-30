@@ -218,6 +218,17 @@ export const tariffDays = pgTable(
 );
 
 /**
+ * Ajustes del nodo que cambia el administrador (T28a). Una fila por ajuste que se haya
+ * cambiado alguna vez; sin fila vale el valor por defecto de `DEFAULT_SETTINGS`.
+ */
+export const settings = pgTable('settings', {
+  key: text('key').primaryKey(),
+  value: jsonb('value').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedBy: jsonb('updated_by').$type<Actor>().notNull(),
+});
+
+/**
  * Combos de horas (REQ-001-80, REQ-001-81). No se borran, solo se desactivan: las ventas
  * guardan su propia copia (ADR-0014).
  */

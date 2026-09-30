@@ -13,3 +13,4 @@ export * from './customer.js';
 export * from './shift.js';
 export * from './wallet.js';
 export * from './combo.js';
+export * from './settings.js';

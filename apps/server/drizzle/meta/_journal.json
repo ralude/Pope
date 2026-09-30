@@ -78,6 +78,13 @@
       "when": 1790748528776,
       "tag": "0010_pcs_and_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790774535375,
+      "tag": "0011_settings",
+      "breakpoints": true
     }
   ]
 }

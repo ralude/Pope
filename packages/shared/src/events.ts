@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { customerStatusSchema } from './customer.js';
 import { microsSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
+import { settingKeySchema } from './settings.js';
 import { staffRoleSchema, staffStatusSchema } from './staff.js';
 import { weekdaySchema } from './tariff.js';
 import { paymentMethodSchema } from './wallet.js';
@@ -299,6 +300,15 @@ export const staffStatusChangedEventSchema = event(
   }),
 );
 
+// ─── Ajustes del nodo ───────────────────────────────────────────────────────────────────
+
+/** Un ajuste cambiado por el administrador, con su valor anterior y el nuevo. */
+export const settingChangedEventSchema = event(
+  'setting.changed',
+  1,
+  z.strictObject({ key: settingKeySchema, from: z.number().int(), to: z.number().int() }),
+);
+
 // ─── Turno de caja (mínimo; lo amplía la spec 005) ──────────────────────────────────────
 
 export const shiftOpenedEventSchema = event(
@@ -325,6 +335,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   comboUpdatedEventSchema,
   comboPurchasedEventSchema,
   tariffChangedEventSchema,
+  settingChangedEventSchema,
   sessionStartedEventSchema,
   sessionEndedEventSchema,
   sessionTimeAddedEventSchema,

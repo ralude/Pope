@@ -66,6 +66,11 @@ const examples = {
   'tariff.changed': envelope('tariff.changed', {
     changes: [{ weekday: 4, from: usd(2_000_000), to: usd(1_500_000) }],
   }),
+  'setting.changed': envelope('setting.changed', {
+    key: 'heartbeatGraceSeconds',
+    from: 180,
+    to: 300,
+  }),
   'session.started': envelope('session.started', {
     kind: 'temporary',
     sessionId: id(6),

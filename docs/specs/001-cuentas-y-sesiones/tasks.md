@@ -236,12 +236,13 @@ antes de seguir.
   - **Verificar:** tests de ambos cierres, del motivo y de la invariante.
   - **Commit:** `feat(server): cierra sesiones y liquida el consumo`
 
-- [ ] **T28a: Ajustes del nodo**
+- [x] **T28a: Ajustes del nodo**
   - **Cubre:** REQ-001-27, REQ-001-64
   - **Hacer:** tabla `settings` con el tiempo de gracia de los latidos (3 min) y las sesiones temporales conservadas por PC (3, mínimo 3); `GET` para el personal y `PUT` solo para el administrador, con evento `setting.changed`.
   - **Verificar:** tests de valores por defecto, cambio con evento, mínimo de 3 y acceso denegado a quien no es administrador.
   - **Commit:** `feat(server): añade los ajustes del nodo`
   - **Nota:** añadida por la pregunta resuelta sobre dónde se configura el respaldo.
+  - **Límites elegidos (2026-09-30, por confirmar):** gracia de latidos entre 30 s y 30 min (menos cerraría sesiones por un corte de red breve); sesiones temporales conservadas entre 3 y 100. Sin fila en `settings` vale el valor por defecto de `DEFAULT_SETTINGS`; se escribe una fila solo al cambiar un ajuste.
 
 - [ ] **T29: Cierre sin latidos y recuperación al arrancar**
   - **Cubre:** REQ-001-27

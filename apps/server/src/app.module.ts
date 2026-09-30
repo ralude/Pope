@@ -10,6 +10,7 @@ import { DatabaseModule } from './db/database.module.js';
 import { EventsModule } from './events/events.module.js';
 import { HealthModule } from './health/health.module.js';
 import { SessionsModule } from './sessions/sessions.module.js';
+import { SettingsModule } from './settings/settings.module.js';
 import { ShiftsModule } from './shifts/shifts.module.js';
 import { TariffsModule } from './tariffs/tariffs.module.js';
 import { WalletModule } from './wallet/wallet.module.js';
@@ -27,6 +28,7 @@ const MODULES_BY_MODE: Record<PopeMode, DynamicModule['imports']> = {
     WalletModule,
     TariffsModule,
     CombosModule,
+    SettingsModule,
     SessionsModule,
   ],
   cloud: [],
