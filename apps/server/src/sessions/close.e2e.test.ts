@@ -114,7 +114,7 @@ describe('cierre de sesiones (e2e, REQ-001-26, REQ-001-31)', () => {
     await createCustomerWithBalance(testApp, 'juan', { moneyMicros: usd(3) });
     const pc = await world.pc(5);
     await login(pc, 'juan');
-    world.clock.advance(30 * MINUTE);
+    await world.run(5, 30 * MINUTE, MINUTE);
     const session = await storedSession(5);
     const cookie = await loginAsStaff(testApp, 'ana', 'encargado', 'Ana');
 
@@ -137,6 +137,32 @@ describe('cierre de sesiones (e2e, REQ-001-26, REQ-001-31)', () => {
       type: 'session.ended',
       actor: { kind: 'staff', name: 'Ana' },
       payload: { reason: 'staff', usage: { kind: 'account', moneySeconds: 1800 } },
+    });
+  });
+
+  it('REQ-001-27: si la PC está muerta, el cierre del encargado cobra solo hasta su último latido', async () => {
+    const testApp = await start();
+    await createCustomerWithBalance(testApp, 'juan', { moneyMicros: usd(3) });
+    const pc = await world.pc(5);
+    await login(pc, 'juan');
+    await world.run(5, 10 * MINUTE, MINUTE);
+    const session = await storedSession(5);
+    const lastBeat = world.clock.now();
+
+    // La PC se apaga; 2 min después, dentro del tiempo de gracia, Ana cierra la sesión.
+    world.clock.advance(2 * MINUTE);
+    const cookie = await loginAsStaff(testApp, 'ana', 'encargado', 'Ana');
+    await testApp.app.inject({
+      method: 'POST',
+      url: `/sessions/${session.id}/close`,
+      headers: { cookie },
+    });
+
+    // 10 min a 1,50 USD/h = 0,25 USD: los 2 min sin latidos no se cobran.
+    expect(await consumption()).toEqual([{ wallet: 'money', amount: usd(-0.25) }]);
+    expect(await lastEvent()).toMatchObject({
+      type: 'session.ended',
+      payload: { billedUntil: lastBeat.toISOString() },
     });
   });
 

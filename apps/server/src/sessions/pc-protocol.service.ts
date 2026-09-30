@@ -117,6 +117,8 @@ export class PcProtocolService {
     pc: PcIdentity,
     message: Exclude<PcToNodeMessage, HelloMessage>,
   ): Promise<void> {
+    // Cualquier mensaje prueba que la PC está viva: se puede cobrar hasta ahora.
+    this.sessions.touch(pc.id);
     switch (message.type) {
       case 'heartbeat':
         connection.send(await this.sessions.heartbeat(pc.id, message));

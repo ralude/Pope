@@ -52,9 +52,10 @@ const MAX_WATCH_MS = 5 * 60_000;
 /** Margen para que el temporizador no salte unos milisegundos antes del segundo justo. */
 const WATCH_SLACK_MS = 20;
 /**
- * Una PC cuenta como viva si su último latido fue hace menos de esto (el agente late cada
- * 10 s). Un temporizador con la PC en silencio no cobra ni cierra: el hueco sin latidos no
- * se cobra (REQ-001-27).
+ * Una PC cuenta como viva si su último mensaje llegó hace menos de esto (el agente late cada
+ * 10 s). Con la PC en silencio, ni los temporizadores ni el panel cobran el hueco: se cobra
+ * como mucho hasta su último contacto (REQ-001-27). Así, como mucho se cobran 15 s de una
+ * PC que acaba de morir.
  */
 const ALIVE_MS = 15_000;
 
@@ -95,13 +96,28 @@ export class SessionsService implements OnModuleDestroy {
     private readonly clock: Clock,
   ) {}
 
-  private markSeen(pcId: string): void {
+  /** La PC acaba de dar señales de vida: cualquier mensaje suyo cuenta. */
+  touch(pcId: string): void {
     this.seen.set(pcId, this.clock.now().getTime());
   }
 
   private isAlive(pcId: string): boolean {
     const last = this.seen.get(pcId);
     return last !== undefined && this.clock.now().getTime() - last <= ALIVE_MS;
+  }
+
+  /**
+   * Hasta qué instante se puede cobrar una sesión de esta PC (REQ-001-27): hasta ahora si
+   * la PC está viva; si lleva en silencio más de `ALIVE_MS`, solo hasta su último contacto.
+   * Sin ningún contacto desde que arrancó el nodo, no se cobra más allá de lo ya cobrado.
+   */
+  private billableUntil(row: SessionRow): number {
+    const now = this.clock.now().getTime();
+    if (this.isAlive(row.pcId)) {
+      return now;
+    }
+    const last = this.seen.get(row.pcId);
+    return last === undefined ? row.lastHeartbeatAt.getTime() : Math.min(now, last);
   }
 
   /** Sesión activa de una PC, si tiene. */
@@ -203,7 +219,7 @@ export class SessionsService implements OnModuleDestroy {
         state: activeState(row, { username: customer.username, balances }),
       };
     });
-    this.markSeen(pc.id);
+    this.touch(pc.id);
     this.watch(started.row, started.remaining);
     return started.state;
   }
@@ -494,7 +510,7 @@ export class SessionsService implements OnModuleDestroy {
    * justo antes de recibir el `state` del login diría lo mismo.
    */
   async heartbeat(pcId: string, claim: SessionClaim): Promise<NodeToPcMessage> {
-    this.markSeen(pcId);
+    this.touch(pcId);
     const state = await this.review(eq(sessions.pcId, pcId));
     const activeId =
       state.type === 'state' && state.status === 'active' ? state.session.sessionId : null;
@@ -512,7 +528,7 @@ export class SessionsService implements OnModuleDestroy {
    * una sesión ya cerrada, se le avisa con `sessionEnded`.
    */
   async reconcile(pcId: string, claimedId: string | null): Promise<void> {
-    this.markSeen(pcId);
+    this.touch(pcId);
     const active = await this.activeOnPc(pcId);
     if (active && claimedId === null) {
       await this.close(active.id, 'no_heartbeat', { kind: 'system' }, { billToNow: false });
@@ -707,10 +723,9 @@ export class SessionsService implements OnModuleDestroy {
    */
   announce(row: SessionRow): void {
     const remaining = remainingSeconds(row, null);
+    // Enviar no prueba que la PC esté viva (el socket puede estar medio cerrado): su último
+    // contacto sigue siendo el que decide hasta dónde se cobra.
     this.connections.send(row.pcId, activeState(row, null));
-    if (this.connections.isConnected(row.pcId)) {
-      this.markSeen(row.pcId);
-    }
     this.sendWarning(row, remaining);
     this.watch(row, remaining);
   }
@@ -730,7 +745,8 @@ export class SessionsService implements OnModuleDestroy {
   }
 
   /**
-   * Cobra la sesión hasta el instante actual y guarda el resultado. Avanza `lastHeartbeatAt`
+   * Cobra la sesión hasta el instante actual, o hasta el último contacto de la PC si está en
+   * silencio (`billableUntil`, REQ-001-27), y guarda el resultado. Avanza `lastHeartbeatAt`
    * exactamente los segundos enteros cobrados, no hasta "ahora": así la fracción de segundo
    * se cobra en el siguiente latido y no se pierde (motor de cobro, `applyCheckpoint`).
    * Si el reloj se corrigió hacia atrás no se cobra nada y la marca no se mueve. Debe
@@ -744,7 +760,7 @@ export class SessionsService implements OnModuleDestroy {
     account: { username: string; balances: CustomerBalances } | null;
   }> {
     const elapsed = seconds(
-      Math.max(0, Math.floor((this.clock.now().getTime() - row.lastHeartbeatAt.getTime()) / 1000)),
+      Math.max(0, Math.floor((this.billableUntil(row) - row.lastHeartbeatAt.getTime()) / 1000)),
     );
     const lastHeartbeatAt = new Date(row.lastHeartbeatAt.getTime() + elapsed * 1000);
 

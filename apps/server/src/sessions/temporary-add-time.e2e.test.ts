@@ -135,6 +135,19 @@ describe('añadir tiempo a una sesión temporal (e2e, REQ-001-70)', () => {
     });
   });
 
+  it('REQ-001-27: con la PC muerta, añadir tiempo no cobra el hueco sin latidos', async () => {
+    const { session } = await openTemporary(5, 30);
+    await world.run(5, 10 * MINUTE, MINUTE);
+
+    // La PC se apaga y a los 2 min Ana añade 10 min: los 2 min sin latidos no se cuentan.
+    world.clock.advance(2 * MINUTE);
+    const response = await addTime(session.id, { paymentMethod: 'cash_usd', minutes: 10 });
+    expect(response.json<TemporarySession>()).toMatchObject({
+      purchasedSeconds: 2400,
+      remainingSeconds: 1800,
+    });
+  });
+
   it('cobra con la tarifa de la sesión, no con la de hoy', async () => {
     await world.close();
     await start(WEDNESDAY_NIGHT);
