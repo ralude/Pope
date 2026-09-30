@@ -267,11 +267,12 @@ antes de seguir.
   - **Commit:** `feat(server): abre sesiones temporales sin cuenta`
   - **Decidido al implementarla (2026-09-30):** `POST /sessions/temporary` (encargado y administrador, con turno abierto) pide `minutes` o `amountMicros`, no las dos. La PC debe estar libre y **conectada** al nodo (si no, se cobraría por una PC que no puede desbloquearse). Cada cobro admite como máximo 24 h y al menos un céntimo. `session_topups` guarda solo los cobros (la restauración no cobra, no tiene fila).
 
-- [ ] **T32: Añadir tiempo a una sesión temporal**
+- [x] **T32: Añadir tiempo a una sesión temporal**
   - **Cubre:** REQ-001-70
   - **Hacer:** endpoint que cobra con la tarifa de la sesión y registra un `session_topup` y un evento.
   - **Verificar:** test de CA-001-10.
   - **Commit:** `feat(server): permite añadir tiempo a una sesión temporal`
+  - **Decidido al implementarla (2026-09-30):** `POST /sessions/:id/time` cobra primero lo ya usado y después suma el tiempo, así que se añade a lo que de verdad queda. Para que un cierre por agotamiento no pise a un cobro simultáneo, `close` admite `onlyIfExhausted` (también protege una recarga en el último segundo de una sesión con cuenta).
 
 - [ ] **T33: Cierre anticipado de sesión temporal**
   - **Cubre:** REQ-001-69

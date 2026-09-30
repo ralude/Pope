@@ -12,6 +12,7 @@ import {
   MAX_TEMPORARY_SECONDS,
   micros,
   newId,
+  type TemporaryAddTimeRequest,
   type TemporaryOpenRequest,
   type TemporaryPurchase,
   temporaryPurchase,
@@ -139,6 +140,79 @@ export class TemporarySessionsService {
     const [described] = await this.describe([row]);
     if (!described) {
       throw new Error('No se pudo leer la sesión abierta');
+    }
+    return described;
+  }
+
+  /**
+   * Añade tiempo a una sesión temporal en curso, cobrando en caja (REQ-001-70, CA-001-10).
+   * Se cobra con la tarifa de la sesión, no con la de hoy, y el cobro queda en el turno de
+   * quien cobra. Emite `session.time_added`. La PC ve el nuevo tiempo al momento.
+   */
+  async addTime(
+    sessionId: string,
+    input: TemporaryAddTimeRequest,
+    shift: CashShift,
+    actor: Actor,
+  ): Promise<TemporarySession> {
+    const row = await this.events.inTransaction(async (tx, emit) => {
+      const [locked] = await tx
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, sessionId))
+        .for('update');
+      if (!locked) {
+        throw new NotFoundException('No existe esa sesión');
+      }
+      if (locked.kind !== 'temporary') {
+        throw new ConflictException('Solo las sesiones temporales admiten añadir tiempo');
+      }
+      if (locked.status !== 'active') {
+        throw new ConflictException('La sesión ya terminó');
+      }
+
+      // Primero se cobra lo ya usado: el tiempo nuevo se suma a lo que de verdad queda.
+      const { row: current } = await this.sessions.checkpoint(locked, tx);
+      const purchase = temporaryPurchase(input, micros(current.rateMicrosPerHour));
+      checkPurchase(purchase);
+      const [updated] = await tx
+        .update(sessions)
+        .set({ purchasedSeconds: (current.purchasedSeconds ?? 0) + purchase.seconds })
+        .where(eq(sessions.id, current.id))
+        .returning();
+      if (!updated) {
+        throw new Error('No se pudo añadir el tiempo');
+      }
+      await tx.insert(sessionTopups).values({
+        id: newId(),
+        sessionId: updated.id,
+        seconds: purchase.seconds,
+        amountMicros: purchase.charge,
+        paymentMethod: input.paymentMethod,
+        shiftId: shift.id,
+        actor,
+        createdAt: this.clock.now(),
+      });
+      const [pc] = await tx.select({ name: pcs.name }).from(pcs).where(eq(pcs.id, updated.pcId));
+      emit({
+        type: 'session.time_added',
+        version: 1,
+        actor,
+        payload: {
+          sessionId: updated.id,
+          pc: { id: updated.pcId, name: pc?.name ?? '' },
+          seconds: purchase.seconds,
+          amount: { micros: purchase.charge, currency: 'USD' },
+          paymentMethod: input.paymentMethod,
+          shiftId: shift.id,
+        },
+      });
+      return updated;
+    });
+    this.sessions.announce(row);
+    const [described] = await this.describe([row]);
+    if (!described) {
+      throw new Error('No se pudo leer la sesión');
     }
     return described;
   }

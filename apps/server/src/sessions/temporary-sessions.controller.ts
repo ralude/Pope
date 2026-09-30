@@ -1,7 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, Post } from '@nestjs/common';
 import {
   type CashShift,
+  idSchema,
   type StaffProfile,
+  type TemporaryAddTimeRequest,
+  temporaryAddTimeRequestSchema,
   type TemporaryOpenRequest,
   temporaryOpenRequestSchema,
   type TemporarySession,
@@ -34,5 +37,20 @@ export class TemporarySessionsController {
     @CurrentStaff() member: StaffProfile,
   ): Promise<TemporarySession> {
     return this.temporary.open(body, shift, staffActor(member));
+  }
+
+  /**
+   * Añade tiempo a una sesión temporal en curso, con el tiempo o el importe que paga el
+   * cliente, a la tarifa de la sesión (REQ-001-70). Responde 409 sin turno abierto.
+   */
+  @RequiresOpenShift()
+  @Post(':id/time')
+  addTime(
+    @Param('id', new ZodValidationPipe(idSchema)) id: string,
+    @Body(new ZodValidationPipe(temporaryAddTimeRequestSchema)) body: TemporaryAddTimeRequest,
+    @CurrentShift() shift: CashShift,
+    @CurrentStaff() member: StaffProfile,
+  ): Promise<TemporarySession> {
+    return this.temporary.addTime(id, body, shift, staffActor(member));
   }
 }

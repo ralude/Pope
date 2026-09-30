@@ -342,14 +342,16 @@ export class SessionsService implements OnModuleDestroy {
    * gastado (hasta dos filas, combo y dinero), guarda el cierre con su motivo y emite
    * `session.ended`. Por defecto cobra antes hasta ahora; un cierre por falta de latidos
    * pasa `billToNow: false` para cobrar solo hasta el último latido (REQ-001-27) y
-   * `ifNotBeatAfter` para no cerrar una sesión que acaba de latir. Avisa a la PC con
-   * `sessionEnded`. Devuelve la sesión cerrada, o `null` si ya no estaba activa.
+   * `ifNotBeatAfter` para no cerrar una sesión que acaba de latir. Un cierre por
+   * agotamiento pasa `onlyIfExhausted` para no cerrar una sesión a la que se acaba de
+   * añadir tiempo o saldo. Avisa a la PC con `sessionEnded`. Devuelve la sesión cerrada, o
+   * `null` si ya no estaba activa o no se cumplió alguna de esas condiciones.
    */
   async close(
     sessionId: string,
     reason: SessionEndReason,
     actor: Actor,
-    options: { billToNow?: boolean; ifNotBeatAfter?: Date } = {},
+    options: { billToNow?: boolean; ifNotBeatAfter?: Date; onlyIfExhausted?: boolean } = {},
   ): Promise<SessionRow | null> {
     const billToNow = options.billToNow ?? true;
     const ended = await this.events.inTransaction(async (tx, emit) => {
@@ -372,6 +374,12 @@ export class SessionsService implements OnModuleDestroy {
           .from(customers)
           .where(eq(customers.id, locked.customerId))
           .for('update');
+      }
+      if (options.onlyIfExhausted) {
+        const account = await this.accountOf(locked, tx);
+        if (remainingSeconds(locked, account?.balances ?? null) > 0) {
+          return null;
+        }
       }
       const { row } = billToNow ? await this.checkpoint(locked, tx) : { row: locked };
       await this.settle(row, actor, tx);
@@ -627,8 +635,15 @@ export class SessionsService implements OnModuleDestroy {
     const remaining = remainingSeconds(row, account?.balances ?? null);
     if (remaining === 0) {
       // Ya se cobró hasta ahora: el cierre no necesita cobrar otra vez.
-      await this.close(row.id, 'exhausted', { kind: 'system' }, { billToNow: false });
-      return LOCKED_STATE;
+      const closed = await this.close(
+        row.id,
+        'exhausted',
+        { kind: 'system' },
+        { billToNow: false, onlyIfExhausted: true },
+      );
+      // Si no cerró, justo entonces le añadieron tiempo o saldo (o ya la habían cerrado):
+      // se revisa de nuevo con los datos al día.
+      return closed ? LOCKED_STATE : this.review(target);
     }
     this.sendWarning(row, remaining);
     this.watch(row, remaining);
@@ -718,9 +733,10 @@ export class SessionsService implements OnModuleDestroy {
    * Cobra la sesión hasta el instante actual y guarda el resultado. Avanza `lastHeartbeatAt`
    * exactamente los segundos enteros cobrados, no hasta "ahora": así la fracción de segundo
    * se cobra en el siguiente latido y no se pierde (motor de cobro, `applyCheckpoint`).
-   * Si el reloj se corrigió hacia atrás no se cobra nada y la marca no se mueve.
+   * Si el reloj se corrigió hacia atrás no se cobra nada y la marca no se mueve. Debe
+   * llamarse con la fila de la sesión bloqueada (`for update`) dentro de la transacción.
    */
-  private async checkpoint(
+  async checkpoint(
     row: SessionRow,
     tx: Database,
   ): Promise<{
