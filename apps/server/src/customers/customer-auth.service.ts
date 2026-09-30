@@ -9,7 +9,7 @@ import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { customers } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
-import { sameUsername, toCustomer } from './customers.service.js';
+import { requireCustomer, sameUsername } from './customers.service.js';
 
 /** Intentos fallidos seguidos que bloquean el login (REQ-001-52). */
 export const MAX_FAILED_LOGINS = 5;
@@ -112,7 +112,10 @@ export class CustomerAuthService {
       if (row.status !== 'active') {
         return { ok: false, reason: 'account_inactive', status: row.status } as const;
       }
-      return { ok: true, customer: toCustomer(row, this.clock.now()) } as const;
+      return {
+        ok: true,
+        customer: await requireCustomer(tx, row.id, this.clock.now()),
+      } as const;
     });
   }
 
@@ -128,7 +131,7 @@ export class CustomerAuthService {
       }
       const now = this.clock.now();
       if (!this.activeLock(row.lockedUntil)) {
-        return toCustomer(row, now);
+        return requireCustomer(tx, id, now);
       }
       await tx
         .update(customers)
@@ -140,7 +143,7 @@ export class CustomerAuthService {
         actor,
         payload: { customer: { id: row.id, username: row.username } },
       });
-      return toCustomer({ ...row, failedLogins: 0, lockedUntil: null }, now);
+      return requireCustomer(tx, id, now);
     });
   }
 

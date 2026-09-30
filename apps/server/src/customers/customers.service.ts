@@ -6,6 +6,7 @@ import {
   type CustomerPage,
   type CustomerSearchQuery,
   type CustomerStatus,
+  micros,
   newId,
 } from '@pope/shared';
 import { asc, count, eq, ilike, or, type SQL, sql } from 'drizzle-orm';
@@ -13,7 +14,7 @@ import { asc, count, eq, ilike, or, type SQL, sql } from 'drizzle-orm';
 import { PasswordService } from '../auth/password.service.js';
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { customers } from '../db/schema.js';
+import { customerBalances, customers } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
 
 /** Condición "mismo usuario sin distinguir mayúsculas" (índice `customers_username_lower_idx`). */
@@ -42,8 +43,21 @@ function searchCondition(q: string): SQL | undefined {
   return or(...conditions);
 }
 
-/** Cliente para el panel. `now` decide si el bloqueo por intentos sigue vigente. */
-export function toCustomer(row: typeof customers.$inferSelect, now: Date): Customer {
+/** Saldos de la caché; `null` si la cuenta aún no tiene movimientos. */
+interface BalancesRow {
+  money: number | null;
+  combo: number | null;
+}
+
+/**
+ * Cliente para el panel. `now` decide si el bloqueo por intentos sigue vigente. Sin
+ * `balances`, los saldos son cero (cuenta recién creada).
+ */
+export function toCustomer(
+  row: typeof customers.$inferSelect,
+  now: Date,
+  balances: BalancesRow = { money: null, combo: null },
+): Customer {
   return {
     id: row.id,
     username: row.username,
@@ -52,8 +66,36 @@ export function toCustomer(row: typeof customers.$inferSelect, now: Date): Custo
     status: row.status,
     loginLockedUntil:
       row.lockedUntil && row.lockedUntil > now ? row.lockedUntil.toISOString() : null,
+    balances: { moneyMicros: micros(balances.money ?? 0), comboSeconds: balances.combo ?? 0 },
     createdAt: row.createdAt.toISOString(),
   };
+}
+
+/** Clientes con sus saldos (la caché `customer_balances`, que puede no tener fila). */
+function selectCustomers(db: Database) {
+  return db
+    .select({
+      customer: customers,
+      money: customerBalances.moneyMicros,
+      combo: customerBalances.comboSeconds,
+    })
+    .from(customers)
+    .leftJoin(customerBalances, eq(customerBalances.customerId, customers.id));
+}
+
+/** Un cliente con sus saldos, o `null` si no existe. Sirve dentro de una transacción. */
+export async function loadCustomer(db: Database, id: string, now: Date): Promise<Customer | null> {
+  const [row] = await selectCustomers(db).where(eq(customers.id, id));
+  return row ? toCustomer(row.customer, now, row) : null;
+}
+
+/** Como `loadCustomer`, pero responde 404 si no existe. */
+export async function requireCustomer(db: Database, id: string, now: Date): Promise<Customer> {
+  const customer = await loadCustomer(db, id, now);
+  if (!customer) {
+    throw new NotFoundException('No existe ese cliente');
+  }
+  return customer;
 }
 
 /** Cuentas de cliente, creadas y gestionadas desde el panel (REQ-001-01, REQ-001-04). */
@@ -109,9 +151,7 @@ export class CustomersService {
   async search(query: CustomerSearchQuery): Promise<CustomerPage> {
     const where = query.q ? searchCondition(query.q) : undefined;
     const [rows, [totals]] = await Promise.all([
-      this.db
-        .select()
-        .from(customers)
+      selectCustomers(this.db)
         .where(where)
         .orderBy(asc(sql`lower(${customers.username})`))
         .limit(query.limit)
@@ -119,16 +159,15 @@ export class CustomersService {
       this.db.select({ total: count() }).from(customers).where(where),
     ]);
     const now = this.clock.now();
-    return { items: rows.map((row) => toCustomer(row, now)), total: totals?.total ?? 0 };
+    return {
+      items: rows.map((row) => toCustomer(row.customer, now, row)),
+      total: totals?.total ?? 0,
+    };
   }
 
   /** Un cliente; 404 si no existe. */
-  async get(id: string): Promise<Customer> {
-    const [row] = await this.db.select().from(customers).where(eq(customers.id, id));
-    if (!row) {
-      throw new NotFoundException('No existe ese cliente');
-    }
-    return toCustomer(row, this.clock.now());
+  get(id: string): Promise<Customer> {
+    return requireCustomer(this.db, id, this.clock.now());
   }
 
   /**
@@ -142,7 +181,7 @@ export class CustomersService {
         throw new NotFoundException('No existe ese cliente');
       }
       if (row.status === status) {
-        return toCustomer(row, this.clock.now());
+        return requireCustomer(tx, id, this.clock.now());
       }
       await tx.update(customers).set({ status }).where(eq(customers.id, id));
       emit({
@@ -155,7 +194,7 @@ export class CustomersService {
           to: status,
         },
       });
-      return toCustomer({ ...row, status }, this.clock.now());
+      return requireCustomer(tx, id, this.clock.now());
     });
   }
 }

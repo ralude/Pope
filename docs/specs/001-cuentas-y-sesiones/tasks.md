@@ -172,7 +172,7 @@ antes de seguir.
   - **Verificar:** tests de los dos monederos y de la invariante.
   - **Commit:** `feat(server): añade el ledger con los dos saldos`
 
-- [ ] **T19: Recargas**
+- [x] **T19: Recargas**
   - **Cubre:** REQ-001-03
   - **Hacer:** endpoint de recarga (importe y método) ligado al turno, con evento `wallet.recharged`.
   - **Verificar:** tests de recarga, rechazo sin turno e invariante.

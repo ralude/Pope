@@ -15,6 +15,7 @@ import { microsSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
 import { staffRoleSchema, staffStatusSchema } from './staff.js';
 import { weekdaySchema } from './tariff.js';
+import { paymentMethodSchema } from './wallet.js';
 
 const positiveSeconds = z.int().positive().brand<'Seconds'>();
 const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
@@ -45,15 +46,6 @@ export const actorSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('system') }),
 ]);
 export type Actor = z.infer<typeof actorSchema>;
-
-// ─── Enumeraciones del dominio ──────────────────────────────────────────────────────────
-
-/**
- * Métodos de pago en caja (REQ-005-21): efectivo en USD o en Bs, pago móvil y punto de
- * venta. Lista fija por ahora; si la spec 005 los hace configurables, será un evento v2.
- */
-export const paymentMethodSchema = z.enum(['cash_usd', 'cash_ves', 'mobile_payment', 'pos']);
-export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
 
 // ─── Constructor de eventos ─────────────────────────────────────────────────────────────
 

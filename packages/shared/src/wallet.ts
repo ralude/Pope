@@ -23,6 +23,13 @@ export const ledgerKindSchema = z.enum([
 export type LedgerKind = z.infer<typeof ledgerKindSchema>;
 
 /**
+ * Métodos de pago en caja (REQ-005-21): efectivo en USD o en Bs, pago móvil y punto de
+ * venta. Lista fija por ahora; si la spec 005 los hace configurables, será un evento v2.
+ */
+export const paymentMethodSchema = z.enum(['cash_usd', 'cash_ves', 'mobile_payment', 'pos']);
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+
+/**
  * Copia del combo en el momento de la venta: si después se edita o se desactiva, las horas
  * vendidas no cambian (REQ-001-81, ADR-0014).
  */

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import type { DatabaseHandle } from '../db/database.js';
 import { customers, ledger } from '../db/schema.js';
+import { EventsService } from '../events/events.service.js';
 import { FakeClock } from '../testing/clock.js';
 import { createTestDatabase } from '../testing/database.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
@@ -19,7 +20,7 @@ describe('WalletService: ledger y dos saldos (REQ-001-83, REQ-001-89, ADR-0014)'
 
   beforeEach(async () => {
     handle = await createTestDatabase();
-    wallet = new WalletService(handle.db, new FakeClock());
+    wallet = new WalletService(handle.db, new EventsService(handle.db), new FakeClock());
     juan = await insertCustomer('juan');
     maria = await insertCustomer('maria');
   });

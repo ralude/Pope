@@ -1,20 +1,25 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import {
   type Actor,
+  type CashShift,
   type ComboSnapshot,
+  type Customer,
+  type CustomerStatus,
   type CustomerBalances,
   type LedgerKind,
   micros,
   newId,
   type PaymentMethod,
+  type RechargeRequest,
   type Wallet,
 } from '@pope/shared';
 import { and, eq, gte, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { customerBalances, ledger } from '../db/schema.js';
-import type { Transaction } from '../events/events.service.js';
+import { customerBalances, customers, ledger } from '../db/schema.js';
+import { requireCustomer } from '../customers/customers.service.js';
+import { EventsService, type Transaction } from '../events/events.service.js';
 
 /** Un movimiento de saldo (REQ-001-89). */
 export interface LedgerEntry {
@@ -38,6 +43,15 @@ export class InsufficientBalanceError extends ConflictException {
   }
 }
 
+/**
+ * Motivo, para el personal, por el que una cuenta no activa no puede recibir recargas ni
+ * combos (pregunta resuelta de la spec 001, REQ-001-04).
+ */
+export function inactiveAccountMessage(status: Exclude<CustomerStatus, 'active'>): string {
+  const state = status === 'blocked' ? 'bloqueada' : 'desactivada';
+  return `La cuenta está ${state}: actívala antes de cargarle saldo`;
+}
+
 const ZERO: CustomerBalances = { moneyMicros: micros(0), comboSeconds: 0 };
 
 /** Columna de la caché que corresponde a cada monedero. */
@@ -54,8 +68,57 @@ const BALANCE_COLUMN = {
 export class WalletService {
   constructor(
     @Inject(DATABASE) private readonly db: Database,
+    private readonly events: EventsService,
     private readonly clock: Clock,
   ) {}
+
+  /**
+   * Recarga en caja (REQ-001-03): suma el importe al saldo en dinero, ligado al turno de
+   * quien cobra, y emite `wallet.recharged`. El sistema no verifica el pago. Una cuenta
+   * bloqueada o desactivada no puede recibir recargas (REQ-001-04).
+   */
+  async recharge(
+    customerId: string,
+    input: RechargeRequest,
+    shift: CashShift,
+    actor: Actor,
+  ): Promise<Customer> {
+    return this.events.inTransaction(async (tx, emit) => {
+      // Bloquea la fila: un cambio de estado simultáneo espera a que termine la recarga.
+      const [customer] = await tx
+        .select()
+        .from(customers)
+        .where(eq(customers.id, customerId))
+        .for('update');
+      if (!customer) {
+        throw new NotFoundException('No existe ese cliente');
+      }
+      if (customer.status !== 'active') {
+        throw new ConflictException(inactiveAccountMessage(customer.status));
+      }
+      await this.post(tx, {
+        customerId,
+        wallet: 'money',
+        amount: input.amountMicros,
+        kind: 'recharge',
+        actor,
+        shiftId: shift.id,
+        paymentMethod: input.paymentMethod,
+      });
+      emit({
+        type: 'wallet.recharged',
+        version: 1,
+        actor,
+        payload: {
+          customer: { id: customer.id, username: customer.username },
+          amount: { micros: input.amountMicros, currency: 'USD' },
+          paymentMethod: input.paymentMethod,
+          shiftId: shift.id,
+        },
+      });
+      return requireCustomer(tx, customerId, this.clock.now());
+    });
+  }
 
   /** Saldos de la cuenta; ceros si nunca tuvo movimientos. */
   async balances(

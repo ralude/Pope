@@ -2,7 +2,9 @@
 // panel; la PC nunca crea ni guarda cuentas.
 import { z } from 'zod';
 
+import { microsSchema } from './money.js';
 import { idSchema } from './session.js';
+import { customerBalancesSchema, paymentMethodSchema } from './wallet.js';
 
 /**
  * Estado de una cuenta (pregunta resuelta de la spec 001): "bloqueada" (sanción) y
@@ -92,7 +94,7 @@ export const customerSearchQuerySchema = z.object({
 });
 export type CustomerSearchQuery = z.infer<typeof customerSearchQuerySchema>;
 
-/** Cliente tal como lo ve el panel. Los saldos llegan con T18. */
+/** Cliente tal como lo ve el panel, con sus saldos sin contar la sesión en curso. */
 export const customerSchema = z.object({
   id: idSchema,
   username: z.string(),
@@ -101,6 +103,7 @@ export const customerSchema = z.object({
   status: customerStatusSchema,
   /** Fin del bloqueo por intentos fallidos si sigue vigente (REQ-001-52); si no, `null`. */
   loginLockedUntil: z.iso.datetime().nullable(),
+  balances: customerBalancesSchema,
   createdAt: z.iso.datetime(),
 });
 export type Customer = z.infer<typeof customerSchema>;
@@ -111,3 +114,13 @@ export const customerPageSchema = z.object({
   total: z.int().nonnegative(),
 });
 export type CustomerPage = z.infer<typeof customerPageSchema>;
+
+/**
+ * Cuerpo de `POST /customers/:id/recharges` (REQ-001-03): importe en µUSD y método de
+ * pago. El sistema no verifica el pago; lo comprueba el encargado.
+ */
+export const rechargeRequestSchema = z.object({
+  amountMicros: microsSchema.refine((m) => m > 0, 'El importe debe ser mayor que cero'),
+  paymentMethod: paymentMethodSchema,
+});
+export type RechargeRequest = z.infer<typeof rechargeRequestSchema>;
