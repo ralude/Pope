@@ -271,6 +271,19 @@ importers:
         specifier: ~5.0.1
         version: 5.0.1(@types/node@24.13.6)(vite@8.3.1(@types/node@24.13.6)(esbuild@0.28.2)(tsx@4.23.15))
 
+  tools/agent-sim:
+    dependencies:
+      '@pope/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@types/node':
+        specifier: ^24.13.6
+        version: 24.13.6
+      vitest:
+        specifier: ~5.0.1
+        version: 5.0.1(@types/node@24.13.6)(vite@8.3.1(@types/node@24.13.6)(esbuild@0.28.2)(tsx@4.23.15))
+
 packages:
 
   '@borewit/text-codec@0.2.2':

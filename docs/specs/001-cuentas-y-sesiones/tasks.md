@@ -315,7 +315,7 @@ antes de seguir.
   - **Verificar:** tests de `devPcId` y `devPcName` en `shared` (límites 1 y 99, rechaza 0, 100 y 1,5) y de `seedDevPcs` con 40 en el servidor (se puede ejecutar dos veces sin error y sin duplicar).
   - **Commit:** `feat(server): permite crear hasta 99 PCs de ejemplo`
 
-- [ ] **T36: PC simulada**
+- [x] **T36: PC simulada**
   - **Cubre:** plan 001 ("Comportamiento del agente en el canal")
   - **Hacer:** crear el paquete `tools/agent-sim` (`@pope/agent-sim`) copiando las convenciones de `packages/shared`: ESM, `tsconfig.json` y `tsconfig.build.json`, scripts `build`, `start` (`node dist/cli.js`), `typecheck`, `lint` y `test` (Vitest). Y la clase `SimulatedPc` en `src/simulated-pc.ts`:
     - Recibe el número de PC, la URL del canal (`ws://host:3000/pc`) y una fábrica de conexiones (por defecto, el `WebSocket` global), para poder probarla sin servidor.

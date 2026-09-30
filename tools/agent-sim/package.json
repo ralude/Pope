@@ -1,0 +1,21 @@
+{
+  "name": "@pope/agent-sim",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Simulador de PCs de Pope: habla el protocolo del agente contra el nodo local",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/cli.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint --max-warnings=0 .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pope/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.6",
+    "vitest": "~5.0.1"
+  }
+}
