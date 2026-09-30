@@ -132,9 +132,7 @@ export class PcProtocolService {
         }
         return;
       case 'buyCombo':
-        connection.send(
-          protocolError('internal_error', 'Todavía no disponible', message.requestId),
-        );
+        connection.send(await this.sessions.buyCombo(pc.id, message.comboId));
         return;
     }
   }

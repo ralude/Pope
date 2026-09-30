@@ -27,10 +27,11 @@ import { and, eq, lte, type SQL } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { customers, pcs, sessions } from '../db/schema.js';
+import { ComboSalesService } from '../combos/combo-sales.service.js';
+import { combos, customers, pcs, sessions } from '../db/schema.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
-import { WalletService } from '../wallet/wallet.service.js';
+import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
 import { PcConnections, type PcIdentity } from './pc-connections.js';
 import {
   accountBalances,
@@ -56,6 +57,12 @@ const WATCH_SLACK_MS = 20;
  * se cobra (REQ-001-27).
  */
 const ALIVE_MS = 15_000;
+
+/** Usuario y saldos del cliente de una sesión con cuenta. */
+interface AccountView {
+  username: string;
+  balances: CustomerBalances;
+}
 
 /** Lo que la PC dice de su sesión en un `hello` o un `heartbeat`. */
 export interface SessionClaim {
@@ -83,6 +90,7 @@ export class SessionsService implements OnModuleDestroy {
     private readonly events: EventsService,
     private readonly wallet: WalletService,
     private readonly tariffs: TariffsService,
+    private readonly comboSales: ComboSalesService,
     private readonly connections: PcConnections,
     private readonly clock: Clock,
   ) {}
@@ -198,6 +206,96 @@ export class SessionsService implements OnModuleDestroy {
     this.markSeen(pc.id);
     this.watch(started.row, started.remaining);
     return started.state;
+  }
+
+  /**
+   * El cliente compra un combo con su saldo desde el Shell, durante la sesión (REQ-001-85,
+   * CA-001-17). Primero cobra la sesión hasta ahora y después compra, en la misma
+   * transacción: el saldo en vivo es el correcto y desde este instante el tiempo sale de las
+   * horas de combo. Devuelve el `state` actualizado. Solo las cuentas pueden comprar
+   * combos (REQ-001-82).
+   */
+  async buyCombo(pcId: string, comboId: string): Promise<NodeToPcMessage> {
+    let bought: { row: SessionRow; account: AccountView };
+    try {
+      bought = await this.events.inTransaction((tx, emit) =>
+        this.buyComboIn(pcId, comboId, tx, emit),
+      );
+    } catch (error) {
+      if (error instanceof InsufficientBalanceError) {
+        throw new PcRequestRefused(
+          'insufficient_balance',
+          'No tienes saldo suficiente para este combo. Recarga en el mostrador',
+        );
+      }
+      throw error;
+    }
+    const remaining = remainingSeconds(bought.row, bought.account.balances);
+    // Con más tiempo, los avisos que ya se dieron pueden volver a tocar (se rearman).
+    this.sendWarning(bought.row, remaining);
+    this.watch(bought.row, remaining);
+    return activeState(bought.row, bought.account);
+  }
+
+  private async buyComboIn(
+    pcId: string,
+    comboId: string,
+    tx: Transaction,
+    emit: Emit,
+  ): Promise<{ row: SessionRow; account: AccountView }> {
+    const [locked] = await tx
+      .select()
+      .from(sessions)
+      .where(and(eq(sessions.pcId, pcId), eq(sessions.status, 'active')))
+      .for('update');
+    if (!locked) {
+      throw new PcRequestRefused('no_active_session', 'No tienes una sesión abierta');
+    }
+    if (locked.kind !== 'account' || !locked.customerId) {
+      throw new PcRequestRefused(
+        'no_active_session',
+        'Los combos son solo para clientes con cuenta',
+      );
+    }
+    const [customer] = await tx
+      .select()
+      .from(customers)
+      .where(eq(customers.id, locked.customerId))
+      .for('update');
+    if (!customer) {
+      throw new Error(`La sesión ${locked.id} no tiene cliente`);
+    }
+    if (customer.status !== 'active') {
+      throw new PcRequestRefused(
+        'account_inactive',
+        `Tu cuenta está ${customer.status === 'blocked' ? 'bloqueada' : 'desactivada'}. Habla con el encargado`,
+      );
+    }
+    const [combo] = await tx
+      .select({ active: combos.active })
+      .from(combos)
+      .where(eq(combos.id, comboId));
+    if (!combo?.active) {
+      throw new PcRequestRefused('combo_unavailable', 'Ese combo ya no está a la venta');
+    }
+
+    const { row } = await this.checkpoint(locked, tx);
+    await this.comboSales.purchaseIn(
+      tx,
+      emit,
+      customer.id,
+      comboId,
+      { via: 'balance' },
+      { kind: 'customer', customerId: customer.id, username: customer.username },
+      row.id,
+    );
+    return {
+      row,
+      account: {
+        username: customer.username,
+        balances: await this.wallet.balances(customer.id, tx),
+      },
+    };
   }
 
   /**

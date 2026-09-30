@@ -251,11 +251,12 @@ antes de seguir.
   - **Commit:** `feat(server): cierra las sesiones sin latidos cobrando hasta el último`
   - **Decidido al implementarla (2026-09-30):** "no tengo sesión" se entiende solo en el `hello` (un latido con `sessionId` nulo justo tras un login diría lo mismo y cerraría la sesión recién abierta). Los temporizadores de T27 solo cobran si la PC latió hace ≤ 15 s, para no cobrar el hueco. La corrección del restante de una temporal deja el evento `session.remaining_corrected` y no se aplica si ya se restauró.
 
-- [ ] **T30: Compra de combo desde el Shell**
+- [x] **T30: Compra de combo desde el Shell**
   - **Cubre:** REQ-001-85
   - **Hacer:** mensaje `buyCombo` durante la sesión; el `state` se actualiza al momento.
   - **Verificar:** test de compra en plena sesión, con el checkpoint correcto.
   - **Commit:** `feat(server): permite comprar combos desde la PC`
+  - **Decidido al implementarla (2026-09-30):** la compra con saldo (Shell y panel) descuenta también lo que la sesión en curso ya consumió y aún no está en el ledger; sin eso, el saldo podía quedar en negativo al cerrar. Las filas de ledger de una compra hecha en el Shell llevan el `session_id`.
 
 ## Fase 6: Sesiones temporales
 

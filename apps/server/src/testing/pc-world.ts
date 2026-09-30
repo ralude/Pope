@@ -68,6 +68,11 @@ export function login(
   return client.request({ type: 'login', username, password, requestId: 'login-1' });
 }
 
+/** El cliente compra un combo con su saldo desde el Shell; devuelve la respuesta del nodo. */
+export function buyCombo(client: PcTestClient, comboId: string): Promise<NodeToPcMessage> {
+  return client.request({ type: 'buyCombo', comboId, requestId: 'buy-1' });
+}
+
 /** El cliente cierra su sesión desde el Shell; devuelve la respuesta del nodo. */
 export function logout(client: PcTestClient): Promise<NodeToPcMessage> {
   return client.request({ type: 'logout', requestId: 'logout-1' });
