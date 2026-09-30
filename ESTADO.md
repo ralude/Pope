@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T35 terminada (restaurar sesiones interrumpidas). Fin de la fase 6
+**Última actualización:** 2026-09-30 · Correcciones de la revisión de T25–T35 y fase 7 detallada
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T36: Simulador de agentes** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 43 / 60 tareas · fase 7 de 9 (Simulador y rendimiento) |
+| **Siguiente tarea** | **T35a: PCs de ejemplo configurables** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 43 / 64 tareas · fase 7 de 9 (Simulador y rendimiento) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 43 / 60 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 43 / 64 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** Revisión de T25–T35: 10 correcciones (no cobrar el tiempo de una PC muerta, no cerrar una sesión que la PC no llegó a conocer con la columna pc_confirmed_at, restante local en el hello, nada llega tarde tras un cierre, un solo sessionEnded, venta de combo en el panel cobrando antes la sesión, estado de la cuenta al abrir, importes en céntimos, claves de ajustes y compra de combo sin duplicados). Fase 7 partida en T35a, T36, T36a, T36b, T37a y T37 con las decisiones del mantenedor; el plan describe el comportamiento del agente en el canal y AGENTS.md añade el ámbito tools.
 - **2026-09-30:** T35. POST /sessions/:id/restore con la PC de destino: la sesión nueva continúa con el tiempo restante, sin cobro, enlazada a la original y con session.restored. Solo una vez (dice quién y cuándo), hasta 48 h desde el corte y solo si la cortó un corte con tiempo restante. Sin exigir turno. Fin de la fase 6 (Sesiones temporales).
 - **2026-09-30:** T34. GET /sessions/temporary/backup (últimas N por PC, N del ajuste, más las interrumpidas pendientes) y GET /sessions/temporary/interrupted (cerradas sin latidos con tiempo restante, sin restaurar y dentro de 48 h desde el último latido). Cada sesión temporal lleva interruption (pending, restored o expired). Las cerradas por cliente, encargado o agotamiento no aparecen como interrumpidas.
 - **2026-09-30:** T33. Sin código nuevo: el cierre de T28 ya descarta el sobrante de una temporal (cliente o encargado): sin devolución en el ledger ni en los cobros, y el tiempo perdido queda en session.ended. Tests de CA-001-09 y helpers de PcWorld (cashier, api, openTemporary).
@@ -66,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T29. Un proceso (cada 10 s y al arrancar el nodo) cierra como no_heartbeat las sesiones sin latidos más que el tiempo de gracia, cobrando hasta el último latido. hello sin sesión con una activa la cierra al momento; si la PC reconecta con una sesión ya cerrada recibe sessionEnded, y una temporal queda con el menor restante (evento session.remaining_corrected). Los temporizadores de T27 no cobran con la PC en silencio.
 - **2026-09-30:** T28a. Tabla settings (sin fila vale el valor por defecto) y /settings: el personal lee y solo el administrador cambia; un evento setting.changed por ajuste que cambia. Gracia de latidos 3 min (30 s–30 min) y sesiones temporales por PC 3 (3–100). SettingsService.get lo usarán T29 y T34.
 - **2026-09-30:** T27. Cada sesión tiene un temporizador en el Clock del nodo que salta cuando toca el aviso de 5 o 1 min o el agotamiento; el latido hace la misma revisión cada 10 s. Al agotarse cierra con motivo exhausted y la PC se bloquea. Si la PC no está conectada, el aviso se reintenta al volver. El Clock gana schedule() y FakeClock.tick() dispara los temporizadores sin esperar.
-- **2026-09-30:** T28. SessionsService.close liquida el consumo en el ledger (hasta 2 filas: combo y dinero, solo lo que había si el saldo bajó), guarda el motivo, emite session.ended y avisa a la PC con sessionEnded. Cierran el cliente (logout desde el Shell) y el personal (POST /sessions/:id/close: 404, 409, solo encargado y administrador).

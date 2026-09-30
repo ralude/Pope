@@ -297,17 +297,73 @@ antes de seguir.
 
 ## Fase 7: Simulador y rendimiento
 
-- [ ] **T36: Simulador de agentes**
-  - **Cubre:** plan 001
-  - **Hacer:** `tools/agent-sim`: CLI que simula N PCs (`hello`, `login`, `heartbeat` cada 10 s, desconexiones).
-  - **Verificar:** 5 PCs simuladas abren sesión y descuentan saldo contra el servidor local.
-  - **Commit:** `feat(tools): añade el simulador de PCs`
+> **Decidido antes de empezar la fase (2026-09-30, mantenedor).** La fase se parte en
+> tareas pequeñas. El simulador (`tools/agent-sim`, paquete `@pope/agent-sim`) imita el
+> "Comportamiento del agente en el canal" del plan, **sin dependencias nuevas**: usa el
+> `WebSocket` global de Node 24, `node:util` (`parseArgs`) y `node:readline`, y solo depende
+> de `@pope/shared`. Los clientes de prueba se crean **por la API del panel**, como lo haría
+> un encargado, para que queden todos sus eventos; las PCs, con `dev:seed-pcs`. La
+> prueba de carga **no** entra en `pnpm test`, porque necesita el servidor compilado y
+> PostgreSQL real. El ámbito de los commits de `tools/*` es `tools` (AGENTS.md).
+
+- [ ] **T35a: PCs de ejemplo configurables**
+  - **Cubre:** plan 001 (Estrategia de pruebas: carga)
+  - **Hacer:**
+    - Mover `devPcId(n)` y `devPcName(n)` de `apps/server/src/pcs/dev-pcs.ts` a `packages/shared/src/dev-pcs.ts` (exportadas desde el `index.ts`) para que el simulador use los mismos ids. El servidor las importa de `@pope/shared`. Validar que `n` es un entero de 1 a 99 (lanza `RangeError` si no).
+    - `seedDevPcs(db, count = 10)`: crea "PC 01" … "PC NN" que falten.
+    - `dev:seed-pcs` admite `--count N` (con `parseArgs` de `node:util`; por defecto 10, de 1 a 99). El mensaje dice cuántas creó y cuántas ya existían.
+  - **Verificar:** tests de `devPcId` y `devPcName` en `shared` (límites 1 y 99, rechaza 0, 100 y 1,5) y de `seedDevPcs` con 40 en el servidor (se puede ejecutar dos veces sin error y sin duplicar).
+  - **Commit:** `feat(server): permite crear hasta 99 PCs de ejemplo`
+
+- [ ] **T36: PC simulada**
+  - **Cubre:** plan 001 ("Comportamiento del agente en el canal")
+  - **Hacer:** crear el paquete `tools/agent-sim` (`@pope/agent-sim`) copiando las convenciones de `packages/shared`: ESM, `tsconfig.json` y `tsconfig.build.json`, scripts `build`, `start` (`node dist/cli.js`), `typecheck`, `lint` y `test` (Vitest). Y la clase `SimulatedPc` en `src/simulated-pc.ts`:
+    - Recibe el número de PC, la URL del canal (`ws://host:3000/pc`) y una fábrica de conexiones (por defecto, el `WebSocket` global), para poder probarla sin servidor.
+    - Cumple la tabla del plan: `hello` al conectar (con `sessionId` y `localRemainingSeconds` si los tiene), `heartbeat` cada 10 s siempre, adopta el `state` activo, cuenta el restante en local cada segundo, olvida la sesión con `sessionEnded` o `state` bloqueado, y reconecta con espera 1, 2, 4, 8, 16 y 30 s (tope).
+    - Métodos: `start()`, `login(usuario, contraseña)` (devuelve la respuesta del nodo y los milisegundos que tardó, medidos con `performance.now()` desde que envía hasta que recibe `state` o `error`), `logout()`, `networkCut(segundos)` (cierra la conexión, sigue contando y reconecta pasado ese tiempo con su sesión), `reboot()` (cierra, olvida la sesión y reconecta con `sessionId: null`), `powerCut()` (cierra y no reconecta ni late hasta `powerOn()`, que arranca como tras un reinicio), `stop()`.
+    - Valida cada mensaje recibido con `nodeToPcMessageSchema`; uno inválido se registra y se ignora.
+    - Emite eventos (`EventEmitter` o una función de aviso) para que la CLI los muestre: conectada, desconectada, `state`, `warning`, `sessionEnded` y `error`.
+  - **Verificar:** tests unitarios con una conexión falsa y `vi.useFakeTimers()`: contenido del `hello` al principio (sin sesión) y tras adoptar una; latido cada 10 s con sesión y restante; restante que baja en local; `sessionEnded` borra la sesión; un corte de red reconecta con la sesión y su restante; `reboot` manda `sessionId: null`; `powerCut` deja de latir; secuencia de espera 1, 2, 4, 8, 16, 30, 30 s; un mensaje inválido no rompe nada; `login` devuelve la latencia.
+  - **Commit:** `feat(tools): añade la PC simulada`
+
+- [ ] **T36a: CLI del simulador: datos de prueba y ejecución**
+  - **Cubre:** plan 001 (Estrategia de pruebas)
+  - **Hacer:** `src/cli.ts` con subcomandos (argumentos con `parseArgs`):
+    - `seed --url http://127.0.0.1:3000 --user U --password P --customers N --money USD`: inicia sesión del personal con `POST /auth/login` (guarda la cookie), abre turno (`POST /shifts`; si ya hay uno abierto, usa ese) y, para `sim01`…`simNN` (contraseña fija `sim1234`), crea las cuentas que falten (`POST /customers`) y recarga en `cash_usd` hasta llegar a `--money` (lee el saldo con `GET /customers?…`; si ya tiene eso o más, no recarga). Al final cierra el turno que abrió. Imprime una línea por cliente.
+    - `run --url ws://127.0.0.1:3000/pc --pcs 1-5 [--login] [--duration S]`: arranca esas PCs; con `--login`, la PC N inicia sesión como `simNN`. Una línea por evento con hora local, PC y lo que pasó, con `formatDuration` y `formatMoney` de `shared` (p. ej. `18:00:05 PC 05 · sim05 entra · 2:00:00 · 3,00 USD`). Con `--duration`, al terminar hace `logout` en todas y muestra, por PC, el saldo al entrar y al salir.
+  - **Verificar:** tests unitarios del parseo de argumentos (`1-5`, `1,3,7`, errores claros en español). Y a mano, contra PostgreSQL real, con esta receta (anotar la salida en el commit):
+    1. `pnpm build`.
+    2. Si no hay administrador: `DATABASE_URL=… pnpm --filter @pope/server staff:create-admin`. Es interactivo; si no se puede contestar, pedírselo al mantenedor.
+    3. En segundo plano: `POPE_MODE=local DATABASE_URL=… pnpm --filter @pope/server start`.
+    4. `DATABASE_URL=… pnpm --filter @pope/server dev:seed-pcs -- --count 5`.
+    5. `pnpm --filter @pope/agent-sim start -- seed --url http://127.0.0.1:3000 --user … --password … --customers 5 --money 3`.
+    6. `pnpm --filter @pope/agent-sim start -- run --url ws://127.0.0.1:3000/pc --pcs 1-5 --login --duration 120`.
+    - **Esperado:** las 5 PCs entran con el tiempo de la tarifa del día (2:00:00 de lunes a miércoles, 1:30:00 de jueves a domingo) y, al salir, cada una muestra unos 0,05 USD menos (2 min a 1,50 USD/h) o 0,07 USD (a 2,00 USD/h).
+  - **Commit:** `feat(tools): permite preparar datos y lanzar PCs simuladas`
+
+- [ ] **T36b: Consola interactiva del simulador**
+  - **Cubre:** plan 001; la usan T39, T43 y T44 para probar el panel a mano.
+  - **Hacer:** subcomando `interactive --url … --pcs 1-10` que arranca las PCs bloqueadas y lee órdenes con `node:readline`: `login N usuario contraseña`, `logout N`, `red N segundos`, `reinicio N`, `apagon N`, `luz N`, `estado` (una línea por PC: bloqueada o en sesión, quién, restante) y `salir`. Sigue mostrando los eventos como `run`. Una orden mal escrita muestra la ayuda sin cerrar la consola.
+  - **Verificar:** tests unitarios del intérprete de órdenes. A mano con la receta de T36a: una PC entra, `red N 20` y sigue en sesión al volver; `apagon N` y, pasados 3 min, el servidor la cierra (`sessionEnded` con `no_heartbeat` al hacer `luz N`); `reinicio N` con una sesión ya nombrada la cierra al momento.
+  - **Commit:** `feat(tools): añade la consola interactiva del simulador`
+
+- [ ] **T37a: Registro de memoria del servidor**
+  - **Cubre:** ADR-0011
+  - **Hacer:** variable de entorno opcional `POPE_MEMORY_LOG_MS` (validada con zod en la configuración; ausente = desactivado; mínimo 1000). Si está, el servidor registra cada ese tiempo una línea con `Logger` (`Memoria: rss=… MB heapUsed=… MB`, en MB con un decimal) a partir de `process.memoryUsage()`. El temporizador no impide cerrar el proceso (`unref`) y se cancela al cerrar la app.
+  - **Verificar:** test de la configuración (valor válido, ausente, menor de 1000 rechazado) y test con reloj simulado de que registra una línea por intervalo. Documentar la variable en AGENTS.md (sección del servidor).
+  - **Commit:** `feat(server): registra la memoria del proceso si se pide`
 
 - [ ] **T37: Prueba de carga**
   - **Cubre:** REQ-001-50, ADR-0011
-  - **Hacer:** escenario de 40 PCs que mide el p95 del login y la memoria del proceso. Resultados en `docs/specs/001-cuentas-y-sesiones/mediciones.md`.
-  - **Verificar:** p95 < 2 s y memoria < 384 MB, **medido en el i5 de 2ª gen** (o apuntar que falta hacerlo en el hardware real).
-  - **Commit:** `test(server): mide la carga con 40 PCs simuladas`
+  - **Hacer:** subcomando `load --url ws://…/pc --pcs 1-40` y `docs/specs/001-cuentas-y-sesiones/mediciones.md`.
+    - **Fase 1, la que decide:** las 40 PCs conectadas y latiendo cada 10 s. La PC N inicia sesión a los `(N − 1) × 1,5 s` (una cada 1,5 s, como llegan los clientes). Después se mantienen las 40 sesiones **10 minutos** con latidos.
+    - **Fase 2, informativa:** `logout` en todas y 40 logins **a la vez**. Se anota, pero no decide: cada login verifica argon2 (19 MiB) y Node solo calcula 4 a la vez (`UV_THREADPOOL_SIZE` por defecto), así que en ráfaga se ponen en cola.
+    - **Latencia:** la que devuelve `SimulatedPc.login`. Se informa de p50, p95 y máximo de cada fase, con p95 por rango más cercano (la posición `ceil(0,95 × n)` de la lista ordenada). Cualquier `error` en un login hace fallar la prueba.
+    - **Memoria:** el servidor se arranca con `POPE_MEMORY_LOG_MS=5000`. En `mediciones.md` se anota el `rss` máximo del registro durante toda la prueba y el del final de los 10 min.
+    - Al terminar imprime una tabla en Markdown lista para pegar en `mediciones.md`.
+    - `mediciones.md` lleva: equipo (CPU, RAM, sistema, versión de Node y de PostgreSQL, `UV_THREADPOOL_SIZE`), la tabla de T37 y un apartado de T11 (resultados de `bench:argon2`), con **dónde se midió**.
+  - **Verificar:** p95 de la fase 1 < 2 s y `rss` máximo < 384 MB. Preparación: la receta de T36a con `--count 40` y `seed --customers 40 --money 20`. Si se mide en el equipo de desarrollo, `mediciones.md` lo dice y queda pendiente medirlo **en el i5 de 2ª gen** (sigue en "Pendientes del mantenedor" de `ESTADO.md`).
+  - **Commit:** `feat(tools): mide la carga con 40 PCs simuladas`
 
 ## Fase 8: Panel (`apps/panel`)
 
@@ -320,7 +376,7 @@ antes de seguir.
 - [ ] **T39: Mapa de PCs en vivo**
   - **Cubre:** REQ-001-31
   - **Hacer:** cuadrícula de PCs (libre, en uso) con cliente o nombre temporal, quién la abrió y tiempo restante, actualizada por WebSocket.
-  - **Verificar:** con el simulador, el mapa cambia en < 1 s.
+  - **Verificar:** con la consola del simulador (T36b), el mapa cambia en < 1 s.
   - **Commit:** `feat(panel): muestra el mapa de PCs en vivo`
 
 - [ ] **T40: Clientes**
@@ -357,13 +413,13 @@ antes de seguir.
 - [ ] **T44: Sesiones temporales en el panel**
   - **Cubre:** REQ-001-60, REQ-001-61, REQ-001-70, REQ-001-69
   - **Hacer:** diálogos de abrir temporal (tiempo o importe, nombre, método), añadir tiempo y cerrar.
-  - **Verificar:** CA-001-05 y CA-001-10 a mano con el simulador.
+  - **Verificar:** CA-001-05 y CA-001-10 a mano con la consola del simulador (T36b).
   - **Commit:** `feat(panel): gestiona las sesiones temporales`
 
 - [ ] **T45: Interrumpidas y restauración**
   - **Cubre:** REQ-001-64, REQ-001-66, REQ-001-67, REQ-001-68, REQ-001-71
   - **Hacer:** vista de sesiones interrumpidas y del respaldo por PC, con el botón Restaurar y la elección de PC.
-  - **Verificar:** simular un apagón con el simulador y restaurar (CA-001-06).
+  - **Verificar:** simular un apagón con la consola del simulador (`apagon N`, T36b) y restaurar (CA-001-06).
   - **Commit:** `feat(panel): muestra y restaura sesiones interrumpidas`
 
 ## Fase 9: Shell (`apps/shell-ui`)

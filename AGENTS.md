@@ -122,7 +122,7 @@ El mantenedor domina TypeScript pero **no C#**:
 
 - **Conventional Commits** en español: `tipo(ámbito): descripción en imperativo`.
   Tipos: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`, `perf`.
-  Ámbitos: `server`, `panel`, `shell-ui`, `native`, `shared`, `adr`, `specs`, `agents`.
+  Ámbitos: `server`, `panel`, `shell-ui`, `native`, `shared`, `tools`, `adr`, `specs`, `agents`.
 - **Un commit = un cambio lógico**, idealmente una tarea de `tasks.md`. Si el mensaje
   necesita un "y", probablemente son dos commits.
 - No mezcles refactor, formato y funcionalidad en el mismo commit.

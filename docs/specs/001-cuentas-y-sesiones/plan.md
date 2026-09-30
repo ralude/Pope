@@ -94,6 +94,19 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 | PC → nodo | `hello` (identidad de la PC), `heartbeat` (session_id?, restante local), `login` (usuario, contraseña), `logout`, `buyCombo` (combo_id). Los tres últimos admiten un `requestId` opcional |
 | nodo → PC | `state` (bloqueada o en sesión: saldos, tarifa, tiempo total), `warning` (5 o 1 min), `sessionEnded` (motivo), `error` (código, mensaje en español y el `requestId` de la petición que falló, si lo traía) |
 
+**Comportamiento del agente en el canal.** Lo imita el simulador (T36) y lo cumplirá el
+agente real (spec 003). El nodo decide; esto es solo lo que la PC dice y cuándo:
+
+| Momento | Qué hace la PC |
+|---|---|
+| Al conectar | Envía `hello` con su `pcId`, la sesión que cree tener (`sessionId`, o `null`) y, si la tiene, su copia del restante (`localRemainingSeconds`) |
+| Cada 10 s, siempre (también bloqueada) | `heartbeat` con la sesión que cree tener y su restante local |
+| Recibe un `state` activo | Adopta ese `sessionId` y toma `remainingSeconds` como restante; lo descuenta en local cada segundo |
+| Recibe `sessionEnded` o un `state` bloqueado | Se bloquea y olvida la sesión y el restante |
+| Pierde la red (corte breve o largo) | Sigue contando el restante en local; reintenta conectar cada 1, 2, 4… hasta 30 s. Al volver, `hello` con la sesión y el restante que guarda. El nodo decide si sigue o si ya se cerró |
+| Se reinicia la PC | Arranca sin sesión: `hello` con `sessionId: null`. Si el nodo sabe que la PC conocía la sesión, la cierra como `no_heartbeat` |
+| Apagón de la PC | Deja de enviar sin cerrar la conexión. Cuando vuelve la luz, arranca como tras un reinicio |
+
 **API del panel (REST + WebSocket para el mapa en vivo):**
 - `auth`: login y logout del personal (cookie httpOnly).
 - `customers`: listar, buscar, crear, bloquear, recargar, comprar combo.
@@ -138,6 +151,7 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 | `zod`, `uuid` | shared | Validación e ids v7 |
 | `react`, `react-dom`, `wouter` | panel, shell-ui | Router de ~2 KB; **sin librería de componentes** para mantener el panel ligero |
 | `vitest`, `@electric-sql/pglite` | solo desarrollo | Tests con PostgreSQL en WASM, sin Docker en Windows |
+| (ninguna) | `tools/agent-sim` | El simulador usa el `WebSocket` que ya trae Node 24, `node:util` (`parseArgs`) y `node:readline`; solo depende de `@pope/shared`. No se instala en el nodo local |
 
 Carga estimada: 40 PCs × 1 latido/10 s = 4 escrituras/s, trivial para PostgreSQL incluso
 con disco mecánico.
