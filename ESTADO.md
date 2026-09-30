@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T28 terminada (cierre de sesiones)
+**Última actualización:** 2026-09-30 · T27 terminada (avisos y agotamiento)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T27: Avisos y agotamiento** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 34 / 60 tareas · fase 5 de 9 (Sesiones con cuenta) |
+| **Siguiente tarea** | **T28a: Ajustes del nodo** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 35 / 60 tareas · fase 5 de 9 (Sesiones con cuenta) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -42,7 +42,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 34 / 60 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 35 / 60 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -55,6 +55,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T27. Cada sesión tiene un temporizador en el Clock del nodo que salta cuando toca el aviso de 5 o 1 min o el agotamiento; el latido hace la misma revisión cada 10 s. Al agotarse cierra con motivo exhausted y la PC se bloquea. Si la PC no está conectada, el aviso se reintenta al volver. El Clock gana schedule() y FakeClock.tick() dispara los temporizadores sin esperar.
 - **2026-09-30:** T28. SessionsService.close liquida el consumo en el ledger (hasta 2 filas: combo y dinero, solo lo que había si el saldo bajó), guarda el motivo, emite session.ended y avisa a la PC con sessionEnded. Cierran el cliente (logout desde el Shell) y el personal (POST /sessions/:id/close: 404, 409, solo encargado y administrador).
 - **2026-09-30:** T26. Cada heartbeat cobra hasta ahora con el reloj del nodo (combo primero, luego dinero; las temporales, su tiempo comprado), guarda la sesión y responde con el state. La marca avanza segundos enteros, sin perder fracciones. T27 pasa después de T28 porque cerrar por agotamiento necesita la liquidación del ledger. Helper de test PcWorld.
 - **2026-09-30:** T25. Mensaje login de la PC: valida credenciales, rechaza si la PC o la cuenta ya tienen sesión (dice en qué PC), exige saldo para 1 min y abre la sesión copiando la tarifa del día con session.started. SessionsService.stateFor da el state de cada PC (también al reconectar).
@@ -64,4 +65,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T21. Tabla `combos` (no se borran, se desactivan) y `/combos`: el personal consulta; el administrador crea y edita con `combo.created` y `combo.updated`. `comboRatePerHour` y `comboDiscounts` en `shared` (el panel los usará en vivo).
 - **2026-09-30:** T20. Tabla `tariff_days` (7 filas; la migración pone lunes–miércoles 1,50 y jueves–domingo 2,00), `GET /tariffs` (personal) y `PUT /tariffs` (administrador: un precio para varios días) con `tariff.changed` solo de los días que cambian. `TariffsService.rateAt(instante)` para las sesiones.
 - **2026-09-30:** T19. `POST /customers/:id/recharges` (encargado y administrador, con `@RequiresOpenShift()`): recarga ligada al turno con `wallet.recharged`; rechaza cuentas bloqueadas o desactivadas. El cliente del panel lleva `balances` (dinero y combo). `paymentMethodSchema` pasa a `wallet.ts`.
-- **2026-09-30:** T18. Tablas `ledger` (solo inserción; importe con signo en µUSD o segundos) y `customer_balances` (caché que nunca baja de cero). `WalletService.post(tx, movimiento)` suma y comprueba en una sola sentencia y lanza `InsufficientBalanceError` (409); helper `assertBalancesMatchLedger`.

@@ -223,7 +223,7 @@ antes de seguir.
   - **Verificar:** tests de CA-001-12, CA-001-16 y CA-001-19 con reloj simulado.
   - **Commit:** `feat(server): cobra la sesión en cada latido`
 
-- [ ] **T27: Avisos y agotamiento**
+- [x] **T27: Avisos y agotamiento**
   - **Cubre:** REQ-001-24, REQ-001-25
   - **Hacer:** temporizador por sesión, envío de `warning` a 5 y 1 min, y cierre al agotarse.
   - **Verificar:** tests con reloj simulado.

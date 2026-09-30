@@ -6,6 +6,7 @@ import { sessions } from '../db/schema.js';
 import { devPcId } from '../pcs/dev-pcs.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { activeSession, heartbeat, login, PcWorld, summary } from '../testing/pc-world.js';
+import { WalletService } from '../wallet/wallet.service.js';
 
 const MINUTE = 60_000;
 
@@ -112,13 +113,18 @@ describe('latidos y checkpoint (e2e, REQ-001-11, REQ-001-12, REQ-001-23)', () =>
 
   it('el saldo nunca queda negativo si el latido llega muy tarde', async () => {
     world = await PcWorld.start(MONDAY);
-    await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
+    const juan = await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
     const pc = await world.pc(5);
     await login(pc, 'juan');
 
+    // Pasan 3 h con solo 2 h pagadas: se cobra lo que había y la sesión se cierra.
     world.clock.advance(3 * 60 * MINUTE);
-    expect(summary(await heartbeat(pc))).toMatchObject({ remainingSeconds: 0, money: 0 });
+    expect(await heartbeat(pc)).toMatchObject({ type: 'sessionEnded', reason: 'exhausted' });
     expect((await storedSession(5)).moneySeconds).toBe(7200);
+    expect(await world.testApp.app.get(WalletService).balances(juan.id)).toEqual({
+      moneyMicros: 0,
+      comboSeconds: 0,
+    });
   });
 
   it('un reloj que retrocede no cobra ni mueve la marca', async () => {
@@ -159,9 +165,9 @@ describe('latidos y checkpoint (e2e, REQ-001-11, REQ-001-12, REQ-001-23)', () =>
     expect(session.remainingSeconds).toBe(2400);
     expect((await storedSession(5)).usedSeconds).toBe(1200);
 
-    // Más tiempo del comprado no se usa: el restante se queda en 0.
+    // Más tiempo del comprado no se usa: se agota y la sesión se cierra.
     world.clock.advance(60 * MINUTE);
-    expect(activeSession(await heartbeat(pc)).remainingSeconds).toBe(0);
-    expect((await storedSession(5)).usedSeconds).toBe(3600);
+    expect(await heartbeat(pc)).toMatchObject({ type: 'sessionEnded', reason: 'exhausted' });
+    expect(await storedSession(5)).toMatchObject({ status: 'ended', usedSeconds: 3600 });
   });
 });

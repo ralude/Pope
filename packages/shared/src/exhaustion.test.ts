@@ -4,6 +4,7 @@ import { type AccountBalances, applyCheckpoint, startUsage } from './billing.js'
 import {
   applyTemporaryCheckpoint,
   pendingWarnings,
+  secondsUntilAttention,
   secondsUntilExhausted,
   type TemporaryUsage,
   temporaryRemaining,
@@ -123,5 +124,23 @@ describe('pendingWarnings (REQ-001-24)', () => {
     // Con 2 min tras la compra, el aviso de 5 min ya se envió y no se repite.
     const { sends } = simulate([300, 60, 120, 60]);
     expect(sends).toEqual([5, 1, null, 1]);
+  });
+});
+
+describe('secondsUntilAttention (REQ-001-24, REQ-001-25)', () => {
+  const until = (remaining: number) => secondsUntilAttention(seconds(remaining));
+
+  it('espera hasta que queden 5 min, luego hasta 1 min y luego hasta el agotamiento', () => {
+    expect(until(7200)).toBe(6900);
+    expect(until(301)).toBe(1);
+    expect(until(300)).toBe(240);
+    expect(until(61)).toBe(1);
+    expect(until(60)).toBe(60);
+    expect(until(1)).toBe(1);
+  });
+
+  it('no espera nada si ya se agotó', () => {
+    expect(until(0)).toBe(0);
+    expect(until(-5)).toBe(0);
   });
 });

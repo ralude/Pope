@@ -75,3 +75,13 @@ export function pendingWarnings(remaining: Seconds, sent: readonly WarningMinute
   const send = due.at(-1) ?? null;
   return { send, sent: send === null ? stillSent : [...reached] };
 }
+
+/**
+ * Segundos hasta el próximo momento que requiere atención de una sesión con `remaining`
+ * segundos: el siguiente aviso que aún no se alcanzó, o el agotamiento (REQ-001-24,
+ * REQ-001-25). El nodo programa ahí su temporizador. Con `remaining` ≤ 0 no hay espera.
+ */
+export function secondsUntilAttention(remaining: Seconds): Seconds {
+  const ahead = WARNINGS.map((w) => remaining - w * SECONDS_PER_MINUTE).filter((s) => s > 0);
+  return seconds(Math.max(0, Math.min(remaining, ...ahead)));
+}

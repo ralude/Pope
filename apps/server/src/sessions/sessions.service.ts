@@ -1,4 +1,11 @@
-import { ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+  type OnModuleDestroy,
+} from '@nestjs/common';
 import {
   type Actor,
   applyCheckpoint,
@@ -7,13 +14,16 @@ import {
   type CustomerBalances,
   newId,
   type NodeToPcMessage,
+  pendingWarnings,
   seconds,
+  secondsUntilAttention,
   secondsUntilExhausted,
   type SessionEndReason,
   startUsage,
   temporaryRemaining,
+  type WarningMinutes,
 } from '@pope/shared';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, type SQL } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
@@ -27,6 +37,7 @@ import {
   activeState,
   LOCKED_STATE,
   PcRequestRefused,
+  remainingSeconds,
   type SessionRow,
   temporaryUsageOf,
   usageOf,
@@ -35,13 +46,22 @@ import {
 /** Saldo mínimo para abrir una sesión: el de 1 minuto (REQ-001-20). */
 export const MIN_SESSION_SECONDS = 60;
 
+/** Como mucho, cada sesión se revisa cada 5 min aunque le quede mucho tiempo. */
+const MAX_WATCH_MS = 5 * 60_000;
+/** Margen para que el temporizador no salte unos milisegundos antes del segundo justo. */
+const WATCH_SLACK_MS = 20;
+
 /**
  * Sesiones de uso de las PCs (plan 001). El nodo es la fuente de verdad del tiempo y del
  * saldo; la PC solo muestra el `state` que le envía (ADR-0007).
  */
 @Injectable()
-export class SessionsService {
+export class SessionsService implements OnModuleDestroy {
   private readonly logger = new Logger('Sessions');
+  /** Cómo cancelar el temporizador de cada sesión vigilada. */
+  private readonly timers = new Map<string, () => void>();
+  /** Avisos ya enviados de cada sesión (5 y 1 min). Se pierden al reiniciar el nodo. */
+  private readonly warned = new Map<string, WarningMinutes[]>();
 
   constructor(
     @Inject(DATABASE) private readonly db: Database,
@@ -77,7 +97,7 @@ export class SessionsService {
    * Lanza `PcRequestRefused` si no se puede abrir.
    */
   async startAccountSession(pc: PcIdentity, customer: Customer): Promise<NodeToPcMessage> {
-    return this.events.inTransaction(async (tx, emit) => {
+    const started = await this.events.inTransaction(async (tx, emit) => {
       // Bloquea la PC y la cuenta: un login simultáneo en otra PC, o una sesión temporal
       // abierta a la vez en esta, esperan a que termine.
       await tx.select({ id: pcs.id }).from(pcs).where(eq(pcs.id, pc.id)).for('update');
@@ -104,9 +124,8 @@ export class SessionsService {
       const now = this.clock.now();
       const rate = await this.tariffs.rateAt(now, tx);
       const balances = await this.wallet.balances(customer.id, tx);
-      if (
-        secondsUntilExhausted(startUsage(rate), accountBalances(balances)) < MIN_SESSION_SECONDS
-      ) {
+      const remaining = secondsUntilExhausted(startUsage(rate), accountBalances(balances));
+      if (remaining < MIN_SESSION_SECONDS) {
         throw new PcRequestRefused(
           'insufficient_balance',
           'No tienes saldo para 1 minuto. Recarga en el mostrador',
@@ -146,8 +165,14 @@ export class SessionsService {
           rate: { micros: rate, currency: 'USD' },
         },
       });
-      return activeState(row, { username: customer.username, balances });
+      return {
+        row,
+        remaining,
+        state: activeState(row, { username: customer.username, balances }),
+      };
     });
+    this.watch(started.row, started.remaining);
+    return started.state;
   }
 
   /**
@@ -234,6 +259,7 @@ export class SessionsService {
       return closed;
     });
     if (ended) {
+      this.unwatch(ended.id);
       this.connections.send(ended.pcId, {
         type: 'sessionEnded',
         sessionId: ended.id,
@@ -323,23 +349,101 @@ export class SessionsService {
   /**
    * Latido de la PC: cobra la sesión activa hasta ahora con el reloj del nodo (REQ-001-23,
    * ADR-0007), guarda el consumo en su fila (REQ-001-63) y devuelve el `state` para que el
-   * Shell actualice tiempo y saldo (REQ-001-12). Sin sesión activa, devuelve la pantalla
-   * de bloqueo.
+   * Shell actualice tiempo y saldo (REQ-001-12). Además revisa si toca avisar o cerrar
+   * (`review`). Sin sesión activa, o si acaba de agotarse, devuelve la pantalla de bloqueo.
    */
-  async heartbeat(pcId: string): Promise<NodeToPcMessage> {
-    return this.events.inTransaction(async (tx) => {
-      // Bloquea la fila: un cierre o un latido simultáneos esperan a que termine este.
+  heartbeat(pcId: string): Promise<NodeToPcMessage> {
+    return this.review(eq(sessions.pcId, pcId));
+  }
+
+  /**
+   * Cobra la sesión activa que cumple `target` hasta ahora y actúa según lo que le queda
+   * (REQ-001-24, REQ-001-25): si se agotó, la cierra; si toca, avisa a 5 y 1 min; y
+   * programa la próxima revisión. La llaman el latido de la PC y el temporizador de la
+   * sesión. Devuelve el `state` que debe ver la PC.
+   */
+  private async review(target: SQL): Promise<NodeToPcMessage> {
+    const checked = await this.events.inTransaction(async (tx) => {
+      // Bloquea la fila: un cierre o una revisión simultáneos esperan a que termine esta.
       const [locked] = await tx
         .select()
         .from(sessions)
-        .where(and(eq(sessions.pcId, pcId), eq(sessions.status, 'active')))
+        .where(and(target, eq(sessions.status, 'active')))
         .for('update');
-      if (!locked) {
-        return LOCKED_STATE;
-      }
-      const { row, account } = await this.checkpoint(locked, tx);
-      return activeState(row, account);
+      return locked ? this.checkpoint(locked, tx) : null;
     });
+    if (!checked) {
+      return LOCKED_STATE;
+    }
+    const { row, account } = checked;
+    const remaining = remainingSeconds(row, account?.balances ?? null);
+    if (remaining === 0) {
+      // Ya se cobró hasta ahora: el cierre no necesita cobrar otra vez.
+      await this.close(row.id, 'exhausted', { kind: 'system' }, { billToNow: false });
+      return LOCKED_STATE;
+    }
+    this.sendWarning(row, remaining);
+    this.watch(row, remaining);
+    return activeState(row, account);
+  }
+
+  /** Envía el aviso de 5 o 1 min si toca. Si la PC no está conectada, se reintenta luego. */
+  private sendWarning(row: SessionRow, remaining: number): void {
+    const check = pendingWarnings(seconds(remaining), this.warned.get(row.id) ?? []);
+    if (check.send !== null) {
+      const delivered = this.connections.send(row.pcId, {
+        type: 'warning',
+        sessionId: row.id,
+        minutesLeft: check.send,
+      });
+      if (!delivered) {
+        return;
+      }
+    }
+    this.warned.set(row.id, check.sent);
+  }
+
+  /**
+   * Programa la próxima revisión de la sesión: cuando le toque el siguiente aviso o se
+   * agote (`secondsUntilAttention`), o ya mismo si hay un aviso pendiente y la PC está
+   * conectada (una sesión que empieza con menos de 5 min). Si cambia lo que le queda (una
+   * recarga, una compra), el temporizador puede saltar antes o después de lo justo: da
+   * igual, porque cada revisión recalcula todo y reprograma, y el latido de la PC revisa
+   * además cada 10 s.
+   */
+  private watch(row: SessionRow, remaining: number): void {
+    this.timers.get(row.id)?.();
+    const due =
+      this.connections.isConnected(row.pcId) &&
+      pendingWarnings(seconds(remaining), this.warned.get(row.id) ?? []).send !== null;
+    const wait = due ? 0 : secondsUntilAttention(seconds(remaining)) * 1000;
+    const deadline = row.lastHeartbeatAt.getTime() + wait;
+    const delay = Math.min(Math.max(0, deadline - this.clock.now().getTime()), MAX_WATCH_MS);
+    this.timers.set(
+      row.id,
+      this.clock.schedule(delay + WATCH_SLACK_MS, async () => {
+        this.timers.delete(row.id);
+        try {
+          await this.review(eq(sessions.id, row.id));
+        } catch (error) {
+          this.logger.error(`Error al revisar la sesión ${row.id}`, error);
+        }
+      }),
+    );
+  }
+
+  /** Deja de vigilar una sesión que se cerró. */
+  private unwatch(sessionId: string): void {
+    this.timers.get(sessionId)?.();
+    this.timers.delete(sessionId);
+    this.warned.delete(sessionId);
+  }
+
+  onModuleDestroy(): void {
+    for (const cancel of this.timers.values()) {
+      cancel();
+    }
+    this.timers.clear();
   }
 
   /**
