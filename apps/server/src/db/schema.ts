@@ -11,6 +11,7 @@ import type {
   PaymentMethod,
   StaffRole,
   Wallet,
+  Weekday,
 } from '@pope/shared';
 import { sql } from 'drizzle-orm';
 import {
@@ -191,5 +192,24 @@ export const customerBalances = pgTable(
   (t) => [
     check('customer_balances_money_nonnegative', sql`${t.moneyMicros} >= 0`),
     check('customer_balances_combo_nonnegative', sql`${t.comboSeconds} >= 0`),
+  ],
+);
+
+/**
+ * Tarifa semanal (REQ-001-10, REQ-001-15): siete filas fijas, una por día (1 = lunes …
+ * 7 = domingo). Los valores iniciales los pone la migración.
+ */
+export const tariffDays = pgTable(
+  'tariff_days',
+  {
+    weekday: integer('weekday').$type<Weekday>().primaryKey(),
+    rateMicrosPerHour: bigint('rate_micros_per_hour', { mode: 'number' }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    /** Quién hizo el último cambio; `null` en los valores iniciales. */
+    updatedBy: jsonb('updated_by').$type<Actor>(),
+  },
+  (t) => [
+    check('tariff_days_weekday_check', sql`${t.weekday} between 1 and 7`),
+    check('tariff_days_rate_positive', sql`${t.rateMicrosPerHour} > 0`),
   ],
 );

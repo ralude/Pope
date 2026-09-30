@@ -57,6 +57,13 @@
       "when": 1790747254612,
       "tag": "0007_ledger",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790747770423,
+      "tag": "0008_tariff_days",
+      "breakpoints": true
     }
   ]
 }

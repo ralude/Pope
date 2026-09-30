@@ -66,3 +66,16 @@ export function rateFor(table: TariffTable, instant: Date): Micros {
   }
   return day.rateMicrosPerHour;
 }
+
+/**
+ * Cuerpo de `PUT /tariffs`: un mismo precio para uno o varios días (REQ-001-15). Solo el
+ * administrador. Cada guardado con cambios genera un evento `tariff.changed`.
+ */
+export const tariffUpdateRequestSchema = z.object({
+  weekdays: z
+    .array(weekdaySchema)
+    .min(1, 'Elige al menos un día')
+    .refine((days) => new Set(days).size === days.length, 'Hay días repetidos'),
+  rateMicrosPerHour: tariffDaySchema.shape.rateMicrosPerHour,
+});
+export type TariffUpdateRequest = z.infer<typeof tariffUpdateRequestSchema>;

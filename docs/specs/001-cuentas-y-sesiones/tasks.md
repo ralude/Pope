@@ -178,7 +178,7 @@ antes de seguir.
   - **Verificar:** tests de recarga, rechazo sin turno e invariante.
   - **Commit:** `feat(server): permite recargar saldo desde el panel`
 
-- [ ] **T20: Tarifas semanales**
+- [x] **T20: Tarifas semanales**
   - **Cubre:** REQ-001-10, REQ-001-15
   - **Hacer:** tabla `tariff_days` con los valores iniciales (lunes–miércoles 1,50; jueves–domingo 2,00), `GET` y `PUT` de varios días a la vez (solo administrador), y evento con los valores anteriores y los nuevos.
   - **Verificar:** test de CA-001-20.

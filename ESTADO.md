@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T19 terminada (recargas)
+**Última actualización:** 2026-09-30 · T20 terminada (tarifas semanales)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T20: Tarifas semanales** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 26 / 60 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
+| **Siguiente tarea** | **T21: Combos** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 27 / 60 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -42,7 +42,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 26 / 60 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 27 / 60 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -55,6 +55,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T20. Tabla `tariff_days` (7 filas; la migración pone lunes–miércoles 1,50 y jueves–domingo 2,00), `GET /tariffs` (personal) y `PUT /tariffs` (administrador: un precio para varios días) con `tariff.changed` solo de los días que cambian. `TariffsService.rateAt(instante)` para las sesiones.
 - **2026-09-30:** T19. `POST /customers/:id/recharges` (encargado y administrador, con `@RequiresOpenShift()`): recarga ligada al turno con `wallet.recharged`; rechaza cuentas bloqueadas o desactivadas. El cliente del panel lleva `balances` (dinero y combo). `paymentMethodSchema` pasa a `wallet.ts`.
 - **2026-09-30:** T18. Tablas `ledger` (solo inserción; importe con signo en µUSD o segundos) y `customer_balances` (caché que nunca baja de cero). `WalletService.post(tx, movimiento)` suma y comprueba en una sola sentencia y lanza `InsufficientBalanceError` (409); helper `assertBalancesMatchLedger`.
 - **2026-09-30:** Decisiones del mantenedor (se añade T28a; 60 tareas): WebSocket con `ws` y despachador propio por `type`, más `requestId` opcional (ADR-0003); tras un corte de red la sesión cerrada sin latidos sigue cerrada y la temporal corrige su restante con el de la PC (T29 desbloqueada); las temporales cobradas por minutos se redondean al céntimo más cercano; tiempo de gracia y respaldo por PC en la tabla `settings` (T28a).
@@ -71,5 +72,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
   usuario de 3–32 `[A-Za-z0-9._-]`, contraseña ≥ 4 y teléfono venezolano normalizado.
 - **2026-09-25:** T14d. `POST /staff`, `GET /staff` y `PATCH /staff/:id/status` (solo
   administrador) con `staff.status_changed`. **Fin de la fase 3** (servidor base).
-- **2026-09-25:** T14c. CLI `staff:create-admin` (contraseña sin eco; admite entrada
-  redirigida). Probada de punta a punta con PostgreSQL 18: CLI → login → `/auth/me`.
