@@ -281,11 +281,12 @@ antes de seguir.
   - **Commit:** `feat(server): descarta el tiempo sobrante al cerrar una temporal`
   - **Hecho sin código nuevo (2026-09-30):** el cierre de T28 ya no devuelve nada en las temporales (no escribe en el ledger ni toca los cobros) y anota el sobrante en `session.ended`; solo faltaba demostrarlo, así que el commit es `test(server): comprueba que cerrar una temporal descarta el tiempo sobrante`. Que la sesión no salga en "interrumpidas" (solo entran las de motivo `no_heartbeat`) se comprueba en T34 y T35.
 
-- [ ] **T34: Respaldo y sesiones interrumpidas**
+- [x] **T34: Respaldo y sesiones interrumpidas**
   - **Cubre:** REQ-001-63, REQ-001-64, REQ-001-65, REQ-001-66
   - **Hacer:** consultas de las últimas N por PC (N del ajuste de T28a, ≥ 3) y de las interrumpidas pendientes.
   - **Verificar:** test de CA-001-07; las pendientes siguen visibles aunque haya más de N sesiones nuevas.
   - **Commit:** `feat(server): conserva el respaldo de sesiones temporales`
+  - **Decidido al implementarla (2026-09-30):** `GET /sessions/temporary/backup` y `GET /sessions/temporary/interrupted`, de solo lectura para todo el personal (también el dueño). Las sesiones nunca se borran; el respaldo solo decide cuáles se muestran: las últimas N por PC más las interrumpidas pendientes. Las 48 h de REQ-001-71 cuentan desde el **último latido** (el corte), no desde el cierre del nodo: así CA-001-11 (corte a las 18:00, caducada el miércoles a las 18:01) se cumple. Cada sesión lleva `interruption` (`pending`, `restored` o `expired`, con quién restauró y cuándo) o `null`.
 
 - [ ] **T35: Restaurar sesiones interrumpidas**
   - **Cubre:** REQ-001-67, REQ-001-68, REQ-001-71

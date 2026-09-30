@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { usd } from './money.js';
 import {
   defaultTemporaryName,
+  interruptionOf,
   temporaryAddTimeRequestSchema,
   temporaryByAmount,
   temporaryByMinutes,
@@ -54,6 +55,48 @@ describe('nombre por defecto (REQ-001-61)', () => {
     expect(defaultTemporaryName('PC 12', new Date('2026-09-29T04:05:00Z'))).toBe(
       'Temporal · PC 12 · 00:05',
     );
+  });
+});
+
+describe('sesiones interrumpidas (REQ-001-66, REQ-001-68, REQ-001-71)', () => {
+  // El corte fue el lunes 28 a las 18:00 en Caracas (22:00 UTC).
+  const cut = new Date('2026-09-28T22:00:00Z');
+  const base = {
+    endReason: 'no_heartbeat',
+    remainingSeconds: 2400,
+    lastBeatAt: cut,
+    restoredBy: null,
+  };
+  const at = (iso: string) => interruptionOf({ ...base, now: new Date(iso) });
+
+  it('está pendiente durante 48 h desde el último latido y después caduca', () => {
+    expect(at('2026-09-28T22:30:00Z')).toMatchObject({
+      status: 'pending',
+      interruptedAt: '2026-09-28T22:00:00.000Z',
+      expiresAt: '2026-09-30T22:00:00.000Z',
+      restoredBy: null,
+    });
+    // El miércoles a las 18:00 (justo 48 h) aún se puede; a las 18:01 (CA-001-11), ya no.
+    expect(at('2026-09-30T22:00:00Z')?.status).toBe('pending');
+    expect(at('2026-09-30T22:01:00Z')?.status).toBe('expired');
+  });
+
+  it('si ya se restauró, dice quién y cuándo, aunque haya caducado', () => {
+    const restoredBy = { name: 'Ana', at: new Date('2026-09-28T22:31:00Z'), sessionId: 'nueva' };
+    expect(
+      interruptionOf({ ...base, restoredBy, now: new Date('2026-10-05T00:00:00Z') }),
+    ).toMatchObject({
+      status: 'restored',
+      restoredBy: { name: 'Ana', at: '2026-09-28T22:31:00.000Z', sessionId: 'nueva' },
+    });
+  });
+
+  it('solo cuentan las cerradas sin latidos que tenían tiempo restante', () => {
+    const now = new Date('2026-09-28T22:30:00Z');
+    for (const endReason of ['customer', 'staff', 'exhausted', null]) {
+      expect(interruptionOf({ ...base, endReason, now })).toBeNull();
+    }
+    expect(interruptionOf({ ...base, remainingSeconds: 0, now })).toBeNull();
   });
 });
 

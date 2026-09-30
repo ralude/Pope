@@ -11,6 +11,7 @@ import { PcProtocolService } from './pc-protocol.service.js';
 import { SessionsController } from './sessions.controller.js';
 import { SessionsService } from './sessions.service.js';
 import { StaleSessionsJob } from './stale-sessions.job.js';
+import { TemporaryBackupController } from './temporary-backup.controller.js';
 import { TemporarySessionsController } from './temporary-sessions.controller.js';
 import { TemporarySessionsService } from './temporary-sessions.service.js';
 
@@ -20,7 +21,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
  */
 @Module({
   imports: [CombosModule, CustomersModule, SettingsModule, TariffsModule, WalletModule],
-  controllers: [SessionsController, TemporarySessionsController],
+  controllers: [SessionsController, TemporarySessionsController, TemporaryBackupController],
   providers: [
     PcConnections,
     SessionsService,

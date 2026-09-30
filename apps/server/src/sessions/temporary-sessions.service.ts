@@ -9,22 +9,27 @@ import {
   type Actor,
   type CashShift,
   defaultTemporaryName,
+  interruptionOf,
   MAX_TEMPORARY_SECONDS,
   micros,
   newId,
+  RESTORE_WINDOW_MS,
   type TemporaryAddTimeRequest,
+  type TemporaryBackup,
   type TemporaryOpenRequest,
   type TemporaryPurchase,
   temporaryPurchase,
   temporaryRemaining,
   type TemporarySession,
 } from '@pope/shared';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { pcs, sessions, sessionTopups } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
+import { SettingsService } from '../settings/settings.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { PcConnections } from './pc-connections.js';
 import { type SessionRow, temporaryUsageOf } from './session-state.js';
@@ -57,6 +62,7 @@ export class TemporarySessionsService {
     @Inject(DATABASE) private readonly db: Database,
     private readonly events: EventsService,
     private readonly tariffs: TariffsService,
+    private readonly settings: SettingsService,
     private readonly connections: PcConnections,
     private readonly sessions: SessionsService,
     private readonly clock: Clock,
@@ -218,15 +224,85 @@ export class TemporarySessionsService {
   }
 
   /**
+   * Respaldo de sesiones temporales (REQ-001-64, REQ-001-65): las últimas N de cada PC, con
+   * N del ajuste del administrador (mínimo 3), más las interrumpidas que siguen pendientes
+   * de restaurar, aunque la PC haya tenido más sesiones después (REQ-001-71). Las sesiones
+   * nunca se borran: esto solo decide cuáles se muestran. De la más reciente a la más antigua.
+   */
+  async backup(): Promise<TemporaryBackup> {
+    const { temporarySessionsKeptPerPc: keptPerPc } = await this.settings.get();
+    const ranked = this.db
+      .select({
+        id: sessions.id,
+        rank: sql<number>`row_number() over (partition by ${sessions.pcId} order by ${sessions.startedAt} desc, ${sessions.id} desc)`.as(
+          'rank',
+        ),
+      })
+      .from(sessions)
+      .where(eq(sessions.kind, 'temporary'))
+      .as('ranked');
+    const recent = await this.db
+      .select({ id: ranked.id })
+      .from(ranked)
+      .where(lte(ranked.rank, keptPerPc));
+    const pending = await this.pendingInterrupted();
+    const ids = [...new Set([...recent.map((row) => row.id), ...pending.map((row) => row.id)])];
+    const rows =
+      ids.length === 0
+        ? []
+        : await this.db
+            .select()
+            .from(sessions)
+            .where(inArray(sessions.id, ids))
+            .orderBy(desc(sessions.startedAt), desc(sessions.id));
+    return { keptPerPc, sessions: await this.describe(rows) };
+  }
+
+  /**
+   * "Sesiones interrumpidas" (REQ-001-66): las cerradas por falta de latidos con tiempo
+   * restante que aún se pueden restaurar. Primero la que se cortó más recientemente.
+   */
+  async interrupted(): Promise<TemporarySession[]> {
+    return this.describe(await this.pendingInterrupted());
+  }
+
+  /**
+   * Temporales cerradas sin latidos, con tiempo restante, sin restaurar y dentro de las 48 h
+   * desde el corte, o sea, el último latido (REQ-001-71).
+   */
+  private async pendingInterrupted(): Promise<SessionRow[]> {
+    const cutoff = new Date(this.clock.now().getTime() - RESTORE_WINDOW_MS);
+    const restoring = alias(sessions, 'restoring');
+    const rows = await this.db
+      .select({ session: sessions })
+      .from(sessions)
+      .leftJoin(restoring, eq(restoring.restoredFrom, sessions.id))
+      .where(
+        and(
+          eq(sessions.kind, 'temporary'),
+          eq(sessions.status, 'ended'),
+          eq(sessions.endReason, 'no_heartbeat'),
+          gt(sql`${sessions.purchasedSeconds} - ${sessions.usedSeconds}`, 0),
+          gte(sessions.lastHeartbeatAt, cutoff),
+          isNull(restoring.id),
+        ),
+      )
+      .orderBy(desc(sessions.lastHeartbeatAt));
+    return rows.map((row) => row.session);
+  }
+
+  /**
    * Sesiones temporales como las ve el panel (REQ-001-64): con el nombre de la PC, lo
-   * cobrado en total, el tiempo restante y quién las abrió.
+   * cobrado en total, el tiempo restante, quién las abrió y, si las cortó un corte, su
+   * estado de interrupción.
    */
   async describe(rows: SessionRow[], db: Database = this.db): Promise<TemporarySession[]> {
     if (rows.length === 0) {
       return [];
     }
     const ids = rows.map((row) => row.id);
-    const [pcRows, chargeRows] = await Promise.all([
+    const now = this.clock.now();
+    const [pcRows, chargeRows, restoringRows] = await Promise.all([
       db
         .select({ id: pcs.id, name: pcs.name })
         .from(pcs)
@@ -239,9 +315,21 @@ export class TemporarySessionsService {
         .from(sessionTopups)
         .where(inArray(sessionTopups.sessionId, ids))
         .groupBy(sessionTopups.sessionId),
+      // Las sesiones que restauraron a estas: dicen quién y cuándo (REQ-001-68).
+      db.select().from(sessions).where(inArray(sessions.restoredFrom, ids)),
     ]);
     const pcNames = new Map(pcRows.map((pc) => [pc.id, pc.name]));
     const charged = new Map(chargeRows.map((r) => [r.sessionId, Number(r.total)]));
+    const restoredBy = new Map<string, { name: string; at: Date; sessionId: string }>();
+    for (const restoring of restoringRows) {
+      if (restoring.restoredFrom) {
+        restoredBy.set(restoring.restoredFrom, {
+          name: actorName(restoring.openedBy),
+          at: restoring.startedAt,
+          sessionId: restoring.id,
+        });
+      }
+    }
     return rows.map((row) => {
       const usage = temporaryUsageOf(row);
       return {
@@ -258,6 +346,13 @@ export class TemporarySessionsService {
         endedAt: row.endedAt?.toISOString() ?? null,
         endReason: row.endReason,
         restoredFrom: row.restoredFrom,
+        interruption: interruptionOf({
+          endReason: row.endReason,
+          remainingSeconds: temporaryRemaining(usage),
+          lastBeatAt: row.lastHeartbeatAt,
+          restoredBy: restoredBy.get(row.id) ?? null,
+          now,
+        }),
       };
     });
   }
