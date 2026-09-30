@@ -1,10 +1,12 @@
 // CLI del simulador de PCs de Pope. Subcomandos:
 //   seed  Crea los clientes sim01…simNN con saldo, por la API del panel.
 //   run   Enciende PCs simuladas y, si se pide, las hace entrar como simNN.
-// (`interactive` llega en T36b y `load` en T37.)
+//   interactive  Consola para controlar las PCs a mano.
+// (`load` llega en T37.)
 import { parseArgs } from 'node:util';
 
 import { parsePcRange, parsePositiveInt, parseUsdAmount, UsageError } from './args.js';
+import { runInteractive } from './interactive.js';
 import { ApiError, HttpPanelApi } from './panel-api.js';
 import { runPcs } from './run.js';
 import { seedCustomers } from './seed.js';
@@ -17,6 +19,8 @@ Uso: pnpm --filter @pope/agent-sim start -- <subcomando> [opciones]
       Crea sim01…simNN (contraseña sim1234) y los recarga hasta tener USD de saldo.
   run --url ws://127.0.0.1:3000/pc --pcs 1-5 [--login] [--duration SEGUNDOS]
       Enciende esas PCs. Con --login, la PC N entra como simNN.
+  interactive --url ws://127.0.0.1:3000/pc --pcs 1-10
+      Consola para controlar las PCs a mano (login, red, reinicio, apagon, luz, estado).
 `;
 
 const log = (line: string) => {
@@ -82,6 +86,17 @@ async function main(): Promise<void> {
         log,
         stop.signal,
       );
+      return;
+    }
+    case 'interactive': {
+      const { values } = parseArgs({
+        args: rest,
+        options: { url: { type: 'string' }, pcs: { type: 'string' } },
+      });
+      if (!values.url || !values.pcs) {
+        throw new UsageError('interactive necesita --url y --pcs');
+      }
+      await runInteractive({ url: values.url, pcs: parsePcRange(values.pcs) }, log);
       return;
     }
     default:

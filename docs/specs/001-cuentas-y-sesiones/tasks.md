@@ -341,10 +341,10 @@ antes de seguir.
     - **Esperado:** las 5 PCs entran con el tiempo de la tarifa del día (2:00:00 de lunes a miércoles, 1:30:00 de jueves a domingo) y, al salir, cada una muestra unos 0,05 USD menos (2 min a 1,50 USD/h) o 0,07 USD (a 2,00 USD/h).
   - **Commit:** `feat(tools): permite preparar datos y lanzar PCs simuladas`
 
-- [ ] **T36b: Consola interactiva del simulador**
+- [x] **T36b: Consola interactiva del simulador**
   - **Cubre:** plan 001; la usan T39, T43 y T44 para probar el panel a mano.
   - **Hacer:** subcomando `interactive --url … --pcs 1-10` que arranca las PCs bloqueadas y lee órdenes con `node:readline`: `login N usuario contraseña`, `logout N`, `red N segundos`, `reinicio N`, `apagon N`, `luz N`, `estado` (una línea por PC: bloqueada o en sesión, quién, restante) y `salir`. Sigue mostrando los eventos como `run`. Una orden mal escrita muestra la ayuda sin cerrar la consola.
-  - **Verificar:** tests unitarios del intérprete de órdenes. A mano con la receta de T36a: una PC entra, `red N 20` y sigue en sesión al volver; `apagon N` y, pasados 3 min, el servidor la cierra (`sessionEnded` con `no_heartbeat` al hacer `luz N`); `reinicio N` con una sesión ya nombrada la cierra al momento.
+  - **Verificar:** tests unitarios del intérprete de órdenes. A mano con la receta de T36a: una PC entra, `red N 20` y sigue en sesión al volver; `apagon N` y, pasada la gracia de latidos (3 min por defecto), el servidor la cierra como `no_heartbeat`, y `luz N` la deja bloqueada (como tras un reinicio, según el plan); `reinicio N` con una sesión ya nombrada la cierra al momento. Para no esperar 3 min se puede bajar la gracia con `PUT /settings` (mínimo 30 s; con 30 s un corte de 20 s ya cierra la sesión, así que para ese caso usar 60 s).
   - **Commit:** `feat(tools): añade la consola interactiva del simulador`
 
 - [ ] **T37a: Registro de memoria del servidor**
