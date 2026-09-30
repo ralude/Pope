@@ -18,9 +18,10 @@ export const settingsSchema = z.strictObject({
   temporarySessionsKeptPerPc: z.number().int().min(MIN_TEMPORARY_SESSIONS_KEPT).max(100),
 });
 export type Settings = z.infer<typeof settingsSchema>;
-export type SettingKey = keyof Settings;
 
-export const settingKeySchema = z.enum(['heartbeatGraceSeconds', 'temporarySessionsKeptPerPc']);
+/** Nombre de un ajuste, sacado del esquema: un ajuste nuevo entra solo en el evento. */
+export const settingKeySchema = settingsSchema.keyof();
+export type SettingKey = z.infer<typeof settingKeySchema>;
 
 /** Valores con los que arranca un nodo nuevo. */
 export const DEFAULT_SETTINGS: Settings = {

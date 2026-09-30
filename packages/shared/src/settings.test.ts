@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_SETTINGS, settingsSchema, settingsUpdateRequestSchema } from './settings.js';
+import {
+  DEFAULT_SETTINGS,
+  settingKeySchema,
+  settingsSchema,
+  settingsUpdateRequestSchema,
+} from './settings.js';
 
 describe('ajustes del nodo (REQ-001-27, REQ-001-64)', () => {
   it('los valores por defecto son 3 min de gracia y 3 sesiones temporales por PC', () => {
@@ -26,6 +31,10 @@ describe('ajustes del nodo (REQ-001-27, REQ-001-64)', () => {
     expect(valid(30)).toBe(true);
     expect(valid(1800)).toBe(true);
     expect(valid(1801)).toBe(false);
+  });
+
+  it('las claves de los ajustes son las del esquema', () => {
+    expect(settingKeySchema.options).toEqual(Object.keys(DEFAULT_SETTINGS));
   });
 
   it('la actualización pide al menos un ajuste y rechaza los desconocidos', () => {
