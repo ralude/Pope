@@ -160,7 +160,7 @@ antes de seguir.
   - **Commit:** `feat(server): permite quitar el bloqueo por intentos desde el panel`
   - **Nota:** tarea añadida por la pregunta resuelta sobre el desbloqueo manual.
 
-- [ ] **T17: Turno de caja mínimo**
+- [x] **T17: Turno de caja mínimo**
   - **Cubre:** REQ-001-03 (dependencia de la spec 005)
   - **Hacer:** tabla `cash_shifts`, abrir y cerrar turno, y guard "requiere turno abierto".
   - **Verificar:** tests de un solo turno abierto por encargado y de rechazo sin turno.

@@ -103,3 +103,29 @@ export const customers = pgTable(
     check('customers_status_check', sql`${t.status} in ('active', 'blocked', 'disabled')`),
   ],
 );
+
+/**
+ * Turnos de caja (T17). **Mínima**: solo abrir y cerrar; la spec 005 añade el fondo, el
+ * conteo y las diferencias. Las recargas y los cobros en caja apuntan aquí (REQ-001-03).
+ */
+export const cashShifts = pgTable(
+  'cash_shifts',
+  {
+    id: uuid('id').primaryKey(),
+    staffId: uuid('staff_id')
+      .notNull()
+      .references(() => staff.id),
+    openedAt: timestamp('opened_at', { withTimezone: true }).notNull(),
+    /** `null` mientras está abierto. */
+    closedAt: timestamp('closed_at', { withTimezone: true }),
+  },
+  (t) => [
+    // Como mucho un turno abierto por miembro del personal, también ante peticiones
+    // simultáneas.
+    uniqueIndex('cash_shifts_open_staff_idx')
+      .on(t.staffId)
+      .where(sql`${t.closedAt} is null`),
+    index('cash_shifts_staff_opened_idx').on(t.staffId, t.openedAt),
+    check('cash_shifts_closed_after_opened', sql`${t.closedAt} >= ${t.openedAt}`),
+  ],
+);

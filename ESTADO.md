@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-25 · T16a terminada (desbloqueo manual del login)
+**Última actualización:** 2026-09-30 · T17 terminada (turno de caja mínimo)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T17: Turno de caja mínimo** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 23 / 59 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
+| **Siguiente tarea** | **T18: Ledger y saldos** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 24 / 59 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 23 / 59 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 24 / 59 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,10 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T17. Tabla `cash_shifts` (índice único parcial: un turno abierto por
+  miembro del personal) y `/shifts` (abrir, `current` y `current/close`) para encargado y
+  administrador, con `shift.opened` y `shift.closed`. `@RequiresOpenShift()` responde 409
+  sin turno y entrega el turno al endpoint con `@CurrentShift()`.
 - **2026-09-25:** T16a. `POST /customers/:id/unlock` (encargado y administrador) quita el bloqueo por intentos y emite `customer.login_unlocked`; sin bloqueo vigente no hace nada. El cliente del panel lleva `loginLockedUntil` para mostrar el botón en la T40.
 - **2026-09-25:** T16 (se añade T16a; 59 tareas). `CustomerAuthService.verify`: 5 fallos seguidos bloquean el login 5 min (fijo; un acierto pone el contador a cero) y emiten `customer.login_locked`. Motivos iguales a los códigos del protocolo; el estado de la cuenta solo se revela con la contraseña correcta. Cuatro preguntas resueltas en la spec.
 - **2026-09-25:** T15a. Tabla `customers` y `/customers`: alta (encargado y administrador), búsqueda
@@ -73,5 +77,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
   revelar qué falló, 7 días renovables (como mucho una escritura por hora) y logout.
 - **2026-09-25:** T14 (dividida en T14, T14a, T14b y T14c; se añadió T14d para gestionar el
   personal: 57 tareas). Tabla `staff` y `StaffService.create` con evento `staff.created`.
-- **2026-09-25:** T13. Tabla `events` (`seq` en orden de confirmación gracias a un bloqueo
-  consultivo) y `EventsService.inTransaction((tx, emit) => …)`; `newId()` (UUIDv7) en `shared`.
