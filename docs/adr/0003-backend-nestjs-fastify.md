@@ -19,8 +19,15 @@ lo escribirán agentes de IA, que rinden mejor con convenciones fuertes y predec
     inventario, caja y emisor de outbox.
   - `cloud`: receptor de eventos, vistas de lectura del dueño y auth del dueño.
   - Común: dominio, validación y esquemas.
-- Tiempo real con agentes y panel mediante **WebSocket** (gateway de NestJS con
-  Socket.IO o `ws`; se decide en el plan de la spec 003 según el consumo de memoria).
+- Tiempo real con agentes y panel mediante **WebSocket**, con la librería **`ws`** sin
+  Socket.IO (decidido el 2026-09-30, antes de la T24 de la spec 001):
+  - El agente en C# usa `System.Net.WebSockets.ClientWebSocket`, de la biblioteca
+    estándar (ADR-0006), sin librerías de terceros.
+  - Los mensajes viajan tal cual los define el JSON Schema de `packages/shared`, sin el
+    envoltorio propio de Socket.IO. Además, `ws` gasta menos memoria (ADR-0011).
+  - El servidor enruta cada mensaje por su campo `type` con un despachador propio, en vez
+    del formato `{ event, data }` que espera el adaptador `ws` de NestJS.
+  - Reconexión y latidos los gestiona el propio protocolo (`hello`, `heartbeat`).
 - Proceso único con límite de memoria según ADR-0011 (≤ 384 MB).
 
 ## Alternativas consideradas

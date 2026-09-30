@@ -206,13 +206,10 @@ antes de seguir.
 
 - [ ] **T24: Gateway WebSocket de PCs**
   - **Cubre:** plan 001 (Contratos)
-  - **Hacer:** gateway con `hello` (identidad de desarrollo; el registro real es la spec 003), registro de conexiones y envío de `state` bloqueado.
-  - **Verificar:** test e2e: una PC se conecta y recibe `state` bloqueado.
+  - **Hacer:** `requestId` opcional en `login`, `logout` y `buyCombo`, devuelto en `error` (protocolo en `shared`). Gateway con `ws` y despachador propio por `type`, `hello` (identidad de desarrollo; el registro real es la spec 003), registro de conexiones y envío de `state` bloqueado.
+  - **Verificar:** test e2e: una PC se conecta y recibe `state` bloqueado; un mensaje no válido recibe `error` con su `requestId`.
   - **Commit:** `feat(server): conecta las PCs por WebSocket`
-  - **Antes de empezar, decidir con el mantenedor** (y dejarlo escrito en ADR-0003, que lo aplazaba al plan de la spec 003):
-    - **Transporte:** `ws` puro (`@nestjs/platform-ws`) o Socket.IO. Recomendado `ws`: el agente en C# puede usar `System.Net.WebSockets.ClientWebSocket` de la biblioteca estándar (ADR-0006) y los mensajes viajan tal cual los describe el JSON Schema de T08. Socket.IO exigiría una librería de terceros en C# y envuelve los mensajes en su propio formato.
-    - **Enrutado:** el adaptador `ws` de NestJS espera `{ event, data }`; nuestro protocolo usa `{ type, … }`. Hay que configurar su traductor de mensajes o manejar el socket directamente.
-    - **`requestId`:** hoy `error` no dice a qué petición responde (el Shell no sabe si falló el login o la compra de un combo). Valorar un `requestId` opcional en `login`, `logout` y `buyCombo` que se devuelva en `error`, antes de que el protocolo llegue al C# (spec 003).
+  - **Decidido (2026-09-30, ADR-0003):** `ws` sin Socket.IO, despachador propio por `type` (el socket se maneja directamente) y `requestId` opcional para saber a qué petición responde cada `error`.
 
 - [ ] **T25: Login desde la PC**
   - **Cubre:** REQ-001-20, REQ-001-21, REQ-001-14, REQ-001-16
@@ -238,12 +235,18 @@ antes de seguir.
   - **Verificar:** tests de ambos cierres, del motivo y de la invariante.
   - **Commit:** `feat(server): cierra sesiones y liquida el consumo`
 
+- [ ] **T28a: Ajustes del nodo**
+  - **Cubre:** REQ-001-27, REQ-001-64
+  - **Hacer:** tabla `settings` con el tiempo de gracia de los latidos (3 min) y las sesiones temporales conservadas por PC (3, mínimo 3); `GET` para el personal y `PUT` solo para el administrador, con evento `setting.changed`.
+  - **Verificar:** tests de valores por defecto, cambio con evento, mínimo de 3 y acceso denegado a quien no es administrador.
+  - **Commit:** `feat(server): añade los ajustes del nodo`
+  - **Nota:** añadida por la pregunta resuelta sobre dónde se configura el respaldo.
+
 - [ ] **T29: Cierre sin latidos y recuperación al arrancar**
   - **Cubre:** REQ-001-27
-  - **Hacer:** proceso periódico de cierre por falta de latidos, revisión al arrancar el nodo y cierre inmediato si la PC dice "no tengo sesión".
-  - **Verificar:** test de CA-001-03.
+  - **Hacer:** proceso periódico de cierre por falta de latidos (tiempo de gracia de T28a), revisión al arrancar el nodo y cierre inmediato si la PC dice "no tengo sesión". Si la PC reconecta con una sesión ya cerrada sin latidos, recibe `sessionEnded`; si era temporal, su restante pasa a ser el menor entre el del nodo y el de la PC (pregunta resuelta de la spec).
+  - **Verificar:** test de CA-001-03 y de la reconexión tras un corte de red.
   - **Commit:** `feat(server): cierra las sesiones sin latidos cobrando hasta el último`
-  - **Bloqueada** hasta resolver la pregunta abierta de la spec 001 sobre el corte de red entre la PC y el nodo (qué pasa cuando un agente reconecta con una sesión ya cerrada por falta de latidos).
 
 - [ ] **T30: Compra de combo desde el Shell**
   - **Cubre:** REQ-001-85
@@ -273,7 +276,7 @@ antes de seguir.
 
 - [ ] **T34: Respaldo y sesiones interrumpidas**
   - **Cubre:** REQ-001-63, REQ-001-64, REQ-001-65, REQ-001-66
-  - **Hacer:** consultas de las últimas N por PC (N configurable, ≥ 3) y de las interrumpidas pendientes.
+  - **Hacer:** consultas de las últimas N por PC (N del ajuste de T28a, ≥ 3) y de las interrumpidas pendientes.
   - **Verificar:** test de CA-001-07; las pendientes siguen visibles aunque haya más de N sesiones nuevas.
   - **Commit:** `feat(server): conserva el respaldo de sesiones temporales`
 

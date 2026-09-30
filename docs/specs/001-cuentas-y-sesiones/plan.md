@@ -44,6 +44,7 @@ Convenciones: ids UUIDv7, fechas `timestamptz` en UTC, importes `bigint` en µ-u
 | `customer_balances` | customer_id, money_micros, combo_seconds | **Caché** del ledger, actualizada en la misma transacción que cada fila del ledger. Un test comprueba que siempre coincide |
 | `sessions` | pc_id, kind (`account`/`temporary`), customer_id?, temp_name?, status (`active`/`ended`), rate_micros_per_hour (copia, REQ-001-14/16), started_at, last_heartbeat_at, ended_at?, end_reason?, opened_by (actor), restored_from?, combo_seconds_used, money_seconds, money_charged_micros, purchased_seconds? | Una fila por sesión |
 | `session_topups` | session_id, seconds, amount_micros, payment_method, shift_id, actor | Cobros de sesiones temporales: apertura y "añadir tiempo" (REQ-001-60, 70) |
+| `settings` | key, value (jsonb), updated_at, updated_by | Ajustes del nodo que cambia el administrador: sesiones temporales conservadas por PC (≥ 3, REQ-001-64) y tiempo de gracia de los latidos (REQ-001-27) |
 | `events` | seq, id, type, version, actor, occurred_at, payload, sent_at? | Auditoría y outbox (ADR-0008). El envío a la nube es la spec 006 |
 
 Índices clave: sesión activa única por cliente (`unique (customer_id) where status='active'`,
@@ -77,6 +78,7 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 |---|---|
 | Latido normal | El agente lo envía cada **10 s** y el nodo guarda el checkpoint en cada uno. Un corte pierde ≤ 10 s (cumple REQ-001-63, que pide ≤ 30 s) |
 | Sin latidos durante el tiempo de gracia (3 min) | Se cierra con `end_reason = no_heartbeat` y se cobra hasta `last_heartbeat_at` (REQ-001-27) |
+| La PC vuelve a conectar con una sesión ya cerrada por falta de latidos (corte de red) | Sigue cerrada: el nodo envía `sessionEnded` y la PC se bloquea. Con cuenta, el hueco sin red no se cobra. Si era temporal, su restante pasa a ser el menor entre el del nodo y el que informa la PC (pregunta resuelta de la spec) |
 | El nodo arranca tras un apagón | Cierra como `no_heartbeat` las sesiones cuyo último latido supere el tiempo de gracia. Si un agente reconecta antes, la sesión sigue |
 | La PC se reinicia y el agente dice "no tengo sesión" | Se cierra al momento como `no_heartbeat`. Si es temporal, queda en "Sesiones interrumpidas" |
 | Restaurar (REQ-001-67, 68, 71) | Se crea una sesión nueva con `restored_from`, `purchased_seconds` = restante de la original y sin cobro. Se rechaza si ya se restauró o si pasaron > 48 h |
@@ -88,8 +90,8 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 
 | Dirección | Mensajes |
 |---|---|
-| PC → nodo | `hello` (identidad de la PC), `heartbeat` (session_id?, restante local), `login` (usuario, contraseña), `logout`, `buyCombo` (combo_id) |
-| nodo → PC | `state` (bloqueada o en sesión: saldos, tarifa, tiempo total), `warning` (5 o 1 min), `sessionEnded` (motivo), `error` (código y mensaje en español) |
+| PC → nodo | `hello` (identidad de la PC), `heartbeat` (session_id?, restante local), `login` (usuario, contraseña), `logout`, `buyCombo` (combo_id). Los tres últimos admiten un `requestId` opcional |
+| nodo → PC | `state` (bloqueada o en sesión: saldos, tarifa, tiempo total), `warning` (5 o 1 min), `sessionEnded` (motivo), `error` (código, mensaje en español y el `requestId` de la petición que falló, si lo traía) |
 
 **API del panel (REST + WebSocket para el mapa en vivo):**
 - `auth`: login y logout del personal (cookie httpOnly).
@@ -102,7 +104,7 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 **Eventos** (versionados): `customer.created`, `customer.status_changed`, `customer.login_locked`,
 `customer.login_unlocked`, `wallet.recharged`,
 `combo.created`, `combo.updated`, `combo.purchased`, `tariff.changed`, `session.started`,
-`session.ended`, `session.time_added`, `session.restored`, `shift.opened`, `shift.closed`.
+`session.ended`, `session.time_added`, `session.restored`, `shift.opened`, `shift.closed`, `setting.changed`.
 
 ## Seguridad
 

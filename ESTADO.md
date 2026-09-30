@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T17 terminada (turno de caja mínimo)
+**Última actualización:** 2026-09-30 · decisiones de T24, T29, T31 y T34 (se añade T28a)
 
 ## Ahora
 
@@ -12,7 +12,7 @@
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
 | **Siguiente tarea** | **T18: Ledger y saldos** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 24 / 59 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
+| **Progreso** | 24 / 60 tareas · fase 4 de 9 (Clientes, saldos, tarifas y combos) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -32,8 +32,6 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 - [ ] **T11 y T37:** ejecutar las mediciones en el PC servidor del local (i5 de 2ª gen, 8 GB).
-- [ ] **Antes de T24:** decidir el transporte WebSocket (`ws` puro recomendado, en vez de Socket.IO), cómo se enruta `type` en NestJS y si se añade `requestId` al protocolo. Detalle en la nota de T24 de [tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md).
-- [ ] **Antes de T29:** decidir qué pasa si se corta la red entre una PC y el nodo más que el tiempo de gracia (choque entre ADR-0007 y REQ-001-27). Pregunta abierta en la [spec 001](docs/specs/001-cuentas-y-sesiones/spec.md).
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **REQ-001-13:** el equivalente en Bs espera a la tasa BCV de la spec 005.
@@ -44,7 +42,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 24 / 59 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 24 / 60 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -56,6 +54,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-09-30:** Decisiones del mantenedor (se añade T28a; 60 tareas): WebSocket con `ws` y despachador propio por `type`, más `requestId` opcional (ADR-0003); tras un corte de red la sesión cerrada sin latidos sigue cerrada y la temporal corrige su restante con el de la PC (T29 desbloqueada); las temporales cobradas por minutos se redondean al céntimo más cercano; tiempo de gracia y respaldo por PC en la tabla `settings` (T28a).
 
 - **2026-09-30:** T17. Tabla `cash_shifts` (índice único parcial: un turno abierto por
   miembro del personal) y `/shifts` (abrir, `current` y `current/close`) para encargado y
@@ -75,5 +75,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
   (`SameSite=Strict`, `Secure` solo en la nube) y guard global con `@Public()` y `@Roles()`.
 - **2026-09-25:** T14a. `staff_sessions` (solo el hash del token) y `AuthService`: login sin
   revelar qué falló, 7 días renovables (como mucho una escritura por hora) y logout.
-- **2026-09-25:** T14 (dividida en T14, T14a, T14b y T14c; se añadió T14d para gestionar el
-  personal: 57 tareas). Tabla `staff` y `StaffService.create` con evento `staff.created`.
