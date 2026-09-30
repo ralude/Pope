@@ -230,7 +230,7 @@ antes de seguir.
   - **Commit:** `feat(server): avisa y cierra la sesión al agotarse el saldo`
   - **Orden (2026-09-30):** se hace después de T28: el cierre por agotamiento usa el cierre con liquidación del ledger que construye T28.
 
-- [ ] **T28: Cierre por el cliente o el encargado**
+- [x] **T28: Cierre por el cliente o el encargado**
   - **Cubre:** REQ-001-26, REQ-001-31
   - **Hacer:** `logout` desde la PC y endpoint de cierre del personal. Al cerrar, se escriben las filas del ledger (combo y dinero) y el evento `session.ended` con el motivo.
   - **Verificar:** tests de ambos cierres, del motivo y de la invariante.

@@ -1,5 +1,6 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import {
+  type Actor,
   applyCheckpoint,
   applyTemporaryCheckpoint,
   type Customer,
@@ -8,17 +9,19 @@ import {
   type NodeToPcMessage,
   seconds,
   secondsUntilExhausted,
+  type SessionEndReason,
   startUsage,
+  temporaryRemaining,
 } from '@pope/shared';
 import { and, eq } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { customers, pcs, sessions } from '../db/schema.js';
-import { EventsService } from '../events/events.service.js';
+import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { WalletService } from '../wallet/wallet.service.js';
-import type { PcIdentity } from './pc-connections.js';
+import { PcConnections, type PcIdentity } from './pc-connections.js';
 import {
   accountBalances,
   activeState,
@@ -38,11 +41,14 @@ export const MIN_SESSION_SECONDS = 60;
  */
 @Injectable()
 export class SessionsService {
+  private readonly logger = new Logger('Sessions');
+
   constructor(
     @Inject(DATABASE) private readonly db: Database,
     private readonly events: EventsService,
     private readonly wallet: WalletService,
     private readonly tariffs: TariffsService,
+    private readonly connections: PcConnections,
     private readonly clock: Clock,
   ) {}
 
@@ -141,6 +147,176 @@ export class SessionsService {
         },
       });
       return activeState(row, { username: customer.username, balances });
+    });
+  }
+
+  /**
+   * El encargado cierra una sesión desde el panel (REQ-001-26). Responde 404 si no existe y
+   * 409 si ya estaba cerrada (por ejemplo, la cerró el cliente un instante antes).
+   */
+  async closeByStaff(sessionId: string, actor: Actor): Promise<void> {
+    if (await this.close(sessionId, 'staff', actor)) {
+      return;
+    }
+    const [existing] = await this.db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(eq(sessions.id, sessionId));
+    if (!existing) {
+      throw new NotFoundException('No existe esa sesión');
+    }
+    throw new ConflictException('La sesión ya está cerrada');
+  }
+
+  /**
+   * El cliente cierra su sesión desde el Shell (REQ-001-26). Devuelve `false` si la PC no
+   * tenía sesión activa: entonces quien llama debe corregir lo que muestra la PC.
+   */
+  async logout(pcId: string): Promise<boolean> {
+    const [found] = await this.db
+      .select({ id: sessions.id, customerId: sessions.customerId, username: customers.username })
+      .from(sessions)
+      .leftJoin(customers, eq(customers.id, sessions.customerId))
+      .where(and(eq(sessions.pcId, pcId), eq(sessions.status, 'active')));
+    if (!found) {
+      return false;
+    }
+    // Una sesión temporal no tiene cliente: el cierre lo hace el sistema a petición de la PC.
+    const actor: Actor =
+      found.customerId && found.username
+        ? { kind: 'customer', customerId: found.customerId, username: found.username }
+        : { kind: 'system' };
+    return (await this.close(found.id, 'customer', actor)) !== null;
+  }
+
+  /**
+   * Cierra la sesión y liquida su consumo (REQ-001-26, REQ-001-31): escribe en el ledger lo
+   * gastado (hasta dos filas, combo y dinero), guarda el cierre con su motivo y emite
+   * `session.ended`. Por defecto cobra antes hasta ahora; un cierre por falta de latidos
+   * pasa `billToNow: false` para cobrar solo hasta el último latido (REQ-001-27). Avisa a la
+   * PC con `sessionEnded`. Devuelve la sesión cerrada, o `null` si ya no estaba activa.
+   */
+  async close(
+    sessionId: string,
+    reason: SessionEndReason,
+    actor: Actor,
+    options: { billToNow?: boolean } = {},
+  ): Promise<SessionRow | null> {
+    const billToNow = options.billToNow ?? true;
+    const ended = await this.events.inTransaction(async (tx, emit) => {
+      const [locked] = await tx
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, sessionId))
+        .for('update');
+      if (locked?.status !== 'active') {
+        return null;
+      }
+      if (locked.customerId) {
+        // Bloquea también la cuenta: una compra o una recarga a la vez esperan al cierre.
+        await tx
+          .select({ id: customers.id })
+          .from(customers)
+          .where(eq(customers.id, locked.customerId))
+          .for('update');
+      }
+      const { row } = billToNow ? await this.checkpoint(locked, tx) : { row: locked };
+      await this.settle(row, actor, tx);
+      const [closed] = await tx
+        .update(sessions)
+        .set({ status: 'ended', endedAt: this.clock.now(), endReason: reason })
+        .where(eq(sessions.id, row.id))
+        .returning();
+      if (!closed) {
+        throw new Error('No se pudo cerrar la sesión');
+      }
+      await this.emitEnded(closed, reason, actor, tx, emit);
+      return closed;
+    });
+    if (ended) {
+      this.connections.send(ended.pcId, {
+        type: 'sessionEnded',
+        sessionId: ended.id,
+        reason,
+      });
+    }
+    return ended;
+  }
+
+  /**
+   * Escribe en el ledger lo consumido por una sesión con cuenta: una fila por monedero con
+   * consumo (REQ-001-89). Si el saldo de la cuenta bajó durante la sesión (un ajuste), solo
+   * se descuenta lo que había: el sistema es prepago y el saldo nunca queda negativo.
+   */
+  private async settle(row: SessionRow, actor: Actor, tx: Transaction): Promise<void> {
+    if (!row.customerId) {
+      return;
+    }
+    const balances = await this.wallet.balances(row.customerId, tx);
+    const combo = Math.min(row.comboSecondsUsed, balances.comboSeconds);
+    const money = Math.min(row.moneyChargedMicros, balances.moneyMicros);
+    if (combo < row.comboSecondsUsed || money < row.moneyChargedMicros) {
+      this.logger.warn(
+        `La cuenta no tenía saldo para liquidar la sesión ${row.id}: se cobra lo que había`,
+      );
+    }
+    if (combo > 0) {
+      await this.wallet.post(tx, {
+        customerId: row.customerId,
+        wallet: 'combo',
+        amount: -combo,
+        kind: 'consumption',
+        actor,
+        sessionId: row.id,
+      });
+    }
+    if (money > 0) {
+      await this.wallet.post(tx, {
+        customerId: row.customerId,
+        wallet: 'money',
+        amount: -money,
+        kind: 'consumption',
+        actor,
+        sessionId: row.id,
+      });
+    }
+  }
+
+  /** `session.ended` con lo consumido y hasta cuándo se cobró (REQ-001-31). */
+  private async emitEnded(
+    row: SessionRow,
+    reason: SessionEndReason,
+    actor: Actor,
+    tx: Database,
+    emit: Emit,
+  ): Promise<void> {
+    const [pc] = await tx.select({ name: pcs.name }).from(pcs).where(eq(pcs.id, row.pcId));
+    const temporary = temporaryUsageOf(row);
+    const account = usageOf(row);
+    emit({
+      type: 'session.ended',
+      version: 1,
+      actor,
+      payload: {
+        sessionId: row.id,
+        pc: { id: row.pcId, name: pc?.name ?? '' },
+        reason,
+        billedUntil: row.lastHeartbeatAt.toISOString(),
+        usage:
+          row.kind === 'account'
+            ? {
+                kind: 'account',
+                comboSecondsUsed: account.comboSecondsUsed,
+                moneySeconds: account.moneySeconds,
+                moneyCharged: { micros: account.moneyChargedMicros, currency: 'USD' },
+              }
+            : {
+                kind: 'temporary',
+                purchasedSeconds: temporary.purchasedSeconds,
+                usedSeconds: temporary.usedSeconds,
+                remainingSeconds: temporaryRemaining(temporary),
+              },
+      },
     });
   }
 

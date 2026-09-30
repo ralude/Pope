@@ -50,6 +50,11 @@ export function login(
   return client.request({ type: 'login', username, password, requestId: 'login-1' });
 }
 
+/** El cliente cierra su sesión desde el Shell; devuelve la respuesta del nodo. */
+export function logout(client: PcTestClient): Promise<NodeToPcMessage> {
+  return client.request({ type: 'logout', requestId: 'logout-1' });
+}
+
 /** Latido de la PC sin copia local del tiempo; devuelve la respuesta del nodo. */
 export function heartbeat(client: PcTestClient): Promise<NodeToPcMessage> {
   return client.request({ type: 'heartbeat', sessionId: null, localRemainingSeconds: null });

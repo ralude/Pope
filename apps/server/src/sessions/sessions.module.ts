@@ -6,6 +6,7 @@ import { WalletModule } from '../wallet/wallet.module.js';
 import { PcConnections } from './pc-connections.js';
 import { PcGateway } from './pc-gateway.js';
 import { PcProtocolService } from './pc-protocol.service.js';
+import { SessionsController } from './sessions.controller.js';
 import { SessionsService } from './sessions.service.js';
 
 /**
@@ -14,6 +15,7 @@ import { SessionsService } from './sessions.service.js';
  */
 @Module({
   imports: [CustomersModule, TariffsModule, WalletModule],
+  controllers: [SessionsController],
   providers: [PcConnections, SessionsService, PcProtocolService, PcGateway],
   exports: [PcConnections, SessionsService],
 })

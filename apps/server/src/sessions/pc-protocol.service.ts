@@ -124,6 +124,12 @@ export class PcProtocolService {
         connection.send(await this.login(pc, message));
         return;
       case 'logout':
+        // Si cierra, `SessionsService` ya avisó a la PC con `sessionEnded`. Si no había
+        // sesión, la PC tenía un dato viejo: se le dice cómo está de verdad.
+        if (!(await this.sessions.logout(pc.id))) {
+          connection.send(await this.sessions.stateFor(pc.id));
+        }
+        return;
       case 'buyCombo':
         connection.send(
           protocolError('internal_error', 'Todavía no disponible', message.requestId),
