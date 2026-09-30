@@ -1,9 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  applyCheckpoint,
+  applyTemporaryCheckpoint,
   type Customer,
   type CustomerBalances,
   newId,
   type NodeToPcMessage,
+  seconds,
   secondsUntilExhausted,
   startUsage,
 } from '@pope/shared';
@@ -22,6 +25,8 @@ import {
   LOCKED_STATE,
   PcRequestRefused,
   type SessionRow,
+  temporaryUsageOf,
+  usageOf,
 } from './session-state.js';
 
 /** Saldo mínimo para abrir una sesión: el de 1 minuto (REQ-001-20). */
@@ -137,6 +142,71 @@ export class SessionsService {
       });
       return activeState(row, { username: customer.username, balances });
     });
+  }
+
+  /**
+   * Latido de la PC: cobra la sesión activa hasta ahora con el reloj del nodo (REQ-001-23,
+   * ADR-0007), guarda el consumo en su fila (REQ-001-63) y devuelve el `state` para que el
+   * Shell actualice tiempo y saldo (REQ-001-12). Sin sesión activa, devuelve la pantalla
+   * de bloqueo.
+   */
+  async heartbeat(pcId: string): Promise<NodeToPcMessage> {
+    return this.events.inTransaction(async (tx) => {
+      // Bloquea la fila: un cierre o un latido simultáneos esperan a que termine este.
+      const [locked] = await tx
+        .select()
+        .from(sessions)
+        .where(and(eq(sessions.pcId, pcId), eq(sessions.status, 'active')))
+        .for('update');
+      if (!locked) {
+        return LOCKED_STATE;
+      }
+      const { row, account } = await this.checkpoint(locked, tx);
+      return activeState(row, account);
+    });
+  }
+
+  /**
+   * Cobra la sesión hasta el instante actual y guarda el resultado. Avanza `lastHeartbeatAt`
+   * exactamente los segundos enteros cobrados, no hasta "ahora": así la fracción de segundo
+   * se cobra en el siguiente latido y no se pierde (motor de cobro, `applyCheckpoint`).
+   * Si el reloj se corrigió hacia atrás no se cobra nada y la marca no se mueve.
+   */
+  private async checkpoint(
+    row: SessionRow,
+    tx: Database,
+  ): Promise<{
+    row: SessionRow;
+    account: { username: string; balances: CustomerBalances } | null;
+  }> {
+    const elapsed = seconds(
+      Math.max(0, Math.floor((this.clock.now().getTime() - row.lastHeartbeatAt.getTime()) / 1000)),
+    );
+    const lastHeartbeatAt = new Date(row.lastHeartbeatAt.getTime() + elapsed * 1000);
+
+    const account = await this.accountOf(row, tx);
+    if (account) {
+      const { usage } = applyCheckpoint(usageOf(row), accountBalances(account.balances), elapsed);
+      const [updated] = await tx
+        .update(sessions)
+        .set({
+          comboSecondsUsed: usage.comboSecondsUsed,
+          moneySeconds: usage.moneySeconds,
+          moneyChargedMicros: usage.moneyChargedMicros,
+          lastHeartbeatAt,
+        })
+        .where(eq(sessions.id, row.id))
+        .returning();
+      return { row: updated ?? row, account };
+    }
+
+    const usage = applyTemporaryCheckpoint(temporaryUsageOf(row), elapsed);
+    const [updated] = await tx
+      .update(sessions)
+      .set({ usedSeconds: usage.usedSeconds, lastHeartbeatAt })
+      .where(eq(sessions.id, row.id))
+      .returning();
+    return { row: updated ?? row, account };
   }
 
   /** Usuario y saldos del cliente de una sesión con cuenta; `null` si es temporal. */

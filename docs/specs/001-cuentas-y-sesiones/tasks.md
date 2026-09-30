@@ -217,7 +217,7 @@ antes de seguir.
   - **Verificar:** tests de CA-001-01, CA-001-02, CA-001-13 y CA-001-21.
   - **Commit:** `feat(server): abre sesiones desde la PC`
 
-- [ ] **T26: Latidos y checkpoint**
+- [x] **T26: Latidos y checkpoint**
   - **Cubre:** REQ-001-11, REQ-001-12, REQ-001-23, REQ-001-87, REQ-001-88
   - **Hacer:** en cada `heartbeat`, aplicar el motor con el reloj del nodo, guardar la sesión y enviar `state`.
   - **Verificar:** tests de CA-001-12, CA-001-16 y CA-001-19 con reloj simulado.
@@ -228,6 +228,7 @@ antes de seguir.
   - **Hacer:** temporizador por sesión, envío de `warning` a 5 y 1 min, y cierre al agotarse.
   - **Verificar:** tests con reloj simulado.
   - **Commit:** `feat(server): avisa y cierra la sesión al agotarse el saldo`
+  - **Orden (2026-09-30):** se hace después de T28: el cierre por agotamiento usa el cierre con liquidación del ledger que construye T28.
 
 - [ ] **T28: Cierre por el cliente o el encargado**
   - **Cubre:** REQ-001-26, REQ-001-31

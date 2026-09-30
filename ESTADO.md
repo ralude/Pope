@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T25 terminada (login desde la PC)
+**Última actualización:** 2026-09-30 · T26 terminada (latidos y checkpoint)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T26: Latidos y checkpoint** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 32 / 60 tareas · fase 5 de 9 (Sesiones con cuenta) |
+| **Siguiente tarea** | **T28: Cierre por el cliente o el encargado (antes que T27, que cierra usando su liquidación)** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 33 / 60 tareas · fase 5 de 9 (Sesiones con cuenta) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -42,7 +42,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 32 / 60 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 33 / 60 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -55,6 +55,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T26. Cada heartbeat cobra hasta ahora con el reloj del nodo (combo primero, luego dinero; las temporales, su tiempo comprado), guarda la sesión y responde con el state. La marca avanza segundos enteros, sin perder fracciones. T27 pasa después de T28 porque cerrar por agotamiento necesita la liquidación del ledger. Helper de test PcWorld.
 - **2026-09-30:** T25. Mensaje login de la PC: valida credenciales, rechaza si la PC o la cuenta ya tienen sesión (dice en qué PC), exige saldo para 1 min y abre la sesión copiando la tarifa del día con session.started. SessionsService.stateFor da el state de cada PC (también al reconectar).
 - **2026-09-30:** T24. Canal de las PCs en `ws://nodo:3000/pc` con `ws` y despachador propio por `type` (`PcProtocolService`); `hello` registra la PC (`unknown_pc` si no existe) y recibe `state`. `requestId` opcional en el protocolo. `PcConnections` envía a cualquier PC; `PcTestClient` simula PCs en los tests.
 - **2026-09-30:** T23. Tablas `pcs` y `sessions` (índices únicos de sesión activa por cuenta y por PC, y de `restored_from`) y clave foránea `ledger.session_id`. PCs de ejemplo con ids fijos: `dev:seed-pcs` crea "PC 01" … "PC 10".
@@ -65,7 +66,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T18. Tablas `ledger` (solo inserción; importe con signo en µUSD o segundos) y `customer_balances` (caché que nunca baja de cero). `WalletService.post(tx, movimiento)` suma y comprueba en una sola sentencia y lanza `InsufficientBalanceError` (409); helper `assertBalancesMatchLedger`.
 - **2026-09-30:** Decisiones del mantenedor (se añade T28a; 60 tareas): WebSocket con `ws` y despachador propio por `type`, más `requestId` opcional (ADR-0003); tras un corte de red la sesión cerrada sin latidos sigue cerrada y la temporal corrige su restante con el de la PC (T29 desbloqueada); las temporales cobradas por minutos se redondean al céntimo más cercano; tiempo de gracia y respaldo por PC en la tabla `settings` (T28a).
 
-- **2026-09-30:** T17. Tabla `cash_shifts` (índice único parcial: un turno abierto por
-  miembro del personal) y `/shifts` (abrir, `current` y `current/close`) para encargado y
-  administrador, con `shift.opened` y `shift.closed`. `@RequiresOpenShift()` responde 409
-  sin turno y entrega el turno al endpoint con `@CurrentShift()`.
