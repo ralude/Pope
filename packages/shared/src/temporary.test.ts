@@ -118,6 +118,10 @@ describe('cuerpos de las peticiones', () => {
     expect(valid({ ...base, minutes: 1440 })).toBe(true);
     expect(valid({ ...base, minutes: 1441 })).toBe(false);
     expect(valid({ ...base, amountMicros: 0 })).toBe(false);
+    // En céntimos enteros: 0,01 USD vale; 0,005 o 0,011 USD, no.
+    expect(valid({ ...base, amountMicros: usd(0.01) })).toBe(true);
+    expect(valid({ ...base, amountMicros: usd(0.005) })).toBe(false);
+    expect(valid({ ...base, amountMicros: usd(0.011) })).toBe(false);
     expect(valid({ ...base, minutes: 30, name: '   ' })).toBe(false);
     expect(valid({ ...base, minutes: 30, name: 'Carlos' })).toBe(true);
     expect(valid({ ...base, minutes: 30, paymentMethod: 'bitcoin' })).toBe(false);

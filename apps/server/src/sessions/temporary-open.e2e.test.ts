@@ -123,7 +123,7 @@ describe('abrir sesión temporal (e2e, REQ-001-22, REQ-001-60, REQ-001-61, REQ-0
     });
   });
 
-  it('con minutos redondea el importe al céntimo; con importe, los segundos se truncan', async () => {
+  it('con minutos redondea el importe al céntimo; con importe, cobra ese importe', async () => {
     await world.pc(5);
     await world.pc(6);
     // 25 min a 1,50 USD/h = 0,625 → 0,63 USD, con los 1500 s exactos.
@@ -131,10 +131,18 @@ describe('abrir sesión temporal (e2e, REQ-001-22, REQ-001-60, REQ-001-61, REQ-0
       purchasedSeconds: 1500,
       amountMicros: usd(0.63),
     });
-    // 0,011 USD = 26,4 s → 26 s, y se cobran los 0,011 USD indicados.
+    // 0,07 USD a 1,50 USD/h son 168 s, y se cobran los 0,07 USD indicados.
     expect(
-      (await open({ ...on(6), amountMicros: usd(0.011) })).json<TemporarySession>(),
-    ).toMatchObject({ purchasedSeconds: 26, amountMicros: usd(0.011) });
+      (await open({ ...on(6), amountMicros: usd(0.07) })).json<TemporarySession>(),
+    ).toMatchObject({ purchasedSeconds: 168, amountMicros: usd(0.07) });
+  });
+
+  it('el importe va en céntimos enteros: medio céntimo no se puede cobrar', async () => {
+    await world.pc(5);
+    const response = await open({ ...on(5), amountMicros: 5000 });
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toContain('El importe va en céntimos enteros');
+    expect(await world.testApp.database.db.select().from(sessionTopups)).toEqual([]);
   });
 
   it('cobra con la tarifa del día y la sesión se queda con ella (REQ-001-14)', async () => {
@@ -190,11 +198,6 @@ describe('abrir sesión temporal (e2e, REQ-001-22, REQ-001-60, REQ-001-61, REQ-0
     await rejected({ ...on(3), minutes: 30 }, 409, 'La PC 03 ya tiene una sesión abierta');
     await rejected({ ...on(6), minutes: 30 }, 409, 'La PC 06 no está conectada al nodo');
     await rejected({ ...on(5), minutes: 30, pcId: newId() }, 404, 'No existe esa PC');
-    await rejected(
-      { ...on(5), amountMicros: 100 },
-      400,
-      'El importe no alcanza para 1 segundo de tiempo',
-    );
     await rejected({ ...on(5), amountMicros: usd(100) }, 400, 'Como máximo 24 horas por cobro');
     await rejected({ ...on(5) }, 400);
     await rejected({ ...on(5), minutes: 30, amountMicros: usd(1) }, 400);

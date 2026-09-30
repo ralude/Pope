@@ -84,10 +84,13 @@ export function formatLocalTime(instant: Date): string {
 /** Tiempo que una sesión interrumpida se puede restaurar desde el corte: 48 h (REQ-001-71). */
 export const RESTORE_WINDOW_MS = 48 * SECONDS_PER_HOUR * 1000;
 
-const positiveAmountSchema = microsSchema.refine(
-  (m) => m > 0,
-  'El importe debe ser mayor que cero',
-);
+/**
+ * Importe que cobra el encargado: positivo y en céntimos enteros, porque la caja no puede
+ * cobrar fracciones de céntimo (0,005 USD no existe en el mostrador).
+ */
+const positiveAmountSchema = microsSchema
+  .refine((m) => m > 0, 'El importe debe ser mayor que cero')
+  .refine((m) => m % MICROS_PER_CENT === 0, 'El importe va en céntimos enteros');
 const minutesSchema = z
   .int()
   .positive('Indica al menos 1 minuto')

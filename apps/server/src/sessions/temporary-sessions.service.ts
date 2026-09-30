@@ -39,7 +39,9 @@ import { SessionsService } from './sessions.service.js';
 
 /**
  * Valida lo que compra un cobro de una sesión temporal: algo de tiempo, sin pasar de 24 h
- * y con un importe de al menos un céntimo (el evento exige un importe positivo).
+ * y con un importe de al menos un céntimo. El importe que escribe el encargado ya llega en
+ * céntimos enteros (esquema de `shared`) y el de los minutos se redondea al céntimo, así
+ * que aquí solo puede faltar si unos pocos minutos a una tarifa muy baja redondean a 0.
  */
 export function checkPurchase(purchase: TemporaryPurchase): void {
   if (purchase.seconds < 1) {
@@ -48,10 +50,12 @@ export function checkPurchase(purchase: TemporaryPurchase): void {
   if (purchase.seconds > MAX_TEMPORARY_SECONDS) {
     throw new BadRequestException('Como máximo 24 horas por cobro');
   }
-  if (purchase.charge < 1) {
+  if (purchase.charge < MICROS_PER_CENT) {
     throw new BadRequestException('El importe es demasiado pequeño para cobrarlo');
   }
 }
+
+const MICROS_PER_CENT = 10_000;
 
 /**
  * Sesiones temporales, sin cuenta (REQ-001-60 a REQ-001-71): las abre el encargado cobrando
