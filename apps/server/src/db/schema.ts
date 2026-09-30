@@ -3,7 +3,15 @@
 //
 // Convenciones (plan 001): ids UUIDv7, fechas `timestamptz` en UTC, importes `bigint` en
 // micro-unidades (ADR-0015) y tiempos en segundos `integer`.
-import type { Actor, CustomerStatus, StaffRole } from '@pope/shared';
+import type {
+  Actor,
+  ComboSnapshot,
+  CustomerStatus,
+  LedgerKind,
+  PaymentMethod,
+  StaffRole,
+  Wallet,
+} from '@pope/shared';
 import { sql } from 'drizzle-orm';
 import {
   bigint,
@@ -127,5 +135,61 @@ export const cashShifts = pgTable(
       .where(sql`${t.closedAt} is null`),
     index('cash_shifts_staff_opened_idx').on(t.staffId, t.openedAt),
     check('cash_shifts_closed_after_opened', sql`${t.closedAt} >= ${t.openedAt}`),
+  ],
+);
+
+/**
+ * Movimientos de saldo (REQ-001-89, ADR-0014): solo se insertan, nunca se modifican ni se
+ * borran. `amount` va en µUSD (monedero `money`) o en segundos (monedero `combo`), con
+ * signo: positivo suma y negativo resta.
+ */
+export const ledger = pgTable(
+  'ledger',
+  {
+    id: uuid('id').primaryKey(),
+    customerId: uuid('customer_id')
+      .notNull()
+      .references(() => customers.id),
+    wallet: text('wallet').$type<Wallet>().notNull(),
+    amount: bigint('amount', { mode: 'number' }).notNull(),
+    kind: text('kind').$type<LedgerKind>().notNull(),
+    /** Sesión que generó el consumo. La clave foránea llega con la tabla `sessions` (T23). */
+    sessionId: uuid('session_id'),
+    /** Turno de caja de los cobros en mostrador (REQ-001-03, REQ-001-84). */
+    shiftId: uuid('shift_id').references(() => cashShifts.id),
+    paymentMethod: text('payment_method').$type<PaymentMethod>(),
+    comboSnapshot: jsonb('combo_snapshot').$type<ComboSnapshot>(),
+    /** Motivo obligatorio de los ajustes (REQ-001-89). */
+    reason: text('reason'),
+    actor: jsonb('actor').$type<Actor>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index('ledger_customer_created_idx').on(t.customerId, t.createdAt),
+    check('ledger_wallet_check', sql`${t.wallet} in ('money', 'combo')`),
+    check(
+      'ledger_kind_check',
+      sql`${t.kind} in ('recharge', 'combo_purchase', 'consumption', 'adjustment', 'migration')`,
+    ),
+    check('ledger_amount_nonzero', sql`${t.amount} <> 0`),
+  ],
+);
+
+/**
+ * Saldos de cada cuenta: **caché** del ledger, actualizada en la misma transacción que cada
+ * movimiento (plan 001). Nunca son negativos: el sistema es solo prepago.
+ */
+export const customerBalances = pgTable(
+  'customer_balances',
+  {
+    customerId: uuid('customer_id')
+      .primaryKey()
+      .references(() => customers.id),
+    moneyMicros: bigint('money_micros', { mode: 'number' }).notNull().default(0),
+    comboSeconds: integer('combo_seconds').notNull().default(0),
+  },
+  (t) => [
+    check('customer_balances_money_nonnegative', sql`${t.moneyMicros} >= 0`),
+    check('customer_balances_combo_nonnegative', sql`${t.comboSeconds} >= 0`),
   ],
 );

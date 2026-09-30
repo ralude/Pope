@@ -11,3 +11,4 @@ export * from './events.js';
 export * from './staff.js';
 export * from './customer.js';
 export * from './shift.js';
+export * from './wallet.js';

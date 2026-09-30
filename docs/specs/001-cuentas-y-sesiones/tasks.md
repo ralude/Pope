@@ -166,7 +166,7 @@ antes de seguir.
   - **Verificar:** tests de un solo turno abierto por encargado y de rechazo sin turno.
   - **Commit:** `feat(server): añade el turno de caja mínimo`
 
-- [ ] **T18: Ledger y saldos**
+- [x] **T18: Ledger y saldos**
   - **Cubre:** REQ-001-83, REQ-001-89, ADR-0014
   - **Hacer:** tablas `ledger` y `customer_balances`, y un `WalletService.post()` que inserta en el ledger y actualiza la caché en la misma transacción. Helper de test `assertBalancesMatchLedger`.
   - **Verificar:** tests de los dos monederos y de la invariante.

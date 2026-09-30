@@ -9,13 +9,14 @@ import { DatabaseModule } from './db/database.module.js';
 import { EventsModule } from './events/events.module.js';
 import { HealthModule } from './health/health.module.js';
 import { ShiftsModule } from './shifts/shifts.module.js';
+import { WalletModule } from './wallet/wallet.module.js';
 
 /** Módulos que se cargan en los dos modos. */
 const COMMON_MODULES = [HealthModule];
 
 /** Módulos propios de cada modo (ADR-0003). Cada spec añade aquí los suyos. */
 const MODULES_BY_MODE: Record<PopeMode, DynamicModule['imports']> = {
-  local: [EventsModule, AuthModule, CustomersModule, ShiftsModule],
+  local: [EventsModule, AuthModule, CustomersModule, ShiftsModule, WalletModule],
   cloud: [],
 };
 

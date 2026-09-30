@@ -50,6 +50,13 @@
       "when": 1790746147417,
       "tag": "0006_cash_shifts",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790747254612,
+      "tag": "0007_ledger",
+      "breakpoints": true
     }
   ]
 }
