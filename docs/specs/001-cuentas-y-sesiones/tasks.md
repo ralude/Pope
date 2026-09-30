@@ -190,7 +190,7 @@ antes de seguir.
   - **Verificar:** test de CA-001-14.
   - **Commit:** `feat(server): gestiona los combos de horas`
 
-- [ ] **T22: Compra de combos**
+- [x] **T22: Compra de combos**
   - **Cubre:** REQ-001-82, REQ-001-84, REQ-001-85
   - **Hacer:** compra en caja (turno + método) y compra con saldo, guardando la copia del combo. Evento `combo.purchased`.
   - **Verificar:** tests de CA-001-17, saldo insuficiente e invariante.

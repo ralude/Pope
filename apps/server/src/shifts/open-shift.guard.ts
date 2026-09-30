@@ -13,6 +13,9 @@ import type { FastifyRequest } from 'fastify';
 
 import { ShiftsService } from './shifts.service.js';
 
+/** Respuesta cuando una operación de caja no tiene turno abierto. */
+export const NO_OPEN_SHIFT_MESSAGE = 'Abre un turno de caja para continuar';
+
 declare module 'fastify' {
   interface FastifyRequest {
     /** Turno abierto de quien hace la petición; lo pone `OpenShiftGuard`. */
@@ -36,7 +39,7 @@ export class OpenShiftGuard implements CanActivate {
     }
     const shift = await this.shifts.findOpen(request.staff.id);
     if (!shift) {
-      throw new ConflictException('Abre un turno de caja para continuar');
+      throw new ConflictException(NO_OPEN_SHIFT_MESSAGE);
     }
     request.shift = shift;
     return true;

@@ -6,6 +6,7 @@ import { type Micros, micros, microsSchema } from './money.js';
 import { idSchema } from './session.js';
 import { type TariffTable, weekdaySchema } from './tariff.js';
 import { SECONDS_PER_HOUR } from './time.js';
+import { paymentMethodSchema } from './wallet.js';
 
 const comboNameSchema = z.string().trim().min(1, 'Pon un nombre al combo').max(100);
 const comboPriceSchema = microsSchema.refine((m) => m > 0, 'El precio debe ser mayor que cero');
@@ -75,3 +76,16 @@ export function comboDiscounts(ratePerHour: Micros, table: TariffTable): ComboDi
       ),
     }));
 }
+
+/**
+ * Cuerpo de `POST /customers/:id/combo-purchases`: en caja, con método de pago y turno
+ * (REQ-001-84), o con el saldo en dinero (REQ-001-85).
+ */
+export const comboPurchaseRequestSchema = z.object({
+  comboId: idSchema,
+  payment: z.discriminatedUnion('via', [
+    z.object({ via: z.literal('cash_desk'), paymentMethod: paymentMethodSchema }),
+    z.object({ via: z.literal('balance') }),
+  ]),
+});
+export type ComboPurchaseRequest = z.infer<typeof comboPurchaseRequestSchema>;
