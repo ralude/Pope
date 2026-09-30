@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T32 terminada (añadir tiempo a una sesión temporal)
+**Última actualización:** 2026-09-30 · T33 terminada (cierre anticipado de sesión temporal)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T33: Cierre anticipado de sesión temporal** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 40 / 60 tareas · fase 6 de 9 (Sesiones temporales) |
+| **Siguiente tarea** | **T34: Respaldo y sesiones interrumpidas** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 41 / 60 tareas · fase 6 de 9 (Sesiones temporales) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 40 / 60 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 41 / 60 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T33. Sin código nuevo: el cierre de T28 ya descarta el sobrante de una temporal (cliente o encargado): sin devolución en el ledger ni en los cobros, y el tiempo perdido queda en session.ended. Tests de CA-001-09 y helpers de PcWorld (cashier, api, openTemporary).
 - **2026-09-30:** T32. POST /sessions/:id/time: cobra primero lo ya usado y añade el tiempo (por minutos o por importe) con la tarifa de la sesión, ligado al turno de quien cobra, con session_topup y session.time_added; la PC ve el nuevo tiempo al momento. El cierre por agotamiento ya no pisa a un cobro simultáneo (onlyIfExhausted).
 - **2026-09-30:** T31. POST /sessions/temporary (encargado y administrador, con turno abierto): abre una sesión temporal en una PC libre y conectada, por minutos (importe redondeado al céntimo) o por importe (segundos truncados), con nombre opcional (Temporal · PC 05 · 18:30). Cobro en session_topups ligado al turno y session.started con el encargado como actor; la PC se desbloquea al momento. Tope de 24 h por cobro (por confirmar).
 - **2026-09-30:** T30. buyCombo desde el Shell: cobra la sesión hasta ahora y compra con saldo en la misma transacción, responde con el state y rearma los avisos. Rechazos con código propio (sin sesión, temporal, combo no disponible, cuenta bloqueada, saldo). Fin de la fase 5. La compra con saldo, también desde el panel, descuenta lo ya consumido en la sesión activa.
@@ -66,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T28. SessionsService.close liquida el consumo en el ledger (hasta 2 filas: combo y dinero, solo lo que había si el saldo bajó), guarda el motivo, emite session.ended y avisa a la PC con sessionEnded. Cierran el cliente (logout desde el Shell) y el personal (POST /sessions/:id/close: 404, 409, solo encargado y administrador).
 - **2026-09-30:** T26. Cada heartbeat cobra hasta ahora con el reloj del nodo (combo primero, luego dinero; las temporales, su tiempo comprado), guarda la sesión y responde con el state. La marca avanza segundos enteros, sin perder fracciones. T27 pasa después de T28 porque cerrar por agotamiento necesita la liquidación del ledger. Helper de test PcWorld.
 - **2026-09-30:** T25. Mensaje login de la PC: valida credenciales, rechaza si la PC o la cuenta ya tienen sesión (dice en qué PC), exige saldo para 1 min y abre la sesión copiando la tarifa del día con session.started. SessionsService.stateFor da el state de cada PC (también al reconectar).
-- **2026-09-30:** T24. Canal de las PCs en `ws://nodo:3000/pc` con `ws` y despachador propio por `type` (`PcProtocolService`); `hello` registra la PC (`unknown_pc` si no existe) y recibe `state`. `requestId` opcional en el protocolo. `PcConnections` envía a cualquier PC; `PcTestClient` simula PCs en los tests.

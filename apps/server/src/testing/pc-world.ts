@@ -1,8 +1,9 @@
-import type { NodeToPcMessage } from '@pope/shared';
+import type { NodeToPcMessage, TemporarySession } from '@pope/shared';
 
 import { devPcId, seedDevPcs } from '../pcs/dev-pcs.js';
 import { SessionsService } from '../sessions/sessions.service.js';
 import { createTestApp, type TestApp } from './app.js';
+import { loginAsStaff } from './auth.js';
 import { FakeClock } from './clock.js';
 import { listenForPcs, PcTestClient } from './pc-client.js';
 
@@ -56,6 +57,47 @@ export class PcWorld {
       client.close();
     }
     await this.testApp.close();
+  }
+
+  /** Petición HTTP al nodo, con la cookie del personal si se indica. */
+  api(method: 'GET' | 'POST' | 'PUT', url: string, cookie: string | null, payload?: object) {
+    return this.testApp.app.inject({
+      method,
+      url,
+      headers: cookie ? { cookie } : {},
+      ...(payload && { payload }),
+    });
+  }
+
+  /** Un encargado con sesión iniciada y el turno de caja abierto; devuelve su cookie. */
+  async cashier(username = 'ana', displayName = 'Ana'): Promise<string> {
+    const cookie = await loginAsStaff(this.testApp, username, 'encargado', displayName);
+    await this.api('POST', '/shifts', cookie);
+    return cookie;
+  }
+
+  /**
+   * El encargado abre una sesión temporal de `minutes` minutos en la PC `n`, que se conecta
+   * antes. Devuelve la PC (ya sin el `state` de desbloqueo en su cola) y la sesión.
+   */
+  async openTemporary(
+    cookie: string,
+    n: number,
+    minutes: number,
+    name?: string,
+  ): Promise<{ pc: PcTestClient; session: TemporarySession }> {
+    const pc = await this.pc(n);
+    const response = await this.api('POST', '/sessions/temporary', cookie, {
+      pcId: devPcId(n),
+      paymentMethod: 'cash_usd',
+      minutes,
+      ...(name !== undefined && { name }),
+    });
+    if (response.statusCode !== 201) {
+      throw new Error(`No se pudo abrir la sesión temporal: ${response.body}`);
+    }
+    await pc.next();
+    return { pc, session: response.json<TemporarySession>() };
   }
 }
 

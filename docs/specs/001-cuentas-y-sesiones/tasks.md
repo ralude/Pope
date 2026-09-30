@@ -274,11 +274,12 @@ antes de seguir.
   - **Commit:** `feat(server): permite añadir tiempo a una sesión temporal`
   - **Decidido al implementarla (2026-09-30):** `POST /sessions/:id/time` cobra primero lo ya usado y después suma el tiempo, así que se añade a lo que de verdad queda. Para que un cierre por agotamiento no pise a un cobro simultáneo, `close` admite `onlyIfExhausted` (también protege una recarga en el último segundo de una sesión con cuenta).
 
-- [ ] **T33: Cierre anticipado de sesión temporal**
+- [x] **T33: Cierre anticipado de sesión temporal**
   - **Cubre:** REQ-001-69
   - **Hacer:** cierre por el cliente o el encargado sin devolución. No aparece en interrumpidas.
   - **Verificar:** test de CA-001-09.
   - **Commit:** `feat(server): descarta el tiempo sobrante al cerrar una temporal`
+  - **Hecho sin código nuevo (2026-09-30):** el cierre de T28 ya no devuelve nada en las temporales (no escribe en el ledger ni toca los cobros) y anota el sobrante en `session.ended`; solo faltaba demostrarlo, así que el commit es `test(server): comprueba que cerrar una temporal descarta el tiempo sobrante`. Que la sesión no salga en "interrumpidas" (solo entran las de motivo `no_heartbeat`) se comprueba en T34 y T35.
 
 - [ ] **T34: Respaldo y sesiones interrumpidas**
   - **Cubre:** REQ-001-63, REQ-001-64, REQ-001-65, REQ-001-66
