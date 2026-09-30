@@ -58,6 +58,8 @@ const WATCH_SLACK_MS = 20;
  * PC que acaba de morir.
  */
 const ALIVE_MS = 15_000;
+/** Cuánto recuerda el nodo que una sesión se cerró, para ignorar lo que llegue tarde. */
+const ENDED_MEMORY_MS = 60_000;
 
 /** Usuario y saldos del cliente de una sesión con cuenta. */
 interface AccountView {
@@ -85,6 +87,13 @@ export class SessionsService implements OnModuleDestroy {
   private readonly warned = new Map<string, WarningMinutes[]>();
   /** Cuándo se supo por última vez de cada PC (latido, login o `hello`), en ms. */
   private readonly seen = new Map<string, number>();
+  /**
+   * Sesiones recién cerradas. Una revisión, una compra o un cambio desde el panel que
+   * confirmó su transacción justo antes del cierre no debe, al terminar, volver a avisar,
+   * programar un temporizador ni enviar el `state` de una sesión que ya terminó. Se olvidan
+   * al cabo de `ENDED_MEMORY_MS`.
+   */
+  private readonly ended = new Set<string>();
 
   constructor(
     @Inject(DATABASE) private readonly db: Database,
@@ -250,7 +259,7 @@ export class SessionsService implements OnModuleDestroy {
     // Con más tiempo, los avisos que ya se dieron pueden volver a tocar (se rearman).
     this.sendWarning(bought.row, remaining);
     this.watch(bought.row, remaining);
-    return activeState(bought.row, bought.account);
+    return this.ended.has(bought.row.id) ? LOCKED_STATE : activeState(bought.row, bought.account);
   }
 
   private async buyComboIn(
@@ -412,6 +421,12 @@ export class SessionsService implements OnModuleDestroy {
     });
     if (ended) {
       this.unwatch(ended.id);
+      const endedId = ended.id;
+      this.ended.add(endedId);
+      this.clock.schedule(ENDED_MEMORY_MS, () => {
+        this.ended.delete(endedId);
+        return Promise.resolve();
+      });
       this.connections.send(ended.pcId, {
         type: 'sessionEnded',
         sessionId: ended.id,
@@ -688,11 +703,15 @@ export class SessionsService implements OnModuleDestroy {
     }
     this.sendWarning(row, remaining);
     this.watch(row, remaining);
-    return activeState(row, account);
+    // Si la cerraron mientras tanto, la PC ya recibió `sessionEnded`: no hay que desbloquearla.
+    return this.ended.has(row.id) ? LOCKED_STATE : activeState(row, account);
   }
 
   /** Envía el aviso de 5 o 1 min si toca. Si la PC no está conectada, se reintenta luego. */
   private sendWarning(row: SessionRow, remaining: number): void {
+    if (this.ended.has(row.id)) {
+      return;
+    }
     const check = pendingWarnings(seconds(remaining), this.warned.get(row.id) ?? []);
     if (check.send !== null) {
       const delivered = this.connections.send(row.pcId, {
@@ -716,6 +735,9 @@ export class SessionsService implements OnModuleDestroy {
    * además cada 10 s.
    */
   private watch(row: SessionRow, remaining: number): void {
+    if (this.ended.has(row.id)) {
+      return;
+    }
     this.timers.get(row.id)?.();
     const due =
       this.connections.isConnected(row.pcId) &&
@@ -747,6 +769,10 @@ export class SessionsService implements OnModuleDestroy {
    * reprograma sus avisos con el nuevo restante.
    */
   announce(row: SessionRow): void {
+    // Si la cerraron justo después, mandar su `state` desbloquearía la PC.
+    if (this.ended.has(row.id)) {
+      return;
+    }
     const remaining = remainingSeconds(row, null);
     // Enviar no prueba que la PC esté viva (el socket puede estar medio cerrado): su último
     // contacto sigue siendo el que decide hasta dónde se cobra.

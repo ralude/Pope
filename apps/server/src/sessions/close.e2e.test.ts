@@ -9,6 +9,7 @@ import { createCustomerWithBalance } from '../testing/customers.js';
 import { heartbeat, login, logout, PcWorld } from '../testing/pc-world.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
 import { WalletService } from '../wallet/wallet.service.js';
+import { SessionsService } from './sessions.service.js';
 
 const MINUTE = 60_000;
 // 18:00 en Caracas de un lunes: 1,50 USD/h.
@@ -164,6 +165,29 @@ describe('cierre de sesiones (e2e, REQ-001-26, REQ-001-31)', () => {
       type: 'session.ended',
       payload: { billedUntil: lastBeat.toISOString() },
     });
+  });
+
+  it('lo que llega tarde tras un cierre no reactiva la sesión: ni state, ni avisos, ni temporizador', async () => {
+    await start();
+    const ana = await world.cashier();
+    // Una temporal de 3 min: el aviso de 5 min toca al momento.
+    const { pc, session } = await world.openTemporary(ana, 5, 3);
+    await pc.next();
+    const [active] = await world.testApp.database.db
+      .select()
+      .from(sessions)
+      .where(eq(sessions.id, session.id));
+    if (!active) {
+      throw new Error('No existe la sesión');
+    }
+    await world.api('POST', `/sessions/${session.id}/close`, ana);
+    expect(await pc.next()).toMatchObject({ type: 'sessionEnded', reason: 'staff' });
+
+    // Un cambio desde el panel que confirmó justo antes del cierre termina ahora.
+    world.testApp.app.get(SessionsService).announce(active);
+
+    // La PC no recibe nada más: lo siguiente es la respuesta a su latido, bloqueada.
+    expect(await heartbeat(pc)).toEqual({ type: 'state', status: 'locked' });
   });
 
   it('el cierre del personal responde 404, 409 y respeta los permisos', async () => {
