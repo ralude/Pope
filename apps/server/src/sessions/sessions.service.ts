@@ -165,11 +165,16 @@ export class SessionsService implements OnModuleDestroy {
       // Bloquea la PC y la cuenta: un login simultáneo en otra PC, o una sesión temporal
       // abierta a la vez en esta, esperan a que termine.
       await tx.select({ id: pcs.id }).from(pcs).where(eq(pcs.id, pc.id)).for('update');
-      await tx
-        .select({ id: customers.id })
+      const [current] = await tx
+        .select({ status: customers.status })
         .from(customers)
         .where(eq(customers.id, customer.id))
         .for('update');
+      // La contraseña se comprobó antes, fuera de esta transacción: si el encargado bloqueó
+      // la cuenta justo entonces, se ve aquí, con la fila ya bloqueada.
+      if (current && current.status !== 'active') {
+        throw new PcRequestRefused('account_inactive', customerInactiveMessage(current.status));
+      }
       if (await this.activeOnPc(pc.id, tx)) {
         throw new PcRequestRefused('session_already_active', 'Esta PC ya tiene una sesión abierta');
       }

@@ -10,6 +10,7 @@ import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { PcTestClient } from '../testing/pc-client.js';
 import { activeSession, heartbeat, login, PcWorld, summary } from '../testing/pc-world.js';
+import { SessionsService } from './sessions.service.js';
 
 // 18:00 en Caracas (UTC−4) de cada día de la semana usado en los criterios.
 const MONDAY = '2026-09-28T22:00:00Z';
@@ -115,6 +116,23 @@ describe('login desde la PC (e2e, REQ-001-20, REQ-001-21)', () => {
     });
     expect(summary(await login(await world.pc(2), 'justo')).remainingSeconds).toBe(60);
     expect(summary(await login(await world.pc(3), 'combo')).remainingSeconds).toBe(60);
+  });
+
+  it('si bloquean la cuenta mientras se comprueba la contraseña, no se abre la sesión', async () => {
+    const testApp = await start(MONDAY);
+    // `juan` es la cuenta tal como la vio la comprobación de la contraseña: activa.
+    const juan = await createCustomerWithBalance(testApp, 'juan', { moneyMicros: usd(3) });
+    await testApp.app.get(CustomersService).setStatus(juan.id, 'disabled', { kind: 'system' });
+
+    const opening = testApp.app
+      .get(SessionsService)
+      .startAccountSession({ id: devPcId(5), name: 'PC 05' }, juan);
+
+    await expect(opening).rejects.toMatchObject({
+      code: 'account_inactive',
+      message: 'Tu cuenta está desactivada. Habla con el encargado',
+    });
+    expect(await testApp.app.get(SessionsService).activeOnPc(devPcId(5))).toBeUndefined();
   });
 
   it('da un mensaje distinto para cada motivo de rechazo', async () => {
