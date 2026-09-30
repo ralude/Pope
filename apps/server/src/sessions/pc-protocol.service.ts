@@ -107,7 +107,7 @@ export class PcProtocolService {
       return;
     }
     this.connections.register(pc, connection);
-    await this.sessions.reconcile(pc.id, message.sessionId);
+    await this.sessions.reconcile(pc.id, message);
     connection.send(await this.sessions.stateFor(pc.id));
   }
 

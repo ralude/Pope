@@ -55,9 +55,16 @@ export class PcTestClient {
     url: string,
     pcId: string,
     sessionId: string | null = null,
+    localRemainingSeconds?: number,
   ): Promise<{ pc: PcTestClient; state: NodeToPcMessage }> {
     const pc = await PcTestClient.connect(url);
-    pc.send({ type: 'hello', protocolVersion: PROTOCOL_VERSION, pcId, sessionId });
+    pc.send({
+      type: 'hello',
+      protocolVersion: PROTOCOL_VERSION,
+      pcId,
+      sessionId,
+      ...(localRemainingSeconds !== undefined && { localRemainingSeconds }),
+    });
     return { pc, state: await pc.next() };
   }
 

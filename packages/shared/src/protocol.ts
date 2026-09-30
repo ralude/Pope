@@ -37,6 +37,13 @@ export const helloMessageSchema = z.object({
   protocolVersion: z.literal(PROTOCOL_VERSION),
   pcId: idSchema,
   sessionId: idSchema.nullable(),
+  /**
+   * Tiempo restante que guardaba la PC de esa sesión (REQ-001-63), si lo sabe. Si el nodo la
+   * cerró por falta de latidos durante un corte, se queda el menor de los dos antes de
+   * responder (pregunta resuelta de la spec 001). Opcional: los agentes que no lo envían
+   * siguen siendo compatibles.
+   */
+  localRemainingSeconds: nonNegativeSeconds.nullable().optional(),
 });
 
 /**

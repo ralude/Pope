@@ -19,6 +19,10 @@ describe('PC → nodo', () => {
     const hello = { type: 'hello', protocolVersion: PROTOCOL_VERSION, pcId: PC_ID };
     expect(valid({ ...hello, sessionId: null })).toBe(true);
     expect(valid({ ...hello, sessionId: SESSION_ID })).toBe(true);
+    // El restante local es opcional y no negativo.
+    expect(valid({ ...hello, sessionId: SESSION_ID, localRemainingSeconds: 1500 })).toBe(true);
+    expect(valid({ ...hello, sessionId: SESSION_ID, localRemainingSeconds: null })).toBe(true);
+    expect(valid({ ...hello, sessionId: SESSION_ID, localRemainingSeconds: -1 })).toBe(false);
     expect(valid({ ...hello, sessionId: null, protocolVersion: 99 })).toBe(false);
     expect(valid({ ...hello, sessionId: null, pcId: 'PC 05' })).toBe(false);
     // Los ids son UUIDv7: un UUIDv4 no vale.

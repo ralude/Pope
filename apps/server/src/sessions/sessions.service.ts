@@ -68,7 +68,7 @@ interface AccountView {
 /** Lo que la PC dice de su sesión en un `hello` o un `heartbeat`. */
 export interface SessionClaim {
   sessionId: string | null;
-  /** Solo en los latidos: el tiempo restante que guarda la PC (REQ-001-63). */
+  /** El tiempo restante que guarda la PC (REQ-001-63), si lo manda. */
   localRemainingSeconds?: number | null;
 }
 
@@ -530,7 +530,8 @@ export class SessionsService implements OnModuleDestroy {
    * que la abría), sigue abierta y la PC la recibe ahora con su `state`. Si dice tener una
    * sesión ya cerrada, se le avisa con `sessionEnded`.
    */
-  async reconcile(pcId: string, claimedId: string | null): Promise<void> {
+  async reconcile(pcId: string, claim: SessionClaim): Promise<void> {
+    const claimedId = claim.sessionId;
     this.touch(pcId);
     await this.confirm(pcId, claimedId);
     const active = await this.activeOnPc(pcId);
@@ -539,7 +540,7 @@ export class SessionsService implements OnModuleDestroy {
         await this.close(active.id, 'no_heartbeat', { kind: 'system' }, { billToNow: false });
       }
     } else if (claimedId !== null && claimedId !== active?.id) {
-      await this.rejectClaim(pcId, claimedId, null);
+      await this.rejectClaim(pcId, claimedId, claim.localRemainingSeconds ?? null);
     }
   }
 

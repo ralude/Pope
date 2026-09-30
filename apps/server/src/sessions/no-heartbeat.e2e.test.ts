@@ -214,6 +214,27 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     back.close();
   });
 
+  it('el restante se corrige ya en el hello, antes de avisar a la PC de que la sesión terminó', async () => {
+    world = await PcWorld.start(MONDAY);
+    const id = await insertTemporary();
+    const pc = await world.pc(5, id);
+    await heartbeat(pc);
+    await world.run(5, 10 * MINUTE, MINUTE);
+    pc.close();
+    await pc.closed;
+    await world.clock.tick(4 * MINUTE);
+
+    // Vuelve la red: la PC dice en su hello que le quedan 2700 s (el nodo tenía 3000).
+    const { pc: back, state } = await PcTestClient.hello(world.url, devPcId(5), id, 2700);
+    expect(state).toEqual({ type: 'sessionEnded', sessionId: id, reason: 'no_heartbeat' });
+    expect((await storedSession(5)).usedSeconds).toBe(900);
+    expect((await allEvents()).at(-1)).toMatchObject({
+      type: 'session.remaining_corrected',
+      payload: { sessionId: id, from: 3000, to: 2700 },
+    });
+    back.close();
+  });
+
   it('no corrige el restante de una temporal que ya se restauró', async () => {
     world = await PcWorld.start(MONDAY);
     const id = await insertTemporary();
