@@ -329,3 +329,34 @@ export const sessions = pgTable(
     ),
   ],
 );
+
+/**
+ * Cobros en caja de las sesiones temporales: el de la apertura y los de "añadir tiempo"
+ * (REQ-001-60, REQ-001-70). Solo se insertan. Van ligados al turno de quien cobró, que es
+ * donde los cuenta la caja (spec 005). Una restauración no cobra, así que no tiene fila.
+ */
+export const sessionTopups = pgTable(
+  'session_topups',
+  {
+    id: uuid('id').primaryKey(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id),
+    /** Tiempo que compra este cobro. */
+    seconds: integer('seconds').notNull(),
+    /** Importe cobrado en µUSD. */
+    amountMicros: bigint('amount_micros', { mode: 'number' }).notNull(),
+    paymentMethod: text('payment_method').$type<PaymentMethod>().notNull(),
+    shiftId: uuid('shift_id')
+      .notNull()
+      .references(() => cashShifts.id),
+    actor: jsonb('actor').$type<Actor>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index('session_topups_session_idx').on(t.sessionId, t.createdAt),
+    index('session_topups_shift_idx').on(t.shiftId),
+    check('session_topups_seconds_positive', sql`${t.seconds} > 0`),
+    check('session_topups_amount_positive', sql`${t.amountMicros} > 0`),
+  ],
+);

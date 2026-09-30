@@ -685,6 +685,21 @@ export class SessionsService implements OnModuleDestroy {
     );
   }
 
+  /**
+   * El panel acaba de abrir una sesión temporal o de cambiar su tiempo (añadir tiempo,
+   * restaurar): la PC recibe su `state` al momento, y la sesión empieza a vigilarse o
+   * reprograma sus avisos con el nuevo restante.
+   */
+  announce(row: SessionRow): void {
+    const remaining = remainingSeconds(row, null);
+    this.connections.send(row.pcId, activeState(row, null));
+    if (this.connections.isConnected(row.pcId)) {
+      this.markSeen(row.pcId);
+    }
+    this.sendWarning(row, remaining);
+    this.watch(row, remaining);
+  }
+
   /** Deja de vigilar una sesión que se cerró. */
   private unwatch(sessionId: string): void {
     this.timers.get(sessionId)?.();

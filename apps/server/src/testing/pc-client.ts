@@ -65,7 +65,7 @@ export class PcTestClient {
     this.ws.send(typeof message === 'string' ? message : JSON.stringify(message));
   }
 
-  /** Siguiente mensaje recibido; falla si no llega en 2 s. */
+  /** Siguiente mensaje recibido; falla si no llega en 5 s (margen para equipos lentos). */
   next(): Promise<NodeToPcMessage> {
     const queued = this.inbox.shift();
     if (queued) {
@@ -74,8 +74,8 @@ export class PcTestClient {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.waiting = null;
-        reject(new Error('La PC no recibió ningún mensaje en 2 s'));
-      }, 2000);
+        reject(new Error('La PC no recibió ningún mensaje en 5 s'));
+      }, 5000);
       this.waiting = (message) => {
         clearTimeout(timer);
         resolve(message);

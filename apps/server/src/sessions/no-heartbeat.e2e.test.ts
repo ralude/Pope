@@ -87,7 +87,7 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     const { sessionId } = activeSession(await login(pc, 'juan'));
 
     // 10 min con latidos: sigue abierta. Después la PC se queda muda (se va la luz).
-    await world.run(5, 10 * MINUTE);
+    await world.run(5, 10 * MINUTE, MINUTE);
     expect(await storedSession(5)).toMatchObject({ status: 'active' });
     const lastBeat = world.clock.now();
 
@@ -118,7 +118,7 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     const id = await insertTemporary();
     const pc = await world.pc(5, id);
     await heartbeat(pc);
-    await world.run(5, 10 * MINUTE);
+    await world.run(5, 10 * MINUTE, MINUTE);
 
     await world.clock.tick(3 * MINUTE);
     expect(await pc.next()).toEqual({
@@ -165,7 +165,7 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
     const pc = await world.pc(5);
     const { sessionId } = activeSession(await login(pc, 'juan'));
-    await world.run(5, 5 * MINUTE);
+    await world.run(5, 5 * MINUTE, MINUTE);
     pc.close();
     await pc.closed;
     await world.clock.tick(4 * MINUTE);
@@ -186,7 +186,7 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     const id = await insertTemporary();
     const pc = await world.pc(5, id);
     await heartbeat(pc);
-    await world.run(5, 10 * MINUTE);
+    await world.run(5, 10 * MINUTE, MINUTE);
     pc.close();
     await pc.closed;
     await world.clock.tick(4 * MINUTE);
@@ -219,7 +219,7 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     const id = await insertTemporary();
     const pc = await world.pc(5, id);
     await heartbeat(pc);
-    await world.run(5, 10 * MINUTE);
+    await world.run(5, 10 * MINUTE, MINUTE);
     pc.close();
     await pc.closed;
     await world.clock.tick(4 * MINUTE);
@@ -237,7 +237,7 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
     const pc = await world.pc(5);
     const { sessionId } = activeSession(await login(pc, 'juan'));
-    await world.run(5, 5 * MINUTE);
+    await world.run(5, 5 * MINUTE, MINUTE);
     const lastBeat = world.clock.now();
 
     // La PC se reinicia: conecta sin sesión un minuto después de su último latido.

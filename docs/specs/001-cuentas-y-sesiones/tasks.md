@@ -260,11 +260,12 @@ antes de seguir.
 
 ## Fase 6: Sesiones temporales
 
-- [ ] **T31: Abrir sesión temporal**
+- [x] **T31: Abrir sesión temporal**
   - **Cubre:** REQ-001-22, REQ-001-60, REQ-001-61, REQ-001-62, REQ-001-82
   - **Hacer:** endpoint con tiempo o importe, nombre opcional (con valor por defecto), método de pago y turno. Tabla `session_topups`.
   - **Verificar:** tests de CA-001-04, CA-001-05 y CA-001-18.
   - **Commit:** `feat(server): abre sesiones temporales sin cuenta`
+  - **Decidido al implementarla (2026-09-30):** `POST /sessions/temporary` (encargado y administrador, con turno abierto) pide `minutes` o `amountMicros`, no las dos. La PC debe estar libre y **conectada** al nodo (si no, se cobraría por una PC que no puede desbloquearse). Cada cobro admite como máximo 24 h y al menos un céntimo. `session_topups` guarda solo los cobros (la restauración no cobra, no tiene fila).
 
 - [ ] **T32: Añadir tiempo a una sesión temporal**
   - **Cubre:** REQ-001-70

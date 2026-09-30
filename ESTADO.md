@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T30 terminada (compra de combo desde el Shell)
+**Última actualización:** 2026-09-30 · T31 terminada (abrir sesión temporal)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T31: Abrir sesión temporal** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 38 / 60 tareas · fase 6 de 9 (Sesiones temporales) |
+| **Siguiente tarea** | **T32: Añadir tiempo a una sesión temporal** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 39 / 60 tareas · fase 6 de 9 (Sesiones temporales) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -35,6 +35,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **T28a:** confirmar los límites de los ajustes: gracia de latidos entre 30 s y 30 min, sesiones temporales conservadas entre 3 y 100 (la spec solo fija el 3 mínimo y el 3 min por defecto).
+- [ ] **T31:** confirmar dos criterios al abrir una sesión temporal: el tope de 24 h por cobro y que la PC deba estar conectada al nodo (si no, se cobraría por una PC que no puede desbloquearse).
 - [ ] **REQ-001-13:** el equivalente en Bs espera a la tasa BCV de la spec 005.
 - [ ] **Antes de la spec 003:** decidir los ADR propuestos [0005](docs/adr/0005-shell-react-en-webview2.md), [0009](docs/adr/0009-escritorio-separado-para-bloqueo-y-pausa.md) y [0010](docs/adr/0010-lista-blanca-y-restauracion.md) (cliente Windows).
 - [ ] **Spec 008:** averiguar si el plan de SENET del local incluye acceso a la API y quién tiene las credenciales.
@@ -43,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 38 / 60 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 39 / 60 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -56,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T31. POST /sessions/temporary (encargado y administrador, con turno abierto): abre una sesión temporal en una PC libre y conectada, por minutos (importe redondeado al céntimo) o por importe (segundos truncados), con nombre opcional (Temporal · PC 05 · 18:30). Cobro en session_topups ligado al turno y session.started con el encargado como actor; la PC se desbloquea al momento. Tope de 24 h por cobro (por confirmar).
 - **2026-09-30:** T30. buyCombo desde el Shell: cobra la sesión hasta ahora y compra con saldo en la misma transacción, responde con el state y rearma los avisos. Rechazos con código propio (sin sesión, temporal, combo no disponible, cuenta bloqueada, saldo). Fin de la fase 5. La compra con saldo, también desde el panel, descuenta lo ya consumido en la sesión activa.
 - **2026-09-30:** T29. Un proceso (cada 10 s y al arrancar el nodo) cierra como no_heartbeat las sesiones sin latidos más que el tiempo de gracia, cobrando hasta el último latido. hello sin sesión con una activa la cierra al momento; si la PC reconecta con una sesión ya cerrada recibe sessionEnded, y una temporal queda con el menor restante (evento session.remaining_corrected). Los temporizadores de T27 no cobran con la PC en silencio.
 - **2026-09-30:** T28a. Tabla settings (sin fila vale el valor por defecto) y /settings: el personal lee y solo el administrador cambia; un evento setting.changed por ajuste que cambia. Gracia de latidos 3 min (30 s–30 min) y sesiones temporales por PC 3 (3–100). SettingsService.get lo usarán T29 y T34.
@@ -65,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T25. Mensaje login de la PC: valida credenciales, rechaza si la PC o la cuenta ya tienen sesión (dice en qué PC), exige saldo para 1 min y abre la sesión copiando la tarifa del día con session.started. SessionsService.stateFor da el state de cada PC (también al reconectar).
 - **2026-09-30:** T24. Canal de las PCs en `ws://nodo:3000/pc` con `ws` y despachador propio por `type` (`PcProtocolService`); `hello` registra la PC (`unknown_pc` si no existe) y recibe `state`. `requestId` opcional en el protocolo. `PcConnections` envía a cualquier PC; `PcTestClient` simula PCs en los tests.
 - **2026-09-30:** T23. Tablas `pcs` y `sessions` (índices únicos de sesión activa por cuenta y por PC, y de `restored_from`) y clave foránea `ledger.session_id`. PCs de ejemplo con ids fijos: `dev:seed-pcs` crea "PC 01" … "PC 10".
-- **2026-09-30:** T22. `POST /customers/:id/combo-purchases`: en caja (turno abierto y método) o con saldo, con copia del combo en el ledger y `combo.purchased`. `ComboSalesService.purchase` servirá para el Shell (T30). **Fin de la fase 4.**

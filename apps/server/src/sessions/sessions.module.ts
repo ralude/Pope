@@ -11,6 +11,8 @@ import { PcProtocolService } from './pc-protocol.service.js';
 import { SessionsController } from './sessions.controller.js';
 import { SessionsService } from './sessions.service.js';
 import { StaleSessionsJob } from './stale-sessions.job.js';
+import { TemporarySessionsController } from './temporary-sessions.controller.js';
+import { TemporarySessionsService } from './temporary-sessions.service.js';
 
 /**
  * Sesiones de uso de las PCs y el canal WebSocket por el que las PCs hablan con el nodo
@@ -18,8 +20,15 @@ import { StaleSessionsJob } from './stale-sessions.job.js';
  */
 @Module({
   imports: [CombosModule, CustomersModule, SettingsModule, TariffsModule, WalletModule],
-  controllers: [SessionsController],
-  providers: [PcConnections, SessionsService, StaleSessionsJob, PcProtocolService, PcGateway],
-  exports: [PcConnections, SessionsService],
+  controllers: [SessionsController, TemporarySessionsController],
+  providers: [
+    PcConnections,
+    SessionsService,
+    TemporarySessionsService,
+    StaleSessionsJob,
+    PcProtocolService,
+    PcGateway,
+  ],
+  exports: [PcConnections, SessionsService, TemporarySessionsService],
 })
 export class SessionsModule {}
