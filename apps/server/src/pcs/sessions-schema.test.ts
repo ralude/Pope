@@ -59,6 +59,17 @@ describe('tablas de PCs y sesiones (REQ-001-21)', () => {
       .set({ status: 'ended', endedAt: now, endReason: 'customer' })
       .where(eq(sessions.id, id));
 
+  it('se pueden crear hasta 99 PCs de ejemplo, sin duplicar al repetir (T35a)', async () => {
+    // Ya hay 10 (beforeEach): con 40 se crean las 30 que faltan y con otra pasada, ninguna.
+    expect(await seedDevPcs(handle.db, 40)).toBe(30);
+    expect(await seedDevPcs(handle.db, 40)).toBe(0);
+    const all = await handle.db.select().from(pcs);
+    expect(all).toHaveLength(40);
+    expect(all.find((pc) => pc.id === devPcId(40))?.name).toBe('PC 40');
+    await expect(seedDevPcs(handle.db, 0)).rejects.toThrow(RangeError);
+    await expect(seedDevPcs(handle.db, 100)).rejects.toThrow(RangeError);
+  });
+
   it('las PCs de ejemplo se crean una sola vez, con ids fijos', async () => {
     expect(await seedDevPcs(handle.db)).toBe(0);
     const all = await handle.db.select().from(pcs);

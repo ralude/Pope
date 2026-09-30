@@ -306,7 +306,7 @@ antes de seguir.
 > prueba de carga **no** entra en `pnpm test`, porque necesita el servidor compilado y
 > PostgreSQL real. El ámbito de los commits de `tools/*` es `tools` (AGENTS.md).
 
-- [ ] **T35a: PCs de ejemplo configurables**
+- [x] **T35a: PCs de ejemplo configurables**
   - **Cubre:** plan 001 (Estrategia de pruebas: carga)
   - **Hacer:**
     - Mover `devPcId(n)` y `devPcName(n)` de `apps/server/src/pcs/dev-pcs.ts` a `packages/shared/src/dev-pcs.ts` (exportadas desde el `index.ts`) para que el simulador use los mismos ids. El servidor las importa de `@pope/shared`. Validar que `n` es un entero de 1 a 99 (lanza `RangeError` si no).
