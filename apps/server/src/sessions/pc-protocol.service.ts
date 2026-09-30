@@ -8,11 +8,16 @@ import {
 } from '@pope/shared';
 import { eq } from 'drizzle-orm';
 
+import { Clock } from '../common/clock.js';
+import { CustomerAuthService } from '../customers/customer-auth.service.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { pcs } from '../db/schema.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
+import { PcRequestRefused } from './session-state.js';
+import { SessionsService } from './sessions.service.js';
 
 type HelloMessage = Extract<PcToNodeMessage, { type: 'hello' }>;
+type LoginMessage = Extract<PcToNodeMessage, { type: 'login' }>;
 
 /** Mensaje de error del protocolo, con el `requestId` de la petición si lo traía. */
 export function protocolError(
@@ -43,6 +48,9 @@ export class PcProtocolService {
   constructor(
     @Inject(DATABASE) private readonly db: Database,
     private readonly connections: PcConnections,
+    private readonly sessions: SessionsService,
+    private readonly customerAuth: CustomerAuthService,
+    private readonly clock: Clock,
   ) {}
 
   /** Procesa un mensaje en crudo. Nunca lanza: los fallos se responden con `error`. */
@@ -71,6 +79,10 @@ export class PcProtocolService {
         await this.dispatch(connection, connection.pc, message);
       }
     } catch (error) {
+      if (error instanceof PcRequestRefused) {
+        connection.send(protocolError(error.code, error.message, requestIdOf(message)));
+        return;
+      }
       this.logger.error(`Error con el mensaje ${message.type}`, error);
       connection.send(
         protocolError('internal_error', 'Error inesperado del nodo', requestIdOf(message)),
@@ -95,7 +107,7 @@ export class PcProtocolService {
       return;
     }
     this.connections.register(pc, connection);
-    connection.send(await this.stateFor());
+    connection.send(await this.sessions.stateFor(pc.id));
   }
 
   /** Mensajes de una PC ya identificada. */
@@ -106,9 +118,11 @@ export class PcProtocolService {
   ): Promise<void> {
     switch (message.type) {
       case 'heartbeat':
-        connection.send(await this.stateFor());
+        connection.send(await this.sessions.stateFor(pc.id));
         return;
       case 'login':
+        connection.send(await this.login(pc, message));
+        return;
       case 'logout':
       case 'buyCombo':
         connection.send(
@@ -118,8 +132,36 @@ export class PcProtocolService {
     }
   }
 
-  /** Estado que debe mostrar la PC. Sin sesiones todavía, siempre bloqueada. */
-  private stateFor(): Promise<NodeToPcMessage> {
-    return Promise.resolve({ type: 'state', status: 'locked' });
+  /**
+   * El cliente inicia sesión desde el Shell (REQ-001-20). Cada motivo de rechazo tiene su
+   * mensaje (pregunta resuelta de la spec 001). Devuelve el `state` de la sesión abierta.
+   */
+  private async login(pc: PcIdentity, message: LoginMessage): Promise<NodeToPcMessage> {
+    // Antes de comprobar la contraseña: así un intento en una PC ocupada no cuenta.
+    if (await this.sessions.activeOnPc(pc.id)) {
+      throw new PcRequestRefused('session_already_active', 'Esta PC ya tiene una sesión abierta');
+    }
+    const result = await this.customerAuth.verify(message.username, message.password);
+    if (!result.ok) {
+      switch (result.reason) {
+        case 'invalid_credentials':
+          throw new PcRequestRefused('invalid_credentials', 'Usuario o contraseña incorrectos');
+        case 'account_locked': {
+          const minutes = Math.ceil(
+            (result.lockedUntil.getTime() - this.clock.now().getTime()) / 60_000,
+          );
+          throw new PcRequestRefused(
+            'account_locked',
+            `Demasiados intentos fallidos. Prueba de nuevo en ${String(minutes)} min`,
+          );
+        }
+        case 'account_inactive':
+          throw new PcRequestRefused(
+            'account_inactive',
+            `Tu cuenta está ${result.status === 'blocked' ? 'bloqueada' : 'desactivada'}. Habla con el encargado`,
+          );
+      }
+    }
+    return this.sessions.startAccountSession(pc, result.customer);
   }
 }

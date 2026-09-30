@@ -211,7 +211,7 @@ antes de seguir.
   - **Commit:** `feat(server): conecta las PCs por WebSocket`
   - **Decidido (2026-09-30, ADR-0003):** `ws` sin Socket.IO, despachador propio por `type` (el socket se maneja directamente) y `requestId` opcional para saber a qué petición responde cada `error`.
 
-- [ ] **T25: Login desde la PC**
+- [x] **T25: Login desde la PC**
   - **Cubre:** REQ-001-20, REQ-001-21, REQ-001-14, REQ-001-16
   - **Hacer:** mensaje `login` → validar, comprobar saldo ≥ 1 min, crear la sesión copiando la tarifa del día y emitir `session.started`.
   - **Verificar:** tests de CA-001-01, CA-001-02, CA-001-13 y CA-001-21.
