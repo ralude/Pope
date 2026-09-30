@@ -3,6 +3,7 @@ import {
   type Actor,
   type ComboSnapshot,
   type Customer,
+  type CustomerStatus,
   micros,
   type PaymentMethod,
   seconds,
@@ -18,6 +19,27 @@ import {
   InsufficientBalanceError,
   WalletService,
 } from '../wallet/wallet.service.js';
+
+/** La cuenta está bloqueada o desactivada: no puede comprar combos (REQ-001-04). */
+export class InactiveAccountError extends ConflictException {
+  constructor(readonly accountStatus: Exclude<CustomerStatus, 'active'>) {
+    super(inactiveAccountMessage(accountStatus));
+  }
+}
+
+/** No existe ningún combo con ese id. */
+export class UnknownComboError extends NotFoundException {
+  constructor() {
+    super('No existe ese combo');
+  }
+}
+
+/** El combo existe pero está desactivado (REQ-001-81). */
+export class ComboUnavailableError extends ConflictException {
+  constructor() {
+    super('Ese combo ya no está a la venta');
+  }
+}
 
 /** Cómo se paga un combo: en caja, ligado al turno (REQ-001-84), o con el saldo (REQ-001-85). */
 export type ComboPayment =
@@ -74,14 +96,14 @@ export class ComboSalesService {
       throw new NotFoundException('No existe ese cliente');
     }
     if (customer.status !== 'active') {
-      throw new ConflictException(inactiveAccountMessage(customer.status));
+      throw new InactiveAccountError(customer.status);
     }
     const [combo] = await tx.select().from(combos).where(eq(combos.id, comboId));
     if (!combo) {
-      throw new NotFoundException('No existe ese combo');
+      throw new UnknownComboError();
     }
     if (!combo.active) {
-      throw new ConflictException('Ese combo ya no está a la venta');
+      throw new ComboUnavailableError();
     }
 
     const snapshot: ComboSnapshot = {

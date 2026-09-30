@@ -3,6 +3,7 @@ import {
   type AccountBalances,
   affordableSeconds,
   type CustomerBalances,
+  type CustomerStatus,
   liveBalances,
   micros,
   type NodeToPcMessage,
@@ -26,6 +27,14 @@ export class PcRequestRefused extends Error {
   ) {
     super(message);
   }
+}
+
+/**
+ * Texto para el cliente cuando su cuenta está bloqueada o desactivada (pregunta resuelta de
+ * la spec 001, REQ-001-04). El del personal es `inactiveAccountMessage`.
+ */
+export function customerInactiveMessage(status: Exclude<CustomerStatus, 'active'>): string {
+  return `Tu cuenta está ${status === 'blocked' ? 'bloqueada' : 'desactivada'}. Habla con el encargado`;
 }
 
 /** Consumo de una sesión con cuenta según su fila. */

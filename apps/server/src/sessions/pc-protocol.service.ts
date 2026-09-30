@@ -13,7 +13,7 @@ import { CustomerAuthService } from '../customers/customer-auth.service.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { pcs } from '../db/schema.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
-import { PcRequestRefused } from './session-state.js';
+import { customerInactiveMessage, PcRequestRefused } from './session-state.js';
 import { SessionsService } from './sessions.service.js';
 
 type HelloMessage = Extract<PcToNodeMessage, { type: 'hello' }>;
@@ -163,10 +163,7 @@ export class PcProtocolService {
           );
         }
         case 'account_inactive':
-          throw new PcRequestRefused(
-            'account_inactive',
-            `Tu cuenta está ${result.status === 'blocked' ? 'bloqueada' : 'desactivada'}. Habla con el encargado`,
-          );
+          throw new PcRequestRefused('account_inactive', customerInactiveMessage(result.status));
       }
     }
     return this.sessions.startAccountSession(pc, result.customer);

@@ -27,8 +27,13 @@ import { and, eq, isNull, lte, type SQL } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { ComboSalesService } from '../combos/combo-sales.service.js';
-import { combos, customers, pcs, sessions } from '../db/schema.js';
+import {
+  ComboSalesService,
+  ComboUnavailableError,
+  InactiveAccountError,
+  UnknownComboError,
+} from '../combos/combo-sales.service.js';
+import { customers, pcs, sessions } from '../db/schema.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
@@ -36,6 +41,7 @@ import { PcConnections, type PcIdentity } from './pc-connections.js';
 import {
   accountBalances,
   activeState,
+  customerInactiveMessage,
   LOCKED_STATE,
   PcRequestRefused,
   remainingSeconds,
@@ -247,10 +253,20 @@ export class SessionsService implements OnModuleDestroy {
         this.buyComboIn(pcId, comboId, tx, emit),
       );
     } catch (error) {
+      // Las comprobaciones son las de la venta de combos; aquí solo se traducen al protocolo.
       if (error instanceof InsufficientBalanceError) {
         throw new PcRequestRefused(
           'insufficient_balance',
           'No tienes saldo suficiente para este combo. Recarga en el mostrador',
+        );
+      }
+      if (error instanceof UnknownComboError || error instanceof ComboUnavailableError) {
+        throw new PcRequestRefused('combo_unavailable', 'Ese combo ya no está a la venta');
+      }
+      if (error instanceof InactiveAccountError) {
+        throw new PcRequestRefused(
+          'account_inactive',
+          customerInactiveMessage(error.accountStatus),
         );
       }
       throw error;
@@ -282,45 +298,18 @@ export class SessionsService implements OnModuleDestroy {
         'Los combos son solo para clientes con cuenta',
       );
     }
-    const [customer] = await tx
-      .select()
-      .from(customers)
-      .where(eq(customers.id, locked.customerId))
-      .for('update');
-    if (!customer) {
-      throw new Error(`La sesión ${locked.id} no tiene cliente`);
-    }
-    if (customer.status !== 'active') {
-      throw new PcRequestRefused(
-        'account_inactive',
-        `Tu cuenta está ${customer.status === 'blocked' ? 'bloqueada' : 'desactivada'}. Habla con el encargado`,
-      );
-    }
-    const [combo] = await tx
-      .select({ active: combos.active })
-      .from(combos)
-      .where(eq(combos.id, comboId));
-    if (!combo?.active) {
-      throw new PcRequestRefused('combo_unavailable', 'Ese combo ya no está a la venta');
-    }
-
-    const { row } = await this.checkpoint(locked, tx);
-    await this.comboSales.purchaseIn(
+    const { row, account } = await this.checkpoint(locked, tx);
+    const username = account?.username ?? '';
+    const customer = await this.comboSales.purchaseIn(
       tx,
       emit,
-      customer.id,
+      locked.customerId,
       comboId,
       { via: 'balance' },
-      { kind: 'customer', customerId: customer.id, username: customer.username },
+      { kind: 'customer', customerId: locked.customerId, username },
       row.id,
     );
-    return {
-      row,
-      account: {
-        username: customer.username,
-        balances: await this.wallet.balances(customer.id, tx),
-      },
-    };
+    return { row, account: { username: customer.username, balances: customer.balances } };
   }
 
   /**
