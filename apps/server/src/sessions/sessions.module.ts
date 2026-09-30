@@ -5,6 +5,7 @@ import { CustomersModule } from '../customers/customers.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { TariffsModule } from '../tariffs/tariffs.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
+import { ComboSalesController } from './combo-sales.controller.js';
 import { PcConnections } from './pc-connections.js';
 import { PcGateway } from './pc-gateway.js';
 import { PcProtocolService } from './pc-protocol.service.js';
@@ -21,7 +22,12 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
  */
 @Module({
   imports: [CombosModule, CustomersModule, SettingsModule, TariffsModule, WalletModule],
-  controllers: [SessionsController, TemporarySessionsController, TemporaryBackupController],
+  controllers: [
+    SessionsController,
+    TemporarySessionsController,
+    TemporaryBackupController,
+    ComboSalesController,
+  ],
   providers: [
     PcConnections,
     SessionsService,

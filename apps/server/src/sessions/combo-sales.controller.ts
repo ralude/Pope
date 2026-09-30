@@ -9,17 +9,21 @@ import {
 
 import { CurrentStaff, Roles } from '../auth/decorators.js';
 import { staffActor } from '../auth/staff.controller.js';
+import type { ComboPayment } from '../combos/combo-sales.service.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { NO_OPEN_SHIFT_MESSAGE } from '../shifts/open-shift.guard.js';
 import { ShiftsService } from '../shifts/shifts.service.js';
-import { type ComboPayment, ComboSalesService } from './combo-sales.service.js';
+import { SessionsService } from './sessions.service.js';
 
-/** Venta de combos desde el panel (REQ-001-84, REQ-001-85). */
+/**
+ * Venta de combos desde el panel (REQ-001-84, REQ-001-85). Vive en el módulo de sesiones
+ * porque, si el cliente está usando una PC, hay que cobrar su sesión antes de vender.
+ */
 @Roles('encargado', 'administrador')
 @Controller('customers/:id')
 export class ComboSalesController {
   constructor(
-    private readonly sales: ComboSalesService,
+    private readonly sessions: SessionsService,
     private readonly shifts: ShiftsService,
   ) {}
 
@@ -41,6 +45,6 @@ export class ComboSalesController {
       }
       payment = { via: 'cash_desk', paymentMethod: body.payment.paymentMethod, shiftId: shift.id };
     }
-    return this.sales.purchase(id, body.comboId, payment, staffActor(member));
+    return this.sessions.sellCombo(id, body.comboId, payment, staffActor(member));
   }
 }

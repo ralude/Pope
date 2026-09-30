@@ -28,6 +28,7 @@ import { and, eq, isNull, lte, type SQL } from 'drizzle-orm';
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import {
+  type ComboPayment,
   ComboSalesService,
   ComboUnavailableError,
   InactiveAccountError,
@@ -276,6 +277,46 @@ export class SessionsService implements OnModuleDestroy {
     this.sendWarning(bought.row, remaining);
     this.watch(bought.row, remaining);
     return this.ended.has(bought.row.id) ? LOCKED_STATE : activeState(bought.row, bought.account);
+  }
+
+  /**
+   * El encargado vende un combo a una cuenta desde el panel, en caja o con su saldo
+   * (REQ-001-84, REQ-001-85). Si la cuenta tiene una sesión en curso, primero la cobra hasta
+   * ahora en la misma transacción: así el saldo en vivo es el correcto y el tiempo usado
+   * antes de la compra no sale de las horas nuevas. La PC ve el nuevo saldo al momento.
+   */
+  async sellCombo(
+    customerId: string,
+    comboId: string,
+    payment: ComboPayment,
+    actor: Actor,
+  ): Promise<Customer> {
+    const sold = await this.events.inTransaction(async (tx, emit) => {
+      const [locked] = await tx
+        .select()
+        .from(sessions)
+        .where(and(eq(sessions.customerId, customerId), eq(sessions.status, 'active')))
+        .for('update');
+      const session = locked ? (await this.checkpoint(locked, tx)).row : null;
+      const customer = await this.comboSales.purchaseIn(
+        tx,
+        emit,
+        customerId,
+        comboId,
+        payment,
+        actor,
+      );
+      return { customer, session };
+    });
+    const { customer, session } = sold;
+    if (session && !this.ended.has(session.id)) {
+      const account = { username: customer.username, balances: customer.balances };
+      const remaining = remainingSeconds(session, customer.balances);
+      this.connections.send(session.pcId, activeState(session, account));
+      this.sendWarning(session, remaining);
+      this.watch(session, remaining);
+    }
+    return customer;
   }
 
   private async buyComboIn(

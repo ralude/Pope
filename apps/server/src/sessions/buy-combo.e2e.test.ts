@@ -134,6 +134,32 @@ describe('compra de combos desde el Shell (e2e, REQ-001-85, REQ-001-82)', () => 
     expect(response.statusCode).toBe(409);
   });
 
+  it('una venta desde el panel cobra antes la sesión en curso y la PC ve el nuevo saldo', async () => {
+    const juan = await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(25) });
+    const pc = await world.pc(5);
+    await login(pc, 'juan');
+    // 10 min de uso con latidos; el último latido llegó hace 8 s (la PC sigue viva).
+    await world.run(5, 10 * MINUTE, MINUTE);
+    world.clock.advance(8 * SECOND);
+
+    const ana = await loginAsStaff(world.testApp, 'ana', 'encargado', 'Ana');
+    const response = await world.testApp.app.inject({
+      method: 'POST',
+      url: `/customers/${juan.id}/combo-purchases`,
+      headers: { cookie: ana },
+      payload: { comboId: combo20, payment: { via: 'balance' } },
+    });
+    expect(response.statusCode).toBe(201);
+
+    // Los 608 s previos a la compra salen del dinero (0,2533 USD), no de las horas nuevas.
+    expect(summary(await pc.next())).toMatchObject({
+      money: usd(25 - 20) - 253_333,
+      comboSeconds: hours(20),
+    });
+    await logout(pc);
+    expect(await consumption()).toEqual([{ wallet: 'money', amount: -253_333 }]);
+  });
+
   it('avisa otra vez si con el combo vuelve a tener más de 5 min y luego se acerca al final', async () => {
     const cheap = await world.testApp.app
       .get(CombosService)
