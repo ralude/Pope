@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T23 terminada (tablas de PCs y sesiones)
+**Última actualización:** 2026-09-30 · T24 terminada (gateway WebSocket de PCs)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T24: Gateway WebSocket de PCs** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 30 / 60 tareas · fase 5 de 9 (Sesiones con cuenta) |
+| **Siguiente tarea** | **T25: Login desde la PC** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 31 / 60 tareas · fase 5 de 9 (Sesiones con cuenta) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -42,7 +42,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 30 / 60 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 31 / 60 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -55,6 +55,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T24. Canal de las PCs en `ws://nodo:3000/pc` con `ws` y despachador propio por `type` (`PcProtocolService`); `hello` registra la PC (`unknown_pc` si no existe) y recibe `state`. `requestId` opcional en el protocolo. `PcConnections` envía a cualquier PC; `PcTestClient` simula PCs en los tests.
 - **2026-09-30:** T23. Tablas `pcs` y `sessions` (índices únicos de sesión activa por cuenta y por PC, y de `restored_from`) y clave foránea `ledger.session_id`. PCs de ejemplo con ids fijos: `dev:seed-pcs` crea "PC 01" … "PC 10".
 - **2026-09-30:** T22. `POST /customers/:id/combo-purchases`: en caja (turno abierto y método) o con saldo, con copia del combo en el ledger y `combo.purchased`. `ComboSalesService.purchase` servirá para el Shell (T30). **Fin de la fase 4.**
 - **2026-09-30:** T21. Tabla `combos` (no se borran, se desactivan) y `/combos`: el personal consulta; el administrador crea y edita con `combo.created` y `combo.updated`. `comboRatePerHour` y `comboDiscounts` en `shared` (el panel los usará en vivo).
@@ -68,4 +69,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
   administrador, con `shift.opened` y `shift.closed`. `@RequiresOpenShift()` responde 409
   sin turno y entrega el turno al endpoint con `@CurrentShift()`.
 - **2026-09-25:** T16a. `POST /customers/:id/unlock` (encargado y administrador) quita el bloqueo por intentos y emite `customer.login_unlocked`; sin bloqueo vigente no hace nada. El cliente del panel lleva `loginLockedUntil` para mostrar el botón en la T40.
-- **2026-09-25:** T16 (se añade T16a; 59 tareas). `CustomerAuthService.verify`: 5 fallos seguidos bloquean el login 5 min (fijo; un acierto pone el contador a cero) y emiten `customer.login_locked`. Motivos iguales a los códigos del protocolo; el estado de la cuenta solo se revela con la contraseña correcta. Cuatro preguntas resueltas en la spec.

@@ -204,7 +204,7 @@ antes de seguir.
   - **Verificar:** test de que la BD rechaza una segunda sesión activa.
   - **Commit:** `feat(server): añade las tablas de PCs y sesiones`
 
-- [ ] **T24: Gateway WebSocket de PCs**
+- [x] **T24: Gateway WebSocket de PCs**
   - **Cubre:** plan 001 (Contratos)
   - **Hacer:** `requestId` opcional en `login`, `logout` y `buyCombo`, devuelto en `error` (protocolo en `shared`). Gateway con `ws` y despachador propio por `type`, `hello` (identidad de desarrollo; el registro real es la spec 003), registro de conexiones y envío de `state` bloqueado.
   - **Verificar:** test e2e: una PC se conecta y recibe `state` bloqueado; un mensaje no válido recibe `error` con su `requestId`.

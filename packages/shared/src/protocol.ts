@@ -16,6 +16,12 @@ export const PROTOCOL_VERSION = 1;
 // Mismo tipo que `Seconds`, pero sin negativos; así el mínimo también sale en el JSON Schema.
 const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
 
+/**
+ * Identificador que la PC pone a una petición (`login`, `logout`, `buyCombo`) para saber a
+ * cuál responde un `error` (ADR-0003). Opcional; el nodo lo devuelve tal cual.
+ */
+export const requestIdSchema = z.string().min(1).max(64);
+
 // ─── PC → nodo ──────────────────────────────────────────────────────────────────────────
 
 /**
@@ -46,6 +52,7 @@ export const heartbeatMessageSchema = z.object({
 /** Inicio de sesión del cliente desde el Shell (REQ-001-20). */
 export const loginMessageSchema = z.object({
   type: z.literal('login'),
+  requestId: requestIdSchema.optional(),
   username: z.string().trim().min(1).max(64),
   // Límite amplio solo para no calcular argon2 sobre textos enormes.
   password: z.string().min(1).max(256),
@@ -54,11 +61,13 @@ export const loginMessageSchema = z.object({
 /** El cliente cierra su sesión desde el Shell (REQ-001-26). */
 export const logoutMessageSchema = z.object({
   type: z.literal('logout'),
+  requestId: requestIdSchema.optional(),
 });
 
 /** El cliente compra un combo con su saldo durante la sesión (REQ-001-85). */
 export const buyComboMessageSchema = z.object({
   type: z.literal('buyCombo'),
+  requestId: requestIdSchema.optional(),
   comboId: idSchema,
 });
 
@@ -144,6 +153,8 @@ export const sessionEndedMessageSchema = z.object({
 export const protocolErrorCodeSchema = z.enum([
   /** El mensaje no cumple el protocolo. */
   'invalid_message',
+  /** La PC no está registrada en el nodo (`hello` con un `pcId` desconocido). */
+  'unknown_pc',
   /** Usuario o contraseña incorrectos (no se distingue cuál, por seguridad). */
   'invalid_credentials',
   /** Bloqueo temporal tras 5 intentos fallidos (REQ-001-52). */
@@ -163,11 +174,15 @@ export const protocolErrorCodeSchema = z.enum([
 ]);
 export type ProtocolErrorCode = z.infer<typeof protocolErrorCodeSchema>;
 
-/** Error con un código estable y un mensaje en español para mostrar al cliente. */
+/**
+ * Error con un código estable y un mensaje en español para mostrar al cliente. Lleva el
+ * `requestId` de la petición que falló, si lo traía.
+ */
 export const errorMessageSchema = z.object({
   type: z.literal('error'),
   code: protocolErrorCodeSchema,
   message: z.string().min(1),
+  requestId: requestIdSchema.optional(),
 });
 
 export const nodeToPcMessageSchema = z.union([

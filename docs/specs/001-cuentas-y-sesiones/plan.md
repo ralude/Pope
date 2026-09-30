@@ -132,6 +132,7 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 |---|---|---|
 | `@nestjs/*` + `fastify` | server | ADR-0003 |
 | `drizzle-orm` + `pg` | server | ADR-0004; sin motor binario |
+| `ws` | server | Canal WebSocket de las PCs (ADR-0003): sin dependencias propias, más ligero que Socket.IO y compatible con `ClientWebSocket` de .NET |
 | `@node-rs/argon2` | server | Hash seguro sin compilación. **Verificar en el i5 de 2ª gen** |
 | `zod`, `uuid` | shared | Validación e ids v7 |
 | `react`, `react-dom`, `wouter` | panel, shell-ui | Router de ~2 KB; **sin librería de componentes** para mantener el panel ligero |

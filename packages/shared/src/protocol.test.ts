@@ -64,6 +64,16 @@ describe('PC → nodo', () => {
     expect(valid({ type: 'buyCombo', comboId: 'combo-20h' })).toBe(false);
   });
 
+  it('login, logout y buyCombo admiten un requestId opcional (ADR-0003)', () => {
+    expect(valid({ type: 'logout', requestId: 'r-1' })).toBe(true);
+    expect(valid({ type: 'buyCombo', comboId: COMBO_ID, requestId: 'r-2' })).toBe(true);
+    expect(valid({ type: 'login', username: 'juan', password: '1234', requestId: 'r-3' })).toBe(
+      true,
+    );
+    expect(valid({ type: 'logout', requestId: '' })).toBe(false);
+    expect(valid({ type: 'logout', requestId: 'x'.repeat(65) })).toBe(false);
+  });
+
   it('rechaza tipos desconocidos y mensajes que no son objetos', () => {
     expect(valid({ type: 'shutdown' })).toBe(false);
     expect(valid('hello')).toBe(false);
@@ -145,6 +155,8 @@ describe('nodo → PC', () => {
     expect(validOut(error)).toBe(true);
     expect(validOut({ ...error, code: 'unknown' })).toBe(false);
     expect(validOut({ ...error, message: '' })).toBe(false);
+    expect(validOut({ ...error, requestId: 'r-1' })).toBe(true);
+    expect(validOut({ ...error, code: 'unknown_pc' })).toBe(true);
   });
 });
 
