@@ -184,7 +184,7 @@ antes de seguir.
   - **Verificar:** test de CA-001-20.
   - **Commit:** `feat(server): permite editar la tarifa de cada día`
 
-- [ ] **T21: Combos**
+- [x] **T21: Combos**
   - **Cubre:** REQ-001-80, REQ-001-81
   - **Hacer:** tabla `combos` y CRUD (solo administrador); la respuesta incluye el precio por hora y el descuento frente a cada tarifa.
   - **Verificar:** test de CA-001-14.

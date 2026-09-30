@@ -1,6 +1,7 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 
 import { AuthModule } from './auth/auth.module.js';
+import { CombosModule } from './combos/combos.module.js';
 import { Clock, SystemClock } from './common/clock.js';
 import { CustomersModule } from './customers/customers.module.js';
 import { APP_CONFIG, type AppConfig, type PopeMode } from './config.js';
@@ -17,7 +18,15 @@ const COMMON_MODULES = [HealthModule];
 
 /** Módulos propios de cada modo (ADR-0003). Cada spec añade aquí los suyos. */
 const MODULES_BY_MODE: Record<PopeMode, DynamicModule['imports']> = {
-  local: [EventsModule, AuthModule, CustomersModule, ShiftsModule, WalletModule, TariffsModule],
+  local: [
+    EventsModule,
+    AuthModule,
+    CustomersModule,
+    ShiftsModule,
+    WalletModule,
+    TariffsModule,
+    CombosModule,
+  ],
   cloud: [],
 };
 

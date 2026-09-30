@@ -213,3 +213,23 @@ export const tariffDays = pgTable(
     check('tariff_days_rate_positive', sql`${t.rateMicrosPerHour} > 0`),
   ],
 );
+
+/**
+ * Combos de horas (REQ-001-80, REQ-001-81). No se borran, solo se desactivan: las ventas
+ * guardan su propia copia (ADR-0014).
+ */
+export const combos = pgTable(
+  'combos',
+  {
+    id: uuid('id').primaryKey(),
+    name: text('name').notNull(),
+    priceMicros: bigint('price_micros', { mode: 'number' }).notNull(),
+    seconds: integer('seconds').notNull(),
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    check('combos_price_positive', sql`${t.priceMicros} > 0`),
+    check('combos_seconds_positive', sql`${t.seconds} > 0`),
+  ],
+);
