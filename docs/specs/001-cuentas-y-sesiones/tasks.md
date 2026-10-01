@@ -353,7 +353,7 @@ antes de seguir.
   - **Verificar:** test de la configuración (valor válido, ausente, menor de 1000 rechazado) y test con reloj simulado de que registra una línea por intervalo. Documentar la variable en AGENTS.md (sección del servidor).
   - **Commit:** `feat(server): registra la memoria del proceso si se pide`
 
-- [ ] **T37: Prueba de carga**
+- [x] **T37: Prueba de carga**
   - **Cubre:** REQ-001-50, ADR-0011
   - **Hacer:** subcomando `load --url ws://…/pc --pcs 1-40` y `docs/specs/001-cuentas-y-sesiones/mediciones.md`.
     - **Fase 1, la que decide:** las 40 PCs conectadas y latiendo cada 10 s. La PC N inicia sesión a los `(N − 1) × 1,5 s` (una cada 1,5 s, como llegan los clientes). Después se mantienen las 40 sesiones **10 minutos** con latidos.
@@ -364,6 +364,7 @@ antes de seguir.
     - `mediciones.md` lleva: equipo (CPU, RAM, sistema, versión de Node y de PostgreSQL, `UV_THREADPOOL_SIZE`), la tabla de T37 y un apartado de T11 (resultados de `bench:argon2`), con **dónde se midió**.
   - **Verificar:** p95 de la fase 1 < 2 s y `rss` máximo < 384 MB. Preparación: la receta de T36a con `--count 40` y `seed --customers 40 --money 20`. Si se mide en el equipo de desarrollo, `mediciones.md` lo dice y queda pendiente medirlo **en el i5 de 2ª gen** (sigue en "Pendientes del mantenedor" de `ESTADO.md`).
   - **Commit:** `feat(tools): mide la carga con 40 PCs simuladas`
+  - **Hecho (2026-10-01):** subcomando `load` (con `--stagger-ms`, `--hold-seconds` y `--server-log`) y `mediciones.md`. Medido en el equipo de desarrollo (cumple con holgura); **falta repetirlo en el i5 de 2ª gen**. La memoria se lee del log del servidor: el desplazamiento del archivo al empezar y al terminar las sesiones separa el pico de arranque, el de la prueba y el del final.
 
 ## Fase 8: Panel (`apps/panel`)
 

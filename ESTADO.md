@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T37a terminada (registro de memoria del servidor)
+**Última actualización:** 2026-09-30 · T37 terminada (prueba de carga). Fin de la fase 7
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T37: Prueba de carga** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 48 / 64 tareas · fase 7 de 9 (Simulador y rendimiento) |
+| **Siguiente tarea** | **T38: Esqueleto del panel y login** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 49 / 64 tareas · fase 8 de 9 (Panel) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -31,7 +31,7 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
-- [ ] **T11 y T37:** ejecutar las mediciones en el PC servidor del local (i5 de 2ª gen, 8 GB).
+- [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local (i5 de 2ª gen, 8 GB). En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **T28a:** confirmar los límites de los ajustes: gracia de latidos entre 30 s y 30 min, sesiones temporales conservadas entre 3 y 100 (la spec solo fija el 3 mínimo y el 3 min por defecto).
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 48 / 64 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 49 / 64 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T37. Subcomando load del simulador (40 PCs conectadas, un login cada 1,5 s, 10 min de sesiones y ráfaga final informativa; mide la memoria con el log del servidor) y mediciones.md. En el equipo de desarrollo: p95 del login 69 ms (ráfaga 334 ms), rss máx 222 MB, 0 errores; argon2 13 ms. Pendiente repetirlo en el i5 de 2ª gen. Fin de la fase 7.
 - **2026-09-30:** T37a. POPE_MEMORY_LOG_MS (opcional, mínimo 1000) hace que el servidor registre cada ese tiempo Memoria: rss=… MB heapUsed=… MB. Probado en un arranque real: unos 84 MB en reposo (el primer registro, durante el arranque y las migraciones, marcó 260 MB).
 - **2026-09-30:** T36b. Subcomando interactive: consola con login, logout, red, reinicio, apagon, luz y estado sobre PCs simuladas. Probada contra PostgreSQL real: el corte de red de 20 s mantiene la sesión, el apagón la cierra sin latidos y el reinicio con la sesión ya nombrada la cierra al momento.
 - **2026-09-30:** T36a. CLI del simulador: seed (crea sim01…simNN y los recarga por la API del panel, con turno propio, idempotente) y run (PCs simuladas con --login y --duration). Probado contra PostgreSQL real: 5 PCs entran con 2:00:00 y salen con 0,05 USD menos tras 2 min; el ledger y los eventos cuadran. La prueba destapó que Fastify rechaza content-type JSON sin cuerpo.
@@ -66,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T35. POST /sessions/:id/restore con la PC de destino: la sesión nueva continúa con el tiempo restante, sin cobro, enlazada a la original y con session.restored. Solo una vez (dice quién y cuándo), hasta 48 h desde el corte y solo si la cortó un corte con tiempo restante. Sin exigir turno. Fin de la fase 6 (Sesiones temporales).
 - **2026-09-30:** T34. GET /sessions/temporary/backup (últimas N por PC, N del ajuste, más las interrumpidas pendientes) y GET /sessions/temporary/interrupted (cerradas sin latidos con tiempo restante, sin restaurar y dentro de 48 h desde el último latido). Cada sesión temporal lleva interruption (pending, restored o expired). Las cerradas por cliente, encargado o agotamiento no aparecen como interrumpidas.
 - **2026-09-30:** T33. Sin código nuevo: el cierre de T28 ya descarta el sobrante de una temporal (cliente o encargado): sin devolución en el ledger ni en los cobros, y el tiempo perdido queda en session.ended. Tests de CA-001-09 y helpers de PcWorld (cashier, api, openTemporary).
-- **2026-09-30:** T32. POST /sessions/:id/time: cobra primero lo ya usado y añade el tiempo (por minutos o por importe) con la tarifa de la sesión, ligado al turno de quien cobra, con session_topup y session.time_added; la PC ve el nuevo tiempo al momento. El cierre por agotamiento ya no pisa a un cobro simultáneo (onlyIfExhausted).
