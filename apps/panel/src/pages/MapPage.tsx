@@ -332,6 +332,33 @@ function OrganizePanel({
   );
 }
 
+/**
+ * Control de la PC desde el panel (spec 003: REQ-003-20, REQ-003-22, REQ-003-43). Necesita el
+ * agente en cada PC, así que por ahora se ve desactivado (decisión del mantenedor).
+ */
+function PcControls() {
+  const actions = ['Encender', 'Reiniciar', 'Apagar', 'Iniciar como administrador'];
+  return (
+    <div className="pc-controls" role="group" aria-label="Control de la PC">
+      <div className="detail-label">Control de la PC</div>
+      <div className="pc-controls-grid">
+        {actions.map((action) => (
+          <button
+            key={action}
+            type="button"
+            className="btn btn-ghost"
+            disabled
+            title="Próximamente: necesita el programa de Pope en la PC"
+          >
+            {action}
+          </button>
+        ))}
+      </div>
+      <div className="field-hint">Próximamente: necesitan el programa de Pope en cada PC.</div>
+    </div>
+  );
+}
+
 function LegendCard({ legend }: { legend: Legend }) {
   const rows: { label: string; count: number; swatch: string; style?: object }[] = [
     { label: KIND_LABEL.account, count: legend.account, swatch: 'swatch-account' },
@@ -442,6 +469,7 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
           La PC no está conectada al nodo. Revisa que esté encendida y con el cable de red puesto.
         </p>
       )}
+      {canOperate && <PcControls />}
 
       <div style={{ flexGrow: 1 }} />
       {session?.customerId && canOperate && (

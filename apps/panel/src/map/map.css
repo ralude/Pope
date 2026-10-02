@@ -214,3 +214,26 @@
   background: var(--red);
   color: #ffffff;
 }
+
+/* Control de la PC (spec 003): de momento, desactivado. */
+.pc-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pc-controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pc-controls-grid .btn {
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+/* «Iniciar como administrador» ocupa la fila entera. */
+.pc-controls-grid .btn:last-child {
+  grid-column: 1 / -1;
+}
