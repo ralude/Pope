@@ -16,13 +16,15 @@ import {
   saleGroupTotals,
   type SaleRequest,
 } from '@pope/shared';
-import { asc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 
 import { CashRegisterService, paymentsOf } from '../cash/cash-register.service.js';
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import {
+  cashShifts,
   customers,
+  ledger,
   products,
   saleConcepts,
   saleLines,
@@ -153,6 +155,87 @@ export class SalesService {
     const movement = list.movements.find((m) => m.source === 'sale' && m.sourceId === saleId);
     if (!movement) {
       throw new Error('No se pudo leer la venta registrada');
+    }
+    return movement;
+  }
+
+  /**
+   * Anula una venta de la caja abierta (REQ-005-23, CA-005-11) y emite `sale.voided`. No borra
+   * nada: marca la venta, devuelve el stock con movimientos `sale` positivos, escribe las filas
+   * negativas del registro de caja y, si se pagó con saldo, lo devuelve a la cuenta. Responde
+   * 409 si ya estaba anulada o si su caja ya se cerró.
+   */
+  async void(id: string, reason: string, actor: Actor): Promise<CashMovement> {
+    const shiftId = await this.events.inTransaction(async (tx, emit) => {
+      const [sale] = await tx.select().from(sales).where(eq(sales.id, id)).for('update');
+      if (!sale) {
+        throw new NotFoundException('No existe esa venta');
+      }
+      if (sale.voidedAt !== null) {
+        throw new ConflictException('Esa venta ya está anulada');
+      }
+      // Bloquea la caja: no puede cerrarse mientras se anula una venta suya.
+      const [shift] = await tx
+        .select()
+        .from(cashShifts)
+        .where(eq(cashShifts.id, sale.shiftId))
+        .for('update');
+      if (shift?.closedAt !== null) {
+        throw new ConflictException('Solo se anulan ventas de la caja abierta');
+      }
+      const now = this.clock.now();
+      await tx
+        .update(sales)
+        .set({ voidedAt: now, voidReason: reason, voidedBy: actor })
+        .where(eq(sales.id, id));
+      const productLines = await tx
+        .select()
+        .from(saleLines)
+        .where(and(eq(saleLines.saleId, id), eq(saleLines.kind, 'product')));
+      if (productLines.length > 0) {
+        await tx.insert(stockMovements).values(
+          productLines.map((line) => ({
+            id: newId(),
+            productId: line.productId ?? '',
+            kind: 'sale' as const,
+            quantity: line.quantity,
+            saleId: id,
+            actor,
+            createdAt: now,
+          })),
+        );
+      }
+      if (sale.customerId !== null) {
+        // Lo que se cobró del saldo vuelve a la cuenta, con otro movimiento `sale`.
+        const charged = await tx
+          .select({ amount: ledger.amount })
+          .from(ledger)
+          .where(and(eq(ledger.saleId, id), eq(ledger.kind, 'sale')));
+        const refund = -charged.reduce((sum, row) => sum + row.amount, 0);
+        if (refund > 0) {
+          await this.wallet.post(tx, {
+            customerId: sale.customerId,
+            wallet: 'money',
+            amount: refund,
+            kind: 'sale',
+            saleId: id,
+            actor,
+          });
+        }
+      }
+      await this.cash.reverseSale(tx, id, sale.shiftId, actor);
+      emit({
+        type: 'sale.voided',
+        version: 1,
+        actor,
+        payload: { saleId: id, shiftId: sale.shiftId, reason },
+      });
+      return sale.shiftId;
+    });
+    const list = await this.cash.list(shiftId);
+    const movement = list.movements.find((m) => m.source === 'void' && m.sourceId === id);
+    if (!movement) {
+      throw new Error('No se pudo leer la anulación');
     }
     return movement;
   }

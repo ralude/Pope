@@ -18,11 +18,11 @@ import {
   type VesRate,
   vesRate,
 } from '@pope/shared';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq, isNotNull } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { cashEntries } from '../db/schema.js';
+import { cashEntries, sales } from '../db/schema.js';
 import type { Transaction } from '../events/events.service.js';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
 import { actorName } from '../sessions/session-state.js';
@@ -121,6 +121,46 @@ export class CashRegisterService {
     return pieces;
   }
 
+  /**
+   * Anota la anulación de una venta (REQ-005-23): una fila negativa por cada fila de la venta,
+   * con el mismo método, moneda y tasa, para devolver justo lo que se cobró. Devuelve la
+   * descripción de la venta.
+   */
+  async reverseSale(
+    tx: Transaction,
+    saleId: string,
+    shiftId: string,
+    actor: Actor,
+  ): Promise<string> {
+    const rows = await tx
+      .select()
+      .from(cashEntries)
+      .where(and(eq(cashEntries.source, 'sale'), eq(cashEntries.sourceId, saleId)));
+    const [first] = rows;
+    if (!first) {
+      throw new Error(`La venta ${saleId} no tiene filas en el registro de caja`);
+    }
+    const now = this.clock.now();
+    await tx.insert(cashEntries).values(
+      rows.map((row) => ({
+        id: newId(),
+        shiftId,
+        source: 'void' as const,
+        sourceId: saleId,
+        group: row.group,
+        method: row.method,
+        currency: row.currency,
+        amountMicros: -row.amountMicros,
+        usdMicros: -row.usdMicros,
+        vesRate: row.vesRate,
+        description: `Anulación · ${first.description}`,
+        actor,
+        createdAt: now,
+      })),
+    );
+    return first.description;
+  }
+
   /** Las filas de una caja, la más reciente primero. */
   async entries(shiftId: string, db: Database | Transaction = this.db): Promise<EntryRow[]> {
     return db
@@ -136,6 +176,15 @@ export class CashRegisterService {
    */
   async list(shiftId: string): Promise<ShiftEntriesResponse> {
     const rows = await this.entries(shiftId);
+    // Las ventas anuladas de esta caja, con su motivo (REQ-005-23).
+    const voided = new Map(
+      (
+        await this.db
+          .select({ id: sales.id, reason: sales.voidReason })
+          .from(sales)
+          .where(and(eq(sales.shiftId, shiftId), isNotNull(sales.voidedAt)))
+      ).map((sale) => [sale.id, sale.reason]),
+    );
     const movements = new Map<string, { first: EntryRow; rows: EntryRow[] }>();
     for (const row of rows) {
       const key = `${row.source}:${row.sourceId}`;
@@ -148,7 +197,12 @@ export class CashRegisterService {
     }
     return {
       shiftId,
-      movements: [...movements.values()].map(({ first, rows: own }) => toMovement(first, own)),
+      movements: [...movements.values()].map(({ first, rows: own }) =>
+        toMovement(first, own, {
+          voided: first.source === 'sale' && voided.has(first.sourceId),
+          reason: first.source === 'void' ? (voided.get(first.sourceId) ?? null) : null,
+        }),
+      ),
       totals: cashTotals(
         rows.map((row) => ({
           group: row.group,
@@ -160,7 +214,11 @@ export class CashRegisterService {
   }
 }
 
-function toMovement(first: EntryRow, rows: readonly EntryRow[]): CashMovement {
+function toMovement(
+  first: EntryRow,
+  rows: readonly EntryRow[],
+  state: { voided: boolean; reason: string | null },
+): CashMovement {
   const payments = paymentsOf(
     rows.map((row) => ({
       group: row.group,
@@ -184,8 +242,7 @@ function toMovement(first: EntryRow, rows: readonly EntryRow[]): CashMovement {
       vesRate: p.vesRate,
     })),
     actorName: actorName(first.actor),
-    voided: false,
-    reason: null,
+    ...state,
   };
 }
 

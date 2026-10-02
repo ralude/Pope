@@ -147,11 +147,12 @@ parte 1.
   - **Commit:** `feat(server): registra ventas de productos y conceptos`
   - **Decidido al implementarla:** `SalesService` en el módulo `sales`. Todo en una transacción: venta, líneas (con la copia del nombre y del precio; el de los productos lo pone el nodo y el de los conceptos lo escribe el encargado), movimientos de stock `sale`, cargo al saldo (movimiento `sale` del ledger, que gana la columna `sale_id`), registro de caja y `sale.recorded`. Los productos se bloquean en orden de id mientras se comprueba el stock; varias líneas del mismo producto suman. Mensajes: "No hay suficiente Refresco: quedan 10" (409, salvo con `allowNegativeStock`), "Refresco ya no está a la venta" (409), "Los pagos no suman el total de la venta" (400), "Saldo insuficiente" (409, con el saldo en vivo: lo consumido por la sesión en curso no se puede gastar, `WalletService.liveMoney`) y "La cuenta está bloqueada: no puede pagar con su saldo". La descripción es "Papas × 2, Impresiones × 10". `POST /sales` responde el movimiento tal como sale en la lista de la caja. Migración `0019_sales`. El e2e de CA-005-01 de T12 pasa a usar una venta de verdad. Verificado: 7 tests e2e (CA-005-02, CA-005-07, CA-005-10, reparto por grupo con dos pagos, stock, cobros rechazados y sin caja).
 
-- [ ] **T15: Anular una venta**
+- [x] **T15: Anular una venta**
   - **Cubre:** REQ-005-23
   - **Hacer:** `POST /sales/:id/void` (solo administrador, con motivo): marca la venta, devuelve el stock, escribe la fila negativa del registro de caja y devuelve el saldo si se pagó con él.
   - **Verificar:** e2e: CA-005-11 y que no se puede anular dos veces.
   - **Commit:** `feat(server): permite anular una venta`
+  - **Decidido al implementarla:** `SalesService.void` en una transacción: bloquea la venta y su caja (la caja no puede cerrarse a la vez), marca `voided_at`, `void_reason` y `voided_by`, devuelve el stock con movimientos `sale` positivos que apuntan a la venta, devuelve al saldo lo cobrado de él (otro movimiento `sale` del ledger) y escribe en el registro de caja una fila negativa por cada fila de la venta (`CashRegisterService.reverseSale`), con el mismo método, moneda y **la misma tasa** de la venta, para devolver justo lo cobrado aunque la tasa haya cambiado. Mensajes: "Esa venta ya está anulada" y "Solo se anulan ventas de la caja abierta" (409). La lista de la caja marca la venta como anulada y lleva el motivo en la fila de la anulación ("Anulación · Refresco × 2"). `POST /sales/:id/void` responde esa fila. Verificado: 5 tests e2e (CA-005-11, Bs con otra tasa, saldo, dos veces/sin motivo/rol, caja cerrada).
 
 - [ ] **T16a: Caja con fondo y cierre con conteo**
   - **Cubre:** REQ-005-40, REQ-005-42, REQ-005-44
