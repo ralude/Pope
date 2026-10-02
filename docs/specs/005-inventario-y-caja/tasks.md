@@ -24,11 +24,12 @@ antes de seguir.
   - **Commit:** `feat(server): guarda la tasa de cambio manual`
   - **Decidido al implementarla:** módulo `exchange-rates` con migración `0015_exchange_rates`. El servicio guarda en memoria las 20 tasas más recientes (al arrancar las lee de la base) y responde la vigente sin consultar la base; la memoria solo cambia tras confirmar la transacción. `POST` responde 201 con el estado nuevo (tasa y `stale`), igual que `GET`. `setBy` sale del actor del evento. Verificado: 7 tests e2e, también contra PostgreSQL real (roles, validación, evento, sustitución con historia, CA-005-05 y lectura al reiniciar).
 
-- [ ] **T03: Repartir la tasa a las PCs y al panel**
+- [x] **T03: Repartir la tasa a las PCs y al panel**
   - **Cubre:** REQ-005-36, REQ-001-13
   - **Hacer:** el `state` de las PCs lleva la tasa vigente; al cambiarla, el nodo reenvía el `state` a las PCs con sesión. El canal del panel envía `exchangeRate` al conectar, al cambiar la tasa y al cambiar de día.
   - **Verificar:** e2e: una PC con sesión recibe un `state` con la tasa nueva y el panel el mensaje `exchangeRate`.
   - **Commit:** `feat(server): reparte la tasa de cambio a las PCs y al panel`
+  - **Decidido al implementarla:** `ExchangeRatesService` avisa a quien se suscriba al guardar una tasa. `SessionsService` pone la vigente en todo `state` activo (`stateOf`) y, al cambiar, reenvía a cada PC conectada con sesión su `state` cobrado hasta ahora, como en un latido, para que el Shell no dé un salto atrás. `PanelHub` manda `exchangeRate` al conectar, al cambiar la tasa y en la revisión de cada minuto si cambió (así detecta el paso de día). Antes, `refactor(server)`: el cliente de prueba del canal del panel pasa a `testing/`. Verificado: 5 tests e2e nuevos (sesión con cuenta y temporal, reenvío, panel al conectar y al cambiar, desactualizada al pasar los días), también contra PostgreSQL real.
 
 - [ ] **T04: La tasa en el panel**
   - **Cubre:** REQ-005-34, REQ-005-35, REQ-005-36

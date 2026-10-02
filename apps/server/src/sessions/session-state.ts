@@ -13,6 +13,7 @@ import {
   secondsUntilExhausted,
   type SessionUsage,
   type TemporaryUsage,
+  type VesRate,
   temporaryRemaining,
 } from '@pope/shared';
 
@@ -87,6 +88,8 @@ export function remainingSeconds(row: SessionRow, balances: CustomerBalances | n
 export function activeState(
   row: SessionRow,
   account: { username: string; balances: CustomerBalances } | null,
+  /** Tasa vigente, para que el Shell muestre el Bs (REQ-005-36); `null` si no hay. */
+  vesRate: VesRate | null,
 ): NodeToPcMessage {
   const base = { sessionId: row.id, startedAt: row.startedAt.toISOString() };
   if (row.kind === 'account' && account) {
@@ -96,7 +99,7 @@ export function activeState(
     return {
       type: 'state',
       status: 'active',
-      vesRate: null,
+      vesRate,
       session: {
         kind: 'account',
         ...base,
@@ -113,7 +116,7 @@ export function activeState(
   return {
     type: 'state',
     status: 'active',
-    vesRate: null,
+    vesRate,
     session: {
       kind: 'temporary',
       ...base,

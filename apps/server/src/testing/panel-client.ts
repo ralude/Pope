@@ -1,5 +1,10 @@
 // Panel de prueba conectado al canal en vivo del nodo (T38a), para los tests e2e.
-import { type PanelMessage, panelMessageSchema, type PcMap } from '@pope/shared';
+import {
+  type ExchangeRateStatus,
+  type PanelMessage,
+  panelMessageSchema,
+  type PcMap,
+} from '@pope/shared';
 import { WebSocket } from 'ws';
 
 /** Panel conectado al canal en vivo: guarda los mensajes y el cierre. */
@@ -59,6 +64,14 @@ export class PanelClient {
     for (;;) {
       const message = await this.next();
       if (message.type === 'interrupted') return message.pending;
+    }
+  }
+
+  /** El siguiente estado de la tasa de cambio, saltando lo demás (spec 005). */
+  async nextRate(): Promise<ExchangeRateStatus> {
+    for (;;) {
+      const message = await this.next();
+      if (message.type === 'exchangeRate') return { rate: message.rate, stale: message.stale };
     }
   }
 

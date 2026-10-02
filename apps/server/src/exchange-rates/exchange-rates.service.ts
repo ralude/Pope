@@ -1,4 +1,4 @@
-import { Inject, Injectable, type OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, type OnModuleInit } from '@nestjs/common';
 import {
   type Actor,
   currentRate,
@@ -41,7 +41,9 @@ function toRate(row: RateRow): ExchangeRate {
  */
 @Injectable()
 export class ExchangeRatesService implements OnModuleInit {
+  private readonly logger = new Logger('ExchangeRates');
   private recent: ExchangeRate[] = [];
+  private readonly listeners = new Set<() => Promise<void>>();
 
   constructor(
     @Inject(DATABASE) private readonly db: Database,
@@ -56,6 +58,17 @@ export class ExchangeRatesService implements OnModuleInit {
       .orderBy(desc(exchangeRates.obtainedAt))
       .limit(CACHED_RATES);
     this.recent = rows.map(toRate);
+  }
+
+  /**
+   * Avisa cuando se guarda una tasa nueva, para repartirla a las PCs y al panel
+   * (REQ-005-36). Devuelve la función que deja de avisar.
+   */
+  subscribe(listener: () => Promise<void>): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
   }
 
   /** La tasa vigente ahora, o `null` si aún no hay ninguna. */
@@ -104,6 +117,18 @@ export class ExchangeRatesService implements OnModuleInit {
     });
     // Solo tras confirmar la transacción: si fallara, la memoria no cambia.
     this.recent = [toRate(row), ...this.recent].slice(0, CACHED_RATES);
+    await this.notify();
     return this.status();
+  }
+
+  /** Avisa a los interesados; un fallo de uno no impide guardar la tasa ni avisar a los demás. */
+  private async notify(): Promise<void> {
+    for (const listener of this.listeners) {
+      try {
+        await listener();
+      } catch (error) {
+        this.logger.error('No se pudo repartir la tasa nueva', error);
+      }
+    }
   }
 }

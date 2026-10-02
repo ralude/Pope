@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  type OnApplicationBootstrap,
   type OnModuleDestroy,
 } from '@nestjs/common';
 import {
@@ -36,6 +37,7 @@ import {
 } from '../combos/combo-sales.service.js';
 import { customers, pcs, sessions } from '../db/schema.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
+import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
 import { PcConnections, type PcIdentity } from './pc-connections.js';
@@ -86,8 +88,10 @@ export interface SessionClaim {
  * saldo; la PC solo muestra el `state` que le envía (ADR-0007).
  */
 @Injectable()
-export class SessionsService implements OnModuleDestroy {
+export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger('Sessions');
+  /** Deja de escuchar los cambios de tasa al cerrar. */
+  private stopRates: (() => void) | null = null;
   /** Cómo cancelar el temporizador de cada sesión vigilada. */
   private readonly timers = new Map<string, () => void>();
   /** Avisos ya enviados de cada sesión (5 y 1 min). Se pierden al reiniciar el nodo. */
@@ -109,8 +113,32 @@ export class SessionsService implements OnModuleDestroy {
     private readonly tariffs: TariffsService,
     private readonly comboSales: ComboSalesService,
     private readonly connections: PcConnections,
+    private readonly rates: ExchangeRatesService,
     private readonly clock: Clock,
   ) {}
+
+  /** El `state` de una sesión activa, con la tasa vigente (REQ-005-36). */
+  private stateOf(row: SessionRow, account: Parameters<typeof activeState>[1]): NodeToPcMessage {
+    return activeState(row, account, this.rates.current()?.vesPerUsd ?? null);
+  }
+
+  /**
+   * La tasa cambió (REQ-005-36): cada PC conectada con sesión recibe su `state` cobrado hasta
+   * ahora, como en un latido, con la tasa nueva.
+   */
+  async resendStates(): Promise<void> {
+    const active = await this.db
+      .select({ pcId: sessions.pcId })
+      .from(sessions)
+      .where(eq(sessions.status, 'active'));
+    for (const { pcId } of active) {
+      if (!this.connections.isConnected(pcId)) {
+        continue;
+      }
+      const { state } = await this.review(eq(sessions.pcId, pcId));
+      this.connections.send(pcId, state);
+    }
+  }
 
   /** La PC acaba de dar señales de vida: cualquier mensaje suyo cuenta. */
   touch(pcId: string): void {
@@ -151,7 +179,7 @@ export class SessionsService implements OnModuleDestroy {
     if (!row) {
       return LOCKED_STATE;
     }
-    return activeState(row, await this.accountOf(row, db));
+    return this.stateOf(row, await this.accountOf(row, db));
   }
 
   /**
@@ -237,7 +265,7 @@ export class SessionsService implements OnModuleDestroy {
       return {
         row,
         remaining,
-        state: activeState(row, { username: customer.username, balances }),
+        state: this.stateOf(row, { username: customer.username, balances }),
       };
     });
     this.touch(pc.id);
@@ -281,7 +309,7 @@ export class SessionsService implements OnModuleDestroy {
     // Con más tiempo, los avisos que ya se dieron pueden volver a tocar (se rearman).
     this.sendWarning(bought.row, remaining);
     this.watch(bought.row, remaining);
-    return this.ended.has(bought.row.id) ? LOCKED_STATE : activeState(bought.row, bought.account);
+    return this.ended.has(bought.row.id) ? LOCKED_STATE : this.stateOf(bought.row, bought.account);
   }
 
   /**
@@ -317,7 +345,7 @@ export class SessionsService implements OnModuleDestroy {
     if (session && !this.ended.has(session.id)) {
       const account = { username: customer.username, balances: customer.balances };
       const remaining = remainingSeconds(session, customer.balances);
-      this.connections.send(session.pcId, activeState(session, account));
+      this.connections.send(session.pcId, this.stateOf(session, account));
       this.sendWarning(session, remaining);
       this.watch(session, remaining);
     }
@@ -742,7 +770,7 @@ export class SessionsService implements OnModuleDestroy {
     this.watch(row, remaining);
     // Si la cerraron mientras tanto, la PC ya recibió `sessionEnded`: no hay que desbloquearla.
     return {
-      state: this.ended.has(row.id) ? LOCKED_STATE : activeState(row, account),
+      state: this.ended.has(row.id) ? LOCKED_STATE : this.stateOf(row, account),
       closedId: null,
     };
   }
@@ -816,7 +844,7 @@ export class SessionsService implements OnModuleDestroy {
     const remaining = remainingSeconds(row, null);
     // Enviar no prueba que la PC esté viva (el socket puede estar medio cerrado): su último
     // contacto sigue siendo el que decide hasta dónde se cobra.
-    this.connections.send(row.pcId, activeState(row, null));
+    this.connections.send(row.pcId, this.stateOf(row, null));
     this.sendWarning(row, remaining);
     this.watch(row, remaining);
   }
@@ -828,7 +856,12 @@ export class SessionsService implements OnModuleDestroy {
     this.warned.delete(sessionId);
   }
 
+  onApplicationBootstrap(): void {
+    this.stopRates = this.rates.subscribe(() => this.resendStates());
+  }
+
   onModuleDestroy(): void {
+    this.stopRates?.();
     for (const cancel of this.timers.values()) {
       cancel();
     }

@@ -14,6 +14,7 @@ import { AuthService } from '../auth/auth.service.js';
 import { STAFF_COOKIE } from '../auth/staff-cookie.js';
 import { Clock } from '../common/clock.js';
 import { EventsService } from '../events/events.service.js';
+import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
 import { PcConnections } from './pc-connections.js';
 import { PcMapService } from './pc-map.service.js';
 import { TemporarySessionsService } from './temporary-sessions.service.js';
@@ -59,6 +60,8 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
   private cancelCheck: (() => void) | null = null;
   /** Último número de interrumpidas pendientes enviado; `null` si aún no se sabe. */
   private lastPending: number | null = null;
+  /** Último estado de la tasa enviado (JSON), para enviarlo solo si cambia. */
+  private lastRate: string | null = null;
   private unsubscribe: (() => void)[] = [];
 
   constructor(
@@ -67,6 +70,7 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
     private readonly events: EventsService,
     private readonly connections: PcConnections,
     private readonly temporary: TemporarySessionsService,
+    private readonly rates: ExchangeRatesService,
     private readonly clock: Clock,
   ) {}
 
@@ -77,6 +81,10 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       }),
       this.connections.subscribe(() => {
         this.changed();
+      }),
+      this.rates.subscribe(() => {
+        this.sendRateIfChanged();
+        return Promise.resolve();
       }),
     ];
     this.scheduleCheck();
@@ -119,6 +127,9 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       const pending = await this.temporary.pendingInterruptedCount();
       this.lastPending = pending;
       this.send(ws, { type: 'interrupted', pending });
+      const rate = this.rates.status();
+      this.lastRate = JSON.stringify(rate);
+      this.send(ws, { type: 'exchangeRate', ...rate });
     } catch (error) {
       this.logger.error('No se pudo enviar el mapa al panel', error);
     }
@@ -152,10 +163,14 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
     await this.sendPendingIfChanged();
   }
 
-  /** Revisa las interrumpidas cada minuto, haya o no eventos. */
+  /**
+   * Revisa cada minuto, haya o no eventos, las interrumpidas y la tasa: su antigüedad cambia
+   * al cambiar de día aunque nadie la toque (REQ-005-35).
+   */
   private scheduleCheck(): void {
     this.cancelCheck = this.clock.schedule(PANEL_INTERRUPTED_CHECK_MS, async () => {
       await this.sendPendingIfChanged();
+      this.sendRateIfChanged();
       this.scheduleCheck();
     });
   }
@@ -176,6 +191,19 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       }
     } catch (error) {
       this.logger.error('No se pudieron contar las interrumpidas para el panel', error);
+    }
+  }
+
+  /** Envía la tasa vigente a todos si cambió desde el último envío (REQ-005-36). */
+  private sendRateIfChanged(): void {
+    const status = this.rates.status();
+    const json = JSON.stringify(status);
+    if (this.clients.size === 0 || json === this.lastRate) {
+      return;
+    }
+    this.lastRate = json;
+    for (const client of this.clients) {
+      this.send(client, { type: 'exchangeRate', ...status });
     }
   }
 

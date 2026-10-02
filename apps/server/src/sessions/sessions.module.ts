@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module.js';
 import { CombosModule } from '../combos/combos.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
+import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { TariffsModule } from '../tariffs/tariffs.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
@@ -26,7 +27,15 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
  * (plan 001). El nodo decide; la PC solo muestra y obedece (ADR-0007).
  */
 @Module({
-  imports: [AuthModule, CombosModule, CustomersModule, SettingsModule, TariffsModule, WalletModule],
+  imports: [
+    AuthModule,
+    CombosModule,
+    CustomersModule,
+    ExchangeRatesModule,
+    SettingsModule,
+    TariffsModule,
+    WalletModule,
+  ],
   controllers: [
     SessionsController,
     TemporarySessionsController,
