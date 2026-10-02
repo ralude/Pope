@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · spec 005 parte 2 (inventario, ventas y caja) redactada, pendiente de aprobar
+**Última actualización:** 2026-10-02 · spec 005 parte 2 aprobada; su plan y sus tareas, propuestos
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) por aprobar |
-| **Siguiente tarea** | **Esperando aprobación del mantenedor** de la parte 2 de la [spec 005](docs/specs/005-inventario-y-caja/spec.md); después, su plan y tareas. La tasa se retoma en T04 cuando lo decida el mantenedor |
-| **Progreso** | Parte 1 (tasa): 3 / 7 tareas · parte 2: sin plan aún |
+| **Siguiente tarea** | **Esperando aprobación** del plan y las tareas de la parte 2 de la [spec 005](docs/specs/005-inventario-y-caja/tasks.md); aprobados, **T08: Diseño de Caja, Inventario y cierre**. Orden: T08–T17, T04, T18–T24, T05–T07 |
+| **Progreso** | Spec 005: 3 / 24 tareas (parte 1: 3 / 7; parte 2: 0 / 17) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: tasa manual (parte 1) aprobada; el resto en borrador | 3 / 7 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: tasa manual (parte 1) aprobada; el resto en borrador | 3 / 24 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |

@@ -1,6 +1,7 @@
-# Tareas 005 · Parte 1: tasa de cambio manual
+# Tareas 005: Inventario y caja
 
-- **Estado:** Aprobado (2026-10-02)
+- **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T03.
+- **Parte 2 · Inventario, ventas y caja:** Propuesto (2026-10-02).
 - **Plan:** [plan.md](plan.md)
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa. Cada
@@ -8,7 +9,9 @@ commit deja el repo compilando y con `pnpm test` en verde. Los tests nombran el 
 prueban. Si una tarea resulta más grande de lo previsto (> 400 líneas), divídela aquí
 antes de seguir.
 
-## Fase 1: Tasa manual
+## Parte 1 · Tasa de cambio manual
+
+### Fase 1: Tasa manual
 
 - [x] **T01: Contratos de la tasa**
   - **Cubre:** REQ-005-33, REQ-005-35, REQ-005-36
@@ -49,10 +52,126 @@ antes de seguir.
   - **Verificar:** a mano, con tasa y sin tasa.
   - **Commit:** `feat(panel): muestra el equivalente en Bs en tarifas, combos y temporales`
 
-## Cierre
+### Cierre de la parte 1
 
 - [ ] **T07: Verificación de la parte 1**
   - **Cubre:** CA-005-06, REQ-001-13
   - **Hacer:** probar CA-005-06 en Chrome (panel y Shell). Marcar REQ-001-13 como hecho en la spec 001 y anotar la verificación en `mediciones.md` de la spec 001.
   - **Verificar:** revisión del mantenedor.
   - **Commit:** `docs(specs): verifica la tasa de cambio manual`
+
+## Parte 2 · Inventario, ventas y caja
+
+**Orden** (plan, "Orden de implementación"): T08 a T17; después **T04** de la parte 1 (la tasa
+en el panel, necesaria para cobrar en bolívares); después T18 a T24; y al final T05 a T07 de la
+parte 1.
+
+### Fase 1: Diseño y contratos
+
+- [ ] **T08: Diseño de Caja, Inventario y cierre**
+  - **Cubre:** REQ-005-20, REQ-005-24, REQ-005-45, REQ-005-51
+  - **Hacer:** artboards nuevos en el lienzo "Panel Pope · Fase 8": Caja (venta nueva a la izquierda, movimientos a la derecha), Inventario (productos con foto y conceptos), abrir turno con fondo, cerrar con conteo y confirmación, Cierres, y una maqueta del PDF de una página.
+  - **Verificar:** aprobación del mantenedor.
+  - **Commit:** sin commit (el diseño vive en el lienzo); se anota en ESTADO.md con el siguiente commit.
+
+- [ ] **T09: Contratos del inventario y la caja**
+  - **Cubre:** REQ-005-01 a REQ-005-05, REQ-005-10, REQ-005-20 a REQ-005-25, REQ-005-40, REQ-005-42, REQ-005-52
+  - **Hacer:** en `@pope/shared`, los esquemas de productos, conceptos, movimientos de stock, ventas (líneas y pagos), registro de caja, turno ampliado y canal (`cash`); los eventos nuevos y la versión 2 de `shift.opened` y `shift.closed`; funciones puras: importe en Bs con la tasa, grupo de cada cobro, lo esperado por método y la diferencia.
+  - **Verificar:** tests unitarios de las funciones y de los esquemas (incluido CA-005-02).
+  - **Commit:** `feat(shared): añade los contratos del inventario y la caja`
+
+### Fase 2: Nodo
+
+- [ ] **T10: Productos y conceptos**
+  - **Cubre:** REQ-005-01, REQ-005-02, REQ-005-04, REQ-005-05
+  - **Hacer:** tablas `products` y `sale_concepts` con su migración; alta y edición (solo administrador) con eventos, incluido el precio anterior y el nuevo.
+  - **Verificar:** e2e por rol y eventos.
+  - **Commit:** `feat(server): da de alta productos y conceptos de venta`
+
+- [ ] **T11: Fotos de los productos**
+  - **Cubre:** REQ-005-03, REQ-005-73
+  - **Hacer:** `POPE_DATA_DIR` (documentado en AGENTS.md), `PUT /products/:id/photo` con cuerpo `image/webp` hasta 512 KB y `GET` con caché larga.
+  - **Verificar:** e2e: subir, servir, rechazar otro tipo o más de 512 KB, y que el dueño no pueda subir.
+  - **Commit:** `feat(server): guarda las fotos de los productos`
+
+- [ ] **T12: Movimientos de stock**
+  - **Cubre:** REQ-005-10 a REQ-005-14
+  - **Hacer:** tabla `stock_movements`; entradas (encargado y administrador), ajustes y mermas con motivo (administrador); stock calculado y aviso de bajo mínimo en `GET /products`.
+  - **Verificar:** e2e: CA-005-01 (con la venta simulada por movimiento) y CA-005-08 sin la foto.
+  - **Commit:** `feat(server): registra el stock con movimientos`
+
+- [ ] **T13: Registro de caja**
+  - **Cubre:** REQ-005-24, REQ-005-41
+  - **Hacer:** tabla `cash_entries` con migración que pasa los cobros anteriores; recargas, sesiones temporales (abrir y añadir tiempo) y combos en caja escriben su fila en la misma transacción; `GET /shifts/current/entries`; mensaje `cash` del canal del panel.
+  - **Verificar:** los e2e de la spec 001 siguen pasando; e2e nuevos de las filas de cada cobro y de la lista del turno.
+  - **Commit:** `feat(server): anota todos los cobros en el registro de caja`
+
+- [ ] **T14: Ventas**
+  - **Cubre:** REQ-005-20 a REQ-005-22, REQ-005-25, REQ-005-43
+  - **Hacer:** tablas `sales` y `sale_lines`; `POST /sales` con productos y conceptos, uno o varios pagos, Bs con la tasa vigente y pago con saldo (ledger `sale`); baja el stock; turno abierto obligatorio.
+  - **Verificar:** e2e: CA-005-02, CA-005-07, CA-005-10, venta sin stock rechazada, sin tasa no se cobra en Bs, sin turno no se vende.
+  - **Commit:** `feat(server): registra ventas de productos y conceptos`
+
+- [ ] **T15: Anular una venta**
+  - **Cubre:** REQ-005-23
+  - **Hacer:** `POST /sales/:id/void` (solo administrador, con motivo): marca la venta, devuelve el stock, escribe la fila negativa del registro de caja y devuelve el saldo si se pagó con él.
+  - **Verificar:** e2e: CA-005-11 y que no se puede anular dos veces.
+  - **Commit:** `feat(server): permite anular una venta`
+
+- [ ] **T16: Turno con fondo y cierre con conteo**
+  - **Cubre:** REQ-005-40, REQ-005-42, REQ-005-44
+  - **Hacer:** columnas nuevas de `cash_shifts`; abrir con el fondo; un solo turno abierto en el local; `GET /shifts/current/closing` y cerrar con lo contado, guardando lo esperado; eventos versión 2; `GET /shifts` para el historial.
+  - **Verificar:** e2e: CA-005-03, segundo turno rechazado, historial por rol.
+  - **Commit:** `feat(server): abre la caja con fondo y la cierra con conteo`
+
+- [ ] **T17: Reportes PDF**
+  - **Cubre:** REQ-005-51, REQ-005-52, REQ-005-53
+  - **Hacer:** `pdfkit` (justificado en el plan); `GET /shifts/:id/report.pdf` con el resumen de una página y el detallado (`?full=1`), con sus roles.
+  - **Verificar:** e2e: CA-005-09 (el texto del PDF lleva los totales y tiene una página), el detallado con movimientos y stock, y el encargado no descarga el detallado.
+  - **Commit:** `feat(server): genera los reportes del cierre en PDF`
+
+### Fase 3: Panel
+
+- [ ] **T18: Inventario en el panel**
+  - **Cubre:** REQ-005-01, REQ-005-03, REQ-005-04, REQ-005-10, REQ-005-13, REQ-005-14
+  - **Hacer:** pantalla `/inventario` según el diseño: productos con foto (reducida con `<canvas>` antes de subirla), alta y edición, entrada, ajuste y merma, y aviso de bajo mínimo.
+  - **Verificar:** CA-005-08 a mano en Chrome.
+  - **Commit:** `feat(panel): muestra el inventario con fotos`
+
+- [ ] **T19: Conceptos en el panel**
+  - **Cubre:** REQ-005-05
+  - **Hacer:** pestaña de conceptos en Inventario (alta y edición para el administrador).
+  - **Verificar:** a mano, crear "Impresiones" a 0,10 USD.
+  - **Commit:** `feat(panel): gestiona los conceptos de venta`
+
+- [ ] **T20: Caja: venta nueva**
+  - **Cubre:** REQ-005-20 a REQ-005-22, REQ-005-25
+  - **Hacer:** pantalla `/caja`, mitad izquierda: golosinas y otras ventas, carrito, pagos (varios métodos, Bs con la tasa, saldo de una cuenta).
+  - **Verificar:** tests del carrito y del reparto de pagos; a mano CA-005-07 y CA-005-10.
+  - **Commit:** `feat(panel): vende golosinas y conceptos desde la caja`
+
+- [ ] **T21: Caja: movimientos del turno**
+  - **Cubre:** REQ-005-23, REQ-005-24
+  - **Hacer:** mitad derecha de `/caja`: lista en vivo (mensaje `cash`), totales por grupo y "Anular" para el administrador.
+  - **Verificar:** a mano: una recarga desde Clientes y una venta aparecen en la lista; CA-005-11.
+  - **Commit:** `feat(panel): muestra los movimientos del turno en la caja`
+
+- [ ] **T22: Abrir y cerrar la caja**
+  - **Cubre:** REQ-005-40, REQ-005-42, REQ-005-45
+  - **Hacer:** abrir turno con fondo; cerrar con lo esperado, lo contado, la diferencia, "¿Seguro que quieres cerrar la caja?" y la descarga del PDF.
+  - **Verificar:** a mano CA-005-03 y CA-005-09, con el PDF impreso en una página.
+  - **Commit:** `feat(panel): abre y cierra la caja con su reporte`
+
+- [ ] **T23: Historial de cierres**
+  - **Cubre:** REQ-005-53
+  - **Hacer:** pantalla `/cierres` para el administrador y el dueño, con los totales de cada día y los dos PDF.
+  - **Verificar:** a mano, por rol.
+  - **Commit:** `feat(panel): muestra el historial de cierres`
+
+### Cierre de la parte 2
+
+- [ ] **T24: Verificación de la parte 2**
+  - **Cubre:** CA-005-01 a CA-005-03, CA-005-07 a CA-005-11
+  - **Hacer:** tabla en `mediciones.md` de la spec 005 con cada criterio y su test o prueba a mano, como en la spec 001.
+  - **Verificar:** revisión del mantenedor.
+  - **Commit:** `docs(specs): verifica el inventario y la caja de la spec 005`
