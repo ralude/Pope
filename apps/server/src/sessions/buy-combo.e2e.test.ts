@@ -22,6 +22,8 @@ import { assertBalancesMatchLedger } from '../testing/wallet.js';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
 // 18:00 en Caracas de un lunes: 1,50 USD/h.
 const MONDAY = '2026-09-28T22:00:00Z';
 const SYSTEM = { kind: 'system' } as const;
@@ -225,6 +227,26 @@ describe('compra de combos desde el Shell (e2e, REQ-001-85, REQ-001-82)', () => 
       code: 'no_active_session',
       message: 'Los combos son solo para clientes con cuenta',
     });
+  });
+
+  it('CA-001-15: las horas de combo no vencen: 6 meses después siguen las mismas', async () => {
+    await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(25) });
+    const pc = await world.pc(5);
+    await login(pc, 'juan');
+    await buyCombo(pc, combo20);
+
+    // Usa 2 h del combo y se va.
+    world.clock.advance(2 * HOUR);
+    expect(summary(await heartbeat(pc))).toMatchObject({ comboSeconds: hours(18) });
+    await logout(pc);
+
+    // Vuelve 180 días después, un sábado (otra tarifa): conserva las 18 h y el saldo.
+    world.clock.advance(180 * DAY);
+    expect(summary(await login(pc, 'juan'))).toMatchObject({
+      comboSeconds: hours(18),
+      money: usd(5),
+    });
+    await assertBalancesMatchLedger(world.testApp.database.db);
   });
 
   it('la respuesta a la compra lleva el requestId, para no confundirla con un latido', async () => {
