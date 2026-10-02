@@ -132,12 +132,9 @@
   gap: 10px;
 }
 
-.field-error {
-  color: var(--danger-text);
-  font-size: 13px;
-}
-
-.field-hint {
-  color: var(--muted);
-  font-size: 13px;
+/* Combo a elegir en la venta. */
+.combo-choice {
+  min-height: 64px;
+  padding: 0 16px;
+  gap: 16px;
 }

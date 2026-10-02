@@ -374,6 +374,167 @@ a {
   gap: 10px;
 }
 
+/* ─── Cobros en caja: opciones, fichas, pestañas y avisos ─────────────────────────────── */
+
+.field-error {
+  color: var(--danger-text);
+  font-size: 13px;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.choice-group {
+  margin: 0;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+/* Opción en tarjeta (radio): método de pago, combo… */
+.choice {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.choice:hover {
+  border-color: #6b7380;
+}
+
+.choice[data-checked='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.choice input {
+  accent-color: var(--accent);
+}
+
+/* Importe rápido (1,00 · 2,00 · 5,00…). */
+.chip {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 18px;
+  background: var(--bg);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: #6b7380;
+}
+
+.chip[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Dos o tres opciones excluyentes en píldora («Con su saldo» / «Cobrar en caja»). */
+.segmented {
+  align-self: flex-start;
+  padding: 4px;
+  border-radius: 20px;
+  background: var(--bg);
+  display: flex;
+  gap: 4px;
+}
+
+.segmented button {
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.amount-input {
+  width: 180px;
+  height: 48px;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Saldo antes y después de cobrar. */
+.summary-box {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bg);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.notice-warn {
+  padding: 14px;
+  border: 1px solid #8a5a12;
+  border-radius: 10px;
+  background: #2a2113;
+  color: #f5d9a8;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Turno de caja en la barra superior. */
+.shift-pill {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.shift-open {
+  border: 1px solid #2f6b3b;
+  background: #17271b;
+  color: #bfe5ca;
+}
+
+.shift-closed {
+  border: 1px solid #8a5a12;
+  background: #2a2113;
+  color: #f5d9a8;
+}
+
 /* Solo para lectores de pantalla. */
 .sr-only {
   position: absolute;

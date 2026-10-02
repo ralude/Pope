@@ -6,6 +6,7 @@ import { Link, useLocation } from 'wouter';
 
 import { useSession, useStaff } from '../session.js';
 import { Icon, type IconName } from './Icon.js';
+import { ShiftPill } from './ShiftPill.js';
 
 /** Secciones del raíl. Cada tarea de la fase 8 añade la suya. */
 const SECTIONS: { href: string; label: string; icon: IconName }[] = [
@@ -65,6 +66,7 @@ function TopBar() {
         </span>
       </div>
       <div style={{ flexGrow: 1 }} />
+      <ShiftPill />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <div className="avatar" aria-hidden="true">
           {staff.displayName.slice(0, 1).toUpperCase()}

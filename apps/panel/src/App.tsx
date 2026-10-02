@@ -4,6 +4,7 @@ import { CustomersPage } from './pages/CustomersPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { MapPage } from './pages/MapPage.js';
 import { SessionProvider, useSession } from './session.js';
+import { ShiftProvider } from './shift.js';
 
 /** Sin sesión, cualquier dirección muestra el login; al entrar se queda en esa dirección. */
 function Routes() {
@@ -19,13 +20,15 @@ function Routes() {
     return <LoginPage notice={state.notice} />;
   }
   return (
-    <Switch>
-      <Route path="/" component={MapPage} />
-      <Route path="/clientes" component={CustomersPage} />
-      <Route>
-        <Redirect to="/" />
-      </Route>
-    </Switch>
+    <ShiftProvider>
+      <Switch>
+        <Route path="/" component={MapPage} />
+        <Route path="/clientes" component={CustomersPage} />
+        <Route>
+          <Redirect to="/" />
+        </Route>
+      </Switch>
+    </ShiftProvider>
   );
 }
 
