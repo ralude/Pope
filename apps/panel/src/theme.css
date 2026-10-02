@@ -23,6 +23,13 @@
   --amber: #d08a1e;
   --amber-bar: #f0a73a;
   --red: #e5484d;
+  /* Mapa de PCs: con cuenta (celeste) y apagada o sin conexión (gris). */
+  --sky: #5cc4f2;
+  --sky-ink: #06283a;
+  --sky-bar: #8fd8f8;
+  --off: #3a3f47;
+  --off-line: #4d535d;
+  --off-text: #c3c9d2;
   --danger-bg: #3a1f22;
   --danger-text: #ffc9c6;
 

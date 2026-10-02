@@ -49,9 +49,14 @@
   outline-offset: 2px;
 }
 
+/*
+ * Colores del mapa (mantenedor, 2026-10-02; REQ-003-21): gris apagada o sin conexión, verde
+ * libre, celeste con un cliente con cuenta y ámbar con una sesión temporal. El rojo del modo
+ * administrador llega con la spec 003.
+ */
 .tile-account {
-  background: var(--green);
-  color: #ffffff;
+  background: var(--sky);
+  color: var(--sky-ink);
 }
 
 .tile-temporary {
@@ -60,15 +65,14 @@
 }
 
 .tile-free {
-  background: #2a2f38;
-  border-color: #353b45;
-  color: var(--text);
+  background: var(--green);
+  color: #ffffff;
 }
 
 .tile-offline {
-  background: #17191d;
-  border-color: #262a31;
-  color: #8a929e;
+  background: var(--off);
+  border-color: var(--off-line);
+  color: var(--off-text);
 }
 
 /* Con sesión pero sin conexión (dentro del tiempo de gracia): borde discontinuo. */
@@ -115,7 +119,7 @@
 }
 
 .swatch-account {
-  background: var(--green);
+  background: var(--sky);
 }
 
 .swatch-temporary {
@@ -123,17 +127,16 @@
 }
 
 .swatch-free {
-  background: #2a2f38;
-  border: 1px solid #4a515c;
+  background: var(--green);
 }
 
 .swatch-offline {
-  background: #17191d;
-  border: 1px solid var(--line-2);
+  background: var(--off);
+  border: 1px solid var(--off-line);
 }
 
 .bar-account {
-  background: var(--green-bar);
+  background: var(--sky-bar);
 }
 
 .bar-temporary {
@@ -141,7 +144,7 @@
 }
 
 .bar-free {
-  background: #4a515c;
+  background: var(--green-bar);
 }
 
 .bar-offline {
@@ -183,14 +186,13 @@
 }
 
 /* Insignia del detalle según el estado de la PC (la base, `.detail-badge`, está en el tema). */
-.detail-badge.badge-free,
 .detail-badge.badge-offline {
-  border-color: var(--line-2);
+  border-color: var(--off-line);
 }
 
 .badge-account {
-  background: var(--green);
-  color: #ffffff;
+  background: var(--sky);
+  color: var(--sky-ink);
 }
 
 .badge-temporary {
@@ -199,12 +201,13 @@
 }
 
 .badge-free {
-  background: #2a2f38;
+  background: var(--green);
+  color: #ffffff;
 }
 
 .badge-offline {
-  background: #17191d;
-  color: #8a929e;
+  background: var(--off);
+  color: var(--off-text);
 }
 
 .badge-ending {
