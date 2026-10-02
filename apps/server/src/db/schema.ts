@@ -7,6 +7,7 @@ import type {
   Actor,
   ComboSnapshot,
   CustomerStatus,
+  ExchangeRateSource,
   LedgerKind,
   PaymentMethod,
   SessionEndReason,
@@ -21,6 +22,7 @@ import {
   bigint,
   boolean,
   check,
+  date,
   index,
   integer,
   jsonb,
@@ -372,5 +374,27 @@ export const sessionTopups = pgTable(
     index('session_topups_shift_idx').on(t.shiftId),
     check('session_topups_seconds_positive', sql`${t.seconds} > 0`),
     check('session_topups_amount_positive', sql`${t.amountMicros} > 0`),
+  ],
+);
+
+/**
+ * Tasas de cambio USD → VES (spec 005, REQ-005-33). Solo se insertan: la historia de tasas es
+ * auditoría. La vigente es la última guardada cuya fecha valor ya llegó (`currentRate`).
+ */
+export const exchangeRates = pgTable(
+  'exchange_rates',
+  {
+    id: uuid('id').primaryKey(),
+    /** µVES por 1 USD (`VesRate`, ADR-0015). */
+    vesPerUsd: bigint('ves_per_usd', { mode: 'number' }).notNull(),
+    /** Fecha valor, día en hora de Caracas: desde ese día vale. */
+    effectiveDate: date('effective_date', { mode: 'string' }).notNull(),
+    source: text('source').$type<ExchangeRateSource>().notNull(),
+    obtainedAt: timestamp('obtained_at', { withTimezone: true }).notNull(),
+    actor: jsonb('actor').$type<Actor>().notNull(),
+  },
+  (t) => [
+    index('exchange_rates_effective_idx').on(t.effectiveDate, t.obtainedAt),
+    check('exchange_rates_positive', sql`${t.vesPerUsd} > 0`),
   ],
 );

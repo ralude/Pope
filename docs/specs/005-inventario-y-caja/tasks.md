@@ -17,11 +17,12 @@ antes de seguir.
   - **Commit:** `feat(shared): añade los contratos de la tasa de cambio`
   - **Decidido al implementarla:** módulo `exchange-rate.ts`. La tasa vigente exige además haberse guardado antes del instante consultado: así "vale desde que se guarda" queda en la propia regla. La fecha valor es `AAAA-MM-DD` en hora de Caracas (`localDateInCaracas`). Tope de 10.000.000 Bs por USD. `setBy` es el nombre de quien la escribió, o `null` si viene del BCV. El mensaje del canal del panel es `{ type: 'exchangeRate', rate, stale }`, como dice el plan.
 
-- [ ] **T02: Guardar y consultar la tasa en el nodo**
+- [x] **T02: Guardar y consultar la tasa en el nodo**
   - **Cubre:** REQ-005-33, REQ-005-34
   - **Hacer:** tabla `exchange_rates` con su migración, `ExchangeRatesService` (vigente en memoria, guardar con evento dentro de `inTransaction`) y `GET`/`POST /exchange-rate` (`POST` solo encargado y administrador).
   - **Verificar:** e2e: el dueño no puede guardar; una tasa válida queda vigente al momento con su evento (actor y fuente `manual`); valores fuera de rango se rechazan.
   - **Commit:** `feat(server): guarda la tasa de cambio manual`
+  - **Decidido al implementarla:** módulo `exchange-rates` con migración `0015_exchange_rates`. El servicio guarda en memoria las 20 tasas más recientes (al arrancar las lee de la base) y responde la vigente sin consultar la base; la memoria solo cambia tras confirmar la transacción. `POST` responde 201 con el estado nuevo (tasa y `stale`), igual que `GET`. `setBy` sale del actor del evento. Verificado: 7 tests e2e, también contra PostgreSQL real (roles, validación, evento, sustitución con historia, CA-005-05 y lectura al reiniciar).
 
 - [ ] **T03: Repartir la tasa a las PCs y al panel**
   - **Cubre:** REQ-005-36, REQ-001-13

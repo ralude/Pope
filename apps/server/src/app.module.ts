@@ -9,6 +9,7 @@ import { APP_CONFIG, type AppConfig, type PopeMode } from './config.js';
 import type { DatabaseHandle } from './db/database.js';
 import { DatabaseModule } from './db/database.module.js';
 import { EventsModule } from './events/events.module.js';
+import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module.js';
 import { HealthModule } from './health/health.module.js';
 import { SessionsModule } from './sessions/sessions.module.js';
 import { SettingsModule } from './settings/settings.module.js';
@@ -30,6 +31,7 @@ const MODULES_BY_MODE: Record<PopeMode, DynamicModule['imports']> = {
     TariffsModule,
     CombosModule,
     SettingsModule,
+    ExchangeRatesModule,
     SessionsModule,
   ],
   cloud: [],
