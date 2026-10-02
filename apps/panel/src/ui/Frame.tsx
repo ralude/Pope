@@ -4,6 +4,7 @@ import { LOCAL_TIME_ZONE, type StaffRole } from '@pope/shared';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
+import { usePcMapFeed } from '../map/channel.js';
 import { useSession, useStaff } from '../session.js';
 import { Icon, type IconName } from './Icon.js';
 import { ShiftPill } from './ShiftPill.js';
@@ -12,6 +13,7 @@ import { ShiftPill } from './ShiftPill.js';
 const SECTIONS: { href: string; label: string; icon: IconName; roles?: StaffRole[] }[] = [
   { href: '/', label: 'Mapa de PCs', icon: 'mapa' },
   { href: '/clientes', label: 'Clientes', icon: 'clientes' },
+  { href: '/interrumpidas', label: 'Interrumpidas', icon: 'interrumpidas' },
   { href: '/combo-horas', label: 'Combos', icon: 'combos' },
   { href: '/tarifas', label: 'Tarifas', icon: 'tarifas' },
   { href: '/personal', label: 'Personal', icon: 'personal', roles: ['administrador'] },
@@ -98,6 +100,7 @@ function TopBar() {
 function Rail() {
   const [location] = useLocation();
   const staff = useStaff();
+  const { pendingInterrupted } = usePcMapFeed();
   return (
     <nav className="rail" aria-label="Secciones">
       {SECTIONS.filter((section) => !section.roles || section.roles.includes(staff.role)).map(
@@ -106,11 +109,18 @@ function Rail() {
             key={section.href}
             href={section.href}
             className="rail-item"
-            aria-label={section.label}
+            aria-label={
+              section.href === '/interrumpidas' && (pendingInterrupted ?? 0) > 0
+                ? `${section.label}: ${String(pendingInterrupted)} pendientes`
+                : section.label
+            }
             title={section.label}
             aria-current={location === section.href ? 'page' : undefined}
           >
             <Icon name={section.icon} size={22} />
+            {section.href === '/interrumpidas' && (pendingInterrupted ?? 0) > 0 && (
+              <span className="rail-dot" />
+            )}
           </Link>
         ),
       )}

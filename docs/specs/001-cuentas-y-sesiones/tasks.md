@@ -458,11 +458,12 @@ antes de seguir.
   - **Decidido al implementarla:** «Abrir sesión temporal» sale en una PC libre y conectada; «Añadir tiempo», en una con temporal. El diálogo cobra por tiempo (minutos, con 30 min, 1 h, 2 h y 3 h) o por importe y muestra el otro valor con los mismos cálculos de `shared` que el nodo (tarifa de hoy al abrir, la de la sesión al añadir). El nombre por defecto se ve de ejemplo. Cerrar una temporal avisa «Cerrar y perder 25 min» (REQ-001-69). Verificado a mano con el simulador y el viernes a 1,50 USD/h de forma provisional: CA-001-05 («Carlos», PC 05, 1 h, abierta por Ana, cobro en su turno y la PC desbloqueada) y CA-001-10 con una temporal de 10 min a la que 0,75 USD suman 30 min; cerrarla avisa de lo que se pierde.
   - **Decidido por el mantenedor (2026-10-02):** sin pantalla propia ni icono en el raíl: se abren, se amplían y se cierran desde el detalle de la PC en el mapa, como en el diseño.
 
-- [ ] **T45: Interrumpidas y restauración**
+- [x] **T45: Interrumpidas y restauración**
   - **Cubre:** REQ-001-64, REQ-001-66, REQ-001-67, REQ-001-68, REQ-001-71
   - **Hacer:** vista de sesiones interrumpidas y del respaldo por PC, con el botón Restaurar y la elección de PC.
   - **Verificar:** simular un apagón con la consola del simulador (`apagon N`, T36b) y restaurar (CA-001-06).
   - **Commit:** `feat(panel): muestra y restaura sesiones interrumpidas`
+  - **Decidido al implementarla:** pantalla `/interrumpidas` con dos pestañas. «Pendientes»: cada sesión con su PC, la hora del corte, quién la abrió, lo que le quedaba y hasta cuándo se puede restaurar; «Restaurar» propone la PC original si está libre y deja elegir entre las conectadas y sin sesión. «Respaldo por PC»: tabla de REQ-001-64 con el motivo de cierre y el estado de la restauración. El dueño solo consulta. El canal `/panel` pasa a ser una sola conexión para todas las pantallas y lleva el número de pendientes (punto ámbar del raíl); el nodo lo revisa también cada minuto, porque una interrumpida caduca sin evento. Verificado a mano con el simulador: al reiniciar la PC 05 con «Carlos» abierta queda interrumpida con 49 min; restaurarla en la PC 03 la desbloquea con ese tiempo sin cobro (CA-001-06); restaurarla otra vez da «Esta sesión ya fue restaurada por Ana a las 02:02» (CA-001-08); con `apagon 3` la sesión restaurada vuelve a quedar pendiente y el punto reaparece sin recargar.
   - **Decidido por el mantenedor (2026-10-02):** el icono de Interrumpidas lleva un punto ámbar si hay pendientes; el nodo envía cuántas hay por el canal `/panel` al conectar y cuando cambia (commit de `server`/`shared` aparte). La pantalla de ajustes (gracia de latidos y sesiones conservadas) queda fuera de la fase 8.
 
 - [ ] **T45a: Servir el panel desde el nodo**

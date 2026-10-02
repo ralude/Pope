@@ -1,0 +1,61 @@
+/* Interrumpidas (T45): tarjetas de pendientes y tabla del respaldo por PC. */
+
+.interrupted {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.interrupted-card {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.interrupted-row {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.interrupted-figure {
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.interrupted-targets {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.backup-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.backup-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.backup-table td {
+  height: 46px;
+  padding: 0 10px;
+  border-bottom: 1px solid #22262d;
+}
+
+.backup-table .col-num {
+  text-align: right;
+}

@@ -37,6 +37,8 @@ export interface PcMapFeed {
    * nodo, que es el que cobra (ADR-0007), aunque el navegador vaya adelantado o atrasado.
    */
   skewMs: number;
+  /** Interrumpidas pendientes de restaurar (T45); `null` hasta que lo diga el nodo. */
+  pendingInterrupted: number | null;
 }
 
 const PcMapFeedContext = createContext<PcMapFeed | null>(null);
@@ -58,7 +60,12 @@ export function usePcMapFeed(): PcMapFeed {
 
 function useChannel(): PcMapFeed {
   const { expire } = useSession();
-  const [feed, setFeed] = useState<PcMapFeed>({ map: null, live: false, skewMs: 0 });
+  const [feed, setFeed] = useState<PcMapFeed>({
+    map: null,
+    live: false,
+    skewMs: 0,
+    pendingInterrupted: null,
+  });
 
   useEffect(() => {
     let socket: WebSocket | null = null;
@@ -75,11 +82,14 @@ function useChannel(): PcMapFeed {
       ws.onmessage = (event: MessageEvent) => {
         const message = parsePanelMessage(event.data);
         if (message?.type === 'pcs') {
-          setFeed({
+          setFeed((prev) => ({
+            ...prev,
             map: message.map,
             live: true,
             skewMs: Date.parse(message.map.at) - Date.now(),
-          });
+          }));
+        } else if (message?.type === 'interrupted') {
+          setFeed((prev) => ({ ...prev, pendingInterrupted: message.pending }));
         }
       };
       ws.onclose = (event: CloseEvent) => {
