@@ -1,5 +1,9 @@
 import 'reflect-metadata';
 
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { type Type } from '@nestjs/common';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
@@ -14,6 +18,8 @@ import { createTestDatabase } from './database.js';
 export interface TestApp {
   app: NestFastifyApplication;
   database: DatabaseHandle;
+  /** Carpeta de datos del nodo, temporal: se borra al cerrar. */
+  dataDir: string;
   close(): Promise<void>;
 }
 
@@ -34,12 +40,14 @@ export async function createTestApp(
   options: TestAppOptions = {},
 ): Promise<TestApp> {
   const database = await createTestDatabase();
+  const dataDir = await mkdtemp(join(tmpdir(), 'pope-test-'));
   const config: AppConfig = {
     mode,
     port: 0,
     host: '127.0.0.1',
     databaseUrl: 'postgres://test',
     memoryLogMs: null,
+    dataDir,
   };
   const builder = Test.createTestingModule({
     imports: [AppModule.register(config, database)],
@@ -53,6 +61,14 @@ export async function createTestApp(
   await configureApp(app, { panelDir: options.panelDir ?? null });
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
-  // Al cerrar la aplicación se cierra también la base de datos (DatabaseModule).
-  return { app, database, close: () => app.close() };
+  return {
+    app,
+    database,
+    dataDir,
+    // Al cerrar la aplicación se cierra también la base de datos (DatabaseModule).
+    close: async () => {
+      await app.close();
+      await rm(dataDir, { recursive: true, force: true });
+    },
+  };
 }

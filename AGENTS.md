@@ -171,8 +171,13 @@ Servidor (`apps/server`, NestJS sobre Fastify):
   @pope/server start` (variables: `POPE_MODE` obligatoria, `local` o `cloud`;
   `DATABASE_URL` obligatoria; `PORT`, por defecto 3000; `HOST`, por defecto `0.0.0.0`;
   `POPE_MEMORY_LOG_MS`, opcional, de 1000 como mínimo: cada ese tiempo registra una línea
-  `Memoria: rss=… MB heapUsed=… MB`, para la prueba de carga).
+  `Memoria: rss=… MB heapUsed=… MB`, para la prueba de carga; `POPE_DATA_DIR`, opcional:
+  carpeta donde el nodo guarda sus archivos, como las fotos de los productos, por defecto
+  `apps/server/data/`, que no se sube al repo).
   Al arrancar aplica las migraciones pendientes. Comprobar: `GET /health`.
+- Fotos de los productos: el panel las reduce y las sube en WebP (`PUT /products/:id/photo`,
+  cuerpo `image/webp` de 512 KB como mucho, sin multipart). El parser de ese tipo está en
+  `bootstrap.ts`; el nodo guarda el archivo en `POPE_DATA_DIR/products/`.
 - Base de datos (Drizzle): el esquema está en `src/db/schema.ts`. Tras cambiarlo,
   `pnpm --filter @pope/server db:generate` crea la migración SQL en `apps/server/drizzle/`
   (se sube al repo). Nunca edites una migración ya subida: crea otra.

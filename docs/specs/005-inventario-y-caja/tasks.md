@@ -105,11 +105,12 @@ parte 1.
   - **Commit:** `feat(server): da de alta productos y conceptos de venta`
   - **Decidido al implementarla:** módulos `products` (productos) y `sales` (por ahora, los conceptos). La tabla `stock_movements` entra ya aquí, porque el alta escribe lo que llegó como primera entrada en la misma transacción, con su `stock.moved`; T12 añade los endpoints de movimientos. `GET /products` ya devuelve el stock (suma de movimientos) y el aviso de bajo mínimo. Las listas van primero con los activos y por nombre. Migración `0016_products`. Verificado: 10 tests e2e (roles, eventos, precio anterior y nuevo, CA-005-08 sin la foto).
 
-- [ ] **T11: Fotos de los productos**
+- [x] **T11: Fotos de los productos**
   - **Cubre:** REQ-005-03, REQ-005-73
   - **Hacer:** `POPE_DATA_DIR` (documentado en AGENTS.md), `PUT /products/:id/photo` con cuerpo `image/webp` hasta 512 KB y `GET` con caché larga.
   - **Verificar:** e2e: subir, servir, rechazar otro tipo o más de 512 KB, y que el dueño no pueda subir.
   - **Commit:** `feat(server): guarda las fotos de los productos`
+  - **Decidido al implementarla:** `POPE_DATA_DIR` (por defecto `apps/server/data/`, en `.gitignore`); el parser de `image/webp` va en `bootstrap.ts` con el tope de 512 KB (413 si se pasa; 415 si es otro tipo). El nodo comprueba además la cabecera RIFF/WEBP. El archivo se llama `<id>-<12 hex del sha256>.webp` y esa parte es la `photoVersion`; se escribe aparte y se renombra, y la foto anterior se borra del disco. Subir la misma foto no emite otro evento. `GET /products/:id/photo` exige sesión del personal (como toda la API) y responde con `Cache-Control: private, max-age=31536000, immutable`. Los tests usan una carpeta de datos temporal por app. Verificado: 6 tests e2e.
 
 - [ ] **T12: Movimientos de stock**
   - **Cubre:** REQ-005-10 a REQ-005-14

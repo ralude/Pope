@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { resolve } from 'node:path';
+
 import { loadConfig } from './config.js';
 
 const DATABASE_URL = 'postgres://pope:clave@127.0.0.1:5432/pope';
@@ -12,6 +14,7 @@ describe('loadConfig (ADR-0003)', () => {
       host: '0.0.0.0',
       databaseUrl: DATABASE_URL,
       memoryLogMs: null,
+      dataDir: resolve(import.meta.dirname, '..', 'data'),
     });
   });
 
@@ -24,6 +27,7 @@ describe('loadConfig (ADR-0003)', () => {
       host: '127.0.0.1',
       databaseUrl: DATABASE_URL,
       memoryLogMs: null,
+      dataDir: resolve(import.meta.dirname, '..', 'data'),
     });
   });
 
@@ -55,5 +59,14 @@ describe('loadConfig (ADR-0003)', () => {
     expect(loadConfig({ POPE_MODE: 'local', DATABASE_URL: 'postgresql://x@y/z' }).databaseUrl).toBe(
       'postgresql://x@y/z',
     );
+  });
+
+  it('la carpeta de datos es data/ junto al servidor, o la de POPE_DATA_DIR (REQ-005-03)', () => {
+    expect(loadConfig({ POPE_MODE: 'local', DATABASE_URL }).dataDir).toBe(
+      resolve(import.meta.dirname, '..', 'data'),
+    );
+    expect(
+      loadConfig({ POPE_MODE: 'local', DATABASE_URL, POPE_DATA_DIR: 'pope-datos' }).dataDir,
+    ).toBe(resolve('pope-datos'));
   });
 });

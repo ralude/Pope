@@ -1,6 +1,18 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  Param,
+  Patch,
+  Post,
+  Put,
+  StreamableFile,
+  UnsupportedMediaTypeException,
+} from '@nestjs/common';
 import {
   idSchema,
+  PRODUCT_PHOTO_TYPE,
   type Product,
   type ProductCreateRequest,
   productCreateRequestSchema,
@@ -12,6 +24,7 @@ import {
 import { CurrentStaff, Roles } from '../auth/decorators.js';
 import { staffActor } from '../auth/staff.controller.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
+import { ProductPhotosService } from './product-photos.service.js';
 import { ProductsService } from './products.service.js';
 
 /**
@@ -20,7 +33,10 @@ import { ProductsService } from './products.service.js';
  */
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly products: ProductsService) {}
+  constructor(
+    private readonly products: ProductsService,
+    private readonly photos: ProductPhotosService,
+  ) {}
 
   @Get()
   list(): Promise<Product[]> {
@@ -44,5 +60,29 @@ export class ProductsController {
     @CurrentStaff() admin: StaffProfile,
   ): Promise<Product> {
     return this.products.update(id, body, staffActor(admin));
+  }
+
+  /**
+   * Sube la foto de un producto (REQ-005-03): cuerpo `image/webp` de 512 KB como mucho, ya
+   * reducido por el panel. El tamaño y el tipo los comprueba el parser de `bootstrap.ts`.
+   */
+  @Roles('administrador')
+  @Put(':id/photo')
+  setPhoto(
+    @Param('id', new ZodValidationPipe(idSchema)) id: string,
+    @Body() body: unknown,
+    @CurrentStaff() admin: StaffProfile,
+  ): Promise<Product> {
+    if (!Buffer.isBuffer(body)) {
+      throw new UnsupportedMediaTypeException('La foto debe ser una imagen WebP');
+    }
+    return this.photos.set(id, body, staffActor(admin));
+  }
+
+  /** La foto de un producto. La ruta lleva su versión, así que no cambia: caché larga. */
+  @Get(':id/photo')
+  @Header('Cache-Control', 'private, max-age=31536000, immutable')
+  async photo(@Param('id', new ZodValidationPipe(idSchema)) id: string): Promise<StreamableFile> {
+    return new StreamableFile(await this.photos.read(id), { type: PRODUCT_PHOTO_TYPE });
   }
 }

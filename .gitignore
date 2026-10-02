@@ -24,6 +24,9 @@ npm-debug.log*
 pnpm-debug.log*
 tmp/
 
+# Datos del nodo local: fotos de los productos (POPE_DATA_DIR)
+apps/server/data/
+
 # Sistema / editores
 .DS_Store
 Thumbs.db
