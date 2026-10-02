@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   ApiClient,
   ApiError,
+  listOf,
   NETWORK_ERROR,
   SESSION_EXPIRED,
   UNEXPECTED_RESPONSE,
@@ -135,5 +136,15 @@ describe('cliente de la API del panel (REQ-001-40)', () => {
     const fn = (() => Promise.reject(new TypeError('Failed to fetch'))) as unknown as typeof fetch;
     const error = await caught(new ApiClient({ fetch: fn }).get('/auth/me', staffProfileSchema));
     expect(error).toMatchObject({ status: 0, message: NETWORK_ERROR });
+  });
+});
+
+describe('listOf', () => {
+  it('valida cada elemento de la lista', () => {
+    const schema = listOf(staffProfileSchema);
+    expect(schema.safeParse([ANA])).toEqual({ success: true, data: [ANA] });
+    expect(schema.safeParse([])).toEqual({ success: true, data: [] });
+    expect(schema.safeParse([ANA, { id: 'x' }]).success).toBe(false);
+    expect(schema.safeParse(ANA).success).toBe(false);
   });
 });

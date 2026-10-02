@@ -13,6 +13,22 @@ export interface FieldIssue {
   message: string;
 }
 
+/** Esquema de una lista JSON cuyos elementos valida `item`. */
+export function listOf<T>(item: Schema<T>): Schema<T[]> {
+  return {
+    safeParse(value: unknown) {
+      if (!Array.isArray(value)) return { success: false };
+      const items: T[] = [];
+      for (const element of value) {
+        const parsed = item.safeParse(element);
+        if (!parsed.success) return { success: false };
+        items.push(parsed.data);
+      }
+      return { success: true, data: items };
+    },
+  };
+}
+
 export const NETWORK_ERROR = 'No se puede conectar con el nodo local. Revisa que esté encendido.';
 export const UNEXPECTED_RESPONSE = 'El nodo respondió algo inesperado. Recarga la página.';
 export const SESSION_EXPIRED = 'Tu sesión ha caducado. Vuelve a iniciar sesión.';
