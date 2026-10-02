@@ -2,7 +2,7 @@ import { newId, type Product, type StockMovement, usd } from '@pope/shared';
 import { asc } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { events, stockMovements } from '../db/schema.js';
+import { events } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 
@@ -43,16 +43,13 @@ describe('movimientos de stock (e2e, REQ-005-10 a REQ-005-14)', () => {
     (await request('GET', `/products/${refresco.id}/movements`, dueno)).json<StockMovement[]>();
 
   it('CA-005-01: con 10, 3 vendidos y 1 de merma quedan 6, con actor y hora', async () => {
-    // La venta llega en T14: aquí se simula con su movimiento.
-    await testApp.database.db.insert(stockMovements).values({
-      id: newId(),
-      productId: refresco.id,
-      kind: 'sale',
-      quantity: -3,
-      saleId: newId(),
-      actor: { kind: 'staff', staffId: newId(), name: 'Ana' },
-      createdAt: new Date(),
+    await request('POST', '/shifts', ana);
+    const sale = await request('POST', '/sales', ana, {
+      lines: [{ kind: 'product', productId: refresco.id, quantity: 3 }],
+      payments: [{ method: 'cash_usd', usdMicros: usd(3) }],
+      customerId: null,
     });
+    expect(sale.statusCode).toBe(201);
     const response = await move({ kind: 'waste', quantity: 1, reason: 'Se rompió' });
     expect(response.statusCode).toBe(201);
     expect(response.json<Product>()).toMatchObject({ stock: 6, lowStock: false });

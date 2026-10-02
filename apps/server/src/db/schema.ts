@@ -173,6 +173,8 @@ export const ledger = pgTable(
     comboSnapshot: jsonb('combo_snapshot').$type<ComboSnapshot>(),
     /** Motivo obligatorio de los ajustes (REQ-001-89). */
     reason: text('reason'),
+    /** Venta del mostrador pagada con el saldo, o su anulación (REQ-005-21, REQ-005-23). */
+    saleId: uuid('sale_id').references((): AnyPgColumn => sales.id),
     actor: jsonb('actor').$type<Actor>().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   },
@@ -181,7 +183,7 @@ export const ledger = pgTable(
     check('ledger_wallet_check', sql`${t.wallet} in ('money', 'combo')`),
     check(
       'ledger_kind_check',
-      sql`${t.kind} in ('recharge', 'combo_purchase', 'consumption', 'adjustment', 'migration')`,
+      sql`${t.kind} in ('recharge', 'combo_purchase', 'consumption', 'adjustment', 'migration', 'sale')`,
     ),
     check('ledger_amount_nonzero', sql`${t.amount} <> 0`),
   ],
@@ -446,7 +448,7 @@ export const stockMovements = pgTable(
     /** Obligatorio en ajustes y mermas (REQ-005-10). */
     reason: text('reason'),
     /** La venta que lo causó, o la anulada si es su devolución. */
-    saleId: uuid('sale_id'),
+    saleId: uuid('sale_id').references((): AnyPgColumn => sales.id),
     actor: jsonb('actor').$type<Actor>().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   },
@@ -539,5 +541,70 @@ export const cashEntries = pgTable(
       sql`(${t.currency} = 'VES') = (${t.vesRate} is not null) and (${t.vesRate} is null or ${t.vesRate} > 0)`,
     ),
     check('cash_entries_balance_usd', sql`${t.method} <> 'balance' or ${t.currency} = 'USD'`),
+  ],
+);
+
+/**
+ * Ventas del mostrador (spec 005, REQ-005-20): una fila por venta. No se borran: anularla
+ * (REQ-005-23) la marca y escribe los movimientos inversos.
+ */
+export const sales = pgTable(
+  'sales',
+  {
+    id: uuid('id').primaryKey(),
+    shiftId: uuid('shift_id')
+      .notNull()
+      .references(() => cashShifts.id),
+    /** La cuenta que pagó con su saldo, si alguna (REQ-005-21). */
+    customerId: uuid('customer_id').references(() => customers.id),
+    /** Total en µUSD. */
+    totalMicros: bigint('total_micros', { mode: 'number' }).notNull(),
+    actor: jsonb('actor').$type<Actor>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    voidedAt: timestamp('voided_at', { withTimezone: true }),
+    voidReason: text('void_reason'),
+    voidedBy: jsonb('voided_by').$type<Actor>(),
+  },
+  (t) => [
+    index('sales_shift_created_idx').on(t.shiftId, t.createdAt),
+    check('sales_total_positive', sql`${t.totalMicros} > 0`),
+    check(
+      'sales_void_fields',
+      sql`(${t.voidedAt} is null) = (${t.voidReason} is null) and (${t.voidedAt} is null) = (${t.voidedBy} is null)`,
+    ),
+  ],
+);
+
+/**
+ * Líneas de una venta: un producto o un concepto, con la copia del nombre y del precio del
+ * momento (como los combos, ADR-0014).
+ */
+export const saleLines = pgTable(
+  'sale_lines',
+  {
+    id: uuid('id').primaryKey(),
+    saleId: uuid('sale_id')
+      .notNull()
+      .references(() => sales.id),
+    /** Orden de la línea dentro de la venta. */
+    position: integer('position').notNull(),
+    kind: text('kind').$type<'product' | 'concept'>().notNull(),
+    productId: uuid('product_id').references(() => products.id),
+    conceptId: uuid('concept_id').references(() => saleConcepts.id),
+    name: text('name').notNull(),
+    quantity: integer('quantity').notNull(),
+    unitPriceMicros: bigint('unit_price_micros', { mode: 'number' }).notNull(),
+    totalMicros: bigint('total_micros', { mode: 'number' }).notNull(),
+  },
+  (t) => [
+    uniqueIndex('sale_lines_sale_position_idx').on(t.saleId, t.position),
+    check(
+      'sale_lines_kind_fields',
+      sql`(${t.kind} = 'product' and ${t.productId} is not null and ${t.conceptId} is null)
+        or (${t.kind} = 'concept' and ${t.conceptId} is not null and ${t.productId} is null)`,
+    ),
+    check('sale_lines_quantity_positive', sql`${t.quantity} > 0`),
+    check('sale_lines_price_positive', sql`${t.unitPriceMicros} > 0`),
+    check('sale_lines_total', sql`${t.totalMicros} = ${t.quantity} * ${t.unitPriceMicros}`),
   ],
 );

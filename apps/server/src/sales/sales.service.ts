@@ -1,0 +1,293 @@
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  type Actor,
+  type CashMovement,
+  type CashShift,
+  lineTotal,
+  type Micros,
+  micros,
+  newId,
+  saleGroupTotals,
+  type SaleRequest,
+} from '@pope/shared';
+import { asc, eq, inArray, sql } from 'drizzle-orm';
+
+import { CashRegisterService, paymentsOf } from '../cash/cash-register.service.js';
+import { Clock } from '../common/clock.js';
+import { DATABASE, type Database } from '../db/database.js';
+import {
+  customers,
+  products,
+  saleConcepts,
+  saleLines,
+  sales,
+  stockMovements,
+} from '../db/schema.js';
+import { EventsService, type Transaction } from '../events/events.service.js';
+import { SettingsService } from '../settings/settings.service.js';
+import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
+
+/** Una línea ya resuelta: con el nombre y el precio del momento. */
+interface ResolvedLine {
+  kind: 'product' | 'concept';
+  id: string;
+  name: string;
+  quantity: number;
+  unitPriceMicros: Micros;
+  totalMicros: Micros;
+}
+
+/** "Doritos × 2, Impresiones × 12": cómo se lee una venta en la lista y en el reporte. */
+export function saleDescription(lines: readonly { name: string; quantity: number }[]): string {
+  return lines.map((line) => `${line.name} × ${String(line.quantity)}`).join(', ');
+}
+
+/**
+ * Ventas del mostrador (spec 005, REQ-005-20 a REQ-005-22, REQ-005-25): golosinas del
+ * inventario y conceptos sin inventario, pagadas con uno o varios métodos, también con el
+ * saldo de una cuenta. Todo en una transacción: la venta, sus líneas, el stock, el saldo, el
+ * registro de caja y el evento.
+ */
+@Injectable()
+export class SalesService {
+  constructor(
+    @Inject(DATABASE) private readonly db: Database,
+    private readonly events: EventsService,
+    private readonly cash: CashRegisterService,
+    private readonly wallet: WalletService,
+    private readonly settings: SettingsService,
+    private readonly clock: Clock,
+  ) {}
+
+  /**
+   * Registra una venta en la caja abierta y emite `sale.recorded`. Responde 409 si falta
+   * stock (salvo que el administrador lo permita, REQ-005-12), si un producto o concepto ya
+   * no está a la venta, si el saldo no alcanza o si hay que cobrar en Bs sin tasa.
+   */
+  async record(input: SaleRequest, shift: CashShift, actor: Actor): Promise<CashMovement> {
+    const allowNegative = (await this.settings.get()).allowNegativeStock === 1;
+    const saleId = await this.events.inTransaction(async (tx, emit) => {
+      const lines = await this.resolve(tx, input, allowNegative);
+      const total = lines.reduce((sum, line) => sum + line.totalMicros, 0);
+      const paid = input.payments.reduce((sum, payment) => sum + payment.usdMicros, 0);
+      if (paid !== total) {
+        throw new BadRequestException('Los pagos no suman el total de la venta');
+      }
+      const now = this.clock.now();
+      const id = newId();
+      await tx.insert(sales).values({
+        id,
+        shiftId: shift.id,
+        customerId: input.customerId,
+        totalMicros: total,
+        actor,
+        createdAt: now,
+      });
+      await tx.insert(saleLines).values(
+        lines.map((line, position) => ({
+          id: newId(),
+          saleId: id,
+          position,
+          kind: line.kind,
+          productId: line.kind === 'product' ? line.id : null,
+          conceptId: line.kind === 'concept' ? line.id : null,
+          name: line.name,
+          quantity: line.quantity,
+          unitPriceMicros: line.unitPriceMicros,
+          totalMicros: line.totalMicros,
+        })),
+      );
+      const productLines = lines.filter((line) => line.kind === 'product');
+      if (productLines.length > 0) {
+        await tx.insert(stockMovements).values(
+          productLines.map((line) => ({
+            id: newId(),
+            productId: line.id,
+            kind: 'sale' as const,
+            quantity: -line.quantity,
+            saleId: id,
+            actor,
+            createdAt: now,
+          })),
+        );
+      }
+      const customer = await this.chargeBalance(tx, input, id, actor);
+      const pieces = await this.cash.record(tx, {
+        shiftId: shift.id,
+        source: 'sale',
+        sourceId: id,
+        description: saleDescription(lines),
+        groups: saleGroupTotals(lines),
+        payments: input.payments,
+        actor,
+      });
+      emit({
+        type: 'sale.recorded',
+        version: 1,
+        actor,
+        payload: {
+          saleId: id,
+          shiftId: shift.id,
+          customer,
+          lines: lines.map((line) => ({
+            kind: line.kind,
+            id: line.id,
+            name: line.name,
+            quantity: line.quantity,
+            unitPrice: { micros: line.unitPriceMicros, currency: 'USD' },
+            total: { micros: line.totalMicros, currency: 'USD' },
+          })),
+          payments: paymentsOf(pieces),
+          total: { micros: micros(total), currency: 'USD' },
+        },
+      });
+      return id;
+    });
+    const list = await this.cash.list(shift.id);
+    const movement = list.movements.find((m) => m.source === 'sale' && m.sourceId === saleId);
+    if (!movement) {
+      throw new Error('No se pudo leer la venta registrada');
+    }
+    return movement;
+  }
+
+  /**
+   * Resuelve las líneas con el nombre y el precio del momento. Los productos se bloquean
+   * (en orden, para no cruzarse con otra venta) mientras se comprueba su stock.
+   */
+  private async resolve(
+    tx: Transaction,
+    input: SaleRequest,
+    allowNegative: boolean,
+  ): Promise<ResolvedLine[]> {
+    const productIds = [
+      ...new Set(input.lines.flatMap((l) => (l.kind === 'product' ? [l.productId] : []))),
+    ];
+    const conceptIds = [
+      ...new Set(input.lines.flatMap((l) => (l.kind === 'concept' ? [l.conceptId] : []))),
+    ];
+    const productRows =
+      productIds.length === 0
+        ? []
+        : await tx
+            .select()
+            .from(products)
+            .where(inArray(products.id, productIds))
+            .orderBy(asc(products.id))
+            .for('update');
+    const conceptRows =
+      conceptIds.length === 0
+        ? []
+        : await tx.select().from(saleConcepts).where(inArray(saleConcepts.id, conceptIds));
+    const productById = new Map(productRows.map((row) => [row.id, row]));
+    const conceptById = new Map(conceptRows.map((row) => [row.id, row]));
+
+    const lines = input.lines.map((line): ResolvedLine => {
+      if (line.kind === 'product') {
+        const product = productById.get(line.productId);
+        if (!product) {
+          throw new NotFoundException('No existe ese producto');
+        }
+        if (!product.active) {
+          throw new ConflictException(`${product.name} ya no está a la venta`);
+        }
+        const unitPriceMicros = micros(product.priceMicros);
+        return {
+          kind: 'product',
+          id: product.id,
+          name: product.name,
+          quantity: line.quantity,
+          unitPriceMicros,
+          totalMicros: lineTotal(line.quantity, unitPriceMicros),
+        };
+      }
+      const concept = conceptById.get(line.conceptId);
+      if (!concept) {
+        throw new NotFoundException('No existe ese concepto');
+      }
+      if (!concept.active) {
+        throw new ConflictException(`${concept.name} ya no está a la venta`);
+      }
+      return {
+        kind: 'concept',
+        id: concept.id,
+        name: concept.name,
+        quantity: line.quantity,
+        unitPriceMicros: line.unitPriceMicros,
+        totalMicros: lineTotal(line.quantity, line.unitPriceMicros),
+      };
+    });
+
+    if (!allowNegative && productIds.length > 0) {
+      const stock = await tx
+        .select({
+          productId: stockMovements.productId,
+          stock: sql<number>`sum(${stockMovements.quantity})`.mapWith(Number),
+        })
+        .from(stockMovements)
+        .where(inArray(stockMovements.productId, productIds))
+        .groupBy(stockMovements.productId);
+      const available = new Map(stock.map((row) => [row.productId, row.stock]));
+      for (const id of productIds) {
+        const wanted = lines
+          .filter((line) => line.kind === 'product' && line.id === id)
+          .reduce((sum, line) => sum + line.quantity, 0);
+        const left = available.get(id) ?? 0;
+        if (wanted > left) {
+          const name = productById.get(id)?.name ?? '';
+          throw new ConflictException(
+            `No hay suficiente ${name}: quedan ${String(Math.max(left, 0))}`,
+          );
+        }
+      }
+    }
+    return lines;
+  }
+
+  /**
+   * Cobra del saldo de la cuenta la parte pagada con saldo (REQ-005-21, CA-005-10), con un
+   * movimiento `sale` del ledger. Devuelve la cuenta para el evento, o `null` si no paga con
+   * saldo.
+   */
+  private async chargeBalance(
+    tx: Transaction,
+    input: SaleRequest,
+    saleId: string,
+    actor: Actor,
+  ): Promise<{ id: string; username: string } | null> {
+    const payment = input.payments.find((p) => p.method === 'balance');
+    if (!payment || input.customerId === null) {
+      return null;
+    }
+    const [customer] = await tx
+      .select()
+      .from(customers)
+      .where(eq(customers.id, input.customerId))
+      .for('update');
+    if (!customer) {
+      throw new NotFoundException('No existe ese cliente');
+    }
+    if (customer.status !== 'active') {
+      const state = customer.status === 'blocked' ? 'bloqueada' : 'desactivada';
+      throw new ConflictException(`La cuenta está ${state}: no puede pagar con su saldo`);
+    }
+    if ((await this.wallet.liveMoney(customer.id, tx)) < payment.usdMicros) {
+      throw new InsufficientBalanceError();
+    }
+    await this.wallet.post(tx, {
+      customerId: customer.id,
+      wallet: 'money',
+      amount: 0 - payment.usdMicros,
+      kind: 'sale',
+      saleId,
+      actor,
+    });
+    return { id: customer.id, username: customer.username };
+  }
+}

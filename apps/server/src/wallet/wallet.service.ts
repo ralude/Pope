@@ -17,7 +17,7 @@ import { and, eq, gte, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { customerBalances, customers, ledger } from '../db/schema.js';
+import { customerBalances, customers, ledger, sessions } from '../db/schema.js';
 import { CashRegisterService, deskPaymentOf } from '../cash/cash-register.service.js';
 import { requireCustomer } from '../customers/customers.service.js';
 import { EventsService, type Transaction } from '../events/events.service.js';
@@ -37,6 +37,8 @@ export interface LedgerEntry {
   paymentMethod?: PaymentMethod;
   comboSnapshot?: ComboSnapshot;
   reason?: string;
+  /** Venta del mostrador pagada con el saldo, o su anulación (spec 005). */
+  saleId?: string;
 }
 
 /** El movimiento dejaría el saldo en negativo: el sistema es solo prepago. */
@@ -135,6 +137,20 @@ export class WalletService {
     });
   }
 
+  /**
+   * Saldo en dinero que de verdad le queda a la cuenta: lo que la sesión en curso ya consumió
+   * aún no está en el ledger (se liquida al cerrar), así que se descuenta aquí. Es lo que se
+   * puede gastar ahora en una venta pagada con saldo (REQ-005-21).
+   */
+  async liveMoney(customerId: string, tx: Transaction): Promise<number> {
+    const [active] = await tx
+      .select({ charged: sessions.moneyChargedMicros })
+      .from(sessions)
+      .where(and(eq(sessions.customerId, customerId), eq(sessions.status, 'active')));
+    const { moneyMicros } = await this.balances(customerId, tx);
+    return moneyMicros - (active?.charged ?? 0);
+  }
+
   /** Saldos de la cuenta; ceros si nunca tuvo movimientos. */
   async balances(
     customerId: string,
@@ -196,6 +212,7 @@ export class WalletService {
       paymentMethod: entry.paymentMethod,
       comboSnapshot: entry.comboSnapshot,
       reason: entry.reason,
+      saleId: entry.saleId,
       actor: entry.actor,
       createdAt: this.clock.now(),
     });
