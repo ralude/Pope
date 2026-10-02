@@ -2,7 +2,7 @@
 
 - **Spec:** [spec.md](spec.md)
 - **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T03.
-- **Parte 2 · Inventario, ventas y caja:** Propuesto (2026-10-02).
+- **Parte 2 · Inventario, ventas y caja:** Aprobado (2026-10-02).
 - **ADRs que aplican:** ADR-0001 (local-first), ADR-0007 (el nodo decide), ADR-0008 (eventos),
   ADR-0011 (recursos), ADR-0015 (micro-unidades).
 - **ADRs nuevos que propone:** ninguno.

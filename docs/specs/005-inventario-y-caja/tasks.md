@@ -1,7 +1,7 @@
 # Tareas 005: Inventario y caja
 
 - **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T03.
-- **Parte 2 · Inventario, ventas y caja:** Propuesto (2026-10-02).
+- **Parte 2 · Inventario, ventas y caja:** Aprobado (2026-10-02).
 - **Plan:** [plan.md](plan.md)
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa. Cada

@@ -2,7 +2,7 @@
 
 - **Estado:** por partes.
   - **Parte 1 · Moneda y tasa de cambio** (REQ-005-30 a REQ-005-36): **Aprobada** (mantenedor, 2026-10-02), con su [plan](plan.md) y [tareas](tasks.md). En pausa tras T03, por decisión del mantenedor, para hacer antes la parte 2.
-  - **Parte 2 · Inventario, ventas y caja** (REQ-005-01 a REQ-005-05, REQ-005-10 a REQ-005-25, REQ-005-40 a REQ-005-53): redactada con el mantenedor y **Aprobada** el 2026-10-02, con su plan y sus tareas (Propuestos).
+  - **Parte 2 · Inventario, ventas y caja** (REQ-005-01 a REQ-005-05, REQ-005-10 a REQ-005-25, REQ-005-40 a REQ-005-53): redactada con el mantenedor y **Aprobada** el 2026-10-02, con su plan y sus tareas (también aprobados).
   - **Parte 3 · Conteo físico y pedidos desde el Shell** (REQ-005-50, REQ-005-60, REQ-005-61): borrador.
 - **Fecha:** 2026-09-25 · parte 2 redactada el 2026-10-02
 - **ADRs relacionados:** ADR-0001, ADR-0004, ADR-0008, ADR-0015

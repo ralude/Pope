@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · spec 005 parte 2 aprobada; su plan y sus tareas, propuestos
+**Última actualización:** 2026-10-02 · plan y tareas de la parte 2 de la spec 005 aprobados
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) por aprobar |
-| **Siguiente tarea** | **Esperando aprobación** del plan y las tareas de la parte 2 de la [spec 005](docs/specs/005-inventario-y-caja/tasks.md); aprobados, **T08: Diseño de Caja, Inventario y cierre**. Orden: T08–T17, T04, T18–T24, T05–T07 |
+| **Siguiente tarea** | **T08: Diseño de Caja, Inventario y cierre** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T08–T17, T04, T18–T24, T05–T07 |
 | **Progreso** | Spec 005: 3 / 24 tareas (parte 1: 3 / 7; parte 2: 0 / 17) |
 | **Bloqueos** | Ninguno |
 
