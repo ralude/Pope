@@ -61,7 +61,7 @@ hoja de papel se sigue usando de respaldo.
 - **REQ-005-20:** Pantalla de **Caja** como en SENET: a la izquierda, la **venta nueva** (golosinas con su foto, o un concepto con cantidad y precio); a la derecha, la **lista de movimientos** del turno. Una venta puede llevar varios productos y conceptos, y pagarse con uno o varios métodos.
 - **REQ-005-21:** Métodos de pago: **efectivo USD**, **efectivo Bs**, **pago móvil**, **punto de venta** y **saldo de la cuenta del cliente** (mantenedor, 2026-10-02: el saldo también paga golosinas y conceptos). El sistema no verifica pagos externos; los confirma el encargado (la verificación automática del pago móvil es la spec 007).
 - **REQ-005-22:** Cada pago registra su **moneda** y, si se paga en bolívares, la **tasa de cambio aplicada** (la vigente, parte 1).
-- **REQ-005-23:** Una venta solo la anula un administrador, con motivo. La anulación genera movimientos inversos (stock y caja); nunca se borra nada.
+- **REQ-005-23:** Una venta solo la anula un administrador, con motivo. La anulación genera movimientos inversos (stock y caja); nunca se borra nada. Solo se anulan ventas de la caja abierta: un cierre ya hecho no cambia, y un error de un día pasado se corrige con ajustes de stock y de saldo (mantenedor, 2026-10-02).
 - **REQ-005-24:** La **lista de movimientos** muestra todo lo cobrado en el turno, el más reciente arriba: ventas de productos y conceptos, recargas de saldo, sesiones temporales y combos vendidos en caja (spec 001), y las anulaciones. Cada fila lleva hora, qué fue, cantidad, importe, método y quién lo cobró.
 - **REQ-005-25:** Una venta pagada con saldo no entra en el dinero de la caja: aparece en la lista y en los reportes marcada "con saldo".
 
@@ -70,11 +70,11 @@ hoja de papel se sigue usando de respaldo.
 - **REQ-005-41:** Todas las ventas, recargas, sesiones temporales y combos cobrados en caja quedan asociados al turno abierto.
 - **REQ-005-42:** Al cerrar el turno, el encargado declara lo **contado por método**: efectivo USD, efectivo Bs, pago móvil y punto de venta. El sistema muestra lo esperado (fondo + lo cobrado en ese método) y la **diferencia** (mantenedor, 2026-10-02).
 - **REQ-005-43:** No se pueden registrar ventas sin un turno abierto.
-- **REQ-005-44:** Se trabaja con **un turno al día**: el reporte del turno es el del día (mantenedor, 2026-10-02).
+- **REQ-005-44:** Se trabaja con **un turno al día**: el reporte del turno es el del día (mantenedor, 2026-10-02). La caja es **del local**: solo hay una abierta, y mientras lo está, encargados y administradores cobran en ella, cada cobro con el nombre de quien lo hizo. La cierra quien la abrió o un administrador. Si se cierra por error, se puede abrir otra el mismo día, con su propio cierre (mantenedor, 2026-10-02).
 - **REQ-005-45:** Antes de cerrar, el panel pide confirmación ("¿Seguro que quieres cerrar la caja?"). Al confirmar, el cierre **descarga sí o sí** el reporte del encargado en PDF (REQ-005-51).
 
 **Reportes del cierre**
-- **REQ-005-51:** **Reporte del encargado**: PDF plano de **una sola página**, para imprimir o mandar al grupo de WhatsApp. Lleva fecha, encargado, hora de apertura y cierre, lo vendido por grupo (**horas de PC**, **golosinas** y **otras ventas**) y el total, y por método lo esperado, lo contado y la diferencia. Lo pagado con saldo aparece aparte.
+- **REQ-005-51:** **Reporte del encargado**: PDF plano de **una sola página**, para imprimir o mandar al grupo de WhatsApp. Lleva el **nombre del local** (un ajuste que cambia el administrador desde el panel; mantenedor, 2026-10-02), fecha, encargado, hora de apertura y cierre, lo vendido por grupo (**horas de PC**, **golosinas** y **otras ventas**) y el total, y por método lo esperado, lo contado y la diferencia. Lo pagado con saldo aparece aparte.
 - **REQ-005-52:** **Horas de PC** reúne las sesiones temporales, las recargas de saldo y los combos vendidos en caja; **golosinas**, los productos del inventario; **otras ventas**, los conceptos (mantenedor, 2026-10-02).
 - **REQ-005-53:** **Reporte detallado**, para el administrador y el dueño: además de lo del reporte del encargado, cada movimiento del turno, las anulaciones con su motivo y, por producto, el stock inicial, las entradas, las ventas, los ajustes, las mermas y el stock final. Se descarga en PDF desde el historial de cierres del panel, de cualquier día.
 

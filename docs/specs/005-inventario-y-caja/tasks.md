@@ -62,8 +62,8 @@ antes de seguir.
 
 ## Parte 2 · Inventario, ventas y caja
 
-**Orden** (plan, "Orden de implementación"): T08 a T17; después **T04** de la parte 1 (la tasa
-en el panel, necesaria para cobrar en bolívares); después T18 a T24; y al final T05 a T07 de la
+**Orden** (plan, "Orden de implementación"): T08 a T17 (T13a, la caja del local, antes del registro de caja); después **T04** de la parte 1 (la tasa
+en el panel, necesaria para cobrar en bolívares); después T18 a T24 (con T23b); y al final T05 a T07 de la
 parte 1.
 
 ### Fase 1: Diseño y contratos
@@ -116,7 +116,13 @@ parte 1.
   - **Verificar:** e2e: CA-005-01 (con la venta simulada por movimiento) y CA-005-08 sin la foto.
   - **Commit:** `feat(server): registra el stock con movimientos`
 
-- [ ] **T13: Registro de caja**
+- [ ] **T13a: Caja del local**
+  - **Cubre:** REQ-005-44
+  - **Hacer:** el turno pasa a ser del local: uno solo abierto (índice único parcial; la migración cierra los que sobren), encargados y administradores cobran en él, `GET /shifts/current` devuelve la caja abierta y `@RequiresOpenShift()` exige la del local.
+  - **Verificar:** e2e: un segundo turno se rechaza aunque lo pida otra persona; el administrador cobra en la caja que abrió la encargada; los e2e de la spec 001 siguen pasando.
+  - **Commit:** `feat(server): hace la caja de turno única en el local`
+
+- [ ] **T13b: Registro de caja**
   - **Cubre:** REQ-005-24, REQ-005-41
   - **Hacer:** tabla `cash_entries` con migración que pasa los cobros anteriores; recargas, sesiones temporales (abrir y añadir tiempo) y combos en caja escriben su fila en la misma transacción, en Bs con la tasa vigente si el método es de Bs (sin tasa, solo efectivo USD); `GET /shifts/current/entries`; mensaje `cash` del canal del panel.
   - **Verificar:** los e2e de la spec 001 siguen pasando; e2e nuevos de las filas de cada cobro y de la lista del turno.
@@ -134,11 +140,17 @@ parte 1.
   - **Verificar:** e2e: CA-005-11 y que no se puede anular dos veces.
   - **Commit:** `feat(server): permite anular una venta`
 
-- [ ] **T16: Turno con fondo y cierre con conteo**
+- [ ] **T16a: Caja con fondo y cierre con conteo**
   - **Cubre:** REQ-005-40, REQ-005-42, REQ-005-44
-  - **Hacer:** columnas nuevas de `cash_shifts`; abrir con el fondo; un solo turno abierto en el local; `GET /shifts/current/closing` y cerrar con lo contado, guardando lo esperado; eventos versión 2; `GET /shifts` para el historial.
-  - **Verificar:** e2e: CA-005-03, segundo turno rechazado, historial por rol.
+  - **Hacer:** columnas nuevas de `cash_shifts`; abrir con el fondo; `GET /shifts/current/closing` y cerrar con lo contado (quien abrió o un administrador), guardando lo esperado; eventos versión 2; `GET /shifts` para el historial.
+  - **Verificar:** e2e: CA-005-03, quién puede cerrar, historial por rol.
   - **Commit:** `feat(server): abre la caja con fondo y la cierra con conteo`
+
+- [ ] **T16b: Nombre del local**
+  - **Cubre:** REQ-005-51
+  - **Hacer:** ajuste de texto `localName` (por defecto "Pope") en `@pope/shared` y en el nodo; versión 2 de `setting.changed`, con valores de número o de texto.
+  - **Verificar:** tests de los esquemas y e2e de los ajustes (el administrador lo cambia y queda el evento v2).
+  - **Commit:** `feat(server): guarda el nombre del local como ajuste`
 
 - [ ] **T17: Reportes PDF**
   - **Cubre:** REQ-005-51, REQ-005-52, REQ-005-53
@@ -183,6 +195,12 @@ parte 1.
   - **Hacer:** pantalla `/cierres` para el administrador y el dueño, con los totales de cada día y los dos PDF.
   - **Verificar:** a mano, por rol.
   - **Commit:** `feat(panel): muestra el historial de cierres`
+
+- [ ] **T23b: Ajustes del local en el panel**
+  - **Cubre:** REQ-005-12, REQ-005-51
+  - **Hacer:** pantalla de ajustes para el administrador con el nombre del local y "Permitir vender sin stock" (el panel aún no tenía pantalla de ajustes).
+  - **Verificar:** a mano, cambiar los dos y verlos en el PDF y en la Caja.
+  - **Commit:** `feat(panel): permite cambiar los ajustes del local`
 
 ### Cierre de la parte 2
 

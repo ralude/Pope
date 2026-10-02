@@ -198,8 +198,20 @@ aún no se usa en el local.
 `allowNegativeStock` (0 o 1, apagado por defecto), que cambia el administrador como los de la
 spec 001. Vale para todos los productos.
 
-**Un turno al día** (REQ-005-44): el nodo ya impide dos turnos abiertos del mismo encargado;
-además impedirá abrir uno si hay otro abierto en el local.
+**Un turno al día y caja del local** (REQ-005-44, mantenedor, 2026-10-02): el turno deja de
+ser de cada miembro del personal y pasa a ser **del local**. Solo hay uno abierto (un índice
+único parcial lo asegura también ante peticiones simultáneas; la migración cierra los que
+hubiera de más, que solo existen en desarrollo). Mientras está abierto, encargados y
+administradores cobran en él y cada fila lleva su actor. Lo cierra quien lo abrió o un
+administrador. Cerrado, se puede abrir otro el mismo día. `GET /shifts/current` pasa a
+devolver la caja abierta del local.
+
+**Anular** (REQ-005-23): solo ventas de la caja abierta; la fila negativa va a esa misma caja.
+
+**Nombre del local** (REQ-005-51, mantenedor, 2026-10-02): ajuste de texto `localName` que
+cambia el administrador (por defecto "Pope"). Los ajustes hasta ahora solo eran números: el
+evento `setting.changed` pasa a la versión 2, con valores de número o de texto. El panel aún
+no tiene pantalla de ajustes: se añade, con este y con `allowNegativeStock`.
 
 ### Fotos de los productos (REQ-005-03, REQ-005-73)
 
@@ -218,6 +230,7 @@ además impedirá abrir uno si hay otro abierto en el local.
 | Método y ruta | Quién | Qué hace |
 |---|---|---|
 | `GET /products` | personal | Productos con su stock y si están bajo mínimo (REQ-005-13) |
+| `GET /products/:id/movements` | personal | Últimos movimientos de un producto (el detalle del diseño de Inventario) |
 | `POST /products`, `PATCH /products/:id` | administrador | Alta y edición (REQ-005-04) |
 | `PUT /products/:id/photo` · `GET /products/:id/photo` | administrador · personal | Foto (REQ-005-03) |
 | `POST /products/:id/stock` | entradas: encargado y administrador; ajustes y mermas: administrador | Movimiento de stock con motivo (REQ-005-10, REQ-005-14) |
@@ -226,10 +239,10 @@ además impedirá abrir uno si hay otro abierto en el local.
 | `POST /sales/:id/void` | administrador | Anulación con motivo (REQ-005-23) |
 | `GET /shifts/current/entries` | personal | Movimientos del turno, el más reciente arriba (REQ-005-24) |
 | `POST /shifts` (amplía) | encargado y administrador | Abre con el fondo inicial (REQ-005-40) |
-| `GET /shifts/current/closing` | quien tiene el turno | Lo esperado por método, para el cierre (REQ-005-42) |
-| `POST /shifts/current/close` (amplía) | quien tiene el turno | Cierra con lo contado; responde lo esperado y la diferencia |
+| `GET /shifts/current/closing` | encargado y administrador | Lo esperado por método, para el cierre (REQ-005-42) |
+| `POST /shifts/current/close` (amplía) | quien abrió la caja o un administrador | Cierra con lo contado; responde lo esperado y la diferencia |
 | `GET /shifts` | administrador y dueño | Historial de cierres (REQ-005-53) |
-| `GET /shifts/:id/report.pdf` | resumen: quien cerró, administrador y dueño; detallado (`?full=1`): administrador y dueño | Los dos PDF (REQ-005-51, REQ-005-53) |
+| `GET /shifts/:id/report.pdf` | resumen: quien abrió o cerró, administrador y dueño; detallado (`?full=1`): administrador y dueño | Los dos PDF (REQ-005-51, REQ-005-53) |
 
 **Canal del panel:** mensaje nuevo `{ type: 'cash' }` cuando cambia el registro de caja o el
 stock; las pantallas abiertas vuelven a pedir lo que muestran. Así dos pestañas del panel ven
