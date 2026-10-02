@@ -18,6 +18,8 @@ export interface PcFeed {
   status: ChannelStatus;
   /** Último estado que mandó el nodo; `null` hasta la primera respuesta. */
   state: StateMessage | null;
+  /** Cuándo llegó `state` (`performance.now()`), para contar el tiempo desde ahí (T47). */
+  stateAt: number;
   /** Error del nodo que no responde a ninguna petición (p. ej. PC no registrada). */
   problem: string | null;
 }
@@ -32,7 +34,12 @@ export function usePcChannel(channel: PcChannel): {
   feed: PcFeed;
   login: (username: string, password: string) => Promise<LoginResult>;
 } {
-  const [feed, setFeed] = useState<PcFeed>({ status: 'connecting', state: null, problem: null });
+  const [feed, setFeed] = useState<PcFeed>({
+    status: 'connecting',
+    state: null,
+    stateAt: 0,
+    problem: null,
+  });
   const pending = useRef<PendingLogin | null>(null);
 
   const settle = useCallback((result: LoginResult) => {
@@ -56,7 +63,7 @@ export function usePcChannel(channel: PcChannel): {
         if (reply) settle(reply);
       }
       if (message.type === 'state') {
-        setFeed((prev) => ({ ...prev, state: message, problem: null }));
+        setFeed((prev) => ({ ...prev, state: message, stateAt: performance.now(), problem: null }));
       } else if (message.type === 'sessionEnded') {
         setFeed((prev) => ({ ...prev, state: { type: 'state', status: 'locked' } }));
       } else if (message.type === 'error' && message.requestId === undefined) {

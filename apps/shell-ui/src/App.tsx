@@ -7,7 +7,15 @@ import { SessionScreen } from './session/SessionScreen.js';
 export function App({ channel, pcName }: { channel: PcChannel; pcName: string }) {
   const { feed, login } = usePcChannel(channel);
   if (feed.state?.status === 'active') {
-    return <SessionScreen session={feed.state.session} pcName={pcName} />;
+    return (
+      <SessionScreen
+        session={feed.state.session}
+        vesRate={feed.state.vesRate}
+        stateAt={feed.stateAt}
+        status={feed.status}
+        pcName={pcName}
+      />
+    );
   }
   return <LockScreen feed={feed} pcName={pcName} login={login} />;
 }

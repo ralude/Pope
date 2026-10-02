@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · T46 terminada: el Shell y su pantalla de login
+**Última actualización:** 2026-10-02 · T47 terminada: tiempo y saldos de la sesión en el Shell
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T47: Estado de la sesión** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 63 / 68 tareas · fase 9 de 9 (Shell) |
+| **Siguiente tarea** | **T48: Avisos y fin de sesión** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 64 / 68 tareas · fase 9 de 9 (Shell) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -46,7 +46,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 63 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 64 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -59,6 +59,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T47: la sesión del Shell muestra el tiempo total, las horas de combo y el saldo con su tiempo equivalente, con cuenta atrás local hecha con el motor de cobro de `@pope/shared` (coincide con el nodo en cada latido). Sin catálogo y con la pausa desactivada, como decidió el mantenedor (anotado en la spec 001).
 - **2026-10-02:** T46: nace `apps/shell-ui` (diseño "Shell Pope · Fase 9", con vidrio y desenfoques): pantalla de bloqueo con login y errores del nodo en español, y canal con el nodo detrás de `PcChannel` (en desarrollo, WebSocket directo que hace de agente). Antes, `docs(specs)`: en la spec 003 el técnico entra solo con usuario y contraseña, y se añade el fondo de bloqueo que sube el administrador.
 - **2026-10-02:** T45a: el nodo sirve el panel compilado en modo `local` (`@fastify/static`), con la API por delante y `index.html` para las rutas del panel; AGENTS.md explica cómo abrirlo. Fin de la fase 8.
 - **2026-10-02:** T45: pantalla Interrumpidas (pendientes con Restaurar y elección de PC libre, y respaldo por PC) y punto ámbar en el raíl con el número que envía el canal. Verificados CA-001-06 y CA-001-08 con el simulador.
@@ -68,4 +69,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T42: pantalla Tarifas: el administrador marca días y les pone un precio; el resto del personal la ve sin poder cambiarla. Verificado CA-001-20 a mano.
 - **2026-10-02:** T41: turno de caja en la barra superior (abrir y cerrar), diálogos de recarga y de venta de combo (con saldo o en caja) desde Clientes y desde el detalle de la PC; la sesión del mapa trae el id del cliente. Antes, las decisiones del mantenedor para el resto de la fase 8. Verificado a mano con el simulador.
 - **2026-10-02:** T40: pantalla Clientes del panel: lista con buscador (usuario, nombre o teléfono), alta con errores por campo, bloquear, desactivar o activar y quitar el bloqueo por intentos; el dueño solo consulta. Antes, `refactor(panel)`: el panel lateral y el diálogo pasan a ser compartidos. Verificado a mano contra PostgreSQL real.
-- **2026-10-01:** T39b: pestaña Organizar del mapa para el administrador con @dnd-kit/core: arrastrar con ratón o teclado, intercambiar, guardar o descartar. Verificado a mano: misma distribución al recargar y desde otra sesión.
