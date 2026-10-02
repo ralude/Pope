@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { actorSchema, domainEventSchema } from './events.js';
+import { actorSchema, domainEventSchema, shiftClosedV2EventSchema } from './events.js';
 
 // UUIDv7 de ejemplo: solo cambia el último carácter.
 const id = (n: number) => `0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a${n.toString(16).padStart(2, '0')}`;
@@ -373,6 +373,60 @@ describe('ventas (REQ-005-21, REQ-005-23)', () => {
   it('la anulación pide motivo', () => {
     const voided = examples['sale.voided'];
     expect(valid({ ...voided, payload: { ...voided.payload, reason: '' } })).toBe(false);
+  });
+});
+
+describe('turno de caja, versión 2 (REQ-005-40, REQ-005-42)', () => {
+  const opened = {
+    ...envelope('shift.opened', {
+      shiftId: SHIFT,
+      openingCash: { usd: usd(20_000_000), ves: { micros: 500_000_000, currency: 'VES' } },
+    }),
+    version: 2,
+  };
+  const method = (expected: number, counted: number, currency = 'VES') => ({
+    currency,
+    expected,
+    counted,
+    difference: counted - expected,
+  });
+  const methods = {
+    cash_usd: method(50_000_000, 45_000_000, 'USD'),
+    cash_ves: method(580_000_000, 580_000_000),
+    mobile_payment: method(160_000_000, 160_000_000),
+    pos: method(0, 0),
+  };
+  const closed = { ...envelope('shift.closed', { shiftId: SHIFT, methods }), version: 2 };
+  const withMethods = (patch: object) => ({
+    ...closed,
+    payload: { shiftId: SHIFT, methods: patch },
+  });
+
+  it('la apertura lleva el fondo en USD y en Bs', () => {
+    expect(domainEventSchema.parse(opened)).toEqual(opened);
+    expect(valid({ ...opened, payload: { shiftId: SHIFT } })).toBe(false);
+  });
+
+  it('CA-005-03: el cierre guarda la diferencia de −5 USD', () => {
+    expect(valid(closed)).toBe(true);
+    expect(shiftClosedV2EventSchema.parse(closed).payload.methods.cash_usd).toEqual({
+      currency: 'USD',
+      expected: 50_000_000,
+      counted: 45_000_000,
+      difference: -5_000_000,
+    });
+  });
+
+  it('el cierre lleva los cuatro métodos, y nada más', () => {
+    expect(valid(withMethods({ ...methods, pos: undefined }))).toBe(false);
+    expect(valid(withMethods({ ...methods, balance: method(0, 0) }))).toBe(false);
+    expect(valid(withMethods({ ...methods, pos: method(0, -1) }))).toBe(false);
+  });
+
+  it('la versión 1, sin fondo ni conteo, sigue siendo válida', () => {
+    expect(valid(examples['shift.opened'])).toBe(true);
+    expect(valid(examples['shift.closed'])).toBe(true);
+    expect(valid({ ...examples['shift.closed'], version: 3 })).toBe(false);
   });
 });
 

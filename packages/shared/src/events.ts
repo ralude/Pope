@@ -327,8 +327,9 @@ export const settingChangedEventSchema = event(
   z.strictObject({ key: settingKeySchema, from: z.number().int(), to: z.number().int() }),
 );
 
-// ─── Turno de caja (mínimo; lo amplía la spec 005) ──────────────────────────────────────
+// ─── Turno de caja ──────────────────────────────────────────────────────────────────────
 
+/** Versión 1 (spec 001): el turno mínimo, sin fondo. Sigue valiendo para los ya guardados. */
 export const shiftOpenedEventSchema = event(
   'shift.opened',
   1,
@@ -339,6 +340,42 @@ export const shiftClosedEventSchema = event(
   'shift.closed',
   1,
   z.strictObject({ shiftId: idSchema }),
+);
+
+const nonNegativeMicrosSchema = microsSchema.refine((m) => m >= 0, 'No puede ser negativo');
+
+/** Versión 2 (REQ-005-40): se abre con el fondo inicial en efectivo USD y en efectivo Bs. */
+export const shiftOpenedV2EventSchema = event(
+  'shift.opened',
+  2,
+  z.strictObject({
+    shiftId: idSchema,
+    openingCash: z.strictObject({
+      usd: z.strictObject({ micros: nonNegativeMicrosSchema, currency: z.literal('USD') }),
+      ves: z.strictObject({ micros: nonNegativeMicrosSchema, currency: z.literal('VES') }),
+    }),
+  }),
+);
+
+/**
+ * Versión 2 (REQ-005-42, CA-005-03): se cierra con lo esperado, lo contado y la diferencia
+ * de cada método de la caja, en la moneda en que se cuenta.
+ */
+export const shiftClosedV2EventSchema = event(
+  'shift.closed',
+  2,
+  z.strictObject({
+    shiftId: idSchema,
+    methods: z.record(
+      paymentMethodSchema,
+      z.strictObject({
+        currency: currencySchema,
+        expected: microsSchema,
+        counted: nonNegativeMicrosSchema,
+        difference: microsSchema,
+      }),
+    ),
+  }),
 );
 
 // ─── Mapa de PCs ────────────────────────────────────────────────────────────────────────
@@ -539,8 +576,9 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   sessionRemainingCorrectedEventSchema,
   sessionTimeAddedEventSchema,
   sessionRestoredEventSchema,
-  shiftOpenedEventSchema,
-  shiftClosedEventSchema,
+  // Dos versiones del mismo tipo: se distinguen por `version`.
+  z.discriminatedUnion('version', [shiftOpenedEventSchema, shiftOpenedV2EventSchema]),
+  z.discriminatedUnion('version', [shiftClosedEventSchema, shiftClosedV2EventSchema]),
   staffCreatedEventSchema,
   staffStatusChangedEventSchema,
   pcMapChangedEventSchema,

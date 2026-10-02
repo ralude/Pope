@@ -89,11 +89,12 @@ parte 1.
   - **Commit:** `feat(shared): añade los contratos de las ventas y el registro de caja`
   - **Decidido al implementarla:** módulos `cash.ts` (registro de caja) y `sale.ts` (venta). El método "saldo" es `balance`, añadido a los cuatro de la caja en `cashMethodSchema`; `methodCurrency` dice en qué moneda se cobra y se cuenta cada uno. Los pagos de `POST /sales` van por su importe en USD y el nodo pone la tasa vigente; que sumen el total lo comprueba el nodo. `splitPayments` reparte los pagos entre los grupos en orden y calcula el Bs una vez por pago (la última fila se queda el resto, para no perder un céntimo). `cashTotals` deja lo pagado con saldo aparte, fuera de los grupos y del total (REQ-005-25). La lista del turno (`GET /shifts/current/entries`) devuelve movimientos ya juntados, con su descripción escrita por el nodo (que también escribe el PDF) y los totales. `sale.voided` lleva el turno al que va la fila negativa.
 
-- [ ] **T09c: Contratos de la apertura y el cierre del turno**
+- [x] **T09c: Contratos de la apertura y el cierre del turno**
   - **Cubre:** REQ-005-40, REQ-005-42, REQ-005-44
   - **Hacer:** en `@pope/shared`, los esquemas del fondo inicial, lo esperado y lo contado al cerrar y el historial de cierres; la versión 2 de `shift.opened` y `shift.closed`; funciones puras: lo esperado por método y la diferencia.
   - **Verificar:** tests unitarios (incluido CA-005-03) y que los eventos de versión 1 siguen siendo válidos.
   - **Commit:** `feat(shared): añade los contratos de la apertura y el cierre del turno`
+  - **Decidido al implementarla:** en `shift.ts`. El fondo (`openingCashSchema`) es el cuerpo de `POST /shifts`. Lo esperado, lo contado y la diferencia van por método (`cashByMethodSchema`, con los cuatro métodos de la caja y ninguno más), cada uno en la moneda en que se cuenta. `expectedCash` deja fuera lo pagado con saldo y los cobros antiguos de un método de Bs guardados en USD. El historial y la respuesta del cierre usan `shiftSummarySchema`. En la unión de eventos, cada tipo con dos versiones es una unión por `version`; la versión 1 sigue siendo válida.
 
 ### Fase 2: Nodo
 
