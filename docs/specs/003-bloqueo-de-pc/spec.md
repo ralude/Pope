@@ -37,8 +37,9 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-11:** El nodo rechaza agentes no registrados o con credencial revocada.
 
 **Control remoto desde el panel**
-- **REQ-003-20:** Comandos: bloquear, abrir sesión, cerrar sesión, enviar mensaje, reiniciar y apagar.
-- **REQ-003-21:** El panel muestra en vivo el estado de cada PC: apagada o sin conexión, libre, en uso, en pausa o en mantenimiento.
+- **REQ-003-20:** Comandos: bloquear, abrir sesión, cerrar sesión, enviar mensaje, reiniciar, apagar, encender (REQ-003-22) e iniciar como administrador (REQ-003-43). Los usan el encargado y el administrador; el dueño solo mira (decisión del mantenedor, 2026-10-02).
+- **REQ-003-21:** El panel muestra en vivo el estado de cada PC con estos colores: apagada o sin conexión en **gris**, libre en **verde**, en uso con cuenta en **celeste**, sesión temporal en **ámbar** y en mantenimiento (modo administrador) en **rojo**. El color de "en pausa" se decide con la spec 002. (Colores del mantenedor, 2026-10-02; los de los estados que ya existen se aplicaron en el panel antes de esta spec.)
+- **REQ-003-22:** **Encender por red (Wake-on-LAN).** Desde el panel se enciende una PC apagada: el nodo envía el "paquete mágico" por la LAN a la dirección MAC de su tarjeta de red, que el agente registra al instalarse (REQ-003-50). Requiere tener Wake-on-LAN activado en la BIOS y en la tarjeta de red (PCIe). Si la PC no se conecta al nodo en unos minutos, el panel lo indica.
 
 **Protección**
 - **REQ-003-30:** Mientras Pope esté en primer plano o bloqueado, se inhiben la tecla Windows, Alt+Tab, Ctrl+Esc y Alt+F4.
@@ -49,6 +50,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 **Mantenimiento**
 - **REQ-003-40:** Un técnico puede entrar en **modo mantenimiento** desde la pantalla de bloqueo ("Usuario técnico") **solo con su usuario y contraseña del personal**, sin código adicional. Así accede al escritorio de Windows con permisos de administrador. (Cambiado el 2026-10-02 por el mantenedor: antes pedía además un código temporal generado en el panel.)
 - **REQ-003-41:** Entrar y salir del modo mantenimiento genera eventos con actor y duración, visibles para el dueño.
+- **REQ-003-43:** **Iniciar como administrador desde el panel.** El encargado o el administrador pone una PC en modo mantenimiento sin escribir nada en ella: la PC muestra el escritorio de Windows con permisos de administrador, como en REQ-003-40. Queda registrado igual (REQ-003-41, con quién lo inició desde el panel) y el mapa la pinta en rojo. Termina con "Terminar y bloquear" en la PC o desde el panel. (Decisión del mantenedor, 2026-10-02.)
 - **REQ-003-42:** Durante el mantenimiento, Pope **no le muestra al técnico el tiempo que lleva**: solo una barra discreta con la PC, quién entró y el botón "Terminar y bloquear". La duración se sigue registrando en el evento de salida (REQ-003-41).
 
 **Instalación**
@@ -103,6 +105,14 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
   - **Dado** un técnico con usuario y contraseña del personal válidos
   - **Cuando** entra en mantenimiento
   - **Entonces** ve el escritorio de Windows y el panel muestra "PC 04 en mantenimiento por Luis".
+- **CA-003-06** (REQ-003-22)
+  - **Dado** la PC 07 apagada, con Wake-on-LAN activado y su MAC registrada
+  - **Cuando** el encargado pulsa "Encender" en el panel
+  - **Entonces** la PC arranca, se conecta al nodo y el mapa pasa de gris a verde.
+- **CA-003-07** (REQ-003-43, REQ-003-21)
+  - **Dado** la PC 04 libre
+  - **Cuando** el encargado pulsa "Iniciar como administrador" en el panel
+  - **Entonces** la PC muestra el escritorio de Windows, el mapa la pinta en rojo y queda el evento con el encargado como actor.
 - **CA-003-04** (REQ-003-70, REQ-003-72, REQ-003-73)
   - **Dado** 10 PCs en la pantalla de bloqueo y 2 apagadas
   - **Cuando** el administrador sube un fondo nuevo desde el panel
@@ -122,7 +132,9 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 
 - [ ] ¿Qué versión y edición de Windows tienen las PCs del local?
 - [ ] ¿Cuántas PCs hay, y tienen congelador de disco (Deep Freeze o similar)?
-- [ ] ¿Wake-on-LAN para encender las PCs desde el panel?
+- [x] ¿Wake-on-LAN para encender las PCs desde el panel? **Resuelta (mantenedor, 2026-10-02): sí** (REQ-003-22). Falta comprobar en el local que las placas y tarjetas de red lo admiten y activarlo en la BIOS.
+- [ ] **Modo administrador remoto con una sesión abierta (REQ-003-43).** ¿Qué pasa si la PC tiene un cliente dentro? Propuesta: solo se permite con la PC libre; con sesión, el panel pide cerrarla antes (y en una temporal se pierde el tiempo, REQ-001-69).
+- [ ] **Placeholders en el panel.** Hasta esta spec, el detalle de la PC muestra "Encender", "Reiniciar", "Apagar" e "Iniciar como administrador" desactivados ("Próximamente"), por decisión del mantenedor (2026-10-02).
 - [ ] **WebView2 en Windows 10 (ADR-0005).** No viene de serie en Windows 10: llegó después por Windows Update y puede faltar (PCs sin actualizar, LTSC, WSUS, congelador de disco). Propuesta: el instalador (REQ-003-50) comprueba si está y, si no, lo instala con el instalador completo sin conexión de Microsoft (~150 MB). Decidir también si se usa la versión "Evergreen" (se actualiza sola) o una versión fija empaquetada con Pope, y confirmar hasta cuándo da Microsoft soporte a WebView2 en Windows 10. Depende de la pregunta anterior sobre la versión y edición de Windows de las PCs.
 
 Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La cadena prevista es: `shell-ui` ⇄ puente de WebView2 ⇄ `Pope.ShellHost` ⇄ named pipe ⇄ `Pope.Agent` ⇄ WebSocket ⇄ nodo, con los mensajes de `packages/shared` (T08 de la spec 001) reenviados sin cambios.
