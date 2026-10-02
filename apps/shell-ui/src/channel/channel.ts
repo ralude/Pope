@@ -5,7 +5,10 @@
 import type { NodeToPcMessage, PcToNodeMessage } from '@pope/shared';
 
 /** Peticiones que hace el Shell. `hello` y los latidos son cosa del agente. */
-export type ShellRequest = Extract<PcToNodeMessage, { type: 'login' | 'logout' | 'buyCombo' }>;
+export type ShellRequest = Extract<
+  PcToNodeMessage,
+  { type: 'login' | 'logout' | 'buyCombo' | 'listCombos' }
+>;
 
 /**
  * `connecting`: aún no hay respuesta del nodo; `online`: el nodo ya contestó con el estado de

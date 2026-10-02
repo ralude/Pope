@@ -1,5 +1,6 @@
 // Conecta el canal con las pantallas del Shell: el estado de la PC (`feed.ts`) y las
-// peticiones que esperan respuesta, como el login.
+// peticiones que esperan respuesta (login, combos), cada una con su `requestId`.
+import type { NodeToPcMessage } from '@pope/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
@@ -9,32 +10,42 @@ import {
   type LoginResult,
   NO_REPLY_MESSAGE,
 } from '../lock/login.js';
-import type { PcChannel } from './channel.js';
+import { type BuyResult, buyReply, type CombosResult, combosReply } from '../session/combos.js';
+import type { PcChannel, ShellRequest } from './channel.js';
 import { applyEvent, dismissEnded, dismissWarning, INITIAL_FEED, type PcFeed } from './feed.js';
 
-interface PendingLogin {
-  requestId: string;
-  resolve: (result: LoginResult) => void;
+/** Petición enviada al nodo que aún no tiene respuesta. */
+interface Pending {
+  /** Prueba si el mensaje la responde; si es así, la resuelve y devuelve `true`. */
+  answer: (message: NodeToPcMessage) => boolean;
+  /** La resuelve como fallida con ese texto. */
+  fail: (text: string) => void;
   timer: ReturnType<typeof setTimeout>;
+}
+
+/** Petición fallida, con el texto para el cliente. */
+interface Failure {
+  ok: false;
+  message: string;
 }
 
 export function usePcChannel(channel: PcChannel): {
   feed: PcFeed;
   login: (username: string, password: string) => Promise<LoginResult>;
+  /** Pide al nodo los combos a la venta (T49). */
+  listCombos: () => Promise<CombosResult>;
+  /** Compra un combo con el saldo (T49, REQ-001-85). */
+  buyCombo: (comboId: string) => Promise<BuyResult>;
   /** El cliente cierra el aviso de fin de tiempo. */
   closeWarning: () => void;
   /** Se deja de mostrar "Tu sesión terminó" y vuelve el bloqueo. */
   closeEnded: () => void;
 } {
   const [feed, setFeed] = useState<PcFeed>(INITIAL_FEED);
-  const pending = useRef<PendingLogin | null>(null);
+  const pending = useRef(new Map<string, Pending>());
 
-  const settle = useCallback((result: LoginResult) => {
-    const current = pending.current;
-    if (!current) return;
-    clearTimeout(current.timer);
-    pending.current = null;
-    current.resolve(result);
+  const failAll = useCallback((text: string) => {
+    for (const request of [...pending.current.values()]) request.fail(text);
   }, []);
 
   useEffect(() => {
@@ -42,40 +53,72 @@ export function usePcChannel(channel: PcChannel): {
       const now = performance.now();
       setFeed((prev) => applyEvent(prev, event, now));
       if (event.kind === 'status') {
-        if (event.status === 'offline') settle({ ok: false, message: CONNECTION_LOST_MESSAGE });
-      } else if (pending.current) {
-        const reply = loginReply(event.message, pending.current.requestId);
-        if (reply) settle(reply);
+        if (event.status === 'offline') failAll(CONNECTION_LOST_MESSAGE);
+        return;
       }
+      for (const request of [...pending.current.values()]) request.answer(event.message);
     });
     return () => {
       channel.stop();
-      settle({ ok: false, message: CONNECTION_LOST_MESSAGE });
+      failAll(CONNECTION_LOST_MESSAGE);
     };
-  }, [channel, settle]);
+  }, [channel, failAll]);
+
+  /**
+   * Envía `build(requestId)` y espera el mensaje que `match` reconozca como su respuesta. Si
+   * no hay conexión, se corta o el nodo no contesta en 15 s, falla con un texto para el cliente.
+   */
+  const request = useCallback(
+    <T>(
+      build: (requestId: string) => ShellRequest,
+      match: (message: NodeToPcMessage, requestId: string) => T | null,
+    ) =>
+      new Promise<T | Failure>((resolve) => {
+        const requestId = crypto.randomUUID();
+        const finish = (result: T | Failure) => {
+          const current = pending.current.get(requestId);
+          if (!current) return;
+          clearTimeout(current.timer);
+          pending.current.delete(requestId);
+          resolve(result);
+        };
+        // Se apunta antes de enviar, por si la respuesta llegara enseguida.
+        pending.current.set(requestId, {
+          answer: (message) => {
+            const reply = match(message, requestId);
+            if (reply === null) return false;
+            finish(reply);
+            return true;
+          },
+          fail: (text) => {
+            finish({ ok: false, message: text });
+          },
+          timer: setTimeout(() => {
+            finish({ ok: false, message: NO_REPLY_MESSAGE });
+          }, LOGIN_TIMEOUT_MS),
+        });
+        if (!channel.send(build(requestId)))
+          finish({ ok: false, message: CONNECTION_LOST_MESSAGE });
+      }),
+    [channel],
+  );
 
   const login = useCallback(
     (username: string, password: string) =>
-      new Promise<LoginResult>((resolve) => {
-        if (pending.current) {
-          resolve({ ok: false, message: 'Ya se está iniciando sesión.' });
-          return;
-        }
-        const requestId = crypto.randomUUID();
-        const timer = setTimeout(() => {
-          settle({ ok: false, message: NO_REPLY_MESSAGE });
-        }, LOGIN_TIMEOUT_MS);
-        // Se apunta antes de enviar, por si la respuesta llegara enseguida.
-        pending.current = { requestId, resolve, timer };
-        const sent = channel.send({
-          type: 'login',
-          requestId,
-          username: username.trim(),
-          password,
-        });
-        if (!sent) settle({ ok: false, message: CONNECTION_LOST_MESSAGE });
-      }),
-    [channel, settle],
+      request(
+        (requestId) => ({ type: 'login', requestId, username: username.trim(), password }),
+        loginReply,
+      ),
+    [request],
+  );
+  const listCombos = useCallback(
+    () => request((requestId) => ({ type: 'listCombos', requestId }), combosReply),
+    [request],
+  );
+  const buyCombo = useCallback(
+    (comboId: string) =>
+      request((requestId) => ({ type: 'buyCombo', requestId, comboId }), buyReply),
+    [request],
   );
 
   const closeWarning = useCallback(() => {
@@ -85,5 +128,5 @@ export function usePcChannel(channel: PcChannel): {
     setFeed(dismissEnded);
   }, []);
 
-  return { feed, login, closeWarning, closeEnded };
+  return { feed, login, listCombos, buyCombo, closeWarning, closeEnded };
 }

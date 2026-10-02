@@ -4,10 +4,13 @@ export function WarningToast({
   minutesLeft,
   temporary,
   onClose,
+  onBuyCombo,
 }: {
   minutesLeft: number;
   temporary: boolean;
   onClose: () => void;
+  /** Abre la compra de combos (T49); `null` en las sesiones temporales, que no usan combos. */
+  onBuyCombo: (() => void) | null;
 }) {
   const title =
     minutesLeft === 1 ? 'Te queda 1 minuto' : `Te quedan ${String(minutesLeft)} minutos`;
@@ -40,6 +43,11 @@ export function WarningToast({
         <div className="toast-title">{title}</div>
         <div className="toast-text">{text}</div>
         <div className="toast-actions">
+          {onBuyCombo && (
+            <button type="button" className="btn-primary btn-small" onClick={onBuyCombo}>
+              Comprar combo
+            </button>
+          )}
           <button type="button" className="btn-ghost btn-small" onClick={onClose}>
             Entendido
           </button>

@@ -803,3 +803,183 @@ input {
   background: #a855f7;
   transition: width 1s linear;
 }
+
+/* ─── Comprar combo (T49) ────────────────────────────────────────────────────────────── */
+
+.buy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.buy-hint {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.btn-wide {
+  padding: 0 24px;
+}
+
+.btn-primary.btn-small {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+.toast-ok {
+  width: 500px;
+  align-items: center;
+  background: rgba(16, 38, 24, 0.8);
+  border: 1px solid #2f8a45;
+  color: #d7f5df;
+}
+
+.toast-ok .toast-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--green);
+  color: #0b1a0f;
+}
+
+.toast-ok .toast-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.dialog-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 7, 10, 0.55);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  width: 600px;
+  padding: 30px;
+  background: rgba(24, 26, 33, 0.88);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dialog-head h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.dialog-text {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--soft);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.combo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.combo-option {
+  min-height: 68px;
+  padding: 0 18px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(6, 7, 10, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.combo-option:hover:not(:disabled) {
+  border-color: #6b7380;
+}
+
+.combo-option[aria-pressed='true'] {
+  border-color: #a855f7;
+  background: rgba(142, 36, 201, 0.24);
+}
+
+.combo-option:disabled {
+  color: #8a929d;
+  cursor: default;
+}
+
+.combo-text {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.combo-name {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.combo-detail {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.combo-detail.short {
+  color: var(--amber-text);
+}
+
+.combo-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  font-size: 19px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.combo-bs {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.combo-summary {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(6, 7, 10, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+.combo-summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}

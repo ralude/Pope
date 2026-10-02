@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react';
 
 import type { ChannelStatus } from '../channel/channel.js';
 import { Wallpaper } from '../lock/Wallpaper.js';
+import { ComboDialog } from './ComboDialog.js';
+import type { BuyResult, CombosResult } from './combos.js';
 import { formatTimeLeft, warningMinutes } from './format.js';
 import { liveSession } from './live.js';
 import { WarningToast } from './WarningToast.js';
@@ -42,6 +44,21 @@ function useElapsed(since: number): number {
   return Math.max(0, (now - since) / 1000);
 }
 
+/** Aviso breve de confirmación ("Listo: sumaste…"), que se quita solo a los 4 s. */
+function useNotice(): { text: string | null; show: (text: string) => void } {
+  const [text, setText] = useState<string | null>(null);
+  useEffect(() => {
+    if (text === null) return;
+    const timer = setTimeout(() => {
+      setText(null);
+    }, 4000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [text]);
+  return { text, show: setText };
+}
+
 export function SessionScreen({
   session,
   vesRate,
@@ -50,6 +67,8 @@ export function SessionScreen({
   pcName,
   warning,
   onCloseWarning,
+  listCombos,
+  buyCombo,
 }: {
   session: SessionState;
   vesRate: VesRate | null;
@@ -59,11 +78,20 @@ export function SessionScreen({
   /** Aviso de fin de tiempo que mandó el nodo (T48), si hay uno abierto. */
   warning: WarningMinutes | null;
   onCloseWarning: () => void;
+  listCombos: () => Promise<CombosResult>;
+  buyCombo: (comboId: string) => Promise<BuyResult>;
 }) {
   const live = liveSession(session, useElapsed(stateAt));
   const remaining = live.remainingSeconds;
   const endsAt = CLOCK.format(new Date(Date.now() + remaining * 1000));
   const who = session.kind === 'account' ? session.username : session.name;
+  const [buying, setBuying] = useState(false);
+  const notice = useNotice();
+
+  const openCombos = () => {
+    onCloseWarning();
+    setBuying(true);
+  };
 
   return (
     <div className="screen session">
@@ -199,6 +227,13 @@ export function SessionScreen({
                 {vesRate !== null &&
                   ` (${formatBolivares(session.ratePerHour.micros, vesRate, '/h')})`}
               </div>
+
+              <div className="buy">
+                <button type="button" className="btn-primary" onClick={openCombos}>
+                  Comprar combo
+                </button>
+                <div className="buy-hint">Para recargar saldo, acércate al mostrador.</div>
+              </div>
             </>
           )}
 
@@ -223,6 +258,45 @@ export function SessionScreen({
           minutesLeft={warningMinutes(warning, remaining)}
           temporary={session.kind === 'temporary'}
           onClose={onCloseWarning}
+          onBuyCombo={session.kind === 'account' ? openCombos : null}
+        />
+      )}
+
+      {notice.text !== null && (
+        <div role="status" className="toast toast-ok">
+          <div className="toast-icon">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M4.5 10.5l3.5 3.5 7.5-8" />
+            </svg>
+          </div>
+          <div className="toast-title">{notice.text}</div>
+        </div>
+      )}
+
+      {buying && live.kind === 'account' && (
+        <ComboDialog
+          moneyMicros={live.moneyMicros}
+          comboSeconds={live.comboSeconds}
+          vesRate={vesRate}
+          listCombos={listCombos}
+          buyCombo={buyCombo}
+          onClose={() => {
+            setBuying(false);
+          }}
+          onBought={(text) => {
+            setBuying(false);
+            notice.show(text);
+          }}
         />
       )}
     </div>

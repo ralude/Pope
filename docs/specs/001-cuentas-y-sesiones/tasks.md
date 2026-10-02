@@ -497,11 +497,12 @@ antes de seguir.
   - **Commit:** `feat(shell-ui): avisa del fin del tiempo`
   - **Decidido al implementarla:** los avisos son los `warning` que manda el nodo; el Shell los muestra arriba hasta "Entendido", o hasta que cambie la sesión o el restante vuelva a subir (compra de tiempo). El aviso dice los minutos del nodo, pero nunca más de los que quedan: tras reiniciarse, el nodo reenvía el de 5 min aunque queden 3. "Tu sesión terminó" sale con cualquier motivo menos cuando la cierra el cliente, y vuelve sola al bloqueo a los 10 s (decisión del mantenedor). Verificado a mano en Chrome con una sesión temporal de 6 min abierta desde el panel (en lugar de saldo bajo, que no había en la base de desarrollo): aviso de 5 min a las 11:13:48, de 1 min a las 11:17:48, fin a las 11:18:48 y bloqueo a las 11:18:58. A mitad de prueba se paró el nodo: el Shell siguió contando, reconectó solo dentro de la gracia de latidos y la sesión continuó.
 
-- [ ] **T49: Comprar combo desde el Shell**
+- [x] **T49: Comprar combo desde el Shell**
   - **Cubre:** REQ-001-85
   - **Hacer:** lista de combos activos y confirmación con el saldo resultante.
   - **Verificar:** CA-001-17 a mano.
   - **Commit:** `feat(shell-ui): permite comprar combos con el saldo`
+  - **Decidido al implementarla:** el protocolo no tenía cómo listar combos: se añadió `listCombos`/`combos` (decisión del mantenedor) y el `state` que responde a `buyCombo` lleva su `requestId`, en un commit `feat(server)` previo. El diálogo se abre desde el panel de la sesión y desde el aviso de fin de tiempo (solo con cuenta); pide los combos al abrirse, elige el de más horas que alcanza a pagar, desactiva los que no ("Saldo insuficiente") y muestra cómo quedan saldo y horas con los valores en vivo. El nodo tiene la última palabra: si rechaza la compra, el motivo sale en el diálogo. El gancho del canal pasa a admitir cualquier petición con `requestId` (login, combos y compra). Verificado a mano en Chrome con `sim01`: con 5,96 USD el combo de 20 h sale sin saldo; dos recargas desde el panel (10 y 5 USD) se ven en el diálogo abierto al momento; con 20,96 USD compra el «Combo 20 horas» y queda en 0,96 USD y 21 h de combo, con las dos filas en el ledger y el evento `combo.purchased` (equivalente a CA-001-17, que también cubre el test e2e del servidor).
 
 - [ ] **T50: Cerrar sesión**
   - **Cubre:** REQ-001-26, REQ-001-69

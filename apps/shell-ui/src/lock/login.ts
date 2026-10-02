@@ -43,6 +43,6 @@ export function loginReply(message: NodeToPcMessage, requestId: string): LoginRe
 }
 
 /** Los mensajes del nodo no llevan punto final; en el Shell se muestran como frases. */
-function withPeriod(text: string): string {
+export function withPeriod(text: string): string {
   return /[.!?…]$/.test(text) ? text : `${text}.`;
 }
