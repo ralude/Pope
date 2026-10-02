@@ -1,6 +1,7 @@
 // Estado de las PCs para el mapa del panel (T38a, REQ-001-31) y canal en vivo del panel.
 import { z } from 'zod';
 
+import { exchangeRateStatusSchema } from './exchange-rate.js';
 import { microsSchema } from './money.js';
 import { idSchema, sessionKindSchema, utcInstantSchema } from './session.js';
 
@@ -119,10 +120,12 @@ export const PANEL_UNAUTHORIZED_CLOSE = 4401;
  * Mensajes del nodo al panel por el canal en vivo. `pcs` lleva el mapa completo: se envía al
  * conectar y cada vez que algo cambia, como mucho una vez por segundo. `interrupted` lleva
  * cuántas sesiones interrumpidas hay pendientes de restaurar (REQ-001-66), para el aviso del
- * raíl: se envía al conectar y cuando cambia.
+ * raíl: se envía al conectar y cuando cambia. `exchangeRate` lleva la tasa vigente y si está
+ * desactualizada (REQ-005-36): se envía al conectar, al cambiar la tasa y al cambiar de día.
  */
 export const panelMessageSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pcs'), map: pcMapSchema }),
   z.object({ type: z.literal('interrupted'), pending: z.int().nonnegative() }),
+  exchangeRateStatusSchema.extend({ type: z.literal('exchangeRate') }),
 ]);
 export type PanelMessage = z.infer<typeof panelMessageSchema>;

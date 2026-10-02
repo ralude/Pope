@@ -136,6 +136,12 @@ const examples = {
       { pc: { id: id(8), name: 'PC 02' }, from: { row: 0, col: 4 }, to: { row: 1, col: 0 } },
     ],
   }),
+  // Spec 005 (REQ-005-34): tasa manual escrita por Ana.
+  'exchange_rate.set': envelope('exchange_rate.set', {
+    vesPerUsd: 40_000_000,
+    effectiveDate: '2026-09-25',
+    source: 'manual',
+  }),
 };
 
 describe('eventos de auditoría (REQ-001-30, ADR-0008)', () => {

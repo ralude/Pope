@@ -11,7 +11,8 @@
 import { z } from 'zod';
 
 import { customerStatusSchema } from './customer.js';
-import { microsSchema } from './money.js';
+import { exchangeRateSourceSchema, localDateSchema } from './exchange-rate.js';
+import { microsSchema, vesRateSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
 import { settingKeySchema } from './settings.js';
 import { staffRoleSchema, staffStatusSchema } from './staff.js';
@@ -365,6 +366,22 @@ export const pcMapChangedEventSchema = event(
   }),
 );
 
+// ─── Tasa de cambio (spec 005) ──────────────────────────────────────────────────────────
+
+/**
+ * Se guardó una tasa de cambio (REQ-005-33, REQ-005-34): a mano desde el panel, con el
+ * personal como actor, o del BCV (parte 2), con el sistema como actor.
+ */
+export const exchangeRateSetEventSchema = event(
+  'exchange_rate.set',
+  1,
+  z.strictObject({
+    vesPerUsd: vesRateSchema,
+    effectiveDate: localDateSchema,
+    source: exchangeRateSourceSchema,
+  }),
+);
+
 // ─── Unión de todos los eventos ─────────────────────────────────────────────────────────
 
 export const domainEventSchema = z.discriminatedUnion('type', [
@@ -388,6 +405,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   staffCreatedEventSchema,
   staffStatusChangedEventSchema,
   pcMapChangedEventSchema,
+  exchangeRateSetEventSchema,
 ]);
 export type DomainEvent = z.infer<typeof domainEventSchema>;
 export type DomainEventType = DomainEvent['type'];

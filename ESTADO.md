@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · aprobadas la tasa manual (005, parte 1) y la pausa (002)
+**Última actualización:** 2026-10-02 · T01 (005) terminada: contratos de la tasa
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · parte 1: tasa de cambio manual](docs/specs/005-inventario-y-caja/plan.md) |
-| **Siguiente tarea** | **T01: Contratos de la tasa** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)) |
-| **Progreso** | 0 / 7 tareas · fase 1 de 1 (tasa manual) |
+| **Siguiente tarea** | **T02: Guardar y consultar la tasa en el nodo** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)) |
+| **Progreso** | 1 / 7 tareas · fase 1 de 1 (tasa manual) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: tasa manual (parte 1) aprobada; el resto en borrador | 0 / 7 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: tasa manual (parte 1) aprobada; el resto en borrador | 1 / 7 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T01 (spec 005): contratos de la tasa en `@pope/shared`: esquemas de la API, evento `exchange_rate.set`, mensaje `exchangeRate` del canal del panel, tasa vigente y antigüedad en días hábiles. Antes, el mantenedor aprobó la parte 1 de la 005 y la spec 002 con su plan.
 - **2026-10-02:** Planes propuestos: tasa manual de la spec 005 (parte 1, 7 tareas; la escriben encargado o administrador y vale al guardarla) y pausa de la spec 002 en dos fases (fase 1 en TypeScript ya; fase 2 nativa con la spec 003). La spec 002 queda con las dudas resueltas por el mantenedor.
 - **2026-10-02:** T51: tabla de los 21 criterios de aceptación en `mediciones.md`, todos con test automático (se añadió el de CA-001-15), y la spec 001 queda **implementada** salvo el Bs. Antes, por petición del mantenedor: colores nuevos del mapa del panel (gris, verde, celeste, ámbar) y «Control de la PC» desactivado, con sus requisitos en la spec 003 (Wake-on-LAN y modo administrador remoto).
 - **2026-10-02:** T50: «Cerrar sesión» con confirmación en el Shell; en las temporales, «Perderás X min». Verificado CA-001-09 con una temporal de 25 min abierta desde el panel. Fin de la fase 9.
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T46: nace `apps/shell-ui` (diseño "Shell Pope · Fase 9", con vidrio y desenfoques): pantalla de bloqueo con login y errores del nodo en español, y canal con el nodo detrás de `PcChannel` (en desarrollo, WebSocket directo que hace de agente). Antes, `docs(specs)`: en la spec 003 el técnico entra solo con usuario y contraseña, y se añade el fondo de bloqueo que sube el administrador.
 - **2026-10-02:** T45a: el nodo sirve el panel compilado en modo `local` (`@fastify/static`), con la API por delante y `index.html` para las rutas del panel; AGENTS.md explica cómo abrirlo. Fin de la fase 8.
 - **2026-10-02:** T45: pantalla Interrumpidas (pendientes con Restaurar y elección de PC libre, y respaldo por PC) y punto ámbar en el raíl con el número que envía el canal. Verificados CA-001-06 y CA-001-08 con el simulador.
-- **2026-10-02:** T44: abrir, ampliar y cerrar sesiones temporales desde el detalle de la PC del mapa (por tiempo o por importe). Verificados CA-001-05 y CA-001-10 a mano con el simulador.

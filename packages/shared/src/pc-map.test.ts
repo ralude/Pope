@@ -44,6 +44,31 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
     expect(() => panelMessageSchema.parse({ type: 'interrupted', pending: -1 })).toThrow();
   });
 
+  it('anuncia la tasa vigente, o que no hay ninguna (REQ-005-36)', () => {
+    const rate = {
+      vesPerUsd: 40_000_000,
+      effectiveDate: '2026-09-28',
+      source: 'manual',
+      obtainedAt: '2026-09-28T19:20:00.000Z',
+      setBy: 'Ana',
+    };
+    expect(panelMessageSchema.parse({ type: 'exchangeRate', rate, stale: false })).toEqual({
+      type: 'exchangeRate',
+      rate,
+      stale: false,
+    });
+    expect(
+      panelMessageSchema.safeParse({ type: 'exchangeRate', rate: null, stale: false }).success,
+    ).toBe(true);
+    expect(
+      panelMessageSchema.safeParse({
+        type: 'exchangeRate',
+        rate: { ...rate, vesPerUsd: 0 },
+        stale: false,
+      }).success,
+    ).toBe(false);
+  });
+
   it('rechaza restantes negativos, tipos de sesión desconocidos y mensajes desconocidos', () => {
     const bad = (s: object) =>
       pcMapSchema.safeParse({

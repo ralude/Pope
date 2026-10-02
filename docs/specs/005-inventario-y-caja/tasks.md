@@ -10,11 +10,12 @@ antes de seguir.
 
 ## Fase 1: Tasa manual
 
-- [ ] **T01: Contratos de la tasa**
+- [x] **T01: Contratos de la tasa**
   - **Cubre:** REQ-005-33, REQ-005-35, REQ-005-36
   - **Hacer:** en `@pope/shared`, los esquemas de la tasa (respuesta de `GET`, cuerpo de `POST`), el evento `exchange_rate.set`, el mensaje `exchangeRate` del canal del panel, y las funciones puras `currentRate` (vigente entre varias) y `businessDaysOld` (antigüedad de lunes a viernes, en hora de Caracas).
   - **Verificar:** tests unitarios de la tasa vigente y de los días hábiles con un fin de semana por medio.
   - **Commit:** `feat(shared): añade los contratos de la tasa de cambio`
+  - **Decidido al implementarla:** módulo `exchange-rate.ts`. La tasa vigente exige además haberse guardado antes del instante consultado: así "vale desde que se guarda" queda en la propia regla. La fecha valor es `AAAA-MM-DD` en hora de Caracas (`localDateInCaracas`). Tope de 10.000.000 Bs por USD. `setBy` es el nombre de quien la escribió, o `null` si viene del BCV. El mensaje del canal del panel es `{ type: 'exchangeRate', rate, stale }`, como dice el plan.
 
 - [ ] **T02: Guardar y consultar la tasa en el nodo**
   - **Cubre:** REQ-005-33, REQ-005-34
