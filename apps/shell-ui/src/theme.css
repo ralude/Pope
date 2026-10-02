@@ -1,0 +1,403 @@
+/*
+ * Tema del Shell (diseño "Shell Pope · Fase 9", estilo SENET). Mismos colores y letra que el
+ * panel, pero con vidrio y desenfoques: las PCs de los clientes (Ryzen 5 5500, RX 5700 XT)
+ * los mueven sin problema, a diferencia del servidor del local.
+ */
+:root {
+  --bg: #0a0b10;
+  --text: #f2f4f7;
+  --soft: #c9cfd8;
+  --muted: #b4bcc7;
+  --accent: #8e24c9;
+  --accent-hover: #7b1faf;
+  --accent-text: #d8b4fe;
+  --green: #3fb950;
+  --green-text: #6edb87;
+  --amber: #f0a73a;
+  --amber-text: #f5c26b;
+  --red: #e5484d;
+  --glass: rgba(20, 22, 29, 0.58);
+  --glass-line: rgba(255, 255, 255, 0.1);
+  --input-bg: rgba(6, 7, 10, 0.55);
+  --input-line: rgba(255, 255, 255, 0.16);
+
+  color-scheme: dark;
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  overflow: hidden;
+  /* El cliente no selecciona ni arrastra nada de la interfaz. */
+  user-select: none;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ─── Pantalla y fondo ───────────────────────────────────────────────────────────────── */
+
+.screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.screen-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallpaper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.wp-shapes {
+  position: absolute;
+  inset: 0;
+}
+
+.wallpaper-blurred .wp-shapes {
+  inset: -80px;
+  filter: blur(70px);
+}
+
+.wp-glow {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.wp-glow-violet {
+  right: -160px;
+  top: -360px;
+  width: 1100px;
+  height: 1100px;
+  background: #6d28d9;
+  filter: blur(140px);
+  opacity: 0.55;
+}
+
+.wp-glow-teal {
+  left: -220px;
+  bottom: -300px;
+  width: 820px;
+  height: 820px;
+  background: #0e9f8e;
+  filter: blur(150px);
+  opacity: 0.32;
+}
+
+.wp-slash {
+  position: absolute;
+  top: -30%;
+  height: 170%;
+  transform: rotate(28deg);
+}
+
+.wp-slash-dark {
+  right: 650px;
+  width: 190px;
+  background: #241452;
+}
+
+.wp-slash-violet {
+  right: 260px;
+  width: 330px;
+  background: var(--accent);
+  opacity: 0.92;
+}
+
+.wp-slash-green {
+  right: 116px;
+  width: 64px;
+  background: #3ddc97;
+  opacity: 0.85;
+}
+
+/* Oscurece el lado del login para que se lea bien sobre cualquier fondo. */
+.wp-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 9, 12, 0.8) 0%,
+    rgba(8, 9, 12, 0.4) 42%,
+    rgba(8, 9, 12, 0) 68%
+  );
+}
+
+.wallpaper-blurred .wp-shade {
+  background: rgba(9, 10, 14, 0.62);
+}
+
+.glass {
+  background: var(--glass);
+  backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid var(--glass-line);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+/* ─── Pantalla de bloqueo ────────────────────────────────────────────────────────────── */
+
+.lock-brand {
+  position: absolute;
+  top: 56px;
+  left: 96px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 5px;
+}
+
+.lock-clock {
+  position: absolute;
+  top: 64px;
+  right: 96px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+}
+
+.lock-time {
+  font-size: 128px;
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.lock-date {
+  font-size: 26px;
+  font-weight: 700;
+  color: #e4e7ec;
+}
+
+.lock-column {
+  position: absolute;
+  left: 96px;
+  top: 0;
+  bottom: 56px;
+  width: 480px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pc-card {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pc-name {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.pc-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.pc-status-free {
+  color: var(--green-text);
+}
+
+.pc-status-off {
+  color: var(--amber-text);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.dot-green {
+  background: var(--green);
+}
+
+.dot-amber {
+  background: var(--amber);
+}
+
+.login-card {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.login-head h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.login-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(142, 36, 201, 0.3);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notice {
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.notice-error {
+  background: rgba(229, 72, 77, 0.16);
+  border: 1px solid var(--red);
+  color: #ffd1ce;
+}
+
+.notice-warn {
+  background: rgba(240, 167, 58, 0.14);
+  border: 1px solid #b9802a;
+  color: #fbe3bc;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--soft);
+}
+
+.input {
+  height: 50px;
+  padding: 0 14px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-line);
+  border-radius: 12px;
+  font-size: 17px;
+  user-select: text;
+}
+
+.input:focus {
+  border-color: #b67cf0;
+}
+
+.input::placeholder {
+  color: #808a96;
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.btn-primary {
+  height: 52px;
+  border: none;
+  border-radius: 26px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-primary:disabled {
+  background: #343943;
+  color: var(--muted);
+  cursor: default;
+}
+
+.login-help {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.lock-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  padding: 0 96px;
+  background: rgba(10, 11, 16, 0.55);
+  backdrop-filter: blur(18px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--soft);
+}
+
+/* ─── Sesión abierta (provisional hasta T47) ─────────────────────────────────────────── */
+
+.session-card {
+  width: 520px;
+  padding: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.session-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+}

@@ -475,12 +475,13 @@ antes de seguir.
 
 ## Fase 9: Shell (`apps/shell-ui`)
 
-- [ ] **T46: Esqueleto del Shell y pantalla de login**
+- [x] **T46: Esqueleto del Shell y pantalla de login**
   - **Cubre:** REQ-001-20, REQ-001-52
   - **Hacer:** Vite + React y cliente del canal PC (en desarrollo, WebSocket directo; con la spec 003 pasará por el host). Pantalla de bloqueo con login y mensajes de error en español.
   - **Verificar:** login en el navegador contra el servidor local.
   - **Commit:** `feat(shell-ui): crea el Shell con la pantalla de login`
   - **Nota de diseño:** el cliente del canal va detrás de una interfaz con dos implementaciones: WebSocket directo al nodo (desarrollo) y puente de WebView2 (`chrome.webview.postMessage`, spec 003). Así el paso a la spec 003 no toca las pantallas. En producción, la conexión con el nodo la mantiene el agente, no el Shell (REQ-003-63).
+  - **Decidido al implementarla:** interfaz `PcChannel` (`start`, `stop`, `send` de `login`, `logout` y `buyCombo`); de momento solo existe la implementación de desarrollo, `DevSocketChannel`, que hace de agente (`hello`, latido cada 10 s con el restante local, reintentos de 1 a 30 s). La PC de ejemplo se elige con `?pc=N`. El login lleva `requestId`: entra con el primer `state` activo y falla con el `error` de ese `requestId`, sin respuesta en 15 s o si se corta la conexión. Los motivos del rechazo son los textos del nodo; el Shell solo pone los suyos para fallos del canal. Sin router (dos pantallas según el `state`). La tarjeta de la tarifa y el enlace "Usuario técnico" del diseño quedan fuera: el protocolo no manda la tarifa con la PC bloqueada y el modo técnico es la spec 003. Hasta T47, la sesión abierta solo muestra quién la usa. Verificado a mano en Chrome contra PostgreSQL real: contraseña equivocada (mensaje del nodo, se vacía la contraseña), login correcto (pasa a la sesión), recarga como reinicio de la PC (el nodo cierra la sesión y vuelve el bloqueo) y nodo parado (aviso, campos desactivados y reconexión sola al volver).
 
 - [ ] **T47: Estado de la sesión**
   - **Cubre:** REQ-001-12, REQ-001-13, REQ-001-88
