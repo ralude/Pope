@@ -11,7 +11,7 @@ import {
   useState,
 } from 'react';
 
-import { ApiClient, ApiError } from './api/client.js';
+import { ApiClient, ApiError, SESSION_EXPIRED } from './api/client.js';
 
 export type SessionState =
   | { status: 'loading' }
@@ -30,16 +30,14 @@ const SessionContext = createContext<SessionValue | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SessionState>({ status: 'loading' });
 
+  // Solo caduca una sesión abierta. Sin ella, un 401 es lo normal (p. ej. el `GET /auth/me`
+  // de una comprobación ya descartada al montar dos veces en desarrollo) y no lleva aviso.
+  const expire = useCallback(() => {
+    setState((prev) => (prev.status === 'in' ? { status: 'out', notice: SESSION_EXPIRED } : prev));
+  }, []);
+
   // Si una petición recibe 401, la sesión caducó o desactivaron al encargado: al login.
-  const api = useMemo(
-    () =>
-      new ApiClient({
-        onUnauthorized: () => {
-          setState({ status: 'out', notice: 'Tu sesión ha caducado. Vuelve a iniciar sesión.' });
-        },
-      }),
-    [],
-  );
+  const api = useMemo(() => new ApiClient({ onUnauthorized: expire }), [expire]);
 
   useEffect(() => {
     let cancelled = false;
