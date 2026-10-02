@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · T49 terminada: compra de combos desde el Shell
+**Última actualización:** 2026-10-02 · T50 terminada: fin de la fase 9 (Shell)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T50: Cerrar sesión** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 66 / 68 tareas · fase 9 de 9 (Shell) |
+| **Siguiente tarea** | **T51: Verificación de aceptación** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 67 / 68 tareas · cierre de la spec |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -36,7 +36,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **T28a:** confirmar los límites de los ajustes: gracia de latidos entre 30 s y 30 min, sesiones temporales conservadas entre 3 y 100 (la spec solo fija el 3 mínimo y el 3 min por defecto).
 - [ ] **T31:** confirmar dos criterios al abrir una sesión temporal: el tope de 24 h por cobro y que la PC deba estar conectada al nodo (si no, se cobraría por una PC que no puede desbloquearse).
-- [ ] **REQ-001-13:** el equivalente en Bs espera a la tasa BCV de la spec 005.
+- [ ] **REQ-001-13:** el equivalente en Bs espera a la tasa BCV de la spec 005. El mantenedor decidió (2026-10-02) adelantar la **tasa manual** (REQ-005-34): falta preparar sus requisitos, plan y tareas para aprobarlos. El Shell y el panel ya muestran Bs en cuanto el nodo mande una tasa.
 - [ ] **Antes de la spec 003:** decidir los ADR propuestos [0005](docs/adr/0005-shell-react-en-webview2.md), [0009](docs/adr/0009-escritorio-separado-para-bloqueo-y-pausa.md) y [0010](docs/adr/0010-lista-blanca-y-restauracion.md) (cliente Windows).
 - [ ] **Ajustes en el panel:** la spec dice que el administrador cambia desde el panel la gracia de latidos y las sesiones temporales conservadas, pero no hay tarea; se decidió dejarlo fuera de la fase 8. Hasta entonces, por la API (`PUT /settings`).
 - [ ] **Test inestable con PostgreSQL real:** `no-heartbeat.e2e.test.ts` › «si la PC nunca supo de la sesión…» cierra la PC y abre una temporal en ella; como abrir exige la PC conectada (T31), con PostgreSQL real el nodo ya vio la desconexión y responde 409 (con PGlite pasa). Falla igual antes de la fase 8; hay que rehacer el test para que la PC pierda el `state` sin estar desconectada al abrir.
@@ -46,7 +46,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 66 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 67 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -59,6 +59,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T50: «Cerrar sesión» con confirmación en el Shell; en las temporales, «Perderás X min». Verificado CA-001-09 con una temporal de 25 min abierta desde el panel. Fin de la fase 9.
 - **2026-10-02:** T49: diálogo «Comprar combo» en el Shell (desde el panel de la sesión y desde el aviso), con lo que alcanza el saldo y cómo quedan saldo y horas. Antes, `feat(server)`: mensaje `listCombos`/`combos` del canal y `requestId` en la respuesta a la compra. Verificado con recargas reales desde el panel.
 - **2026-10-02:** T48: avisos de 5 y 1 min (los del nodo, sin contradecir al contador) y pantalla «Tu sesión terminó» que vuelve al bloqueo a los 10 s. Antes, `feat(shell-ui)`: todos los tiempos sin segundos («4 h 15 min»), como pidió el mantenedor. Verificado con una sesión temporal de 6 min.
 - **2026-10-02:** T47: la sesión del Shell muestra el tiempo total, las horas de combo y el saldo con su tiempo equivalente, con cuenta atrás local hecha con el motor de cobro de `@pope/shared` (coincide con el nodo en cada latido). Sin catálogo y con la pausa desactivada, como decidió el mantenedor (anotado en la spec 001).
@@ -68,4 +69,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T44: abrir, ampliar y cerrar sesiones temporales desde el detalle de la PC del mapa (por tiempo o por importe). Verificados CA-001-05 y CA-001-10 a mano con el simulador.
 - **2026-10-02:** T43b: pantalla Personal (solo administrador): alta con rol y activar o desactivar, sin poder desactivarse a sí mismo. Verificado a mano: el encargado desactivado pierde la sesión y no puede entrar.
 - **2026-10-02:** T43: pantalla Combos en `/combo-horas` (la API ya usa `/combos`): alta y edición con lo que sale la hora y el descuento por tramos de días mientras se escribe; el resto del personal ve la lista. Verificado CA-001-14 a mano.
-- **2026-10-02:** T42: pantalla Tarifas: el administrador marca días y les pone un precio; el resto del personal la ve sin poder cambiarla. Verificado CA-001-20 a mano.

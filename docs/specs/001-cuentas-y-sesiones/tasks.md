@@ -504,11 +504,12 @@ antes de seguir.
   - **Commit:** `feat(shell-ui): permite comprar combos con el saldo`
   - **Decidido al implementarla:** el protocolo no tenía cómo listar combos: se añadió `listCombos`/`combos` (decisión del mantenedor) y el `state` que responde a `buyCombo` lleva su `requestId`, en un commit `feat(server)` previo. El diálogo se abre desde el panel de la sesión y desde el aviso de fin de tiempo (solo con cuenta); pide los combos al abrirse, elige el de más horas que alcanza a pagar, desactiva los que no ("Saldo insuficiente") y muestra cómo quedan saldo y horas con los valores en vivo. El nodo tiene la última palabra: si rechaza la compra, el motivo sale en el diálogo. El gancho del canal pasa a admitir cualquier petición con `requestId` (login, combos y compra). Verificado a mano en Chrome con `sim01`: con 5,96 USD el combo de 20 h sale sin saldo; dos recargas desde el panel (10 y 5 USD) se ven en el diálogo abierto al momento; con 20,96 USD compra el «Combo 20 horas» y queda en 0,96 USD y 21 h de combo, con las dos filas en el ledger y el evento `combo.purchased` (equivalente a CA-001-17, que también cubre el test e2e del servidor).
 
-- [ ] **T50: Cerrar sesión**
+- [x] **T50: Cerrar sesión**
   - **Cubre:** REQ-001-26, REQ-001-69
   - **Hacer:** botón de cerrar sesión con confirmación; en temporales, con el aviso "Perderás X min".
   - **Verificar:** CA-001-09 a mano.
   - **Commit:** `feat(shell-ui): permite cerrar la sesión con confirmación`
+  - **Decidido al implementarla:** el botón va al pie del panel de la sesión. Con cuenta, la confirmación recuerda el saldo y las horas que quedan guardados; en una temporal, «Perderás X min» con el restante en vivo (en el formato sin segundos) y el botón «Cerrar y perder X min». `logout` va con `requestId` y se da por hecho con el `sessionEnded` o el `state` bloqueado; al cerrarla el propio cliente se vuelve directo al bloqueo. Verificado a mano en Chrome: con `sim01`, «Seguir jugando» mantiene la sesión y «Cerrar sesión» bloquea la PC (motivo `customer`); con una temporal de 25 min abierta desde el panel, sale «Perderás 25 min», la PC se bloquea y la sesión queda cerrada por el cliente, así que no entra en «Sesiones interrumpidas» (solo las `no_heartbeat`, REQ-001-66), como pide CA-001-09.
 
 ## Cierre
 

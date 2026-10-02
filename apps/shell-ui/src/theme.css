@@ -983,3 +983,45 @@ input {
   justify-content: space-between;
   gap: 12px;
 }
+
+/* ─── Cerrar sesión (T50) ────────────────────────────────────────────────────────────── */
+
+.dialog.logout {
+  width: 540px;
+}
+
+.lose {
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(240, 167, 58, 0.14);
+  border: 1px solid #b9802a;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 16px;
+  line-height: 1.45;
+  color: #fbe3bc;
+}
+
+.lose-title {
+  font-size: 30px;
+  font-weight: 800;
+  color: #ffd79a;
+  font-variant-numeric: tabular-nums;
+}
+
+.btn-danger {
+  height: 48px;
+  padding: 0 24px;
+  border: 1px solid var(--red);
+  border-radius: 24px;
+  background: transparent;
+  color: #ffc9c6;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: rgba(229, 72, 77, 0.16);
+}

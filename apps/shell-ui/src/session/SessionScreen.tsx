@@ -14,6 +14,8 @@ import { useEffect, useState } from 'react';
 import type { ChannelStatus } from '../channel/channel.js';
 import { Wallpaper } from '../lock/Wallpaper.js';
 import { ComboDialog } from './ComboDialog.js';
+import { LogoutDialog } from './LogoutDialog.js';
+import type { LogoutResult } from './logout.js';
 import type { BuyResult, CombosResult } from './combos.js';
 import { formatTimeLeft, warningMinutes } from './format.js';
 import { liveSession } from './live.js';
@@ -69,6 +71,7 @@ export function SessionScreen({
   onCloseWarning,
   listCombos,
   buyCombo,
+  logout,
 }: {
   session: SessionState;
   vesRate: VesRate | null;
@@ -80,12 +83,14 @@ export function SessionScreen({
   onCloseWarning: () => void;
   listCombos: () => Promise<CombosResult>;
   buyCombo: (comboId: string) => Promise<BuyResult>;
+  logout: () => Promise<LogoutResult>;
 }) {
   const live = liveSession(session, useElapsed(stateAt));
   const remaining = live.remainingSeconds;
   const endsAt = CLOCK.format(new Date(Date.now() + remaining * 1000));
   const who = session.kind === 'account' ? session.username : session.name;
   const [buying, setBuying] = useState(false);
+  const [closing, setClosing] = useState(false);
   const notice = useNotice();
 
   const openCombos = () => {
@@ -243,6 +248,18 @@ export function SessionScreen({
               el mostrador.
             </div>
           )}
+
+          <div className="session-spacer" />
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={() => {
+              onCloseWarning();
+              setClosing(true);
+            }}
+          >
+            Cerrar sesión
+          </button>
         </aside>
       </div>
 
@@ -296,6 +313,22 @@ export function SessionScreen({
           onBought={(text) => {
             setBuying(false);
             notice.show(text);
+          }}
+        />
+      )}
+
+      {closing && (
+        <LogoutDialog
+          temporary={session.kind === 'temporary'}
+          remainingSeconds={remaining}
+          balances={
+            live.kind === 'account'
+              ? { money: formatMoney(live.moneyMicros), combo: formatTimeLeft(live.comboSeconds) }
+              : null
+          }
+          logout={logout}
+          onClose={() => {
+            setClosing(false);
           }}
         />
       )}

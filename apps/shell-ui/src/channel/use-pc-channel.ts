@@ -1,5 +1,5 @@
 // Conecta el canal con las pantallas del Shell: el estado de la PC (`feed.ts`) y las
-// peticiones que esperan respuesta (login, combos), cada una con su `requestId`.
+// peticiones que esperan respuesta (login, combos, cierre), cada una con su `requestId`.
 import type { NodeToPcMessage } from '@pope/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -11,6 +11,7 @@ import {
   NO_REPLY_MESSAGE,
 } from '../lock/login.js';
 import { type BuyResult, buyReply, type CombosResult, combosReply } from '../session/combos.js';
+import { type LogoutResult, logoutReply } from '../session/logout.js';
 import type { PcChannel, ShellRequest } from './channel.js';
 import { applyEvent, dismissEnded, dismissWarning, INITIAL_FEED, type PcFeed } from './feed.js';
 
@@ -36,6 +37,8 @@ export function usePcChannel(channel: PcChannel): {
   listCombos: () => Promise<CombosResult>;
   /** Compra un combo con el saldo (T49, REQ-001-85). */
   buyCombo: (comboId: string) => Promise<BuyResult>;
+  /** El cliente cierra su sesión (T50, REQ-001-26). */
+  logout: () => Promise<LogoutResult>;
   /** El cliente cierra el aviso de fin de tiempo. */
   closeWarning: () => void;
   /** Se deja de mostrar "Tu sesión terminó" y vuelve el bloqueo. */
@@ -120,6 +123,10 @@ export function usePcChannel(channel: PcChannel): {
       request((requestId) => ({ type: 'buyCombo', requestId, comboId }), buyReply),
     [request],
   );
+  const logout = useCallback(
+    () => request((requestId) => ({ type: 'logout', requestId }), logoutReply),
+    [request],
+  );
 
   const closeWarning = useCallback(() => {
     setFeed(dismissWarning);
@@ -128,5 +135,5 @@ export function usePcChannel(channel: PcChannel): {
     setFeed(dismissEnded);
   }, []);
 
-  return { feed, login, listCombos, buyCombo, closeWarning, closeEnded };
+  return { feed, login, listCombos, buyCombo, logout, closeWarning, closeEnded };
 }

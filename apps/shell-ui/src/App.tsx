@@ -7,7 +7,8 @@ import { EndedScreen } from './session/EndedScreen.js';
 import { SessionScreen } from './session/SessionScreen.js';
 
 export function App({ channel, pcName }: { channel: PcChannel; pcName: string }) {
-  const { feed, login, listCombos, buyCombo, closeWarning, closeEnded } = usePcChannel(channel);
+  const { feed, login, listCombos, buyCombo, logout, closeWarning, closeEnded } =
+    usePcChannel(channel);
   if (feed.state?.status === 'active') {
     return (
       <SessionScreen
@@ -20,6 +21,7 @@ export function App({ channel, pcName }: { channel: PcChannel; pcName: string })
         onCloseWarning={closeWarning}
         listCombos={listCombos}
         buyCombo={buyCombo}
+        logout={logout}
       />
     );
   }
