@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  formatBolivares,
   formatMoney,
   micros,
   microsSchema,
@@ -88,10 +89,17 @@ describe('formatMoney (REQ-001-12, REQ-001-13, REQ-001-23)', () => {
     expect(formatMoney(micros(-1))).toBe('0,00 USD');
   });
 
-  it('REQ-001-13: añade el equivalente en VES si hay tasa', () => {
+  it('REQ-001-13: añade el equivalente en bolívares, escrito «Bs», si hay tasa', () => {
     const rate = vesRate(40_000_000); // 40 VES/USD
-    expect(formatMoney(usd(3), { vesRate: rate })).toBe('3,00 USD (≈ 120,00 VES)');
-    expect(formatMoney(usd(1234.56), { vesRate: rate })).toBe('1.234,56 USD (≈ 49.382,40 VES)');
+    expect(formatMoney(usd(3), { vesRate: rate })).toBe('3,00 USD (≈ 120,00 Bs)');
+    expect(formatMoney(usd(1234.56), { vesRate: rate })).toBe('1.234,56 USD (≈ 49.382,40 Bs)');
+  });
+
+  it('REQ-001-13: el equivalente en bolívares también se puede mostrar solo', () => {
+    const rate = vesRate(40_000_000);
+    expect(formatBolivares(usd(2.96), rate)).toBe('≈ 118,40 Bs');
+    expect(formatBolivares(usd(25), rate)).toBe('≈ 1.000,00 Bs');
+    expect(formatBolivares(usd(1.5), rate, '/h')).toBe('≈ 60,00 Bs/h');
   });
 
   it('REQ-001-13: sin tasa solo muestra USD', () => {
@@ -101,7 +109,7 @@ describe('formatMoney (REQ-001-12, REQ-001-13, REQ-001-23)', () => {
   it('admite un sufijo para tarifas', () => {
     expect(formatMoney(usd(1.5), { suffix: '/h' })).toBe('1,50 USD/h');
     expect(formatMoney(usd(1.5), { suffix: '/h', vesRate: vesRate(40_000_000) })).toBe(
-      '1,50 USD/h (≈ 60,00 VES/h)',
+      '1,50 USD/h (≈ 60,00 Bs/h)',
     );
   });
 });

@@ -75,7 +75,7 @@ export function roundToCents(amount: Micros): number {
 }
 
 export interface FormatMoneyOptions {
-  /** Si se indica, añade el equivalente en bolívares: `3,00 USD (≈ 120,00 VES)`. */
+  /** Si se indica, añade el equivalente en bolívares: `3,00 USD (≈ 120,00 Bs)`. */
   vesRate?: VesRate | undefined;
   /** Texto tras cada código de moneda, p. ej. `/h` para tarifas: `1,50 USD/h`. */
   suffix?: string;
@@ -83,7 +83,9 @@ export interface FormatMoneyOptions {
 
 /**
  * Formatea un importe en µUSD para mostrarlo: `3,00 USD`, `1.234,56 USD`,
- * `3,00 USD (≈ 120,00 VES)`. Es la única forma de mostrar dinero en la interfaz (ADR-0015).
+ * `3,00 USD (≈ 120,00 Bs)`. Es la única forma de mostrar dinero en la interfaz (ADR-0015).
+ * Los bolívares se escriben «Bs», como se leen en el local (pregunta resuelta de la spec
+ * 001); el código `VES` solo se usa en los datos.
  */
 export function formatMoney(amount: Micros, options: FormatMoneyOptions = {}): string {
   const suffix = options.suffix ?? '';
@@ -91,8 +93,15 @@ export function formatMoney(amount: Micros, options: FormatMoneyOptions = {}): s
   if (options.vesRate === undefined) {
     return main;
   }
-  const ves = usdToVes(amount, options.vesRate);
-  return `${main} (≈ ${formatCents(roundToCents(ves))} VES${suffix})`;
+  return `${main} (${formatBolivares(amount, options.vesRate, suffix)})`;
+}
+
+/**
+ * Solo el equivalente en bolívares de un importe en µUSD: `≈ 120,00 Bs`. Para mostrarlo en
+ * su propia línea, debajo del importe en USD (REQ-001-13).
+ */
+export function formatBolivares(amount: Micros, rate: VesRate, suffix = ''): string {
+  return `≈ ${formatCents(roundToCents(usdToVes(amount, rate)))} Bs${suffix}`;
 }
 
 /** `123456` céntimos → `1.234,56`: miles con punto y decimales con coma. */
