@@ -1,89 +1,17 @@
-import {
-  devPcId,
-  PANEL_UNAUTHORIZED_CLOSE,
-  type PanelMessage,
-  panelMessageSchema,
-  type PcMap,
-  usd,
-} from '@pope/shared';
+import { devPcId, PANEL_UNAUTHORIZED_CLOSE, type PcMap, usd } from '@pope/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { WebSocket } from 'ws';
 
 import { PANEL_INTERRUPTED_CHECK_MS } from './panel-hub.js';
 import { PcConnections } from './pc-connections.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
+import { PanelClient } from '../testing/panel-client.js';
 import { login, PcWorld } from '../testing/pc-world.js';
 
 // 18:00 en Caracas de un lunes: 1,50 USD/h.
 const MONDAY = '2026-09-28T22:00:00Z';
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
-
-/** Panel conectado al canal en vivo: guarda los mensajes y el cierre. */
-class PanelClient {
-  private readonly inbox: PanelMessage[] = [];
-  private waiting: ((message: PanelMessage) => void) | null = null;
-  readonly closed: Promise<number>;
-
-  constructor(private readonly ws: WebSocket) {
-    ws.on('message', (data: Buffer) => {
-      const message = panelMessageSchema.parse(JSON.parse(data.toString('utf8')));
-      if (this.waiting) {
-        this.waiting(message);
-        this.waiting = null;
-      } else {
-        this.inbox.push(message);
-      }
-    });
-    this.closed = new Promise((resolve) => {
-      ws.on('close', (code: number) => {
-        resolve(code);
-      });
-    });
-  }
-
-  static connect(url: string, cookie?: string): PanelClient {
-    return new PanelClient(new WebSocket(url, { headers: cookie ? { cookie } : {} }));
-  }
-
-  next(): Promise<PanelMessage> {
-    const queued = this.inbox.shift();
-    if (queued) {
-      return Promise.resolve(queued);
-    }
-    return new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        this.waiting = null;
-        reject(new Error('El panel no recibió nada en 5 s'));
-      }, 5000);
-      this.waiting = (message) => {
-        clearTimeout(timer);
-        resolve(message);
-      };
-    });
-  }
-
-  /** El siguiente mapa, saltando los demás mensajes. */
-  async nextMap(): Promise<PcMap> {
-    for (;;) {
-      const message = await this.next();
-      if (message.type === 'pcs') return message.map;
-    }
-  }
-
-  /** El siguiente número de interrumpidas pendientes, saltando los mapas. */
-  async nextPending(): Promise<number> {
-    for (;;) {
-      const message = await this.next();
-      if (message.type === 'interrupted') return message.pending;
-    }
-  }
-
-  close(): void {
-    this.ws.close();
-  }
-}
 
 describe('estado de las PCs para el panel (e2e, REQ-001-31)', () => {
   let world: PcWorld;
