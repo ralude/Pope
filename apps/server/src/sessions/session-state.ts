@@ -1,6 +1,7 @@
 // Estado que ve la PC a partir de la fila de `sessions` (REQ-001-12, REQ-001-88).
 import {
   type AccountBalances,
+  type Actor,
   affordableSeconds,
   type CustomerBalances,
   type CustomerStatus,
@@ -35,6 +36,18 @@ export class PcRequestRefused extends Error {
  */
 export function customerInactiveMessage(status: Exclude<CustomerStatus, 'active'>): string {
   return `Tu cuenta está ${status === 'blocked' ? 'bloqueada' : 'desactivada'}. Habla con el encargado`;
+}
+
+/** Nombre de quien hizo algo, para mostrarlo en el panel. */
+export function actorName(actor: Actor): string {
+  switch (actor.kind) {
+    case 'staff':
+      return actor.name;
+    case 'customer':
+      return actor.username;
+    case 'system':
+      return 'Sistema';
+  }
 }
 
 /** Consumo de una sesión con cuenta según su fila. */

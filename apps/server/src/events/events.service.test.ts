@@ -51,6 +51,45 @@ describe('EventsService.inTransaction (REQ-001-30, ADR-0008)', () => {
     expect(stored?.occurredAt.getTime()).toBeGreaterThanOrEqual(before - 1000);
   });
 
+  it('avisa a los suscritos solo de lo confirmado, y nunca de una transacción deshecha', async () => {
+    const seen: string[][] = [];
+    const stop = service.subscribe((committed) => {
+      seen.push(committed.map((e) => e.type));
+    });
+
+    await service.inTransaction((_tx, emit) => {
+      emit(shiftOpened);
+      emit({ ...shiftOpened, type: 'shift.closed' });
+      return Promise.resolve();
+    });
+    await service.inTransaction(() => Promise.resolve());
+    await expect(
+      service.inTransaction((_tx, emit) => {
+        emit(shiftOpened);
+        return Promise.reject(new Error('falla'));
+      }),
+    ).rejects.toThrow('falla');
+    expect(seen).toEqual([['shift.opened', 'shift.closed']]);
+
+    // Un suscrito que falla no afecta a quien hizo el cambio; y se puede dejar de escuchar.
+    const stopBroken = service.subscribe(() => {
+      throw new Error('oyente roto');
+    });
+    await expect(
+      service.inTransaction((_tx, emit) => {
+        emit(shiftOpened);
+        return Promise.resolve('hecho');
+      }),
+    ).resolves.toBe('hecho');
+    stop();
+    stopBroken();
+    await service.inTransaction((_tx, emit) => {
+      emit(shiftOpened);
+      return Promise.resolve();
+    });
+    expect(seen).toHaveLength(2);
+  });
+
   it('numera los eventos con seq creciente, en el orden en que se confirman', async () => {
     for (let i = 0; i < 3; i++) {
       await service.inTransaction((_tx, emit) => {

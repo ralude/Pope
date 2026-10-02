@@ -16,3 +16,4 @@ export * from './combo.js';
 export * from './settings.js';
 export * from './temporary.js';
 export * from './dev-pcs.js';
+export * from './pc-map.js';

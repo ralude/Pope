@@ -7,9 +7,10 @@ import {
   type OnApplicationBootstrap,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
-import type { NodeToPcMessage } from '@pope/shared';
+import { type NodeToPcMessage, PANEL_CHANNEL_PATH } from '@pope/shared';
 import { type WebSocket, WebSocketServer } from 'ws';
 
+import { PanelHub } from './panel-hub.js';
 import type { PcConnection, PcIdentity } from './pc-connections.js';
 import { PcProtocolService } from './pc-protocol.service.js';
 
@@ -60,12 +61,18 @@ export class PcGateway implements OnApplicationBootstrap, BeforeApplicationShutd
   constructor(
     private readonly adapterHost: HttpAdapterHost,
     private readonly protocol: PcProtocolService,
+    private readonly panel: PanelHub,
   ) {}
 
   onApplicationBootstrap(): void {
     const server = this.adapterHost.httpAdapter.getHttpServer() as Server;
     server.on('upgrade', (request: IncomingMessage, socket: Duplex, head: Buffer) => {
+      // Un solo punto de entrada para los WebSocket del nodo: las PCs y el panel.
       const path = new URL(request.url ?? '/', 'http://localhost').pathname;
+      if (path === PANEL_CHANNEL_PATH) {
+        this.panel.handleUpgrade(request, socket, head);
+        return;
+      }
       if (path !== PC_CHANNEL_PATH) {
         socket.destroy();
         return;

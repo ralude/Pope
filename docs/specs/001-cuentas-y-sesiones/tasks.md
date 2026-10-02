@@ -382,11 +382,12 @@ antes de seguir.
   - **Verificar:** tests del cliente de API (respuesta válida, 401, error con mensaje del nodo, respuesta que no cumple el esquema). A mano: login correcto e incorrecto, recargar la página sigue dentro, "Salir" vuelve al login.
   - **Commit:** `feat(panel): crea el panel con el login del personal`
 
-- [ ] **T38a: Estado de las PCs para el panel**
+- [x] **T38a: Estado de las PCs para el panel**
   - **Cubre:** REQ-001-31
   - **Hacer:** en `shared`, el esquema del estado de cada PC para el mapa: id, nombre, posición, conectada, y su sesión activa resumida (tipo, quién, abierta por, restante, saldo o cobrado, tarifa, si quedan menos de 5 min). En el servidor, `GET /pcs/map` (todo el personal) y el canal WebSocket `/panel`, autenticado con la cookie del personal (sin ella, se cierra), que envía el estado completo de las PCs al conectar y cada vez que algo cambia (sesión abierta o cerrada, latido, PC conectada o desconectada), como mucho una vez por segundo.
   - **Verificar:** tests e2e: el mapa refleja PCs libres, con cuenta, temporales y desconectadas; un login desde la PC llega por el canal; sin cookie el canal se cierra.
   - **Commit:** `feat(server): envía el estado de las PCs al panel`
+  - **Decidido al implementarla (2026-10-01):** el canal se refresca con los eventos confirmados (`EventsService.subscribe`) y con las conexiones y desconexiones de las PCs; los latidos no emiten eventos, así que cada sesión lleva su restante y `billedUntil` para que el panel cuente en vivo. La sesión del personal se comprueba al abrir el canal (si luego desactivan a alguien, su canal sigue abierto hasta que recargue).
 
 - [ ] **T39: Mapa de PCs en vivo**
   - **Cubre:** REQ-001-31

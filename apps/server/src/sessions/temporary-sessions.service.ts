@@ -34,7 +34,7 @@ import { EventsService } from '../events/events.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { PcConnections } from './pc-connections.js';
-import { type SessionRow, temporaryUsageOf } from './session-state.js';
+import { actorName, type SessionRow, temporaryUsageOf } from './session-state.js';
 import { SessionsService } from './sessions.service.js';
 
 /**
@@ -477,17 +477,5 @@ export class TemporarySessionsService {
         }),
       };
     });
-  }
-}
-
-/** Nombre de quien hizo algo, para mostrarlo en el panel. */
-function actorName(actor: Actor): string {
-  switch (actor.kind) {
-    case 'staff':
-      return actor.name;
-    case 'customer':
-      return actor.username;
-    case 'system':
-      return 'Sistema';
   }
 }

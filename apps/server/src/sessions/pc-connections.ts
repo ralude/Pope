@@ -23,6 +23,21 @@ export interface PcConnection {
 export class PcConnections {
   private readonly logger = new Logger('PcConnections');
   private readonly byPc = new Map<string, PcConnection>();
+  private readonly listeners = new Set<() => void>();
+
+  /** Avisa cuando una PC se conecta o se desconecta (el mapa del panel). */
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private changed(): void {
+    for (const listener of this.listeners) {
+      listener();
+    }
+  }
 
   /** Registra la conexión de una PC; si ya tenía otra, la cierra (se quedó colgada). */
   register(pc: PcIdentity, connection: PcConnection): void {
@@ -34,6 +49,7 @@ export class PcConnections {
     connection.pc = pc;
     this.byPc.set(pc.id, connection);
     this.logger.log(`${pc.name} conectada`);
+    this.changed();
   }
 
   /** Olvida la conexión si sigue siendo la registrada para su PC. */
@@ -42,6 +58,7 @@ export class PcConnections {
     if (pc && this.byPc.get(pc.id) === connection) {
       this.byPc.delete(pc.id);
       this.logger.log(`${pc.name} desconectada`);
+      this.changed();
     }
   }
 
