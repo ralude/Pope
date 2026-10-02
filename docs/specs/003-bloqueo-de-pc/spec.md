@@ -38,7 +38,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 
 **Control remoto desde el panel**
 - **REQ-003-20:** Comandos: bloquear, abrir sesión, cerrar sesión, enviar mensaje, reiniciar, apagar, encender (REQ-003-22) e iniciar como administrador (REQ-003-43). Los usan el encargado y el administrador; el dueño solo mira (decisión del mantenedor, 2026-10-02).
-- **REQ-003-21:** El panel muestra en vivo el estado de cada PC con estos colores: apagada o sin conexión en **gris**, libre en **verde**, en uso con cuenta en **celeste**, sesión temporal en **ámbar** y en mantenimiento (modo administrador) en **rojo**. El color de "en pausa" se decide con la spec 002. (Colores del mantenedor, 2026-10-02; los de los estados que ya existen se aplicaron en el panel antes de esta spec.)
+- **REQ-003-21:** El panel muestra en vivo el estado de cada PC con estos colores: apagada o sin conexión en **gris**, libre en **verde**, en uso con cuenta en **celeste**, sesión temporal en **ámbar** y en mantenimiento (modo administrador) en **rojo**. En pausa, en **morado** (REQ-002-14). (Colores del mantenedor, 2026-10-02; los de los estados que ya existen se aplicaron en el panel antes de esta spec.)
 - **REQ-003-22:** **Encender por red (Wake-on-LAN).** Desde el panel se enciende una PC apagada: el nodo envía el "paquete mágico" por la LAN a la dirección MAC de su tarjeta de red, que el agente registra al instalarse (REQ-003-50). Requiere tener Wake-on-LAN activado en la BIOS y en la tarjeta de red (PCIe). Si la PC no se conecta al nodo en unos minutos, el panel lo indica.
 
 **Protección**
