@@ -1,6 +1,6 @@
 # Spec 001: Cuentas y sesiones
 
-- **Estado:** Aprobada
+- **Estado:** Implementada (2026-10-02), salvo REQ-001-13: el equivalente en Bs espera a la tasa de la spec 005. Criterios de aceptación verificados en [`mediciones.md`](mediciones.md#t51--criterios-de-aceptación).
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0001, ADR-0007, ADR-0008, ADR-0014
 - **Specs relacionadas:** 002, 003, 006

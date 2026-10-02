@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · T50 terminada: fin de la fase 9 (Shell)
+**Última actualización:** 2026-10-02 · T51 terminada: spec 001 implementada
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T51: Verificación de aceptación** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 67 / 68 tareas · cierre de la spec |
+| **Spec en curso** | Ninguna: la [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) está implementada |
+| **Siguiente tarea** | **Preparar la tasa manual en Bs** (parte de la [spec 005](docs/specs/005-inventario-y-caja/spec.md), REQ-005-34): requisitos, plan y tareas para que los apruebe el mantenedor (su decisión del 2026-10-02) |
+| **Progreso** | Spec 001: 68 / 68 tareas |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -46,7 +46,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 67 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (salvo REQ-001-13, Bs) | 68 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -59,6 +59,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T51: tabla de los 21 criterios de aceptación en `mediciones.md`, todos con test automático (se añadió el de CA-001-15), y la spec 001 queda **implementada** salvo el Bs. Antes, por petición del mantenedor: colores nuevos del mapa del panel (gris, verde, celeste, ámbar) y «Control de la PC» desactivado, con sus requisitos en la spec 003 (Wake-on-LAN y modo administrador remoto).
 - **2026-10-02:** T50: «Cerrar sesión» con confirmación en el Shell; en las temporales, «Perderás X min». Verificado CA-001-09 con una temporal de 25 min abierta desde el panel. Fin de la fase 9.
 - **2026-10-02:** T49: diálogo «Comprar combo» en el Shell (desde el panel de la sesión y desde el aviso), con lo que alcanza el saldo y cómo quedan saldo y horas. Antes, `feat(server)`: mensaje `listCombos`/`combos` del canal y `requestId` en la respuesta a la compra. Verificado con recargas reales desde el panel.
 - **2026-10-02:** T48: avisos de 5 y 1 min (los del nodo, sin contradecir al contador) y pantalla «Tu sesión terminó» que vuelve al bloqueo a los 10 s. Antes, `feat(shell-ui)`: todos los tiempos sin segundos («4 h 15 min»), como pidió el mantenedor. Verificado con una sesión temporal de 6 min.
@@ -68,4 +69,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T45: pantalla Interrumpidas (pendientes con Restaurar y elección de PC libre, y respaldo por PC) y punto ámbar en el raíl con el número que envía el canal. Verificados CA-001-06 y CA-001-08 con el simulador.
 - **2026-10-02:** T44: abrir, ampliar y cerrar sesiones temporales desde el detalle de la PC del mapa (por tiempo o por importe). Verificados CA-001-05 y CA-001-10 a mano con el simulador.
 - **2026-10-02:** T43b: pantalla Personal (solo administrador): alta con rol y activar o desactivar, sin poder desactivarse a sí mismo. Verificado a mano: el encargado desactivado pierde la sesión y no puede entrar.
-- **2026-10-02:** T43: pantalla Combos en `/combo-horas` (la API ya usa `/combos`): alta y edición con lo que sale la hora y el descuento por tramos de días mientras se escribe; el resto del personal ve la lista. Verificado CA-001-14 a mano.

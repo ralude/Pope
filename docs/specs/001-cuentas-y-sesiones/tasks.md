@@ -513,8 +513,9 @@ antes de seguir.
 
 ## Cierre
 
-- [ ] **T51: Verificación de aceptación**
+- [x] **T51: Verificación de aceptación**
   - **Cubre:** todos los CA-001-*
   - **Hacer:** tabla en `mediciones.md` con cada CA y el test o la prueba manual que lo cubre. Marcar la spec como **Implementada** (salvo REQ-001-13, pendiente de la spec 005).
   - **Verificar:** revisión del mantenedor.
   - **Commit:** `docs(specs): verifica los criterios de aceptación de la spec 001`
+  - **Decidido al implementarla:** CA-001-15 (las horas de combo no vencen) solo lo citaba un test del formato de horas; se añadió un test e2e en un commit `test(server)` previo. Con eso, todos los criterios tienen al menos un test automático. Antes de cerrar se pasaron los tests del servidor contra PostgreSQL real: solo falla el test inestable ya anotado en "Pendientes del mantenedor" de `ESTADO.md`.
