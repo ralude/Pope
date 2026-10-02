@@ -1,5 +1,6 @@
 import { Redirect, Route, Switch } from 'wouter';
 
+import { CombosPage } from './pages/CombosPage.js';
 import { CustomersPage } from './pages/CustomersPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { MapPage } from './pages/MapPage.js';
@@ -25,6 +26,7 @@ function Routes() {
       <Switch>
         <Route path="/" component={MapPage} />
         <Route path="/clientes" component={CustomersPage} />
+        <Route path="/combo-horas" component={CombosPage} />
         <Route path="/tarifas" component={TariffsPage} />
         <Route>
           <Redirect to="/" />

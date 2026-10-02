@@ -12,6 +12,7 @@ import { ShiftPill } from './ShiftPill.js';
 const SECTIONS: { href: string; label: string; icon: IconName }[] = [
   { href: '/', label: 'Mapa de PCs', icon: 'mapa' },
   { href: '/clientes', label: 'Clientes', icon: 'clientes' },
+  { href: '/combo-horas', label: 'Combos', icon: 'combos' },
   { href: '/tarifas', label: 'Tarifas', icon: 'tarifas' },
 ];
 

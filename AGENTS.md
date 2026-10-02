@@ -203,7 +203,9 @@ Panel (`apps/panel`, React + Vite + wouter):
 - Desarrollo: con el nodo arrancado en el puerto 3000, `pnpm --filter @pope/panel dev` y abrir
   `http://127.0.0.1:5173`. Vite hace de proxy de la API y del canal `/panel` hacia el nodo,
   así la cookie del personal es del mismo origen. Las rutas del panel van en español
-  (`/clientes`) y las de la API en inglés (`/customers`), para que no choquen.
+  (`/clientes`) y las de la API en inglés (`/customers`), para que no choquen. Una ruta del panel
+  tampoco puede empezar como una de la API (el proxy compara el principio): por eso Combos está en
+  `/combo-horas` y no en `/combos`.
 - Diseño de referencia: el lienzo "Panel Pope · Fase 8 (estilo SENET)", a 1920×1080. Estilos
   en `src/theme.css`: colores planos, sin desenfoques ni animaciones (gráfica integrada del
   i5-2400). Las llamadas al nodo pasan por `ApiClient` (`src/api/client.ts`), que valida cada

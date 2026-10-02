@@ -433,11 +433,12 @@ antes de seguir.
   - **Decidido al implementarla:** pantalla `/tarifas` según el lienzo, sin el equivalente en Bs: una tarjeta por día que el administrador marca (también «Todos» y «Ninguno») y un precio en céntimos para los días marcados. Tras guardar se limpia la selección y se dice qué se guardó. Verificado a mano (CA-001-20): lunes a jueves a 1,50 y después el domingo a 3,00 dejan la tabla lunes–jueves 1,50, viernes–sábado 2,00 y domingo 3,00, con dos eventos `tariff.changed`.
   - **Decidido por el mantenedor (2026-10-02):** el encargado y el dueño ven la tabla sin poder cambiarla.
 
-- [ ] **T43: Administración de combos**
+- [x] **T43: Administración de combos**
   - **Cubre:** REQ-001-80, REQ-001-81
   - **Hacer:** lista, alta y edición, mostrando el precio por hora y el descuento en vivo mientras se escribe.
   - **Verificar:** CA-001-14 a mano.
   - **Commit:** `feat(panel): administra los combos`
+  - **Decidido al implementarla:** la pantalla está en `/combo-horas` (decidido por el mantenedor), porque `/combos` es la ruta de la API y el proxy y el nodo la reservan. Lista de combos con su estado y, para el administrador, un panel lateral de alta o edición: nombre, precio en céntimos, horas (admite «1,5») y, al editar, «A la venta». Lo que sale la hora y el descuento por tramos se calculan en el panel con `comboRatePerHour` y `comboDiscounts` de `shared` y la tarifa actual. Guardar se desactiva si no hay cambios. Verificado a mano (CA-001-14): «Combo 20 horas» a 20 USD por 20 h muestra «1,00 USD/h», «33 % menos que de lunes a miércoles (1,50 USD/h)» y «50 % menos que de jueves a domingo (2,00 USD/h)»; desactivar otro combo lo deja «Desactivado».
   - **Decidido por el mantenedor (2026-10-02):** el encargado y el dueño ven la lista sin poder cambiarla. El descuento se agrupa por tramos de días seguidos con el mismo precio («de lunes a miércoles», «viernes y sábado», «el domingo»).
 
 - [ ] **T43b: Administración del personal**
