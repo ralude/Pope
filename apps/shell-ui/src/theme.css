@@ -543,10 +543,11 @@ input {
 }
 
 .remaining-time {
-  font-size: 76px;
+  font-size: 56px;
   font-weight: 300;
-  line-height: 1.05;
+  line-height: 1.1;
   letter-spacing: -1px;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 
@@ -601,15 +602,18 @@ input {
 }
 
 .balance-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   font-size: 16px;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.balance-text .balance-sub {
+  white-space: nowrap;
 }
 
 .in-use {
-  padding: 2px 8px;
+  margin-right: 6px;
+  padding: 1px 7px;
   border-radius: 10px;
   background: rgba(63, 185, 80, 0.18);
   color: #9fe3b0;

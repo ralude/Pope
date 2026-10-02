@@ -3,7 +3,6 @@
 // sin el catálogo de apps, que llegará con la spec 004 (decisión del mantenedor).
 import {
   formatBolivares,
-  formatDuration,
   formatMoney,
   LOCAL_TIME_ZONE,
   type SessionState,
@@ -13,6 +12,7 @@ import { useEffect, useState } from 'react';
 
 import type { ChannelStatus } from '../channel/channel.js';
 import { Wallpaper } from '../lock/Wallpaper.js';
+import { formatTimeLeft } from './format.js';
 import { liveSession } from './live.js';
 
 /** Por debajo de 5 min el tiempo se pinta en ámbar, como los avisos (REQ-001-24). */
@@ -115,7 +115,7 @@ export function SessionScreen({
               role="timer"
               className={remaining <= LOW_SECONDS ? 'remaining-time low' : 'remaining-time'}
             >
-              {formatDuration(remaining)}
+              {formatTimeLeft(remaining)}
             </div>
             <div className="remaining-until">
               {remaining > 0 ? `Hasta las ${endsAt} aprox.` : 'Sin tiempo'}
@@ -143,13 +143,13 @@ export function SessionScreen({
                     </svg>
                   </div>
                   <div className="balance-text">
-                    <div className="balance-name">
-                      Horas de combo
+                    <div className="balance-name">Horas de combo</div>
+                    <div className="balance-sub">
                       {live.consuming === 'combo' && <span className="in-use">En uso</span>}
+                      Se gastan primero
                     </div>
-                    <div className="balance-sub">Se gastan primero y no vencen</div>
                   </div>
-                  <div className="balance-value">{formatDuration(live.comboSeconds)}</div>
+                  <div className="balance-value">{formatTimeLeft(live.comboSeconds)}</div>
                 </div>
 
                 <div className={live.comboSeconds > 0 ? 'balance' : 'balance active'}>
@@ -170,11 +170,11 @@ export function SessionScreen({
                     </svg>
                   </div>
                   <div className="balance-text">
-                    <div className="balance-name">
-                      Saldo
-                      {live.consuming === 'money' && <span className="in-use">En uso</span>}
+                    <div className="balance-name">Saldo</div>
+                    <div className="balance-sub">
+                      {live.consuming === 'money' && <span className="in-use">En uso</span>}≈{' '}
+                      {formatTimeLeft(live.moneySeconds)} de uso
                     </div>
-                    <div className="balance-sub">≈ {formatDuration(live.moneySeconds)} de uso</div>
                   </div>
                   <div className="balance-values">
                     <div className="balance-value">{formatMoney(live.moneyMicros)}</div>
