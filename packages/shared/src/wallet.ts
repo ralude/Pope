@@ -10,8 +10,9 @@ export type Wallet = z.infer<typeof walletSchema>;
 
 /**
  * Tipos de movimiento: recarga, compra de combo, consumo de una sesión, ajuste con motivo
- * y saldo migrado desde el sistema anterior (spec 008). Los saldos nunca se editan: solo
- * cambian con movimientos (REQ-001-89).
+ * saldo migrado desde el sistema anterior (spec 008) y venta del mostrador pagada con el
+ * saldo (REQ-005-21; positiva si se anula). Los saldos nunca se editan: solo cambian con
+ * movimientos (REQ-001-89).
  */
 export const ledgerKindSchema = z.enum([
   'recharge',
@@ -19,6 +20,7 @@ export const ledgerKindSchema = z.enum([
   'consumption',
   'adjustment',
   'migration',
+  'sale',
 ]);
 export type LedgerKind = z.infer<typeof ledgerKindSchema>;
 

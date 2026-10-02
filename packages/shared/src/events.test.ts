@@ -171,6 +171,45 @@ const examples = {
     before: { name: 'Impresiones', unitPrice: usd(100_000), active: true },
     after: { name: 'Impresiones', unitPrice: usd(150_000), active: true },
   }),
+  // Spec 005, parte 2: ventas. Un refresco en Bs (CA-005-02) y 12 impresiones en USD.
+  'sale.recorded': envelope('sale.recorded', {
+    saleId: id(12),
+    shiftId: SHIFT,
+    customer: null,
+    lines: [
+      {
+        kind: 'product',
+        id: id(13),
+        name: 'Refresco',
+        quantity: 1,
+        unitPrice: usd(1_000_000),
+        total: usd(1_000_000),
+      },
+      {
+        kind: 'concept',
+        id: id(11),
+        name: 'Impresiones',
+        quantity: 12,
+        unitPrice: usd(100_000),
+        total: usd(1_200_000),
+      },
+    ],
+    payments: [
+      {
+        method: 'cash_ves',
+        amount: { micros: 40_000_000, currency: 'VES' },
+        usd: usd(1_000_000),
+        vesRate: 40_000_000,
+      },
+      { method: 'cash_usd', amount: usd(1_200_000), usd: usd(1_200_000), vesRate: null },
+    ],
+    total: usd(2_200_000),
+  }),
+  'sale.voided': envelope('sale.voided', {
+    saleId: id(12),
+    shiftId: SHIFT,
+    reason: 'error de cobro',
+  }),
 };
 
 describe('eventos de auditoría (REQ-001-30, ADR-0008)', () => {
@@ -306,6 +345,34 @@ describe('inventario (REQ-005-02, REQ-005-10)', () => {
     expect(valid(withPayload({ kind: 'adjustment', quantity: -2, reason: 'Conteo' }))).toBe(true);
     expect(valid(withPayload({ kind: 'adjustment', quantity: 0, reason: 'Conteo' }))).toBe(false);
     expect(valid(withPayload({ kind: 'sale', quantity: -1, reason: null }))).toBe(false);
+  });
+});
+
+describe('ventas (REQ-005-21, REQ-005-23)', () => {
+  it('el pago con saldo lleva la cuenta del cliente', () => {
+    const recorded = examples['sale.recorded'];
+    const payload = {
+      ...recorded.payload,
+      customer: JUAN,
+      payments: [{ method: 'balance', amount: usd(2_200_000), usd: usd(2_200_000), vesRate: null }],
+    };
+    expect(valid({ ...recorded, payload })).toBe(true);
+  });
+
+  it('sin líneas, sin pagos o con importes en 0 no vale', () => {
+    const recorded = examples['sale.recorded'];
+    const withPayload = (patch: object) => ({
+      ...recorded,
+      payload: { ...recorded.payload, ...patch },
+    });
+    expect(valid(withPayload({ lines: [] }))).toBe(false);
+    expect(valid(withPayload({ payments: [] }))).toBe(false);
+    expect(valid(withPayload({ total: usd(0) }))).toBe(false);
+  });
+
+  it('la anulación pide motivo', () => {
+    const voided = examples['sale.voided'];
+    expect(valid({ ...voided, payload: { ...voided.payload, reason: '' } })).toBe(false);
   });
 });
 

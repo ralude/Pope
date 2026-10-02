@@ -69,6 +69,10 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
     ).toBe(false);
   });
 
+  it('avisa de que cambió la caja o el stock, sin datos (REQ-005-24)', () => {
+    expect(panelMessageSchema.parse({ type: 'cash' })).toEqual({ type: 'cash' });
+  });
+
   it('rechaza restantes negativos, tipos de sesión desconocidos y mensajes desconocidos', () => {
     const bad = (s: object) =>
       pcMapSchema.safeParse({

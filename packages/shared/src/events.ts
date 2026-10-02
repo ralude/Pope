@@ -10,9 +10,10 @@
 // contraseña que se colara por error, hace fallar la validación (REQ-001-51).
 import { z } from 'zod';
 
+import { cashMethodSchema } from './cash.js';
 import { customerStatusSchema } from './customer.js';
 import { exchangeRateSourceSchema, localDateSchema } from './exchange-rate.js';
-import { microsSchema, vesRateSchema } from './money.js';
+import { currencySchema, microsSchema, vesRateSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
 import { settingKeySchema } from './settings.js';
 import { staffRoleSchema, staffStatusSchema } from './staff.js';
@@ -467,6 +468,59 @@ export const saleConceptUpdatedEventSchema = event(
   }),
 );
 
+// ─── Ventas del mostrador (spec 005, parte 2) ───────────────────────────────────────────
+
+/**
+ * Venta registrada (REQ-005-20 a REQ-005-22): sus líneas, con la copia del nombre y del
+ * precio del momento, y sus pagos, con la moneda y la tasa si se pagó en Bs. Las líneas de
+ * productos implican su movimiento de stock `sale`. `customer` es quien pagó con su saldo.
+ */
+export const saleRecordedEventSchema = event(
+  'sale.recorded',
+  1,
+  z.strictObject({
+    saleId: idSchema,
+    shiftId: idSchema,
+    customer: customerRefSchema.nullable(),
+    lines: z
+      .array(
+        z.strictObject({
+          kind: z.enum(['product', 'concept']),
+          id: idSchema,
+          name: z.string().min(1),
+          quantity: z.int().positive(),
+          unitPrice: positiveUsdSchema,
+          total: positiveUsdSchema,
+        }),
+      )
+      .min(1),
+    payments: z
+      .array(
+        z.strictObject({
+          method: cashMethodSchema,
+          amount: z.strictObject({
+            micros: microsSchema.refine((m) => m > 0, 'El importe debe ser mayor que cero'),
+            currency: currencySchema,
+          }),
+          usd: positiveUsdSchema,
+          vesRate: vesRateSchema.nullable(),
+        }),
+      )
+      .min(1),
+    total: positiveUsdSchema,
+  }),
+);
+
+/**
+ * Venta anulada por el administrador, con motivo (REQ-005-23). Implica devolver el stock,
+ * la fila negativa del registro de caja en `shiftId` y, si se pagó con saldo, devolverlo.
+ */
+export const saleVoidedEventSchema = event(
+  'sale.voided',
+  1,
+  z.strictObject({ saleId: idSchema, shiftId: idSchema, reason: z.string().min(1) }),
+);
+
 // ─── Unión de todos los eventos ─────────────────────────────────────────────────────────
 
 export const domainEventSchema = z.discriminatedUnion('type', [
@@ -497,6 +551,8 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   stockMovedEventSchema,
   saleConceptCreatedEventSchema,
   saleConceptUpdatedEventSchema,
+  saleRecordedEventSchema,
+  saleVoidedEventSchema,
 ]);
 export type DomainEvent = z.infer<typeof domainEventSchema>;
 export type DomainEventType = DomainEvent['type'];

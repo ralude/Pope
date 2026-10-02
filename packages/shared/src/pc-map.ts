@@ -127,5 +127,7 @@ export const panelMessageSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pcs'), map: pcMapSchema }),
   z.object({ type: z.literal('interrupted'), pending: z.int().nonnegative() }),
   exchangeRateStatusSchema.extend({ type: z.literal('exchangeRate') }),
+  /** Cambió el registro de caja o el stock: las pantallas abiertas vuelven a pedirlos. */
+  z.object({ type: z.literal('cash') }),
 ]);
 export type PanelMessage = z.infer<typeof panelMessageSchema>;
