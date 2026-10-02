@@ -10,6 +10,7 @@ import { Icon, type IconName } from './Icon.js';
 /** Secciones del raíl. Cada tarea de la fase 8 añade la suya. */
 const SECTIONS: { href: string; label: string; icon: IconName }[] = [
   { href: '/', label: 'Mapa de PCs', icon: 'mapa' },
+  { href: '/clientes', label: 'Clientes', icon: 'clientes' },
 ];
 
 const ROLE_LABEL: Record<StaffRole, string> = {

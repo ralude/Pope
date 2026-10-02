@@ -1,0 +1,143 @@
+/* Pantalla de clientes (T40): tabla con buscador y, a la derecha, el cliente elegido. */
+
+.customers-layout {
+  height: 100%;
+  display: flex;
+}
+
+.customers-list {
+  flex-grow: 1;
+  min-width: 0;
+  padding: 16px 24px;
+  overflow: auto;
+}
+
+.customers-search {
+  width: 360px;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 20px;
+  font-size: 15px;
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.customers-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.customers-table td {
+  height: 46px;
+  padding: 0 10px;
+  border-bottom: 1px solid #22262d;
+}
+
+.customers-table .col-num {
+  text-align: right;
+}
+
+/* Ancho fijo: si cambia la insignia de estado, las demás columnas no se mueven. */
+.customers-table .col-status {
+  width: 190px;
+}
+
+.customers-table tbody tr {
+  cursor: pointer;
+}
+
+.customers-table tbody tr:hover {
+  background: #20242b;
+}
+
+.customers-table tbody tr[aria-selected='true'] {
+  background: var(--accent-soft);
+}
+
+/* El usuario es un botón para poder elegir la fila con el teclado. */
+.customer-pick {
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.customers-footer {
+  padding: 14px 10px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Estado de la cuenta. */
+.status-pill {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-active {
+  background: #17271b;
+  color: #a7e0b5;
+}
+
+.status-blocked {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.status-disabled {
+  background: var(--surface-2);
+  color: var(--soft);
+}
+
+.status-locked {
+  background: #2a2113;
+  color: #f5d9a8;
+}
+
+.balance-card {
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.balance-value {
+  font-size: 22px;
+}
+
+.lock-box {
+  padding: 12px;
+  background: #2a2113;
+  border: 1px solid #8a5a12;
+  border-radius: 8px;
+  color: #f5d9a8;
+  line-height: 1.45;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.field-error {
+  color: var(--danger-text);
+  font-size: 13px;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 13px;
+}

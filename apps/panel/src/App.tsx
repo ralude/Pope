@@ -1,5 +1,6 @@
 import { Redirect, Route, Switch } from 'wouter';
 
+import { CustomersPage } from './pages/CustomersPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { MapPage } from './pages/MapPage.js';
 import { SessionProvider, useSession } from './session.js';
@@ -20,6 +21,7 @@ function Routes() {
   return (
     <Switch>
       <Route path="/" component={MapPage} />
+      <Route path="/clientes" component={CustomersPage} />
       <Route>
         <Redirect to="/" />
       </Route>

@@ -410,11 +410,12 @@ antes de seguir.
   - **Commit:** `feat(panel): permite organizar el mapa arrastrando las PCs`
   - **Decidido al implementarla:** con el ratón, la PC cae en la casilla bajo el puntero; con el teclado (Espacio o Intro, flechas, Espacio o Intro, Escape), cada flecha la lleva a la casilla vecina, y los avisos para lectores de pantalla van en español. Al organizar se ve una fila vacía de sobra para poder bajar PCs (7 filas como mínimo, 30 como máximo). Guardar envía la distribución de todas las PCs; la edición se mantiene hasta que el canal trae el mapa ya guardado. `@dnd-kit/core` suma 14 KB comprimidos al panel. Verificado a mano: ratón, teclado e intercambio; tras guardar, la misma distribución al recargar y desde otra sesión.
 
-- [ ] **T40: Clientes**
+- [x] **T40: Clientes**
   - **Cubre:** REQ-001-01, REQ-001-02, REQ-001-04
   - **Hacer:** lista con buscador, alta de cliente, bloqueo o desactivación, y botón para quitar el bloqueo por intentos (T16a).
   - **Verificar:** manual contra el servidor local.
   - **Commit:** `feat(panel): gestiona los clientes`
+  - **Decidido al implementarla:** pantalla `/clientes` según el lienzo, sin el equivalente en Bs y sin «Recargar saldo» ni «Vender combo», que llegan con T41. La búsqueda se lanza 250 ms después de la última tecla, de 50 en 50 con «Ver más». La columna Estado muestra «Bloqueo por intentos» solo en cuentas activas. El panel lateral ofrece pasar a cualquiera de los otros dos estados, sin confirmación porque se puede deshacer. El alta marca bajo cada campo el error del nodo y permite mostrar la contraseña. El dueño solo consulta. Verificado a mano contra PostgreSQL real: búsqueda por nombre con tilde, por cifras del teléfono y por usuario; quitar el bloqueo, bloquear, desactivar y activar (con sus eventos); alta con teléfono incorrecto y correcto, y la vista del dueño sin botones.
 
 - [ ] **T41: Turno, recargas y venta de combos**
   - **Cubre:** REQ-001-03, REQ-001-84, REQ-001-85
