@@ -1,6 +1,6 @@
 # Spec 005: Inventario de productos y caja
 
-- **Estado:** Borrador
+- **Estado:** Borrador. La sección **"Moneda y tasa de cambio (BCV)"** (REQ-005-30 a REQ-005-35) se adelanta por decisión del mantenedor (2026-10-02) y está **pendiente de aprobación** por separado, con su propio [plan](plan.md) y [tareas](tasks.md). El resto sigue en borrador.
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0001, ADR-0004, ADR-0008
 - **Specs relacionadas:** 001, 006
@@ -49,7 +49,8 @@ bolívares, pago móvil, transferencia).
 - **REQ-005-31:** El nodo local obtiene automáticamente la **tasa oficial USD → VES del BCV**. El BCV la publica los días hábiles bancarios **por la tarde** (aprox. 16:00–18:00, hora de Caracas), con **fecha valor del siguiente día hábil**.
 - **REQ-005-32:** Los días hábiles, el nodo consulta cada 30 min entre las 15:00 y las 20:00 (hora de Caracas) hasta obtener la tasa nueva, y una vez más a las 08:00 por si se publicó tarde. El horario es configurable.
 - **REQ-005-33:** Cada tasa se guarda con su fecha valor, su fuente y la hora a la que se obtuvo. La **tasa vigente** de un día es la más reciente cuya fecha valor sea hoy o anterior. Fines de semana y feriados sigue vigente la última.
-- **REQ-005-34:** Sin internet o si el BCV no responde, se mantiene la última tasa vigente y el panel muestra su fecha. El administrador puede introducir la tasa a mano; queda registrada con actor y fuente "manual".
+- **REQ-005-34:** Sin internet o si el BCV no responde, se mantiene la última tasa vigente y el panel muestra su fecha. El **encargado o el administrador** puede introducir la tasa a mano desde el panel; vale **desde el momento en que se guarda** y queda registrada con actor y fuente "manual". El dueño la ve, pero no la cambia. (Quién y desde cuándo: decisión del mantenedor, 2026-10-02.)
+- **REQ-005-36:** El panel muestra siempre la tasa vigente, con su fecha y su fuente. Un cambio de tasa llega al momento a las pantallas abiertas del panel y a las PCs con sesión, que pasan a mostrar el equivalente en Bs con la tasa nueva.
 - **REQ-005-35:** El panel avisa si la tasa vigente tiene más de 1 día hábil de antigüedad.
 
 **Turnos de caja**
@@ -90,6 +91,10 @@ bolívares, pago móvil, transferencia).
   - **Dado** el local sin internet desde el lunes
   - **Cuando** es miércoles
   - **Entonces** se sigue usando la tasa del lunes, el panel muestra "Tasa del lunes" y avisa de que está desactualizada.
+- **CA-005-06** (REQ-005-34, REQ-005-36, REQ-001-13)
+  - **Dado** un nodo sin ninguna tasa y un cliente en sesión con 3,00 USD de saldo
+  - **Cuando** el encargado escribe en el panel la tasa 40,00 Bs por USD
+  - **Entonces** desde ese momento el panel y el Shell muestran "3,00 USD (≈ 120,00 Bs)", y queda un evento con el encargado como actor y la fuente "manual".
 - **CA-005-03** (REQ-005-42)
   - **Dado** un turno con 50 USD esperados en efectivo
   - **Cuando** el encargado declara 45 USD al cerrar
@@ -109,3 +114,5 @@ bolívares, pago móvil, transferencia).
 - [ ] ¿La tasa nueva se aplica **cuando llega su fecha valor** o **en cuanto se publica**? (Propuesta: por fecha valor, que es cuando entra en vigor oficialmente.)
 - [x] ¿Qué métodos de pago usa hoy el local? **Resuelta: pago móvil, punto de venta y efectivo** (REQ-005-21).
 - [ ] ¿Se necesita imprimir tickets?
+- [x] ¿Quién introduce la tasa a mano y desde cuándo vale? **Resuelta (mantenedor, 2026-10-02): el encargado o el administrador, y vale desde que se guarda** (REQ-005-34).
+- [ ] **Días hábiles (REQ-005-35).** ¿Qué es "más de 1 día hábil" de antigüedad? Propuesta para empezar: de lunes a viernes, sin contar feriados; los feriados bancarios de Venezuela se añadirían con la consulta automática al BCV.
