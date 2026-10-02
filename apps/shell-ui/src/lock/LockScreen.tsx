@@ -3,7 +3,7 @@
 // la PC llega al nodo. Sin nodo no se puede entrar (REQ-003-04).
 import { type SyntheticEvent, useEffect, useRef, useState } from 'react';
 
-import type { PcFeed } from '../channel/use-pc-channel.js';
+import type { PcFeed } from '../channel/feed.js';
 import { type LoginResult, missingField } from './login.js';
 import { Wallpaper } from './Wallpaper.js';
 
