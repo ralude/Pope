@@ -42,6 +42,8 @@ import {
 } from '../map/model.js';
 import { OrganizeGrid } from '../map/OrganizeGrid.js';
 import { useSession, useStaff } from '../session.js';
+import { lossText } from '../temporary/model.js';
+import { TemporaryDialog, type TemporaryTarget } from '../temporary/TemporaryDialog.js';
 import { Dialog } from '../ui/Dialog.js';
 import { Frame } from '../ui/Frame.js';
 
@@ -382,6 +384,11 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
   const stopCharging = useCallback(() => {
     setCharging(null);
   }, []);
+  // Sesión temporal que se abre en esta PC o a la que se añade tiempo (T44).
+  const [temporary, setTemporary] = useState<TemporaryTarget | null>(null);
+  const stopTemporary = useCallback(() => {
+    setTemporary(null);
+  }, []);
   const kind = tileKind(pc);
   const session = pc.session;
   const remaining = session ? liveRemaining(session, pc.connected, now) : 0;
@@ -425,7 +432,9 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
       )}
       {kind === 'free' && (
         <p className="detail-note" style={{ margin: 0 }}>
-          Libre y conectada. El cliente puede entrar con su cuenta desde la PC.
+          {canOperate
+            ? 'Libre y conectada. El cliente puede entrar con su cuenta desde la PC, o puedes abrirle una sesión temporal.'
+            : 'Libre y conectada. El cliente puede entrar con su cuenta desde la PC.'}
         </p>
       )}
       {kind === 'offline' && (
@@ -447,6 +456,40 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
           onDone={stopCharging}
         />
       )}
+      {kind === 'free' && canOperate && (
+        <button
+          type="button"
+          className="btn btn-primary btn-lg"
+          onClick={() => {
+            setTemporary({ action: 'open', pc: { id: pc.id, name: pc.name } });
+          }}
+        >
+          Abrir sesión temporal
+        </button>
+      )}
+      {session?.kind === 'temporary' && canOperate && (
+        <button
+          type="button"
+          className="btn btn-primary btn-lg"
+          onClick={() => {
+            setTemporary({
+              action: 'add',
+              sessionId: session.sessionId,
+              who: session.who,
+              pcName: pc.name,
+              rateMicrosPerHour: session.rateMicrosPerHour,
+            });
+          }}
+        >
+          Añadir tiempo
+        </button>
+      )}
+      {temporary &&
+        (temporary.action === 'open'
+          ? kind === 'free'
+          : session?.sessionId === temporary.sessionId) && (
+          <TemporaryDialog target={temporary} now={now} onClose={stopTemporary} />
+        )}
       {session && canOperate && (
         <button
           type="button"
@@ -463,6 +506,7 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
           pcName={pc.name}
           who={session.who}
           sessionId={session.sessionId}
+          lostSeconds={session.kind === 'temporary' ? remaining : null}
           onDone={stopClosing}
         />
       )}
@@ -537,17 +581,21 @@ function AccountBalance({ pc, now }: { pc: PcMapItem; now: Date }) {
 
 /**
  * Confirmación antes de cerrar una sesión (REQ-001-26): se cobra hasta este momento y la PC
- * se bloquea. Diálogo propio, sin `confirm()` del navegador.
+ * se bloquea. En una temporal, el tiempo que le queda se pierde y no se puede restaurar
+ * (REQ-001-69). Diálogo propio, sin `confirm()` del navegador.
  */
 function CloseSessionDialog({
   pcName,
   who,
   sessionId,
+  lostSeconds,
   onDone,
 }: {
   pcName: string;
   who: string;
   sessionId: string;
+  /** Temporal: el tiempo que se pierde; con cuenta, `null`. */
+  lostSeconds: number | null;
   onDone: () => void;
 }) {
   const { api } = useSession();
@@ -565,10 +613,23 @@ function CloseSessionDialog({
   };
 
   return (
-    <Dialog title={`Cerrar la sesión de ${pcName}`} onClose={onDone} onSubmit={submit}>
-      <p className="detail-note" style={{ margin: 0 }}>
-        Se cobra a <strong>{who}</strong> hasta este momento y la PC se bloquea.
-      </p>
+    <Dialog
+      title={
+        lostSeconds === null ? `Cerrar la sesión de ${pcName}` : `¿Cerrar la sesión de ${who}?`
+      }
+      onClose={onDone}
+      onSubmit={submit}
+    >
+      {lostSeconds === null ? (
+        <p className="detail-note" style={{ margin: 0 }}>
+          Se cobra a <strong>{who}</strong> hasta este momento y la PC se bloquea.
+        </p>
+      ) : (
+        <p className="detail-note" style={{ margin: 0 }}>
+          A {who} le quedan <strong>{lossText(lostSeconds)}</strong> en la {pcName}. Si cierras
+          ahora, ese tiempo se pierde: no se devuelve ni se puede restaurar.
+        </p>
+      )}
       {error && (
         <div role="alert" className="alert-error">
           {error}
@@ -579,7 +640,11 @@ function CloseSessionDialog({
           Cancelar
         </button>
         <button type="submit" className="btn btn-danger" disabled={busy}>
-          {busy ? 'Cerrando…' : 'Cerrar sesión'}
+          {busy
+            ? 'Cerrando…'
+            : lostSeconds === null
+              ? 'Cerrar sesión'
+              : `Cerrar y perder ${lossText(lostSeconds)}`}
         </button>
       </div>
     </Dialog>

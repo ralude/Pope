@@ -450,11 +450,12 @@ antes de seguir.
   - **Nota:** añadida junto con T14d.
   - **Decidido por el mantenedor (2026-10-02):** la sección solo le aparece al administrador.
 
-- [ ] **T44: Sesiones temporales en el panel**
+- [x] **T44: Sesiones temporales en el panel**
   - **Cubre:** REQ-001-60, REQ-001-61, REQ-001-70, REQ-001-69
   - **Hacer:** diálogos de abrir temporal (tiempo o importe, nombre, método), añadir tiempo y cerrar.
   - **Verificar:** CA-001-05 y CA-001-10 a mano con la consola del simulador (T36b).
   - **Commit:** `feat(panel): gestiona las sesiones temporales`
+  - **Decidido al implementarla:** «Abrir sesión temporal» sale en una PC libre y conectada; «Añadir tiempo», en una con temporal. El diálogo cobra por tiempo (minutos, con 30 min, 1 h, 2 h y 3 h) o por importe y muestra el otro valor con los mismos cálculos de `shared` que el nodo (tarifa de hoy al abrir, la de la sesión al añadir). El nombre por defecto se ve de ejemplo. Cerrar una temporal avisa «Cerrar y perder 25 min» (REQ-001-69). Verificado a mano con el simulador y el viernes a 1,50 USD/h de forma provisional: CA-001-05 («Carlos», PC 05, 1 h, abierta por Ana, cobro en su turno y la PC desbloqueada) y CA-001-10 con una temporal de 10 min a la que 0,75 USD suman 30 min; cerrarla avisa de lo que se pierde.
   - **Decidido por el mantenedor (2026-10-02):** sin pantalla propia ni icono en el raíl: se abren, se amplían y se cierran desde el detalle de la PC en el mapa, como en el diseño.
 
 - [ ] **T45: Interrumpidas y restauración**

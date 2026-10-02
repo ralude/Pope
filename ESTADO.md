@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · T43b terminada (personal)
+**Última actualización:** 2026-10-02 · T44 terminada (sesiones temporales)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T44: Sesiones temporales en el panel** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 59 / 68 tareas · fase 8 de 9 (Panel) |
+| **Siguiente tarea** | **T45: Interrumpidas y restauración** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 60 / 68 tareas · fase 8 de 9 (Panel) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -45,7 +45,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 59 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 60 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -58,6 +58,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T44: abrir, ampliar y cerrar sesiones temporales desde el detalle de la PC del mapa (por tiempo o por importe). Verificados CA-001-05 y CA-001-10 a mano con el simulador.
 - **2026-10-02:** T43b: pantalla Personal (solo administrador): alta con rol y activar o desactivar, sin poder desactivarse a sí mismo. Verificado a mano: el encargado desactivado pierde la sesión y no puede entrar.
 - **2026-10-02:** T43: pantalla Combos en `/combo-horas` (la API ya usa `/combos`): alta y edición con lo que sale la hora y el descuento por tramos de días mientras se escribe; el resto del personal ve la lista. Verificado CA-001-14 a mano.
 - **2026-10-02:** T42: pantalla Tarifas: el administrador marca días y les pone un precio; el resto del personal la ve sin poder cambiarla. Verificado CA-001-20 a mano.
@@ -67,4 +68,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-01:** T39a: columnas map_row y map_col en pcs, PUT /pcs/map solo para el administrador (distribución completa en una transacción) y evento pc.map_changed con las PCs que cambian. Probado también contra PostgreSQL real.
 - **2026-10-01:** T39: mapa de PCs en vivo en el panel, con baldosas por estado, leyenda, ocupación y detalle de la PC con «Cerrar sesión». Cuenta el restante y el saldo con el reloj del nodo entre envíos del canal `/panel`. Medido con el simulador: 17–36 ms. Antes, `fix(panel)`: ya no aparece «sesión caducada» al abrir el panel sin sesión.
 - **2026-09-30:** T38a. GET /pcs/map (todo el personal) y canal WebSocket /panel con la cookie del personal (sin ella se cierra con 4401): el mapa completo al conectar y en cada cambio, como mucho uno por segundo. Esquemas pcMapSchema y panelMessageSchema en shared. EventsService.subscribe avisa de lo confirmado y PcConnections de las conexiones.
-- **2026-09-30:** T38. apps/panel (@pope/panel) con Vite, React 19 y wouter: tema oscuro del diseño estilo SENET para 1920×1080, Nunito incluida, barra superior con fecha y hora de Caracas, raíl de iconos y login. ApiClient valida cada respuesta con shared y da mensajes en español; un 401 fuera del login devuelve al login. Vite hace de proxy al nodo. Probado contra el servidor real: login correcto e incorrecto, sesión al recargar y salir.
