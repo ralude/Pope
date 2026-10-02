@@ -417,11 +417,12 @@ antes de seguir.
   - **Commit:** `feat(panel): gestiona los clientes`
   - **Decidido al implementarla:** pantalla `/clientes` según el lienzo, sin el equivalente en Bs y sin «Recargar saldo» ni «Vender combo», que llegan con T41. La búsqueda se lanza 250 ms después de la última tecla, de 50 en 50 con «Ver más». La columna Estado muestra «Bloqueo por intentos» solo en cuentas activas. El panel lateral ofrece pasar a cualquiera de los otros dos estados, sin confirmación porque se puede deshacer. El alta marca bajo cada campo el error del nodo y permite mostrar la contraseña. El dueño solo consulta. Verificado a mano contra PostgreSQL real: búsqueda por nombre con tilde, por cifras del teléfono y por usuario; quitar el bloqueo, bloquear, desactivar y activar (con sus eventos); alta con teléfono incorrecto y correcto, y la vista del dueño sin botones.
 
-- [ ] **T41: Turno, recargas y venta de combos**
+- [x] **T41: Turno, recargas y venta de combos**
   - **Cubre:** REQ-001-03, REQ-001-84, REQ-001-85
   - **Hacer:** control para abrir y cerrar turno, diálogo de recarga y diálogo de compra de combo (en caja o con saldo).
   - **Verificar:** manual; los saldos del cliente cambian al momento.
   - **Commit:** `feat(panel): permite recargar y vender combos`
+  - **Decidido al implementarla:** recargar y vender solo se ofrecen a cuentas activas. La recarga trae importes rápidos (1, 2, 5 y 10 USD) y muestra el saldo tras recargar; la venta de combo ofrece «Con su saldo» (si alcanza) o «Cobrar en caja» con método de pago. Sin turno, los diálogos lo piden y lo abren ahí mismo. En el mapa, el saldo que se muestra es el de la sesión en vivo. Verificado a mano contra PostgreSQL real con el simulador: abrir turno desde la recarga, recargar por pago móvil a una PC con sesión (saldo y tiempo cambian al momento), vender un combo con saldo y otro en caja, y cerrar el turno; eventos `shift.opened`, `wallet.recharged`, `combo.purchased` y `shift.closed` con Ana como actor.
   - **Decidido por el mantenedor (2026-10-02):** el turno se abre y se cierra desde una píldora de la barra superior («Sin turno · Abrir turno» o «Turno abierto · 14:02»), sin entrada en el raíl hasta la spec 005. «Recargar saldo» y «Vender combo» están en Clientes y también en el detalle de una PC con sesión de cuenta; para eso la sesión del mapa trae el id del cliente (commit de `server`/`shared` aparte).
 
 - [ ] **T42: Tabla de tarifas**

@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · T40 terminada (clientes)
+**Última actualización:** 2026-10-02 · T41 terminada (turno, recargas y combos)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T41: Turno, recargas y venta de combos** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 55 / 68 tareas · fase 8 de 9 (Panel) |
+| **Siguiente tarea** | **T42: Tabla de tarifas** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 56 / 68 tareas · fase 8 de 9 (Panel) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -45,7 +45,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 55 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 56 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -58,6 +58,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T41: turno de caja en la barra superior (abrir y cerrar), diálogos de recarga y de venta de combo (con saldo o en caja) desde Clientes y desde el detalle de la PC; la sesión del mapa trae el id del cliente. Antes, las decisiones del mantenedor para el resto de la fase 8. Verificado a mano con el simulador.
 - **2026-10-02:** T40: pantalla Clientes del panel: lista con buscador (usuario, nombre o teléfono), alta con errores por campo, bloquear, desactivar o activar y quitar el bloqueo por intentos; el dueño solo consulta. Antes, `refactor(panel)`: el panel lateral y el diálogo pasan a ser compartidos. Verificado a mano contra PostgreSQL real.
 - **2026-10-01:** T39b: pestaña Organizar del mapa para el administrador con @dnd-kit/core: arrastrar con ratón o teclado, intercambiar, guardar o descartar. Verificado a mano: misma distribución al recargar y desde otra sesión.
 - **2026-10-01:** T39a: columnas map_row y map_col en pcs, PUT /pcs/map solo para el administrador (distribución completa en una transacción) y evento pc.map_changed con las PCs que cambian. Probado también contra PostgreSQL real.
@@ -67,4 +68,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** Decisiones del mantenedor para la fase 8: diseño de referencia el lienzo estilo SENET a 1920×1080, Nunito incluida, Bs oculto hasta la spec 005 y escrito «Bs», organizar el mapa arrastrando (REQ-001-45, @dnd-kit/core; tareas T39a y T39b) y el nodo sirve el panel compilado (T45a). Se añade T38a: estado de las PCs y canal WebSocket del panel.
 - **2026-09-30:** T37. Subcomando load del simulador (40 PCs conectadas, un login cada 1,5 s, 10 min de sesiones y ráfaga final informativa; mide la memoria con el log del servidor) y mediciones.md. En el equipo de desarrollo: p95 del login 69 ms (ráfaga 334 ms), rss máx 222 MB, 0 errores; argon2 13 ms. Pendiente repetirlo en el i5 de 2ª gen. Fin de la fase 7.
 - **2026-09-30:** T37a. POPE_MEMORY_LOG_MS (opcional, mínimo 1000) hace que el servidor registre cada ese tiempo Memoria: rss=… MB heapUsed=… MB. Probado en un arranque real: unos 84 MB en reposo (el primer registro, durante el arranque y las migraciones, marcó 260 MB).
-- **2026-09-30:** T36b. Subcomando interactive: consola con login, logout, red, reinicio, apagon, luz y estado sobre PCs simuladas. Probada contra PostgreSQL real: el corte de red de 20 s mantiene la sesión, el apagón la cierra sin latidos y el reinicio con la sesión ya nombrada la cierra al momento.

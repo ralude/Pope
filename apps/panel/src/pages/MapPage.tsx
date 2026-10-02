@@ -5,6 +5,7 @@
 import '../map/map.css';
 
 import {
+  type CustomerBalances,
   formatDuration,
   formatLocalTime,
   formatMoney,
@@ -15,6 +16,8 @@ import {
 import { type ReactNode, type SyntheticEvent, useCallback, useState } from 'react';
 
 import { ApiError } from '../api/client.js';
+import { ComboSaleDialog } from '../customers/ComboSaleDialog.js';
+import { RechargeDialog } from '../customers/RechargeDialog.js';
 import { useNodeNow, usePcMapFeed } from '../map/channel.js';
 import {
   type Cell,
@@ -371,6 +374,14 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
   const stopClosing = useCallback(() => {
     setClosingId(null);
   }, []);
+  // Cobro en curso (T41), atado a la sesión igual que el cierre.
+  const [charging, setCharging] = useState<{
+    what: 'recharge' | 'combo';
+    sessionId: string;
+  } | null>(null);
+  const stopCharging = useCallback(() => {
+    setCharging(null);
+  }, []);
   const kind = tileKind(pc);
   const session = pc.session;
   const remaining = session ? liveRemaining(session, pc.connected, now) : 0;
@@ -424,6 +435,18 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
       )}
 
       <div style={{ flexGrow: 1 }} />
+      {session?.customerId && canOperate && (
+        <AccountCharges
+          customerId={session.customerId}
+          username={session.who}
+          balances={liveAccount(session, pc.connected, now)}
+          what={charging?.sessionId === session.sessionId ? charging.what : null}
+          onStart={(what) => {
+            setCharging({ what, sessionId: session.sessionId });
+          }}
+          onDone={stopCharging}
+        />
+      )}
       {session && canOperate && (
         <button
           type="button"
@@ -442,6 +465,56 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
           sessionId={session.sessionId}
           onDone={stopClosing}
         />
+      )}
+    </>
+  );
+}
+
+/**
+ * «Recargar saldo» y «Vender combo» para el cliente de la PC (T41, REQ-001-03,
+ * REQ-001-84, REQ-001-85). El saldo que se muestra es el de la sesión en vivo.
+ */
+function AccountCharges({
+  customerId,
+  username,
+  balances,
+  what,
+  onStart,
+  onDone,
+}: {
+  customerId: string;
+  username: string;
+  balances: CustomerBalances;
+  what: 'recharge' | 'combo' | null;
+  onStart: (what: 'recharge' | 'combo') => void;
+  onDone: () => void;
+}) {
+  const customer = { id: customerId, username };
+  return (
+    <>
+      <button
+        type="button"
+        className="btn btn-primary btn-lg"
+        onClick={() => {
+          onStart('recharge');
+        }}
+      >
+        Recargar saldo
+      </button>
+      <button
+        type="button"
+        className="btn btn-ghost btn-lg"
+        onClick={() => {
+          onStart('combo');
+        }}
+      >
+        Vender combo
+      </button>
+      {what === 'recharge' && (
+        <RechargeDialog customer={customer} balances={balances} onClose={onDone} onDone={onDone} />
+      )}
+      {what === 'combo' && (
+        <ComboSaleDialog customer={customer} balances={balances} onClose={onDone} onDone={onDone} />
       )}
     </>
   );

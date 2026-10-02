@@ -22,6 +22,7 @@ import {
 } from 'react';
 
 import { ApiError, type FieldIssue } from '../api/client.js';
+import { ComboSaleDialog } from '../customers/ComboSaleDialog.js';
 import {
   BADGE_LABEL,
   customerBadge,
@@ -32,6 +33,7 @@ import {
   searchPath,
   statusActions,
 } from '../customers/model.js';
+import { RechargeDialog } from '../customers/RechargeDialog.js';
 import { useSession, useStaff } from '../session.js';
 import { Dialog } from '../ui/Dialog.js';
 import { Frame } from '../ui/Frame.js';
@@ -294,6 +296,14 @@ function CustomerDetail({
   const { api } = useSession();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dialog, setDialog] = useState<'recharge' | 'combo' | null>(null);
+  const closeDialog = useCallback(() => {
+    setDialog(null);
+  }, []);
+  const charged = (updated: Customer) => {
+    setDialog(null);
+    onChange(updated);
+  };
   const badge = customerBadge(customer, now);
   const locked = isLoginLocked(customer, now);
   const contact = [customer.name, customer.phone && formatPhone(customer.phone)].filter(Boolean);
@@ -363,6 +373,44 @@ function CustomerDetail({
         </div>
       )}
       <div style={{ flexGrow: 1 }} />
+      {canOperate && customer.status === 'active' && (
+        <>
+          <button
+            type="button"
+            className="btn btn-primary btn-lg"
+            onClick={() => {
+              setDialog('recharge');
+            }}
+          >
+            Recargar saldo
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost btn-lg"
+            onClick={() => {
+              setDialog('combo');
+            }}
+          >
+            Vender combo
+          </button>
+        </>
+      )}
+      {dialog === 'recharge' && (
+        <RechargeDialog
+          customer={customer}
+          balances={customer.balances}
+          onClose={closeDialog}
+          onDone={charged}
+        />
+      )}
+      {dialog === 'combo' && (
+        <ComboSaleDialog
+          customer={customer}
+          balances={customer.balances}
+          onClose={closeDialog}
+          onDone={charged}
+        />
+      )}
       {canOperate && (
         <div className="detail-grid" style={{ gap: 8 }}>
           {statusActions(customer.status).map((action) => (
