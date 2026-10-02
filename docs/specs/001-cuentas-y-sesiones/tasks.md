@@ -422,18 +422,21 @@ antes de seguir.
   - **Hacer:** control para abrir y cerrar turno, diálogo de recarga y diálogo de compra de combo (en caja o con saldo).
   - **Verificar:** manual; los saldos del cliente cambian al momento.
   - **Commit:** `feat(panel): permite recargar y vender combos`
+  - **Decidido por el mantenedor (2026-10-02):** el turno se abre y se cierra desde una píldora de la barra superior («Sin turno · Abrir turno» o «Turno abierto · 14:02»), sin entrada en el raíl hasta la spec 005. «Recargar saldo» y «Vender combo» están en Clientes y también en el detalle de una PC con sesión de cuenta; para eso la sesión del mapa trae el id del cliente (commit de `server`/`shared` aparte).
 
 - [ ] **T42: Tabla de tarifas**
   - **Cubre:** REQ-001-10, REQ-001-15
   - **Hacer:** tabla de 7 días con selección múltiple (solo administrador).
   - **Verificar:** CA-001-20 a mano.
   - **Commit:** `feat(panel): permite editar las tarifas por día`
+  - **Decidido por el mantenedor (2026-10-02):** el encargado y el dueño ven la tabla sin poder cambiarla.
 
 - [ ] **T43: Administración de combos**
   - **Cubre:** REQ-001-80, REQ-001-81
   - **Hacer:** lista, alta y edición, mostrando el precio por hora y el descuento en vivo mientras se escribe.
   - **Verificar:** CA-001-14 a mano.
   - **Commit:** `feat(panel): administra los combos`
+  - **Decidido por el mantenedor (2026-10-02):** el encargado y el dueño ven la lista sin poder cambiarla. El descuento se agrupa por tramos de días seguidos con el mismo precio («de lunes a miércoles», «viernes y sábado», «el domingo»).
 
 - [ ] **T43b: Administración del personal**
   - **Cubre:** REQ-001-40
@@ -441,18 +444,21 @@ antes de seguir.
   - **Verificar:** a mano: crear un encargado, iniciar sesión con él y desactivarlo.
   - **Commit:** `feat(panel): administra el personal`
   - **Nota:** añadida junto con T14d.
+  - **Decidido por el mantenedor (2026-10-02):** la sección solo le aparece al administrador.
 
 - [ ] **T44: Sesiones temporales en el panel**
   - **Cubre:** REQ-001-60, REQ-001-61, REQ-001-70, REQ-001-69
   - **Hacer:** diálogos de abrir temporal (tiempo o importe, nombre, método), añadir tiempo y cerrar.
   - **Verificar:** CA-001-05 y CA-001-10 a mano con la consola del simulador (T36b).
   - **Commit:** `feat(panel): gestiona las sesiones temporales`
+  - **Decidido por el mantenedor (2026-10-02):** sin pantalla propia ni icono en el raíl: se abren, se amplían y se cierran desde el detalle de la PC en el mapa, como en el diseño.
 
 - [ ] **T45: Interrumpidas y restauración**
   - **Cubre:** REQ-001-64, REQ-001-66, REQ-001-67, REQ-001-68, REQ-001-71
   - **Hacer:** vista de sesiones interrumpidas y del respaldo por PC, con el botón Restaurar y la elección de PC.
   - **Verificar:** simular un apagón con la consola del simulador (`apagon N`, T36b) y restaurar (CA-001-06).
   - **Commit:** `feat(panel): muestra y restaura sesiones interrumpidas`
+  - **Decidido por el mantenedor (2026-10-02):** el icono de Interrumpidas lleva un punto ámbar si hay pendientes; el nodo envía cuántas hay por el canal `/panel` al conectar y cuando cambia (commit de `server`/`shared` aparte). La pantalla de ajustes (gracia de latidos y sesiones conservadas) queda fuera de la fase 8.
 
 - [ ] **T45a: Servir el panel desde el nodo**
   - **Cubre:** ADR-0011, REQ-001-53
