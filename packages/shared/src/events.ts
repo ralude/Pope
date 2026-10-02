@@ -382,6 +382,91 @@ export const exchangeRateSetEventSchema = event(
   }),
 );
 
+// ─── Inventario (spec 005, parte 2) ─────────────────────────────────────────────────────
+
+const productRefSchema = z.strictObject({ id: idSchema, name: z.string().min(1) });
+
+const productDataSchema = z.strictObject({
+  name: z.string().min(1),
+  price: positiveUsdSchema,
+  minStock: z.int().nonnegative().nullable(),
+  active: z.boolean(),
+});
+
+/** Alta de un producto (REQ-005-04). Lo que llegó va aparte, en su `stock.moved`. */
+export const productCreatedEventSchema = event(
+  'product.created',
+  1,
+  z.strictObject({ productId: idSchema, product: productDataSchema }),
+);
+
+/** Edición o desactivación, con los valores anteriores y los nuevos (REQ-005-02). */
+export const productUpdatedEventSchema = event(
+  'product.updated',
+  1,
+  z.strictObject({ productId: idSchema, before: productDataSchema, after: productDataSchema }),
+);
+
+/** Foto nueva de un producto (REQ-005-03), con el nombre del archivo que puso el nodo. */
+export const productPhotoSetEventSchema = event(
+  'product.photo_set',
+  1,
+  z.strictObject({ product: productRefSchema, photo: z.string().min(1) }),
+);
+
+/**
+ * Entrada de mercancía, ajuste o merma (REQ-005-10, REQ-005-14), con la cantidad con signo.
+ * Los movimientos de una venta y de su anulación van en `sale.recorded` y `sale.voided`.
+ */
+export const stockMovedEventSchema = event(
+  'stock.moved',
+  1,
+  z.discriminatedUnion('kind', [
+    z.strictObject({
+      kind: z.literal('restock'),
+      product: productRefSchema,
+      quantity: z.int().positive(),
+      reason: z.string().min(1).nullable(),
+    }),
+    z.strictObject({
+      kind: z.literal('adjustment'),
+      product: productRefSchema,
+      quantity: z.int().refine((q) => q !== 0, 'El ajuste no puede ser 0'),
+      reason: z.string().min(1),
+    }),
+    z.strictObject({
+      kind: z.literal('waste'),
+      product: productRefSchema,
+      quantity: z.int().negative(),
+      reason: z.string().min(1),
+    }),
+  ]),
+);
+
+const saleConceptDataSchema = z.strictObject({
+  name: z.string().min(1),
+  unitPrice: positiveUsdSchema,
+  active: z.boolean(),
+});
+
+/** Alta de un concepto que se vende sin inventario, como "Impresiones" (REQ-005-05). */
+export const saleConceptCreatedEventSchema = event(
+  'sale_concept.created',
+  1,
+  z.strictObject({ conceptId: idSchema, concept: saleConceptDataSchema }),
+);
+
+/** Edición o desactivación de un concepto, con los valores anteriores y los nuevos. */
+export const saleConceptUpdatedEventSchema = event(
+  'sale_concept.updated',
+  1,
+  z.strictObject({
+    conceptId: idSchema,
+    before: saleConceptDataSchema,
+    after: saleConceptDataSchema,
+  }),
+);
+
 // ─── Unión de todos los eventos ─────────────────────────────────────────────────────────
 
 export const domainEventSchema = z.discriminatedUnion('type', [
@@ -406,6 +491,12 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   staffStatusChangedEventSchema,
   pcMapChangedEventSchema,
   exchangeRateSetEventSchema,
+  productCreatedEventSchema,
+  productUpdatedEventSchema,
+  productPhotoSetEventSchema,
+  stockMovedEventSchema,
+  saleConceptCreatedEventSchema,
+  saleConceptUpdatedEventSchema,
 ]);
 export type DomainEvent = z.infer<typeof domainEventSchema>;
 export type DomainEventType = DomainEvent['type'];

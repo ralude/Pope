@@ -41,6 +41,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
     expect(response.json<Settings>()).toEqual({
       heartbeatGraceSeconds: 180,
       temporarySessionsKeptPerPc: 3,
+      allowNegativeStock: 0,
     });
   });
 
@@ -50,6 +51,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
     expect(response.json<Settings>()).toEqual({
       heartbeatGraceSeconds: 300,
       temporarySessionsKeptPerPc: 3,
+      allowNegativeStock: 0,
     });
     expect((await get(ana)).json<Settings>().heartbeatGraceSeconds).toBe(300);
     expect(await settingEvents()).toMatchObject([
@@ -105,6 +107,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
     expect(await testApp.app.get(SettingsService).get()).toEqual({
       heartbeatGraceSeconds: 180,
       temporarySessionsKeptPerPc: 3,
+      allowNegativeStock: 0,
     });
   });
 });

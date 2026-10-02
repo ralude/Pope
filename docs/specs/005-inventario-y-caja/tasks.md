@@ -75,11 +75,12 @@ parte 1.
   - **Commit:** sin commit (el diseño vive en el lienzo); se anota en ESTADO.md con el siguiente commit.
   - **Decidido al implementarla:** artboards Caja, Inventario, NuevoProducto, AbrirCaja, CerrarCaja (conteo, confirmación y "Caja cerrada"), Cierres y ReportePDF (A4). El raíl gana Caja, Inventario y Cierres; "Turno de caja" pasa a ser Caja. El PDF del encargado no lleva líneas de firma (mantenedor). Aprobado por el mantenedor el 2026-10-02.
 
-- [ ] **T09a: Contratos del inventario**
+- [x] **T09a: Contratos del inventario**
   - **Cubre:** REQ-005-01 a REQ-005-05, REQ-005-10 a REQ-005-14
   - **Hacer:** en `@pope/shared`, los esquemas de productos (con la cantidad inicial como primera entrada), conceptos y movimientos de stock; el ajuste `allowNegativeStock` (REQ-005-12); los eventos `product.*`, `stock.moved` y `sale_concept.*`; el aviso de bajo mínimo.
   - **Verificar:** tests unitarios de los esquemas, del bajo mínimo y de los eventos.
   - **Commit:** `feat(shared): añade los contratos del inventario`
+  - **Decidido al implementarla:** módulo `inventory.ts`. Los tipos de movimiento van en inglés como el resto de los datos: `restock` (entrada), `sale` (venta), `adjustment` (ajuste) y `waste` (merma). `POST /products` lleva `initialQuantity` (0 si no llegó nada) y el nodo la guarda como entrada en la misma transacción. La foto se identifica con `photoVersion`, que entra en la ruta (`productPhotoPath`) para que la caché larga no enseñe una foto vieja. Bajo mínimo es estar **por debajo** del mínimo (con 5 de mínimo, avisa con 4). Evento nuevo `product.photo_set`. `stock.moved` solo para entradas, ajustes y mermas (con la cantidad con signo); lo de las ventas va en sus eventos. `allowNegativeStock` es 0 o 1, como número igual que los demás ajustes.
 
 - [ ] **T09b: Contratos de las ventas y la caja**
   - **Cubre:** REQ-005-20 a REQ-005-25, REQ-005-40, REQ-005-42, REQ-005-52

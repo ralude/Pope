@@ -12,7 +12,17 @@ describe('ajustes del nodo (REQ-001-27, REQ-001-64)', () => {
     expect(settingsSchema.parse(DEFAULT_SETTINGS)).toEqual({
       heartbeatGraceSeconds: 180,
       temporarySessionsKeptPerPc: 3,
+      allowNegativeStock: 0,
     });
+  });
+
+  it('vender sin stock está apagado por defecto y solo vale 0 o 1 (REQ-005-12)', () => {
+    const valid = (allowNegativeStock: number) =>
+      settingsUpdateRequestSchema.safeParse({ allowNegativeStock }).success;
+    expect(valid(0)).toBe(true);
+    expect(valid(1)).toBe(true);
+    expect(valid(2)).toBe(false);
+    expect(valid(-1)).toBe(false);
   });
 
   it('las sesiones temporales conservadas no bajan de 3', () => {

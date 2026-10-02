@@ -16,6 +16,11 @@ export const settingsSchema = z.strictObject({
   heartbeatGraceSeconds: z.number().int().min(30).max(1800),
   /** Sesiones temporales que el panel conserva por PC (REQ-001-64). Mínimo 3. */
   temporarySessionsKeptPerPc: z.number().int().min(MIN_TEMPORARY_SESSIONS_KEPT).max(100),
+  /**
+   * Si se puede vender un producto sin stock, dejándolo en negativo (REQ-005-12): 1 sí, 0 no.
+   * Apagado por defecto. Es un número, como los demás ajustes, para que valga el mismo evento.
+   */
+  allowNegativeStock: z.number().int().min(0).max(1),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
@@ -27,6 +32,7 @@ export type SettingKey = z.infer<typeof settingKeySchema>;
 export const DEFAULT_SETTINGS: Settings = {
   heartbeatGraceSeconds: 180,
   temporarySessionsKeptPerPc: MIN_TEMPORARY_SESSIONS_KEPT,
+  allowNegativeStock: 0,
 };
 
 /** Cuerpo de `PUT /settings`: uno o varios ajustes; los que no vienen no cambian. */

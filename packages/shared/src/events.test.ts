@@ -142,6 +142,35 @@ const examples = {
     effectiveDate: '2026-09-25',
     source: 'manual',
   }),
+  // Spec 005, parte 2: inventario.
+  'product.created': envelope('product.created', {
+    productId: id(10),
+    product: { name: 'Doritos', price: usd(1_500_000), minStock: 5, active: true },
+  }),
+  'product.updated': envelope('product.updated', {
+    productId: id(10),
+    before: { name: 'Doritos', price: usd(1_500_000), minStock: 5, active: true },
+    after: { name: 'Doritos', price: usd(1_750_000), minStock: 5, active: true },
+  }),
+  'product.photo_set': envelope('product.photo_set', {
+    product: { id: id(10), name: 'Doritos' },
+    photo: '0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a0a-3f2a9c.webp',
+  }),
+  'stock.moved': envelope('stock.moved', {
+    kind: 'restock',
+    product: { id: id(10), name: 'Doritos' },
+    quantity: 24,
+    reason: null,
+  }),
+  'sale_concept.created': envelope('sale_concept.created', {
+    conceptId: id(11),
+    concept: { name: 'Impresiones', unitPrice: usd(100_000), active: true },
+  }),
+  'sale_concept.updated': envelope('sale_concept.updated', {
+    conceptId: id(11),
+    before: { name: 'Impresiones', unitPrice: usd(100_000), active: true },
+    after: { name: 'Impresiones', unitPrice: usd(150_000), active: true },
+  }),
 };
 
 describe('eventos de auditoría (REQ-001-30, ADR-0008)', () => {
@@ -254,6 +283,29 @@ describe('importes y tiempos en los eventos (ADR-0015)', () => {
         payload: { ...ended.payload, usage: { ...usage, moneySeconds: -1 } },
       }),
     ).toBe(false);
+  });
+});
+
+describe('inventario (REQ-005-02, REQ-005-10)', () => {
+  it('el cambio de precio queda con el anterior y el nuevo', () => {
+    const event = domainEventSchema.parse(examples['product.updated']);
+    expect(event.type === 'product.updated' && event.payload.before.price.micros).toBe(1_500_000);
+    expect(event.type === 'product.updated' && event.payload.after.price.micros).toBe(1_750_000);
+  });
+
+  it('la entrada sube, la merma baja y los dos con su signo; ajuste y merma llevan motivo', () => {
+    const moved = examples['stock.moved'];
+    const withPayload = (payload: object) => ({
+      ...moved,
+      payload: { ...moved.payload, ...payload },
+    });
+    expect(valid(withPayload({ quantity: -24 }))).toBe(false);
+    expect(valid(withPayload({ kind: 'waste', quantity: -1, reason: 'Vencido' }))).toBe(true);
+    expect(valid(withPayload({ kind: 'waste', quantity: 1, reason: 'Vencido' }))).toBe(false);
+    expect(valid(withPayload({ kind: 'waste', quantity: -1, reason: null }))).toBe(false);
+    expect(valid(withPayload({ kind: 'adjustment', quantity: -2, reason: 'Conteo' }))).toBe(true);
+    expect(valid(withPayload({ kind: 'adjustment', quantity: 0, reason: 'Conteo' }))).toBe(false);
+    expect(valid(withPayload({ kind: 'sale', quantity: -1, reason: null }))).toBe(false);
   });
 });
 
