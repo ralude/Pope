@@ -117,7 +117,7 @@ describe('abrir sesión temporal (e2e, REQ-001-22, REQ-001-60, REQ-001-61, REQ-0
         rate: { micros: usd(1.5), currency: 'USD' },
         purchasedSeconds: 1800,
         amount: { micros: usd(0.75), currency: 'USD' },
-        paymentMethod: 'cash_usd',
+        payment: { method: 'cash_usd', amount: { micros: usd(0.75), currency: 'USD' } },
         shiftId,
       },
     });

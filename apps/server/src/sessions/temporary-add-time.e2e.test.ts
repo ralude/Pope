@@ -65,6 +65,9 @@ describe('añadir tiempo a una sesión temporal (e2e, REQ-001-70)', () => {
     request('POST', `/sessions/${id}/time`, body, cookie);
 
   it('CA-001-10: con 10 min restantes, cobrar 0,75 USD la deja en 40 min y el cobro va al turno', async () => {
+    // El punto de venta es en Bs: hace falta la tasa del día (spec 005). Se guarda antes de
+    // abrir, para que su reenvío del estado no se cruce con el del tiempo añadido.
+    await request('POST', '/exchange-rate', { vesPerUsd: 40_000_000 });
     const { pc, session } = await openTemporary(5, 10);
 
     const response = await addTime(session.id, { paymentMethod: 'pos', amountMicros: usd(0.75) });
@@ -107,7 +110,11 @@ describe('añadir tiempo a una sesión temporal (e2e, REQ-001-70)', () => {
         pc: { id: devPcId(5), name: 'PC 05' },
         seconds: 1800,
         amount: { micros: usd(0.75), currency: 'USD' },
-        paymentMethod: 'pos',
+        payment: {
+          method: 'pos',
+          amount: { micros: 30_000_000, currency: 'VES' },
+          vesRate: 40_000_000,
+        },
         shiftId,
       },
     });

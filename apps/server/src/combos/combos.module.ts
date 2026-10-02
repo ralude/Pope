@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 
+import { CashModule } from '../cash/cash.module.js';
 import { TariffsModule } from '../tariffs/tariffs.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
 import { ComboSalesService } from './combo-sales.service.js';
@@ -11,7 +12,7 @@ import { CombosService } from './combos.service.js';
  * desde el panel está en `SessionsModule`, porque antes de vender cobra la sesión en curso.
  */
 @Module({
-  imports: [TariffsModule, WalletModule],
+  imports: [TariffsModule, WalletModule, CashModule],
   controllers: [CombosController],
   providers: [CombosService, ComboSalesService],
   exports: [CombosService, ComboSalesService],

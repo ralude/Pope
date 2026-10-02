@@ -7,7 +7,12 @@ import {
   Logger,
   type OnApplicationBootstrap,
 } from '@nestjs/common';
-import { PANEL_UNAUTHORIZED_CLOSE, type PanelMessage, panelMessageSchema } from '@pope/shared';
+import {
+  type DomainEventType,
+  PANEL_UNAUTHORIZED_CLOSE,
+  type PanelMessage,
+  panelMessageSchema,
+} from '@pope/shared';
 import { type WebSocket, WebSocketServer } from 'ws';
 
 import { AuthService } from '../auth/auth.service.js';
@@ -27,6 +32,27 @@ export const PANEL_THROTTLE_MS = 1000;
  * las 48 h del corte sin que pase nada más (REQ-001-71).
  */
 export const PANEL_INTERRUPTED_CHECK_MS = 60_000;
+
+/**
+ * Eventos que cambian lo que muestran la Caja o el Inventario: cobros, ventas, stock,
+ * productos, conceptos y la caja misma. Tras ellos se avisa al panel con `cash` (REQ-005-24).
+ */
+export const CASH_EVENT_TYPES: ReadonlySet<DomainEventType> = new Set<DomainEventType>([
+  'wallet.recharged',
+  'combo.purchased',
+  'session.started',
+  'session.time_added',
+  'sale.recorded',
+  'sale.voided',
+  'stock.moved',
+  'product.created',
+  'product.updated',
+  'product.photo_set',
+  'sale_concept.created',
+  'sale_concept.updated',
+  'shift.opened',
+  'shift.closed',
+]);
 
 /** Lee una cookie de la cabecera `Cookie` de la petición de conexión. */
 export function cookieFrom(header: string | undefined, name: string): string | null {
@@ -76,7 +102,10 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
 
   onApplicationBootstrap(): void {
     this.unsubscribe = [
-      this.events.subscribe(() => {
+      this.events.subscribe((committed) => {
+        if (committed.some((event) => CASH_EVENT_TYPES.has(event.type))) {
+          this.broadcastCash();
+        }
         this.changed();
       }),
       this.connections.subscribe(() => {
@@ -191,6 +220,16 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       }
     } catch (error) {
       this.logger.error('No se pudieron contar las interrumpidas para el panel', error);
+    }
+  }
+
+  /**
+   * Avisa de que cambió la caja o el stock: las pantallas abiertas vuelven a pedir lo que
+   * muestran. Sin esperar al segundo del mapa: es un mensaje pequeño y poco frecuente.
+   */
+  private broadcastCash(): void {
+    for (const client of this.clients) {
+      this.send(client, { type: 'cash' });
     }
   }
 

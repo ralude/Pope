@@ -2,6 +2,7 @@ import { newId, usd } from '@pope/shared';
 import { asc, eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import type { CashRegisterService } from '../cash/cash-register.service.js';
 import type { DatabaseHandle } from '../db/database.js';
 import { customers, ledger } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
@@ -20,7 +21,9 @@ describe('WalletService: ledger y dos saldos (REQ-001-83, REQ-001-89, ADR-0014)'
 
   beforeEach(async () => {
     handle = await createTestDatabase();
-    wallet = new WalletService(handle.db, new EventsService(handle.db), new FakeClock());
+    // Estos tests solo usan `post`, que no toca el registro de caja.
+    const cash = {} as CashRegisterService;
+    wallet = new WalletService(handle.db, new EventsService(handle.db), cash, new FakeClock());
     juan = await insertCustomer('juan');
     maria = await insertCustomer('maria');
   });

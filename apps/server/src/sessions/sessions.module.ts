@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 
 import { AuthModule } from '../auth/auth.module.js';
+import { CashModule } from '../cash/cash.module.js';
 import { CombosModule } from '../combos/combos.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module.js';
@@ -29,6 +30,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
 @Module({
   imports: [
     AuthModule,
+    CashModule,
     CombosModule,
     CustomersModule,
     ExchangeRatesModule,

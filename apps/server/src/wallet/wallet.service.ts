@@ -18,11 +18,14 @@ import { and, eq, gte, sql } from 'drizzle-orm';
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { customerBalances, customers, ledger } from '../db/schema.js';
+import { CashRegisterService, deskPaymentOf } from '../cash/cash-register.service.js';
 import { requireCustomer } from '../customers/customers.service.js';
 import { EventsService, type Transaction } from '../events/events.service.js';
 
 /** Un movimiento de saldo (REQ-001-89). */
 export interface LedgerEntry {
+  /** Id de la fila; si no se da, uno nuevo. Lo da quien necesita enlazarla (registro de caja). */
+  id?: string;
   customerId: string;
   wallet: Wallet;
   /** µUSD (monedero `money`) o segundos (monedero `combo`); negativo resta. */
@@ -69,12 +72,13 @@ export class WalletService {
   constructor(
     @Inject(DATABASE) private readonly db: Database,
     private readonly events: EventsService,
+    private readonly cash: CashRegisterService,
     private readonly clock: Clock,
   ) {}
 
   /**
-   * Recarga en caja (REQ-001-03): suma el importe al saldo en dinero, ligado al turno de
-   * quien cobra, y emite `wallet.recharged`. El sistema no verifica el pago. Una cuenta
+   * Recarga en caja (REQ-001-03): suma el importe al saldo en dinero, la anota en el registro
+   * de caja (REQ-005-24; en Bs, con la tasa vigente) y emite `wallet.recharged`. El sistema no verifica el pago. Una cuenta
    * bloqueada o desactivada no puede recibir recargas (REQ-001-04).
    */
   async recharge(
@@ -96,7 +100,9 @@ export class WalletService {
       if (customer.status !== 'active') {
         throw new ConflictException(inactiveAccountMessage(customer.status));
       }
+      const ledgerId = newId();
       await this.post(tx, {
+        id: ledgerId,
         customerId,
         wallet: 'money',
         amount: input.amountMicros,
@@ -105,14 +111,23 @@ export class WalletService {
         shiftId: shift.id,
         paymentMethod: input.paymentMethod,
       });
+      const pieces = await this.cash.record(tx, {
+        shiftId: shift.id,
+        source: 'recharge',
+        sourceId: ledgerId,
+        description: `Recarga · ${customer.username}`,
+        groups: [{ group: 'pc', usdMicros: input.amountMicros }],
+        payments: [{ method: input.paymentMethod, usdMicros: input.amountMicros }],
+        actor,
+      });
       emit({
         type: 'wallet.recharged',
-        version: 1,
+        version: 2,
         actor,
         payload: {
           customer: { id: customer.id, username: customer.username },
           amount: { micros: input.amountMicros, currency: 'USD' },
-          paymentMethod: input.paymentMethod,
+          payment: deskPaymentOf(pieces),
           shiftId: shift.id,
         },
       });
@@ -171,7 +186,7 @@ export class WalletService {
     }
 
     await tx.insert(ledger).values({
-      id: newId(),
+      id: entry.id ?? newId(),
       customerId: entry.customerId,
       wallet: entry.wallet,
       amount: entry.amount,

@@ -84,6 +84,8 @@ describe('compra de combos desde el panel (e2e, REQ-001-82, REQ-001-84, REQ-001-
 
   it('en caja suma las horas sin tocar el saldo y liga el cobro al turno', async () => {
     const shift = await openShift();
+    // El punto de venta es en Bs: hace falta la tasa del día (spec 005).
+    await request('POST', '/exchange-rate', ana, { vesPerUsd: 40_000_000 });
     const response = await buy({ via: 'cash_desk', paymentMethod: 'pos' });
     expect(response.json<Customer>().balances).toEqual({ moneyMicros: 0, comboSeconds: hours(20) });
     const rows = await testApp.database.db
@@ -106,7 +108,14 @@ describe('compra de combos desde el panel (e2e, REQ-001-82, REQ-001-84, REQ-001-
       }),
     ]);
     expect(await lastEvent()).toMatchObject({
-      payload: { payment: { via: 'cash_desk', paymentMethod: 'pos', shiftId: shift.id } },
+      version: 2,
+      payload: {
+        payment: {
+          via: 'cash_desk',
+          payment: { method: 'pos', amount: { micros: 800_000_000, currency: 'VES' } },
+          shiftId: shift.id,
+        },
+      },
     });
     await assertBalancesMatchLedger(testApp.database.db);
   });

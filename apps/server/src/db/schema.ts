@@ -5,7 +5,11 @@
 // micro-unidades (ADR-0015) y tiempos en segundos `integer`.
 import type {
   Actor,
+  CashGroup,
+  CashMethod,
+  CashSource,
   ComboSnapshot,
+  Currency,
   CustomerStatus,
   ExchangeRateSource,
   LedgerKind,
@@ -480,4 +484,60 @@ export const saleConcepts = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   },
   (t) => [check('sale_concepts_price_positive', sql`${t.unitPriceMicros} > 0`)],
+);
+
+/**
+ * Registro único de lo cobrado (spec 005, REQ-005-24): una fila por pago y grupo del
+ * reporte. Lo escriben las ventas, las recargas, las sesiones temporales y los combos
+ * cobrados en caja, en la misma transacción que el cobro. Solo se insertan: una anulación
+ * escribe filas con importes negativos.
+ */
+export const cashEntries = pgTable(
+  'cash_entries',
+  {
+    id: uuid('id').primaryKey(),
+    shiftId: uuid('shift_id')
+      .notNull()
+      .references(() => cashShifts.id),
+    source: text('source').$type<CashSource>().notNull(),
+    /** La venta, recarga (fila del ledger), cobro de la temporal o compra de combo. */
+    sourceId: uuid('source_id').notNull(),
+    /** Grupo del reporte (REQ-005-52). */
+    group: text('report_group').$type<CashGroup>().notNull(),
+    method: text('method').$type<CashMethod>().notNull(),
+    currency: text('currency').$type<Currency>().notNull(),
+    /** En la moneda del pago, µ-unidades (ADR-0015). */
+    amountMicros: bigint('amount_micros', { mode: 'number' }).notNull(),
+    /** Su equivalente en µUSD. */
+    usdMicros: bigint('usd_micros', { mode: 'number' }).notNull(),
+    /** Tasa aplicada si se cobró en Bs (REQ-005-22). */
+    vesRate: bigint('ves_rate', { mode: 'number' }),
+    /** Qué fue, copiado al cobrar: "Recarga · juan", "Impresiones × 12". */
+    description: text('description').notNull(),
+    actor: jsonb('actor').$type<Actor>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index('cash_entries_shift_created_idx').on(t.shiftId, t.createdAt),
+    index('cash_entries_source_idx').on(t.source, t.sourceId),
+    check(
+      'cash_entries_source_check',
+      sql`${t.source} in ('sale', 'recharge', 'temporary', 'combo', 'void')`,
+    ),
+    check('cash_entries_group_check', sql`${t.group} in ('pc', 'snacks', 'other')`),
+    check(
+      'cash_entries_method_check',
+      sql`${t.method} in ('cash_usd', 'cash_ves', 'mobile_payment', 'pos', 'balance')`,
+    ),
+    check('cash_entries_currency_check', sql`${t.currency} in ('USD', 'VES')`),
+    check(
+      'cash_entries_amounts',
+      sql`${t.amountMicros} <> 0 and sign(${t.amountMicros}) = sign(${t.usdMicros})`,
+    ),
+    check(
+      'cash_entries_rate',
+      sql`(${t.currency} = 'VES') = (${t.vesRate} is not null) and (${t.vesRate} is null or ${t.vesRate} > 0)`,
+    ),
+    check('cash_entries_balance_usd', sql`${t.method} <> 'balance' or ${t.currency} = 'USD'`),
+  ],
 );

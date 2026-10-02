@@ -42,6 +42,8 @@ describe('recargas desde el panel (e2e, REQ-001-03)', () => {
 
   it('la encargada recarga en su turno: sube el saldo, queda en el ledger y emite el evento', async () => {
     const shift = await openShift(ana);
+    // El pago móvil es en Bs: hace falta la tasa del día (spec 005).
+    await request('POST', '/exchange-rate', ana, { vesPerUsd: 40_000_000 });
     const response = await recharge({ amountMicros: usd(3), paymentMethod: 'mobile_payment' });
     expect(response.statusCode).toBe(201);
     expect(response.json<Customer>().balances).toEqual({ moneyMicros: usd(3), comboSeconds: 0 });
@@ -65,7 +67,11 @@ describe('recargas desde el panel (e2e, REQ-001-03)', () => {
       payload: {
         customer: { id: juan.id, username: 'juan' },
         amount: { micros: usd(3), currency: 'USD' },
-        paymentMethod: 'mobile_payment',
+        payment: {
+          method: 'mobile_payment',
+          amount: { micros: 120_000_000, currency: 'VES' },
+          vesRate: 40_000_000,
+        },
         shiftId: shift.id,
       },
     });
@@ -74,6 +80,7 @@ describe('recargas desde el panel (e2e, REQ-001-03)', () => {
 
   it('las recargas se acumulan y el panel ve el saldo en la lista y en la ficha', async () => {
     await openShift(ana);
+    await request('POST', '/exchange-rate', ana, { vesPerUsd: 40_000_000 });
     await recharge({ amountMicros: usd(3), paymentMethod: 'cash_usd' });
     await recharge({ amountMicros: usd(0.25), paymentMethod: 'pos' });
     const expected = { moneyMicros: usd(3.25), comboSeconds: 0 };

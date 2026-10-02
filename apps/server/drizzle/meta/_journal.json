@@ -127,6 +127,13 @@
       "when": 1790966584815,
       "tag": "0017_one_open_cash_shift",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1790967285655,
+      "tag": "0018_cash_entries",
+      "breakpoints": true
     }
   ]
 }

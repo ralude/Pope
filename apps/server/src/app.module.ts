@@ -1,6 +1,7 @@
 import { type DynamicModule, Module } from '@nestjs/common';
 
 import { AuthModule } from './auth/auth.module.js';
+import { CashModule } from './cash/cash.module.js';
 import { CombosModule } from './combos/combos.module.js';
 import { Clock, SystemClock } from './common/clock.js';
 import { MemoryLogService } from './common/memory-log.service.js';
@@ -34,6 +35,7 @@ const MODULES_BY_MODE: Record<PopeMode, DynamicModule['imports']> = {
     CombosModule,
     SettingsModule,
     ExchangeRatesModule,
+    CashModule,
     ProductsModule,
     SalesModule,
     SessionsModule,

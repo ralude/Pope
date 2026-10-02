@@ -5,11 +5,13 @@ import {
   type Customer,
   type CustomerStatus,
   micros,
+  newId,
   type PaymentMethod,
   seconds,
 } from '@pope/shared';
 import { and, eq } from 'drizzle-orm';
 
+import { CashRegisterService, deskPaymentOf } from '../cash/cash-register.service.js';
 import { Clock } from '../common/clock.js';
 import { requireCustomer } from '../customers/customers.service.js';
 import { combos, customers, sessions } from '../db/schema.js';
@@ -55,6 +57,7 @@ export class ComboSalesService {
   constructor(
     private readonly events: EventsService,
     private readonly wallet: WalletService,
+    private readonly cash: CashRegisterService,
     private readonly clock: Clock,
   ) {}
 
@@ -134,8 +137,10 @@ export class ComboSalesService {
       }
       await this.wallet.post(tx, { ...common, wallet: 'money', amount: -combo.priceMicros });
     }
+    const ledgerId = newId();
     await this.wallet.post(tx, {
       ...common,
+      id: ledgerId,
       wallet: 'combo',
       amount: combo.seconds,
       ...(payment.via === 'cash_desk' && {
@@ -143,10 +148,23 @@ export class ComboSalesService {
         paymentMethod: payment.paymentMethod,
       }),
     });
+    // En caja entra dinero: va al registro de caja (REQ-005-24), en Bs con la tasa si toca.
+    const pieces =
+      payment.via === 'cash_desk'
+        ? await this.cash.record(tx, {
+            shiftId: payment.shiftId,
+            source: 'combo',
+            sourceId: ledgerId,
+            description: `${combo.name} · ${customer.username}`,
+            groups: [{ group: 'pc', usdMicros: snapshot.priceMicros }],
+            payments: [{ method: payment.paymentMethod, usdMicros: snapshot.priceMicros }],
+            actor,
+          })
+        : null;
 
     emit({
       type: 'combo.purchased',
-      version: 1,
+      version: 2,
       actor,
       payload: {
         customer: { id: customer.id, username: customer.username },
@@ -157,8 +175,8 @@ export class ComboSalesService {
           seconds: seconds(snapshot.seconds),
         },
         payment:
-          payment.via === 'cash_desk'
-            ? { via: 'cash_desk', paymentMethod: payment.paymentMethod, shiftId: payment.shiftId }
+          payment.via === 'cash_desk' && pieces !== null
+            ? { via: 'cash_desk', payment: deskPaymentOf(pieces), shiftId: payment.shiftId }
             : { via: 'balance' },
         sessionId,
       },

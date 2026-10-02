@@ -75,6 +75,14 @@ export class PanelClient {
     }
   }
 
+  /** Espera el aviso de que cambió la caja o el stock, saltando lo demás (spec 005). */
+  async nextCash(): Promise<true> {
+    for (;;) {
+      const message = await this.next();
+      if (message.type === 'cash') return true;
+    }
+  }
+
   close(): void {
     this.ws.close();
   }

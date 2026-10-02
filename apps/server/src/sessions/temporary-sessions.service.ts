@@ -30,6 +30,7 @@ import { alias } from 'drizzle-orm/pg-core';
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { pcs, sessions, sessionTopups } from '../db/schema.js';
+import { CashRegisterService, deskPaymentOf } from '../cash/cash-register.service.js';
 import { EventsService } from '../events/events.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
@@ -71,6 +72,7 @@ export class TemporarySessionsService {
     private readonly settings: SettingsService,
     private readonly connections: PcConnections,
     private readonly sessions: SessionsService,
+    private readonly cash: CashRegisterService,
     private readonly clock: Clock,
   ) {}
 
@@ -120,8 +122,9 @@ export class TemporarySessionsService {
       if (!created) {
         throw new Error('No se pudo abrir la sesión');
       }
+      const topupId = newId();
       await tx.insert(sessionTopups).values({
-        id: newId(),
+        id: topupId,
         sessionId: created.id,
         seconds: purchase.seconds,
         amountMicros: purchase.charge,
@@ -130,9 +133,18 @@ export class TemporarySessionsService {
         actor,
         createdAt: now,
       });
+      const pieces = await this.cash.record(tx, {
+        shiftId: shift.id,
+        source: 'temporary',
+        sourceId: topupId,
+        description: `Sesión temporal · ${pc.name} · ${name}`,
+        groups: [{ group: 'pc', usdMicros: purchase.charge }],
+        payments: [{ method: input.paymentMethod, usdMicros: purchase.charge }],
+        actor,
+      });
       emit({
         type: 'session.started',
-        version: 1,
+        version: 2,
         actor,
         payload: {
           kind: 'temporary',
@@ -142,7 +154,7 @@ export class TemporarySessionsService {
           rate: { micros: rate, currency: 'USD' },
           purchasedSeconds: purchase.seconds,
           amount: { micros: purchase.charge, currency: 'USD' },
-          paymentMethod: input.paymentMethod,
+          payment: deskPaymentOf(pieces),
           shiftId: shift.id,
         },
       });
@@ -195,8 +207,9 @@ export class TemporarySessionsService {
       if (!updated) {
         throw new Error('No se pudo añadir el tiempo');
       }
+      const topupId = newId();
       await tx.insert(sessionTopups).values({
-        id: newId(),
+        id: topupId,
         sessionId: updated.id,
         seconds: purchase.seconds,
         amountMicros: purchase.charge,
@@ -206,16 +219,25 @@ export class TemporarySessionsService {
         createdAt: this.clock.now(),
       });
       const [pc] = await tx.select({ name: pcs.name }).from(pcs).where(eq(pcs.id, updated.pcId));
+      const pieces = await this.cash.record(tx, {
+        shiftId: shift.id,
+        source: 'temporary',
+        sourceId: topupId,
+        description: `Más tiempo · ${pc?.name ?? ''} · ${updated.tempName ?? ''}`,
+        groups: [{ group: 'pc', usdMicros: purchase.charge }],
+        payments: [{ method: input.paymentMethod, usdMicros: purchase.charge }],
+        actor,
+      });
       emit({
         type: 'session.time_added',
-        version: 1,
+        version: 2,
         actor,
         payload: {
           sessionId: updated.id,
           pc: { id: updated.pcId, name: pc?.name ?? '' },
           seconds: purchase.seconds,
           amount: { micros: purchase.charge, currency: 'USD' },
-          paymentMethod: input.paymentMethod,
+          payment: deskPaymentOf(pieces),
           shiftId: shift.id,
         },
       });
