@@ -1,6 +1,10 @@
 // Punto de entrada del servidor de Pope.
 import 'reflect-metadata';
 
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 
@@ -16,6 +20,16 @@ const app = await NestFactory.create<NestFastifyApplication>(
   AppModule.register(config, database),
   new FastifyAdapter(),
 );
-await configureApp(app);
+// El nodo local sirve el panel compilado (T45a): `apps/panel/dist`, junto a este paquete.
+let panelDir: string | null = null;
+if (config.mode === 'local') {
+  const dir = fileURLToPath(new URL('../../panel/dist', import.meta.url));
+  if (existsSync(dir)) {
+    panelDir = dir;
+  } else {
+    new Logger('Panel').warn(`No se sirve el panel: falta ${dir} (compílalo con pnpm build).`);
+  }
+}
+await configureApp(app, { panelDir });
 app.enableShutdownHooks();
 await app.listen(config.port, config.host);

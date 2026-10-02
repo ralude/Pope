@@ -206,6 +206,11 @@ Panel (`apps/panel`, React + Vite + wouter):
   (`/clientes`) y las de la API en inglés (`/customers`), para que no choquen. Una ruta del panel
   tampoco puede empezar como una de la API (el proxy compara el principio): por eso Combos está en
   `/combo-horas` y no en `/combos`.
+- En el local, el nodo sirve el panel compilado (`@fastify/static`, solo en modo `local`): tras
+  `pnpm build` (deja el panel en `apps/panel/dist`), arrancar el nodo y abrir
+  `http://<IP del nodo>:3000`, sin el servidor de Vite. Las rutas de la API tienen prioridad y
+  cualquier otra devuelve `index.html`. Si falta `apps/panel/dist`, el nodo arranca igual y lo
+  avisa en el log.
 - Diseño de referencia: el lienzo "Panel Pope · Fase 8 (estilo SENET)", a 1920×1080. Estilos
   en `src/theme.css`: colores planos, sin desenfoques ni animaciones (gráfica integrada del
   i5-2400). Las llamadas al nodo pasan por `ApiClient` (`src/api/client.ts`), que valida cada

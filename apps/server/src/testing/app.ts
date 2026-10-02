@@ -20,6 +20,8 @@ export interface TestApp {
 export interface TestAppOptions {
   /** Reloj del nodo; p. ej. un `FakeClock` para fijar el día de la semana. */
   clock?: Clock;
+  /** Carpeta de un panel compilado de prueba, para servirlo (T45a). */
+  panelDir?: string;
 }
 
 /**
@@ -48,7 +50,7 @@ export async function createTestApp(
   }
   const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-  await configureApp(app);
+  await configureApp(app, { panelDir: options.panelDir ?? null });
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
   // Al cerrar la aplicación se cierra también la base de datos (DatabaseModule).

@@ -466,11 +466,12 @@ antes de seguir.
   - **Decidido al implementarla:** pantalla `/interrumpidas` con dos pestañas. «Pendientes»: cada sesión con su PC, la hora del corte, quién la abrió, lo que le quedaba y hasta cuándo se puede restaurar; «Restaurar» propone la PC original si está libre y deja elegir entre las conectadas y sin sesión. «Respaldo por PC»: tabla de REQ-001-64 con el motivo de cierre y el estado de la restauración. El dueño solo consulta. El canal `/panel` pasa a ser una sola conexión para todas las pantallas y lleva el número de pendientes (punto ámbar del raíl); el nodo lo revisa también cada minuto, porque una interrumpida caduca sin evento. Verificado a mano con el simulador: al reiniciar la PC 05 con «Carlos» abierta queda interrumpida con 49 min; restaurarla en la PC 03 la desbloquea con ese tiempo sin cobro (CA-001-06); restaurarla otra vez da «Esta sesión ya fue restaurada por Ana a las 02:02» (CA-001-08); con `apagon 3` la sesión restaurada vuelve a quedar pendiente y el punto reaparece sin recargar.
   - **Decidido por el mantenedor (2026-10-02):** el icono de Interrumpidas lleva un punto ámbar si hay pendientes; el nodo envía cuántas hay por el canal `/panel` al conectar y cuando cambia (commit de `server`/`shared` aparte). La pantalla de ajustes (gracia de latidos y sesiones conservadas) queda fuera de la fase 8.
 
-- [ ] **T45a: Servir el panel desde el nodo**
+- [x] **T45a: Servir el panel desde el nodo**
   - **Cubre:** ADR-0011, REQ-001-53
   - **Hacer:** el servidor sirve `apps/panel/dist` con `@fastify/static` en modo `local` (las rutas de la API y los WebSocket tienen prioridad; cualquier otra ruta devuelve `index.html` para que funcione wouter). Documentar en AGENTS.md cómo compilar y abrir el panel.
   - **Verificar:** test e2e de que `/` devuelve el panel y `/clientes` también; a mano, el panel en `http://127.0.0.1:3000` sin el servidor de Vite.
   - **Commit:** `feat(server): sirve el panel compilado`
+  - **Decidido al implementarla:** `@fastify/static` solo da `reply.sendFile`; una ruta comodín de Fastify devuelve el archivo si existe dentro de la carpeta (sin salir de ella) y, si no, `index.html` sin caché a las peticiones de navegador; a las demás, un 404 en JSON como el resto de la API. Lo de `assets/` (con hash) va con caché de un año. `main.ts` busca `apps/panel/dist` junto al paquete del servidor solo en modo `local`; si falta, arranca igual y lo avisa. Verificado: 7 tests e2e y, a mano, el panel en `http://127.0.0.1:3000/clientes` sin Vite, con la sesión, el turno, el mapa en vivo y el aviso de interrumpidas.
 
 ## Fase 9: Shell (`apps/shell-ui`)
 
