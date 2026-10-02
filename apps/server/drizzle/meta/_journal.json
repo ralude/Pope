@@ -113,6 +113,13 @@
       "when": 1790959713075,
       "tag": "0015_exchange_rates",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790965722510,
+      "tag": "0016_products",
+      "breakpoints": true
     }
   ]
 }

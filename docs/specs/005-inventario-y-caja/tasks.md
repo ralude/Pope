@@ -98,11 +98,12 @@ parte 1.
 
 ### Fase 2: Nodo
 
-- [ ] **T10: Productos y conceptos**
+- [x] **T10: Productos y conceptos**
   - **Cubre:** REQ-005-01, REQ-005-02, REQ-005-04, REQ-005-05
   - **Hacer:** tablas `products` y `sale_concepts` con su migración; alta y edición (solo administrador) con eventos, incluido el precio anterior y el nuevo.
   - **Verificar:** e2e por rol y eventos.
   - **Commit:** `feat(server): da de alta productos y conceptos de venta`
+  - **Decidido al implementarla:** módulos `products` (productos) y `sales` (por ahora, los conceptos). La tabla `stock_movements` entra ya aquí, porque el alta escribe lo que llegó como primera entrada en la misma transacción, con su `stock.moved`; T12 añade los endpoints de movimientos. `GET /products` ya devuelve el stock (suma de movimientos) y el aviso de bajo mínimo. Las listas van primero con los activos y por nombre. Migración `0016_products`. Verificado: 10 tests e2e (roles, eventos, precio anterior y nuevo, CA-005-08 sin la foto).
 
 - [ ] **T11: Fotos de los productos**
   - **Cubre:** REQ-005-03, REQ-005-73

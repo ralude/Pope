@@ -13,6 +13,7 @@ import type {
   SessionEndReason,
   SessionKind,
   StaffRole,
+  StockMovementKind,
   Wallet,
   Weekday,
 } from '@pope/shared';
@@ -397,4 +398,85 @@ export const exchangeRates = pgTable(
     index('exchange_rates_effective_idx').on(t.effectiveDate, t.obtainedAt),
     check('exchange_rates_positive', sql`${t.vesPerUsd} > 0`),
   ],
+);
+
+/**
+ * Productos del inventario (spec 005, REQ-005-01): golosinas, bebidas… No se borran, solo se
+ * desactivan. El stock no se guarda aquí: es la suma de `stock_movements` (REQ-005-11).
+ */
+export const products = pgTable(
+  'products',
+  {
+    id: uuid('id').primaryKey(),
+    name: text('name').notNull(),
+    /** Precio de venta en µUSD. */
+    priceMicros: bigint('price_micros', { mode: 'number' }).notNull(),
+    /** Por debajo de este stock, el panel avisa (REQ-005-13). */
+    minStock: integer('min_stock'),
+    active: boolean('active').notNull().default(true),
+    /** Archivo de la foto en la carpeta de datos del nodo (REQ-005-03), si tiene. */
+    photo: text('photo'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    check('products_price_positive', sql`${t.priceMicros} > 0`),
+    check('products_min_stock_nonnegative', sql`${t.minStock} >= 0`),
+  ],
+);
+
+/**
+ * Movimientos de stock (REQ-005-10): solo se insertan. `quantity` lleva signo: las entradas
+ * suman, las ventas y las mermas restan y los ajustes van en cualquier sentido. Anular una
+ * venta escribe un movimiento `sale` positivo que apunta a la venta anulada (REQ-005-23).
+ */
+export const stockMovements = pgTable(
+  'stock_movements',
+  {
+    id: uuid('id').primaryKey(),
+    productId: uuid('product_id')
+      .notNull()
+      .references(() => products.id),
+    kind: text('kind').$type<StockMovementKind>().notNull(),
+    quantity: integer('quantity').notNull(),
+    /** Obligatorio en ajustes y mermas (REQ-005-10). */
+    reason: text('reason'),
+    /** La venta que lo causó, o la anulada si es su devolución. */
+    saleId: uuid('sale_id'),
+    actor: jsonb('actor').$type<Actor>().notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [
+    index('stock_movements_product_created_idx').on(t.productId, t.createdAt),
+    index('stock_movements_sale_idx').on(t.saleId),
+    check(
+      'stock_movements_kind_check',
+      sql`${t.kind} in ('restock', 'sale', 'adjustment', 'waste')`,
+    ),
+    check('stock_movements_quantity_nonzero', sql`${t.quantity} <> 0`),
+    check(
+      'stock_movements_kind_fields',
+      sql`(${t.kind} = 'restock' and ${t.quantity} > 0 and ${t.saleId} is null)
+        or (${t.kind} = 'sale' and ${t.saleId} is not null)
+        or (${t.kind} = 'adjustment' and ${t.reason} is not null and ${t.saleId} is null)
+        or (${t.kind} = 'waste' and ${t.quantity} < 0 and ${t.reason} is not null
+          and ${t.saleId} is null)`,
+    ),
+  ],
+);
+
+/**
+ * Conceptos que se venden sin inventario, como "Impresiones" (REQ-005-05). No se borran,
+ * solo se desactivan: las ventas guardan su propia copia del nombre y del precio.
+ */
+export const saleConcepts = pgTable(
+  'sale_concepts',
+  {
+    id: uuid('id').primaryKey(),
+    name: text('name').notNull(),
+    /** Precio por unidad sugerido en µUSD; el encargado puede cambiarlo al vender. */
+    unitPriceMicros: bigint('unit_price_micros', { mode: 'number' }).notNull(),
+    active: boolean('active').notNull().default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [check('sale_concepts_price_positive', sql`${t.unitPriceMicros} > 0`)],
 );
