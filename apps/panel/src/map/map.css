@@ -182,32 +182,7 @@
   margin-bottom: 16px;
 }
 
-.map-detail {
-  width: 340px;
-  flex-shrink: 0;
-  padding: 24px;
-  background: var(--surface);
-  border-left: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  overflow: auto;
-}
-
-.detail-title {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-}
-
-.detail-badge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 700;
-  border: 1px solid transparent;
-}
-
+/* Insignia del detalle según el estado de la PC (la base, `.detail-badge`, está en el tema). */
 .detail-badge.badge-free,
 .detail-badge.badge-offline {
   border-color: var(--line-2);
@@ -235,61 +210,4 @@
 .badge-ending {
   background: var(--red);
   color: #ffffff;
-}
-
-.detail-field {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.detail-label {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.detail-time {
-  font-size: 40px;
-  line-height: 1.1;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.detail-note {
-  color: var(--soft);
-  line-height: 1.5;
-}
-
-/* Diálogo centrado sobre una capa oscura (sin desenfoque). */
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(8, 9, 11, 0.72);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.dialog {
-  width: 480px;
-  padding: 26px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.dialog h2 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.dialog-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
 }

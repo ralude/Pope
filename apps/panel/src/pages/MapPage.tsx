@@ -12,14 +12,7 @@ import {
   type PcMapItem,
   seconds,
 } from '@pope/shared';
-import {
-  type ReactNode,
-  type SyntheticEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { type ReactNode, type SyntheticEvent, useCallback, useState } from 'react';
 
 import { ApiError } from '../api/client.js';
 import { useNodeNow, usePcMapFeed } from '../map/channel.js';
@@ -46,6 +39,7 @@ import {
 } from '../map/model.js';
 import { OrganizeGrid } from '../map/OrganizeGrid.js';
 import { useSession, useStaff } from '../session.js';
+import { Dialog } from '../ui/Dialog.js';
 import { Frame } from '../ui/Frame.js';
 
 const KIND_LABEL: Record<TileKind, string> = {
@@ -199,7 +193,7 @@ export function MapPage() {
           {legendOpen && <LegendCard legend={legend} />}
         </div>
         <aside
-          className="map-detail"
+          className="side-panel"
           aria-label={organizing ? 'Organizar el mapa' : 'Detalle de la PC'}
         >
           {organizing ? (
@@ -486,18 +480,6 @@ function CloseSessionDialog({
   const { api } = useSession();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    cancelRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onDone();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [onDone]);
 
   const submit = (event: SyntheticEvent) => {
     event.preventDefault();
@@ -510,32 +492,23 @@ function CloseSessionDialog({
   };
 
   return (
-    <div className="dialog-backdrop">
-      <form
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="close-session-title"
-        className="card dialog"
-        onSubmit={submit}
-      >
-        <h2 id="close-session-title">Cerrar la sesión de {pcName}</h2>
-        <p className="detail-note" style={{ margin: 0 }}>
-          Se cobra a <strong>{who}</strong> hasta este momento y la PC se bloquea.
-        </p>
-        {error && (
-          <div role="alert" className="alert-error">
-            {error}
-          </div>
-        )}
-        <div className="dialog-actions">
-          <button ref={cancelRef} type="button" className="btn btn-ghost" onClick={onDone}>
-            Cancelar
-          </button>
-          <button type="submit" className="btn btn-danger" disabled={busy}>
-            {busy ? 'Cerrando…' : 'Cerrar sesión'}
-          </button>
+    <Dialog title={`Cerrar la sesión de ${pcName}`} onClose={onDone} onSubmit={submit}>
+      <p className="detail-note" style={{ margin: 0 }}>
+        Se cobra a <strong>{who}</strong> hasta este momento y la PC se bloquea.
+      </p>
+      {error && (
+        <div role="alert" className="alert-error">
+          {error}
         </div>
-      </form>
-    </div>
+      )}
+      <div className="dialog-actions">
+        <button autoFocus type="button" className="btn btn-ghost" onClick={onDone}>
+          Cancelar
+        </button>
+        <button type="submit" className="btn btn-danger" disabled={busy}>
+          {busy ? 'Cerrando…' : 'Cerrar sesión'}
+        </button>
+      </div>
+    </Dialog>
   );
 }
