@@ -19,6 +19,9 @@ import {
   type ProductUpdateRequest,
   productUpdateRequestSchema,
   type StaffProfile,
+  type StockMovement,
+  type StockMoveRequest,
+  stockMoveRequestSchema,
 } from '@pope/shared';
 
 import { CurrentStaff, Roles } from '../auth/decorators.js';
@@ -26,6 +29,7 @@ import { staffActor } from '../auth/staff.controller.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { ProductPhotosService } from './product-photos.service.js';
 import { ProductsService } from './products.service.js';
+import { StockService } from './stock.service.js';
 
 /**
  * Productos del inventario. Todo el personal los ve con su stock; solo el administrador los
@@ -36,6 +40,7 @@ export class ProductsController {
   constructor(
     private readonly products: ProductsService,
     private readonly photos: ProductPhotosService,
+    private readonly stock: StockService,
   ) {}
 
   @Get()
@@ -84,5 +89,25 @@ export class ProductsController {
   @Header('Cache-Control', 'private, max-age=31536000, immutable')
   async photo(@Param('id', new ZodValidationPipe(idSchema)) id: string): Promise<StreamableFile> {
     return new StreamableFile(await this.photos.read(id), { type: PRODUCT_PHOTO_TYPE });
+  }
+
+  /**
+   * Movimiento de stock (REQ-005-14): entradas, el encargado y el administrador; ajustes y
+   * mermas, solo el administrador (lo comprueba el servicio).
+   */
+  @Roles('encargado', 'administrador')
+  @Post(':id/stock')
+  move(
+    @Param('id', new ZodValidationPipe(idSchema)) id: string,
+    @Body(new ZodValidationPipe(stockMoveRequestSchema)) body: StockMoveRequest,
+    @CurrentStaff() member: StaffProfile,
+  ): Promise<Product> {
+    return this.stock.move(id, body, member);
+  }
+
+  /** Últimos movimientos de un producto, para su detalle en Inventario. */
+  @Get(':id/movements')
+  movements(@Param('id', new ZodValidationPipe(idSchema)) id: string): Promise<StockMovement[]> {
+    return this.stock.movements(id);
   }
 }

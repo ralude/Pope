@@ -112,11 +112,12 @@ parte 1.
   - **Commit:** `feat(server): guarda las fotos de los productos`
   - **Decidido al implementarla:** `POPE_DATA_DIR` (por defecto `apps/server/data/`, en `.gitignore`); el parser de `image/webp` va en `bootstrap.ts` con el tope de 512 KB (413 si se pasa; 415 si es otro tipo). El nodo comprueba además la cabecera RIFF/WEBP. El archivo se llama `<id>-<12 hex del sha256>.webp` y esa parte es la `photoVersion`; se escribe aparte y se renombra, y la foto anterior se borra del disco. Subir la misma foto no emite otro evento. `GET /products/:id/photo` exige sesión del personal (como toda la API) y responde con `Cache-Control: private, max-age=31536000, immutable`. Los tests usan una carpeta de datos temporal por app. Verificado: 6 tests e2e.
 
-- [ ] **T12: Movimientos de stock**
+- [x] **T12: Movimientos de stock**
   - **Cubre:** REQ-005-10 a REQ-005-14
   - **Hacer:** tabla `stock_movements`; entradas (encargado y administrador), ajustes y mermas con motivo (administrador); stock calculado y aviso de bajo mínimo en `GET /products`.
   - **Verificar:** e2e: CA-005-01 (con la venta simulada por movimiento) y CA-005-08 sin la foto.
   - **Commit:** `feat(server): registra el stock con movimientos`
+  - **Decidido al implementarla:** `StockService` en el módulo `products`. `POST /products/:id/stock` admite encargado y administrador, y el servicio responde 403 si el encargado pide un ajuste o una merma. Ningún movimiento deja el stock en negativo salvo con `allowNegativeStock` (409 "No hay tanto stock de…"), no solo las ventas: no se puede mermar lo que no hay. El producto se bloquea (`for update`) mientras se calcula el stock. Endpoint nuevo `GET /products/:id/movements` (los 50 últimos, el más reciente arriba, con el nombre de quien lo hizo), para el detalle del diseño de Inventario. Verificado: 5 tests e2e (CA-005-01 con la venta simulada, roles, bajo mínimo, stock negativo y validación).
 
 - [ ] **T13a: Caja del local**
   - **Cubre:** REQ-005-44
