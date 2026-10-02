@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · Decisiones de la fase 8 (panel)
+**Última actualización:** 2026-09-30 · T38 terminada (esqueleto del panel y login)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T38: Esqueleto del panel y login** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 49 / 68 tareas · fase 8 de 9 (Panel) |
+| **Siguiente tarea** | **T38a: Estado de las PCs para el panel** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 50 / 68 tareas · fase 8 de 9 (Panel) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 49 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 50 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-09-30:** T38. apps/panel (@pope/panel) con Vite, React 19 y wouter: tema oscuro del diseño estilo SENET para 1920×1080, Nunito incluida, barra superior con fecha y hora de Caracas, raíl de iconos y login. ApiClient valida cada respuesta con shared y da mensajes en español; un 401 fuera del login devuelve al login. Vite hace de proxy al nodo. Probado contra el servidor real: login correcto e incorrecto, sesión al recargar y salir.
 - **2026-09-30:** Decisiones del mantenedor para la fase 8: diseño de referencia el lienzo estilo SENET a 1920×1080, Nunito incluida, Bs oculto hasta la spec 005 y escrito «Bs», organizar el mapa arrastrando (REQ-001-45, @dnd-kit/core; tareas T39a y T39b) y el nodo sirve el panel compilado (T45a). Se añade T38a: estado de las PCs y canal WebSocket del panel.
 - **2026-09-30:** T37. Subcomando load del simulador (40 PCs conectadas, un login cada 1,5 s, 10 min de sesiones y ráfaga final informativa; mide la memoria con el log del servidor) y mediciones.md. En el equipo de desarrollo: p95 del login 69 ms (ráfaga 334 ms), rss máx 222 MB, 0 errores; argon2 13 ms. Pendiente repetirlo en el i5 de 2ª gen. Fin de la fase 7.
 - **2026-09-30:** T37a. POPE_MEMORY_LOG_MS (opcional, mínimo 1000) hace que el servidor registre cada ese tiempo Memoria: rss=… MB heapUsed=… MB. Probado en un arranque real: unos 84 MB en reposo (el primer registro, durante el arranque y las migraciones, marcó 260 MB).
@@ -66,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T35a. devPcId y devPcName pasan a shared (de 1 a 99, con RangeError fuera de rango) y seedDevPcs/dev:seed-pcs admiten --count para crear hasta 99 PCs; sin duplicar al repetir.
 - **2026-09-30:** Revisión de T25–T35: 10 correcciones (no cobrar el tiempo de una PC muerta, no cerrar una sesión que la PC no llegó a conocer con la columna pc_confirmed_at, restante local en el hello, nada llega tarde tras un cierre, un solo sessionEnded, venta de combo en el panel cobrando antes la sesión, estado de la cuenta al abrir, importes en céntimos, claves de ajustes y compra de combo sin duplicados). Fase 7 partida en T35a, T36, T36a, T36b, T37a y T37 con las decisiones del mantenedor; el plan describe el comportamiento del agente en el canal y AGENTS.md añade el ámbito tools.
 - **2026-09-30:** T35. POST /sessions/:id/restore con la PC de destino: la sesión nueva continúa con el tiempo restante, sin cobro, enlazada a la original y con session.restored. Solo una vez (dice quién y cuándo), hasta 48 h desde el corte y solo si la cortó un corte con tiempo restante. Sin exigir turno. Fin de la fase 6 (Sesiones temporales).
-- **2026-09-30:** T34. GET /sessions/temporary/backup (últimas N por PC, N del ajuste, más las interrumpidas pendientes) y GET /sessions/temporary/interrupted (cerradas sin latidos con tiempo restante, sin restaurar y dentro de 48 h desde el último latido). Cada sesión temporal lleva interruption (pending, restored o expired). Las cerradas por cliente, encargado o agotamiento no aparecen como interrumpidas.

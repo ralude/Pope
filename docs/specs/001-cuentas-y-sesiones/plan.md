@@ -160,7 +160,7 @@ de los diálogos. El equivalente en Bs no se muestra hasta que exista una tasa (
 | `zod`, `uuid` | shared | Validación e ids v7 |
 | `react`, `react-dom`, `wouter` | panel, shell-ui | Router de ~2 KB; **sin librería de componentes** para mantener el panel ligero |
 | `@dnd-kit/core` | panel | Arrastrar las PCs al organizar el mapa (REQ-001-45). ~10 KB comprimido, sin dependencias; mueve con `transform`, que la gráfica integrada maneja bien, y funciona con teclado |
-| `@fontsource/nunito` | panel | Fuente del diseño incluida en el panel, porque el local trabaja sin internet. Solo los woff2 de 3 pesos (~60 KB) |
+| `@fontsource/nunito` | panel | Fuente del diseño incluida en el panel, porque el local trabaja sin internet. Solo el alfabeto latino en 3 pesos (400, 700, 800): ~50 KB en woff2 |
 | `@fastify/static` | server | Servir el panel compilado desde el propio nodo (ADR-0011): el encargado lo abre en el navegador sin instalar nada |
 | `vite`, `@vitejs/plugin-react` | solo desarrollo | Compilar el panel y servirlo con recarga en caliente mientras se desarrolla |
 | `vitest`, `@electric-sql/pglite` | solo desarrollo | Tests con PostgreSQL en WASM, sin Docker en Windows |

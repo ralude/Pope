@@ -1,0 +1,278 @@
+/*
+ * Tema del panel (diseño "Panel Pope · Fase 8", estilo SENET). Pensado para la gráfica
+ * integrada del i5-2400 (HD 2000): colores planos, sin desenfoques, sombras difuminadas,
+ * degradados ni animaciones. La única transparencia es la capa de los diálogos.
+ */
+:root {
+  --bg: #121417;
+  --map-bg: #0e1013;
+  --bar: #191c21;
+  --surface: #1b1e24;
+  --surface-2: #23272e;
+  --line: #2e333b;
+  --line-2: #3a404a;
+  --text: #e4e7ec;
+  --muted: #9aa3af;
+  --soft: #b8bfc9;
+  --accent: #8e24c9;
+  --accent-hover: #7b1faf;
+  --accent-soft: #2b1f3a;
+  --accent-text: #d8b4fe;
+  --green: #277a33;
+  --green-bar: #3fb950;
+  --amber: #d08a1e;
+  --amber-bar: #f0a73a;
+  --red: #e5484d;
+  --danger-bg: #3a1f22;
+  --danger-text: #ffc9c6;
+
+  color-scheme: dark;
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 1280px;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--accent-text);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ─── Botones en píldora ─────────────────────────────────────────────────────────────── */
+
+.btn {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.btn-lg {
+  height: 46px;
+  border-radius: 23px;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.btn-ghost {
+  background: var(--surface-2);
+  border-color: #353b45;
+  color: var(--text);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: #2b3038;
+}
+
+.btn-danger {
+  background: transparent;
+  border-color: var(--red);
+  color: #ffb4b0;
+}
+
+/* ─── Formularios ────────────────────────────────────────────────────────────────────── */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--soft);
+}
+
+.input {
+  height: 44px;
+  padding: 0 12px;
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.alert-error {
+  padding: 10px 14px;
+  background: var(--danger-bg);
+  border: 1px solid var(--red);
+  border-radius: 8px;
+  color: var(--danger-text);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+/* ─── Marco: barra superior, raíl y cabecera de sección ──────────────────────────────── */
+
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  height: 56px;
+  flex-shrink: 0;
+  padding: 0 20px;
+  background: var(--bar);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.brand {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.app-body {
+  flex-grow: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.rail {
+  width: 64px;
+  flex-shrink: 0;
+  padding-top: 8px;
+  background: var(--bar);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+}
+
+.rail-item {
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.rail-item:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.rail-item[aria-current='page'] {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.section {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  height: 64px;
+  flex-shrink: 0;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.section-body {
+  flex-grow: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
+  background: #3b2a55;
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+/* Solo para lectores de pantalla. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

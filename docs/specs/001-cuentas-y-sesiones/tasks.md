@@ -376,7 +376,7 @@ antes de seguir.
 > (T45a). Las pantallas solo tienen tests de su lógica (cliente de API, cálculos), no de
 > DOM; se verifican a mano contra el servidor y el simulador.
 
-- [ ] **T38: Esqueleto del panel y login**
+- [x] **T38: Esqueleto del panel y login**
   - **Cubre:** REQ-001-40
   - **Hacer:** `apps/panel` (`@pope/panel`) con Vite + React + wouter, con las convenciones de paquete de AGENTS.md. Cliente de API tipado que valida las respuestas con los esquemas de `shared` y convierte los errores del nodo en mensajes en español. Tema del diseño (colores, Nunito, raíl de iconos y barra superior con el personal y "Salir") y pantalla de login. Las rutas sin sesión llevan al login; al entrar se va al mapa (de momento, vacío). En desarrollo, Vite hace de proxy de `/auth`, `/customers`… y de los WebSocket al nodo, para que la cookie sea del mismo origen.
   - **Verificar:** tests del cliente de API (respuesta válida, 401, error con mensaje del nodo, respuesta que no cumple el esquema). A mano: login correcto e incorrecto, recargar la página sigue dentro, "Salir" vuelve al login.
