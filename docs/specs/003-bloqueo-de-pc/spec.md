@@ -21,7 +21,8 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 
 - Como **dueño**, quiero que al encender la PC aparezca Pope bloqueado para que nadie la use sin pagar.
 - Como **encargado**, quiero bloquear, apagar o enviar un mensaje a cualquier PC desde el panel.
-- Como **técnico**, quiero salir al escritorio de Windows con una credencial especial para hacer mantenimiento.
+- Como **técnico**, quiero salir al escritorio de Windows con mi usuario y contraseña del personal para hacer mantenimiento.
+- Como **administrador**, quiero subir desde el panel una imagen para el fondo de la pantalla de bloqueo y que llegue sola a todas las PCs.
 
 ## Requisitos funcionales
 
@@ -46,12 +47,35 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-33:** El estado bloqueado usa el escritorio separado (ADR-0009).
 
 **Mantenimiento**
-- **REQ-003-40:** Un técnico puede entrar en **modo mantenimiento** con credencial de personal y un código temporal generado en el panel. Así accede al escritorio de Windows con permisos de administrador.
+- **REQ-003-40:** Un técnico puede entrar en **modo mantenimiento** desde la pantalla de bloqueo ("Usuario técnico") **solo con su usuario y contraseña del personal**, sin código adicional. Así accede al escritorio de Windows con permisos de administrador. (Cambiado el 2026-10-02 por el mantenedor: antes pedía además un código temporal generado en el panel.)
 - **REQ-003-41:** Entrar y salir del modo mantenimiento genera eventos con actor y duración, visibles para el dueño.
+- **REQ-003-42:** Durante el mantenimiento, Pope **no le muestra al técnico el tiempo que lleva**: solo una barra discreta con la PC, quién entró y el botón "Terminar y bloquear". La duración se sigue registrando en el evento de salida (REQ-003-41).
 
 **Instalación**
 - **REQ-003-50:** Un instalador crea el usuario restringido, configura el inicio de sesión automático, aplica las directivas, instala el servicio y registra la PC (REQ-003-10).
 - **REQ-003-51:** El instalador se puede desinstalar y deja Windows como estaba.
+
+**Fondo de la pantalla de bloqueo**
+- **REQ-003-70:** Desde el panel, el administrador sube una imagen (JPG, PNG o WebP) que pasa a ser el fondo de la pantalla de bloqueo de **todas** las PCs. También puede quitarla y volver al fondo por defecto de Pope.
+- **REQ-003-71:** El nodo guarda la imagen en disco, no en la base de datos, junto con su huella SHA-256. Cada cambio (subir o quitar) genera un evento con actor (ADR-0008).
+- **REQ-003-72:** El nodo avisa en vivo a las PCs conectadas. Las que estaban apagadas o sin conexión se enteran al reconectar, porque la conexión inicial les dice qué fondo toca.
+- **REQ-003-73:** Cada PC descarga la imagen del nodo, comprueba la huella, la guarda en local y solo entonces la pone de fondo. Mientras descarga, la pantalla de bloqueo muestra un indicador de actualización con el progreso, **sin impedir iniciar sesión**. Si la descarga falla o la huella no coincide, conserva el fondo anterior y reintenta.
+- **REQ-003-74:** Si llega un fondo nuevo con una sesión abierta, la PC lo descarga en segundo plano y lo aplica al volver a la pantalla de bloqueo, sin interrumpir al cliente.
+- **REQ-003-75:** El fondo funciona sin internet: viaja solo por la LAN, y cada PC conserva su copia aunque el nodo no responda (REQ-003-04).
+
+> **Propuesta para el plan (2026-10-02, a confirmar):** endpoints del nodo para el fondo.
+>
+> | Método y ruta | Quién | Qué hace |
+> |---|---|---|
+> | `PUT /lock-screen/background` | administrador | Sube la imagen (`multipart/form-data`, campo `file`). Comprueba el tipo por el contenido (no por la extensión) y el tamaño máximo; guarda el archivo con su SHA-256 como nombre; emite `lock_screen.background_changed`; avisa a las PCs. Devuelve `{ sha256, size, mimeType, uploadedAt, uploadedBy }`. |
+> | `DELETE /lock-screen/background` | administrador | Vuelve al fondo por defecto; emite el mismo evento con `sha256: null` y avisa a las PCs. |
+> | `GET /lock-screen/background` | personal | Datos del fondo actual (o `null`), para la vista previa del panel. |
+> | `GET /lock-screen/background/:sha256` | PC registrada (o personal) | Descarga la imagen. Como el nombre es la huella, se sirve con caché `immutable`. La PC se autentica con su credencial (REQ-003-63), no con la cookie del personal. |
+>
+> - Canal PC: mensaje nuevo `lockBackground` (`{ sha256, size, mimeType }` o `null`), con su esquema `zod` en `@pope/shared`. Se envía al cambiar el fondo y tras el `hello` de cada PC.
+> - El panel redimensiona y comprime la imagen en el navegador (a 1920×1080, con `<canvas>`) antes de subirla. Así el nodo no procesa imágenes ni necesita `sharp` (ADR-0011).
+> - Dependencia nueva del servidor: `@fastify/multipart`, que hay que justificar en el plan (ADR-0011).
+> - En el panel, la pantalla iría en `/fondo-de-bloqueo`, que no choca con `/lock-screen` en el proxy de Vite.
 
 ## Requisitos no funcionales
 
@@ -76,9 +100,17 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
   - **Cuando** se mata `Pope.ShellHost` de cualquier forma
   - **Entonces** en < 3 s vuelve la pantalla de bloqueo.
 - **CA-003-03** (REQ-003-40, REQ-003-41)
-  - **Dado** un técnico con código válido
+  - **Dado** un técnico con usuario y contraseña del personal válidos
   - **Cuando** entra en mantenimiento
   - **Entonces** ve el escritorio de Windows y el panel muestra "PC 04 en mantenimiento por Luis".
+- **CA-003-04** (REQ-003-70, REQ-003-72, REQ-003-73)
+  - **Dado** 10 PCs en la pantalla de bloqueo y 2 apagadas
+  - **Cuando** el administrador sube un fondo nuevo desde el panel
+  - **Entonces** las 10 muestran el indicador de actualización y luego el fondo nuevo; las 2 apagadas lo reciben al encender.
+- **CA-003-05** (REQ-003-74)
+  - **Dado** una PC con una sesión abierta
+  - **Cuando** se sube un fondo nuevo
+  - **Entonces** la sesión sigue sin cambios y el fondo nuevo aparece al cerrarla.
 
 ## Fuera de alcance
 
@@ -101,4 +133,6 @@ Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La
 - [ ] **Origen de la interfaz del Shell.** Si WebView2 cargara `shell-ui` desde el nodo, sin nodo no habría pantalla y no se cumpliría REQ-003-04. Propuesta: empaquetarla junto al host (`SetVirtualHostNameToFolderMapping`). Enlaza con las actualizaciones de los clientes (fuera de alcance).
 - [ ] **Quién aplica el bloqueo al recibir `state`.** Según ADR-0009 cambia de escritorio el host, pero si el host muere el agente debe garantizar el bloqueo (REQ-003-32) y seguir la cuenta atrás sin red (ADR-0007). Ambos tendrán que entender `state`, `sessionEnded` y el tiempo restante; conviene acotar exactamente qué hace cada uno.
 - [ ] **Validar el protocolo en C# (ADR-0002).** .NET no trae un validador de JSON Schema (solo exporta). Hará falta un paquete en el proyecto de tests (JsonSchema.Net o NJsonSchema), justificado en el plan, o generar las clases C# a partir del schema.
+- [ ] **Quién puede entrar en mantenimiento (REQ-003-40).** Sin el código del panel, cualquiera que conozca una contraseña del personal tendría el escritorio con permisos de administrador. Propuesta: solo el rol **administrador** (o un rol nuevo "técnico"), nunca el encargado ni el dueño, con el mismo bloqueo tras 5 intentos fallidos durante 5 min que los clientes (REQ-001-52).
+- [ ] **Fondo de bloqueo (REQ-003-70).** ¿Tamaño máximo de la imagen (propuesta: 10 MB antes de comprimir)? ¿Qué resolución tienen los monitores del local? ¿Hace falta un fondo distinto por PC o por zona? (Por ahora, uno para todas.) ¿Lo sube solo el administrador o también el encargado?
 - [ ] **Dirección del nodo.** ¿Cómo encuentra el agente al nodo? Propuesta: IP fija del nodo configurada por el instalador (REQ-003-50).
