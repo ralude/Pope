@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · T51 terminada: spec 001 implementada
+**Última actualización:** 2026-10-02 · planes de la tasa manual (005) y de la pausa (002), pendientes de aprobar
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | Ninguna: la [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) está implementada |
-| **Siguiente tarea** | **Preparar la tasa manual en Bs** (parte de la [spec 005](docs/specs/005-inventario-y-caja/spec.md), REQ-005-34): requisitos, plan y tareas para que los apruebe el mantenedor (su decisión del 2026-10-02) |
+| **Siguiente tarea** | **Esperando aprobación del mantenedor:** la parte 1 de la [spec 005](docs/specs/005-inventario-y-caja/spec.md) (tasa manual, con su [plan](docs/specs/005-inventario-y-caja/plan.md) y [tareas](docs/specs/005-inventario-y-caja/tasks.md)) y la [spec 002](docs/specs/002-pausa-de-sesion/spec.md) con su [plan](docs/specs/002-pausa-de-sesion/plan.md). Aprobada la 005, empezar por su T01 |
 | **Progreso** | Spec 001: 68 / 68 tareas |
 | **Bloqueos** | Ninguno |
 
@@ -47,10 +47,10 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (salvo REQ-001-13, Bs) | 68 / 68 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador, dudas resueltas · plan propuesto | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | Borrador | — |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | Borrador · tasa manual (parte 1) planificada | 0 / 7 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -59,6 +59,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** Planes propuestos: tasa manual de la spec 005 (parte 1, 7 tareas; la escriben encargado o administrador y vale al guardarla) y pausa de la spec 002 en dos fases (fase 1 en TypeScript ya; fase 2 nativa con la spec 003). La spec 002 queda con las dudas resueltas por el mantenedor.
 - **2026-10-02:** T51: tabla de los 21 criterios de aceptación en `mediciones.md`, todos con test automático (se añadió el de CA-001-15), y la spec 001 queda **implementada** salvo el Bs. Antes, por petición del mantenedor: colores nuevos del mapa del panel (gris, verde, celeste, ámbar) y «Control de la PC» desactivado, con sus requisitos en la spec 003 (Wake-on-LAN y modo administrador remoto).
 - **2026-10-02:** T50: «Cerrar sesión» con confirmación en el Shell; en las temporales, «Perderás X min». Verificado CA-001-09 con una temporal de 25 min abierta desde el panel. Fin de la fase 9.
 - **2026-10-02:** T49: diálogo «Comprar combo» en el Shell (desde el panel de la sesión y desde el aviso), con lo que alcanza el saldo y cómo quedan saldo y horas. Antes, `feat(server)`: mensaje `listCombos`/`combos` del canal y `requestId` en la respuesta a la compra. Verificado con recargas reales desde el panel.
@@ -68,4 +69,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T45a: el nodo sirve el panel compilado en modo `local` (`@fastify/static`), con la API por delante y `index.html` para las rutas del panel; AGENTS.md explica cómo abrirlo. Fin de la fase 8.
 - **2026-10-02:** T45: pantalla Interrumpidas (pendientes con Restaurar y elección de PC libre, y respaldo por PC) y punto ámbar en el raíl con el número que envía el canal. Verificados CA-001-06 y CA-001-08 con el simulador.
 - **2026-10-02:** T44: abrir, ampliar y cerrar sesiones temporales desde el detalle de la PC del mapa (por tiempo o por importe). Verificados CA-001-05 y CA-001-10 a mano con el simulador.
-- **2026-10-02:** T43b: pantalla Personal (solo administrador): alta con rol y activar o desactivar, sin poder desactivarse a sí mismo. Verificado a mano: el encargado desactivado pierde la sesión y no puede entrar.
