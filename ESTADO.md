@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · planes de la tasa manual (005) y de la pausa (002), pendientes de aprobar
+**Última actualización:** 2026-10-02 · aprobadas la tasa manual (005, parte 1) y la pausa (002)
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | Ninguna: la [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) está implementada |
-| **Siguiente tarea** | **Esperando aprobación del mantenedor:** la parte 1 de la [spec 005](docs/specs/005-inventario-y-caja/spec.md) (tasa manual, con su [plan](docs/specs/005-inventario-y-caja/plan.md) y [tareas](docs/specs/005-inventario-y-caja/tasks.md)) y la [spec 002](docs/specs/002-pausa-de-sesion/spec.md) con su [plan](docs/specs/002-pausa-de-sesion/plan.md). Aprobada la 005, empezar por su T01 |
-| **Progreso** | Spec 001: 68 / 68 tareas |
+| **Spec en curso** | [005 · parte 1: tasa de cambio manual](docs/specs/005-inventario-y-caja/plan.md) |
+| **Siguiente tarea** | **T01: Contratos de la tasa** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)) |
+| **Progreso** | 0 / 7 tareas · fase 1 de 1 (tasa manual) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -31,6 +31,7 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
+- [ ] **Spec 002:** escribir su `tasks.md` (fase 1) a partir del plan aprobado, al terminar la tasa manual de la 005.
 - [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local (i5 de 2ª gen, 8 GB). En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
@@ -47,10 +48,10 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (salvo REQ-001-13, Bs) | 68 / 68 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador, dudas resueltas · plan propuesto | — |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | Borrador · tasa manual (parte 1) planificada | 0 / 7 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: tasa manual (parte 1) aprobada; el resto en borrador | 0 / 7 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |

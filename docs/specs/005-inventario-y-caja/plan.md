@@ -1,6 +1,6 @@
 # Plan 005 · Parte 1: tasa de cambio manual
 
-- **Estado:** Propuesto
+- **Estado:** Aprobado (2026-10-02)
 - **Spec:** [spec.md](spec.md), sección "Moneda y tasa de cambio (BCV)": REQ-005-30, REQ-005-33,
   REQ-005-34, REQ-005-35 y REQ-005-36. Cierra además REQ-001-13 (spec 001).
 - **ADRs que aplican:** ADR-0001 (local-first), ADR-0007 (el nodo decide), ADR-0008 (eventos),

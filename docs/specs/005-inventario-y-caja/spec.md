@@ -1,6 +1,6 @@
 # Spec 005: Inventario de productos y caja
 
-- **Estado:** Borrador. La sección **"Moneda y tasa de cambio (BCV)"** (REQ-005-30 a REQ-005-35) se adelanta por decisión del mantenedor (2026-10-02) y está **pendiente de aprobación** por separado, con su propio [plan](plan.md) y [tareas](tasks.md). El resto sigue en borrador.
+- **Estado:** Borrador. La sección **"Moneda y tasa de cambio (BCV)"** (REQ-005-30 a REQ-005-35) se adelanta por decisión del mantenedor (2026-10-02) y está **Aprobada** por separado (mantenedor, 2026-10-02), con su propio [plan](plan.md) y [tareas](tasks.md). El resto sigue en borrador.
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0001, ADR-0004, ADR-0008
 - **Specs relacionadas:** 001, 006

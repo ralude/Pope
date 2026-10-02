@@ -1,7 +1,7 @@
 # Plan 002: Pausa de sesión
 
-- **Estado:** Propuesto
-- **Spec:** [spec.md](spec.md) (pendiente de aprobación, con las dudas resueltas el 2026-10-02)
+- **Estado:** Aprobado (2026-10-02)
+- **Spec:** [spec.md](spec.md)
 - **ADRs que aplican:** ADR-0001 (local-first), ADR-0007 (el nodo decide), ADR-0008 (eventos),
   ADR-0011 (recursos) y ADR-0015 (micro-unidades). **ADR-0009** (escritorio separado) sigue
   **Propuesto**: la fase 1 no depende de él; hay que decidirlo antes de la fase 2.

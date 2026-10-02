@@ -1,6 +1,6 @@
 # Spec 002: Pausa de sesión
 
-- **Estado:** Borrador · dudas resueltas por el mantenedor (2026-10-02), **pendiente de aprobación**
+- **Estado:** Aprobada (mantenedor, 2026-10-02)
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0007, ADR-0009
 - **Specs relacionadas:** 001, 003

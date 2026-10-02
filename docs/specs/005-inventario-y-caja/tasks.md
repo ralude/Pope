@@ -1,6 +1,6 @@
 # Tareas 005 · Parte 1: tasa de cambio manual
 
-- **Estado:** Propuesto
+- **Estado:** Aprobado (2026-10-02)
 - **Plan:** [plan.md](plan.md)
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa. Cada
