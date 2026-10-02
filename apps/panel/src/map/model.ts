@@ -5,12 +5,13 @@ import {
   applyCheckpoint,
   type PcMapItem,
   type PcMapSession,
+  PC_MAP_COLUMNS,
   seconds,
   startUsage,
 } from '@pope/shared';
 
-/** Columnas del mapa (diseño de referencia: 14 × 7 casillas en la pantalla de 1920×1080). */
-export const MAP_COLUMNS = 14;
+/** Columnas del mapa: las mismas que acepta el nodo al guardar la distribución. */
+export const MAP_COLUMNS = PC_MAP_COLUMNS;
 
 /** Estado que pinta la baldosa. */
 export type TileKind = 'account' | 'temporary' | 'free' | 'offline';

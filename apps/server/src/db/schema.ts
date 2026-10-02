@@ -259,8 +259,16 @@ export const pcs = pgTable(
     /** Nombre que ven el panel y los eventos, p. ej. "PC 05". */
     name: text('name').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    /** Casilla en el mapa del panel (REQ-001-45). Sin ella, la PC va al final del mapa. */
+    mapRow: integer('map_row'),
+    mapCol: integer('map_col'),
   },
-  (t) => [uniqueIndex('pcs_name_lower_idx').on(sql`lower(${t.name})`)],
+  (t) => [
+    uniqueIndex('pcs_name_lower_idx').on(sql`lower(${t.name})`),
+    // Una PC por casilla. PostgreSQL no compara los NULL, así que las PCs sin posición no chocan.
+    uniqueIndex('pcs_map_cell_idx').on(t.mapRow, t.mapCol),
+    check('pcs_map_cell_check', sql`(${t.mapRow} is null) = (${t.mapCol} is null)`),
+  ],
 );
 
 /**

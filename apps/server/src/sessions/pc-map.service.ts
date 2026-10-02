@@ -75,9 +75,8 @@ export class PcMapService {
     const items: PcMapItem[] = pcRows.map((pc) => ({
       id: pc.id,
       name: pc.name,
-      // La posición llega con T39a (REQ-001-45); hasta entonces, por nombre.
-      row: null,
-      col: null,
+      row: pc.mapRow,
+      col: pc.mapCol,
       connected: this.connections.isConnected(pc.id),
       session: byPc.get(pc.id) ?? null,
     }));

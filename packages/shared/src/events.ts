@@ -339,6 +339,32 @@ export const shiftClosedEventSchema = event(
   z.strictObject({ shiftId: idSchema }),
 );
 
+// ─── Mapa de PCs ────────────────────────────────────────────────────────────────────────
+
+// Sin el tope de filas y columnas del panel: si el mapa crece, los eventos viejos siguen
+// siendo válidos.
+const mapCellSchema = z.strictObject({ row: z.int().nonnegative(), col: z.int().nonnegative() });
+
+/**
+ * El administrador guardó la distribución del mapa (REQ-001-45). Solo van las PCs que
+ * cambian, con su casilla anterior y la nueva (`null`: sin posición).
+ */
+export const pcMapChangedEventSchema = event(
+  'pc.map_changed',
+  1,
+  z.strictObject({
+    changes: z
+      .array(
+        z.strictObject({
+          pc: pcRefSchema,
+          from: mapCellSchema.nullable(),
+          to: mapCellSchema.nullable(),
+        }),
+      )
+      .min(1),
+  }),
+);
+
 // ─── Unión de todos los eventos ─────────────────────────────────────────────────────────
 
 export const domainEventSchema = z.discriminatedUnion('type', [
@@ -361,6 +387,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   shiftClosedEventSchema,
   staffCreatedEventSchema,
   staffStatusChangedEventSchema,
+  pcMapChangedEventSchema,
 ]);
 export type DomainEvent = z.infer<typeof domainEventSchema>;
 export type DomainEventType = DomainEvent['type'];

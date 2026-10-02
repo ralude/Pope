@@ -31,6 +31,58 @@ export const pcMapSessionSchema = z.object({
 });
 export type PcMapSession = z.infer<typeof pcMapSessionSchema>;
 
+/** Columnas del mapa del panel (diseño: 14 × 7 casillas en la pantalla de 1920×1080). */
+export const PC_MAP_COLUMNS = 14;
+
+/** Filas como máximo. Sobra para un local de 40 PCs con pasillos y paredes. */
+export const PC_MAP_MAX_ROWS = 30;
+
+/** Una casilla del mapa (REQ-001-45), contando desde 0. */
+export const pcMapCellSchema = z.strictObject({
+  row: z
+    .int()
+    .min(0)
+    .max(PC_MAP_MAX_ROWS - 1),
+  col: z
+    .int()
+    .min(0)
+    .max(PC_MAP_COLUMNS - 1),
+});
+export type PcMapCell = z.infer<typeof pcMapCellSchema>;
+
+/**
+ * Cuerpo de `PUT /pcs/map` (REQ-001-45): la distribución completa. Las PCs que no aparecen
+ * se quedan sin posición y van al final del mapa. Ni una PC dos veces ni dos en una casilla.
+ */
+export const pcMapLayoutRequestSchema = z
+  .strictObject({
+    positions: z.array(pcMapCellSchema.extend({ pcId: idSchema })).max(500),
+  })
+  .superRefine(({ positions }, ctx) => {
+    const pcs = new Set<string>();
+    const cells = new Set<string>();
+    positions.forEach((position, index) => {
+      if (pcs.has(position.pcId)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['positions', index, 'pcId'],
+          message: 'Esta PC aparece dos veces',
+        });
+      }
+      const cell = `${String(position.row)}:${String(position.col)}`;
+      if (cells.has(cell)) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['positions', index],
+          message: 'Dos PCs en la misma casilla',
+        });
+      }
+      pcs.add(position.pcId);
+      cells.add(cell);
+    });
+  });
+export type PcMapLayoutRequest = z.infer<typeof pcMapLayoutRequestSchema>;
+
 /** Una PC del mapa. */
 export const pcMapItemSchema = z.object({
   id: idSchema,

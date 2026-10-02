@@ -10,6 +10,7 @@ import { ComboSalesController } from './combo-sales.controller.js';
 import { PanelHub } from './panel-hub.js';
 import { PcConnections } from './pc-connections.js';
 import { PcMapController } from './pc-map.controller.js';
+import { PcLayoutService } from './pc-layout.service.js';
 import { PcMapService } from './pc-map.service.js';
 import { PcGateway } from './pc-gateway.js';
 import { PcProtocolService } from './pc-protocol.service.js';
@@ -36,6 +37,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
   providers: [
     PcConnections,
     PcMapService,
+    PcLayoutService,
     PanelHub,
     SessionsService,
     TemporarySessionsService,

@@ -99,6 +99,13 @@
       "when": 1790778976166,
       "tag": "0013_session_pc_confirmed",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1790902310717,
+      "tag": "0014_pc_map_position",
+      "breakpoints": true
     }
   ]
 }

@@ -130,6 +130,12 @@ const examples = {
     from: 'active',
     to: 'inactive',
   }),
+  'pc.map_changed': envelope('pc.map_changed', {
+    changes: [
+      { pc: PC05, from: null, to: { row: 0, col: 4 } },
+      { pc: { id: id(8), name: 'PC 02' }, from: { row: 0, col: 4 }, to: { row: 1, col: 0 } },
+    ],
+  }),
 };
 
 describe('eventos de auditoría (REQ-001-30, ADR-0008)', () => {
