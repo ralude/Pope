@@ -53,6 +53,10 @@
   cursor: pointer;
 }
 
+.customers-table tbody tr.static-row {
+  cursor: default;
+}
+
 .customers-table tbody tr:hover {
   background: #20242b;
 }

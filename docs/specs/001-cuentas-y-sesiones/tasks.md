@@ -441,11 +441,12 @@ antes de seguir.
   - **Decidido al implementarla:** la pantalla está en `/combo-horas` (decidido por el mantenedor), porque `/combos` es la ruta de la API y el proxy y el nodo la reservan. Lista de combos con su estado y, para el administrador, un panel lateral de alta o edición: nombre, precio en céntimos, horas (admite «1,5») y, al editar, «A la venta». Lo que sale la hora y el descuento por tramos se calculan en el panel con `comboRatePerHour` y `comboDiscounts` de `shared` y la tarifa actual. Guardar se desactiva si no hay cambios. Verificado a mano (CA-001-14): «Combo 20 horas» a 20 USD por 20 h muestra «1,00 USD/h», «33 % menos que de lunes a miércoles (1,50 USD/h)» y «50 % menos que de jueves a domingo (2,00 USD/h)»; desactivar otro combo lo deja «Desactivado».
   - **Decidido por el mantenedor (2026-10-02):** el encargado y el dueño ven la lista sin poder cambiarla. El descuento se agrupa por tramos de días seguidos con el mismo precio («de lunes a miércoles», «viernes y sábado», «el domingo»).
 
-- [ ] **T43b: Administración del personal**
+- [x] **T43b: Administración del personal**
   - **Cubre:** REQ-001-40
   - **Hacer:** lista del personal, alta (usuario, nombre, rol y contraseña) y activar o desactivar (solo administrador).
   - **Verificar:** a mano: crear un encargado, iniciar sesión con él y desactivarlo.
   - **Commit:** `feat(panel): administra el personal`
+  - **Decidido al implementarla:** pantalla `/personal`, que solo existe para el administrador (raíl y ruta). Tabla con usuario, nombre, rol y estado, y alta en el panel lateral (usuario, nombre para mostrar, rol y contraseña). En la fila de quien ha entrado no hay botón: nadie se desactiva a sí mismo desde el panel (decidido por el mantenedor). Verificado a mano: crear el encargado `carlos`, entrar con él, desactivarlo (su sesión pasa a dar 401 y ya no puede entrar) y un encargado recibe 403 en `GET /staff`.
   - **Nota:** añadida junto con T14d.
   - **Decidido por el mantenedor (2026-10-02):** la sección solo le aparece al administrador.
 

@@ -8,12 +8,13 @@ import { useSession, useStaff } from '../session.js';
 import { Icon, type IconName } from './Icon.js';
 import { ShiftPill } from './ShiftPill.js';
 
-/** Secciones del raíl. Cada tarea de la fase 8 añade la suya. */
-const SECTIONS: { href: string; label: string; icon: IconName }[] = [
+/** Secciones del raíl. Cada tarea de la fase 8 añade la suya; `roles` limita quién la ve. */
+const SECTIONS: { href: string; label: string; icon: IconName; roles?: StaffRole[] }[] = [
   { href: '/', label: 'Mapa de PCs', icon: 'mapa' },
   { href: '/clientes', label: 'Clientes', icon: 'clientes' },
   { href: '/combo-horas', label: 'Combos', icon: 'combos' },
   { href: '/tarifas', label: 'Tarifas', icon: 'tarifas' },
+  { href: '/personal', label: 'Personal', icon: 'personal', roles: ['administrador'] },
 ];
 
 const ROLE_LABEL: Record<StaffRole, string> = {
@@ -96,20 +97,23 @@ function TopBar() {
 
 function Rail() {
   const [location] = useLocation();
+  const staff = useStaff();
   return (
     <nav className="rail" aria-label="Secciones">
-      {SECTIONS.map((section) => (
-        <Link
-          key={section.href}
-          href={section.href}
-          className="rail-item"
-          aria-label={section.label}
-          title={section.label}
-          aria-current={location === section.href ? 'page' : undefined}
-        >
-          <Icon name={section.icon} size={22} />
-        </Link>
-      ))}
+      {SECTIONS.filter((section) => !section.roles || section.roles.includes(staff.role)).map(
+        (section) => (
+          <Link
+            key={section.href}
+            href={section.href}
+            className="rail-item"
+            aria-label={section.label}
+            title={section.label}
+            aria-current={location === section.href ? 'page' : undefined}
+          >
+            <Icon name={section.icon} size={22} />
+          </Link>
+        ),
+      )}
     </nav>
   );
 }
