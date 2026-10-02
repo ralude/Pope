@@ -117,9 +117,12 @@ export const PANEL_UNAUTHORIZED_CLOSE = 4401;
 
 /**
  * Mensajes del nodo al panel por el canal en vivo. `pcs` lleva el mapa completo: se envía al
- * conectar y cada vez que algo cambia, como mucho una vez por segundo.
+ * conectar y cada vez que algo cambia, como mucho una vez por segundo. `interrupted` lleva
+ * cuántas sesiones interrumpidas hay pendientes de restaurar (REQ-001-66), para el aviso del
+ * raíl: se envía al conectar y cuando cambia.
  */
 export const panelMessageSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('pcs'), map: pcMapSchema }),
+  z.object({ type: z.literal('interrupted'), pending: z.int().nonnegative() }),
 ]);
 export type PanelMessage = z.infer<typeof panelMessageSchema>;

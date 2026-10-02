@@ -388,6 +388,11 @@ export class TemporarySessionsService {
     return this.describe(await this.pendingInterrupted());
   }
 
+  /** Cuántas interrumpidas hay pendientes de restaurar, para el aviso del panel. */
+  async pendingInterruptedCount(): Promise<number> {
+    return (await this.pendingInterrupted()).length;
+  }
+
   /**
    * Temporales cerradas sin latidos, con tiempo restante, sin restaurar y dentro de las 48 h
    * desde el corte, o sea, el último latido (REQ-001-71).

@@ -37,6 +37,11 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
     };
     expect(pcMapSchema.parse(map)).toEqual(map);
     expect(panelMessageSchema.parse({ type: 'pcs', map })).toEqual({ type: 'pcs', map });
+    expect(panelMessageSchema.parse({ type: 'interrupted', pending: 2 })).toEqual({
+      type: 'interrupted',
+      pending: 2,
+    });
+    expect(() => panelMessageSchema.parse({ type: 'interrupted', pending: -1 })).toThrow();
   });
 
   it('rechaza restantes negativos, tipos de sesión desconocidos y mensajes desconocidos', () => {

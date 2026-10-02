@@ -9,6 +9,7 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { WebSocket } from 'ws';
 
+import { PANEL_INTERRUPTED_CHECK_MS } from './panel-hub.js';
 import { PcConnections } from './pc-connections.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
@@ -16,6 +17,8 @@ import { login, PcWorld } from '../testing/pc-world.js';
 
 // 18:00 en Caracas de un lunes: 1,50 USD/h.
 const MONDAY = '2026-09-28T22:00:00Z';
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
 
 /** Panel conectado al canal en vivo: guarda los mensajes y el cierre. */
 class PanelClient {
@@ -59,6 +62,22 @@ class PanelClient {
         resolve(message);
       };
     });
+  }
+
+  /** El siguiente mapa, saltando los demás mensajes. */
+  async nextMap(): Promise<PcMap> {
+    for (;;) {
+      const message = await this.next();
+      if (message.type === 'pcs') return message.map;
+    }
+  }
+
+  /** El siguiente número de interrumpidas pendientes, saltando los mapas. */
+  async nextPending(): Promise<number> {
+    for (;;) {
+      const message = await this.next();
+      if (message.type === 'interrupted') return message.pending;
+    }
   }
 
   close(): void {
@@ -151,20 +170,20 @@ describe('estado de las PCs para el panel (e2e, REQ-001-31)', () => {
     const pc = await world.pc(5);
     const panel = PanelClient.connect(panelUrl, ana);
 
-    const first = await panel.next();
-    expect(pcIn(first.map, 5)).toMatchObject({ connected: true, session: null });
+    const first = await panel.nextMap();
+    expect(pcIn(first, 5)).toMatchObject({ connected: true, session: null });
 
     await login(pc, 'juan');
     await world.clock.tick(1000);
-    const update = await panel.next();
-    expect(pcIn(update.map, 5).session).toMatchObject({ kind: 'account', who: 'juan' });
+    const update = await panel.nextMap();
+    expect(pcIn(update, 5).session).toMatchObject({ kind: 'account', who: 'juan' });
     panel.close();
   });
 
   it('una PC que se desconecta también llega en vivo', async () => {
     const pc = await world.pc(7);
     const panel = PanelClient.connect(panelUrl, ana);
-    expect(pcIn((await panel.next()).map, 7).connected).toBe(true);
+    expect(pcIn(await panel.nextMap(), 7).connected).toBe(true);
 
     pc.close();
     await pc.closed;
@@ -173,7 +192,26 @@ describe('estado de las PCs para el panel (e2e, REQ-001-31)', () => {
       expect(connections.isConnected(devPcId(7))).toBe(false);
     });
     await world.clock.tick(1000);
-    expect(pcIn((await panel.next()).map, 7).connected).toBe(false);
+    expect(pcIn(await panel.nextMap(), 7).connected).toBe(false);
+    panel.close();
+  });
+
+  it('avisa de las interrumpidas pendientes al conectar y cuando cambian (T45, REQ-001-66)', async () => {
+    const panel = PanelClient.connect(panelUrl, ana);
+    expect(await panel.nextPending()).toBe(0);
+
+    // "Carlos" paga 60 min, la usa 20 y se va la luz: a los 3 min sin latidos se cierra.
+    const { pc } = await world.openTemporary(ana, 5, 60, 'Carlos');
+    await world.run(5, 20 * MINUTE, MINUTE);
+    pc.close();
+    await pc.closed;
+    await world.clock.tick(4 * MINUTE);
+    expect(await panel.nextPending()).toBe(1);
+
+    // A las 48 h del corte caduca sin ningún evento: lo ve la revisión de cada minuto.
+    world.clock.advance(48 * HOUR);
+    await world.clock.tick(PANEL_INTERRUPTED_CHECK_MS);
+    expect(await panel.nextPending()).toBe(0);
     panel.close();
   });
 

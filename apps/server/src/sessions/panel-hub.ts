@@ -16,9 +16,16 @@ import { Clock } from '../common/clock.js';
 import { EventsService } from '../events/events.service.js';
 import { PcConnections } from './pc-connections.js';
 import { PcMapService } from './pc-map.service.js';
+import { TemporarySessionsService } from './temporary-sessions.service.js';
 
 /** Como mucho, un envío del mapa por segundo: el panel corre en la gráfica integrada. */
 export const PANEL_THROTTLE_MS = 1000;
+
+/**
+ * Cada cuánto se revisan las interrumpidas pendientes aunque no haya eventos: una caduca a
+ * las 48 h del corte sin que pase nada más (REQ-001-71).
+ */
+export const PANEL_INTERRUPTED_CHECK_MS = 60_000;
 
 /** Lee una cookie de la cabecera `Cookie` de la petición de conexión. */
 export function cookieFrom(header: string | undefined, name: string): string | null {
@@ -38,8 +45,9 @@ export function cookieFrom(header: string | undefined, name: string): string | n
 /**
  * Canal en vivo del panel (T38a): `ws://nodo:3000/panel`, autenticado con la cookie del
  * personal. Envía el mapa de PCs al conectar y cada vez que algo cambia (un evento
- * confirmado, una PC que se conecta o desconecta), con un envío por segundo como mucho. El
- * panel no envía nada por aquí: sus acciones van por la API HTTP.
+ * confirmado, una PC que se conecta o desconecta), con un envío por segundo como mucho, y el
+ * número de interrumpidas pendientes al conectar y cuando cambia (T45). El panel no envía
+ * nada por aquí: sus acciones van por la API HTTP.
  */
 @Injectable()
 export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdown {
@@ -48,6 +56,9 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
   private readonly clients = new Set<WebSocket>();
   private lastSentAt = Number.NEGATIVE_INFINITY;
   private cancelPending: (() => void) | null = null;
+  private cancelCheck: (() => void) | null = null;
+  /** Último número de interrumpidas pendientes enviado; `null` si aún no se sabe. */
+  private lastPending: number | null = null;
   private unsubscribe: (() => void)[] = [];
 
   constructor(
@@ -55,6 +66,7 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
     private readonly map: PcMapService,
     private readonly events: EventsService,
     private readonly connections: PcConnections,
+    private readonly temporary: TemporarySessionsService,
     private readonly clock: Clock,
   ) {}
 
@@ -67,6 +79,7 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
         this.changed();
       }),
     ];
+    this.scheduleCheck();
   }
 
   beforeApplicationShutdown(): void {
@@ -74,6 +87,7 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       stop();
     }
     this.cancelPending?.();
+    this.cancelCheck?.();
     for (const client of this.wss.clients) {
       client.terminate();
     }
@@ -102,6 +116,9 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
     });
     try {
       this.send(ws, { type: 'pcs', map: await this.map.snapshot() });
+      const pending = await this.temporary.pendingInterruptedCount();
+      this.lastPending = pending;
+      this.send(ws, { type: 'interrupted', pending });
     } catch (error) {
       this.logger.error('No se pudo enviar el mapa al panel', error);
     }
@@ -131,6 +148,34 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       }
     } catch (error) {
       this.logger.error('No se pudo enviar el mapa al panel', error);
+    }
+    await this.sendPendingIfChanged();
+  }
+
+  /** Revisa las interrumpidas cada minuto, haya o no eventos. */
+  private scheduleCheck(): void {
+    this.cancelCheck = this.clock.schedule(PANEL_INTERRUPTED_CHECK_MS, async () => {
+      await this.sendPendingIfChanged();
+      this.scheduleCheck();
+    });
+  }
+
+  /** Envía el número de interrumpidas pendientes a todos si cambió desde el último envío. */
+  private async sendPendingIfChanged(): Promise<void> {
+    if (this.clients.size === 0) {
+      return;
+    }
+    try {
+      const pending = await this.temporary.pendingInterruptedCount();
+      if (pending === this.lastPending) {
+        return;
+      }
+      this.lastPending = pending;
+      for (const client of this.clients) {
+        this.send(client, { type: 'interrupted', pending });
+      }
+    } catch (error) {
+      this.logger.error('No se pudieron contar las interrumpidas para el panel', error);
     }
   }
 
