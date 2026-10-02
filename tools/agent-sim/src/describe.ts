@@ -35,6 +35,9 @@ export function describeEvent(event: PcEvent): string | null {
       return `aviso: queda ${String(message.minutesLeft)} min`;
     case 'sessionEnded':
       return `sesión terminada (${END_REASONS[message.reason]})`;
+    case 'combos':
+      // El simulador no pide combos; si llegan, no hace falta contarlo.
+      return null;
     case 'error':
       return `error ${message.code}: ${message.message}`;
   }

@@ -12,6 +12,7 @@ import {
   activeSession,
   buyCombo,
   heartbeat,
+  listCombos,
   login,
   logout,
   PcWorld,
@@ -223,6 +224,52 @@ describe('compra de combos desde el Shell (e2e, REQ-001-85, REQ-001-82)', () => 
     expect(await buyCombo(pc6, combo20)).toMatchObject({
       code: 'no_active_session',
       message: 'Los combos son solo para clientes con cuenta',
+    });
+  });
+
+  it('la respuesta a la compra lleva el requestId, para no confundirla con un latido', async () => {
+    await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(25) });
+    const pc = await world.pc(5);
+    await login(pc, 'juan');
+
+    expect(await buyCombo(pc, combo20)).toMatchObject({
+      type: 'state',
+      status: 'active',
+      requestId: 'buy-1',
+    });
+    expect(await heartbeat(pc)).not.toHaveProperty('requestId');
+  });
+
+  it('listCombos devuelve los combos a la venta, de menos a más tiempo', async () => {
+    const service = world.testApp.app.get(CombosService);
+    const combo5 = await service.create(
+      { name: 'Combo 5 horas', priceMicros: usd(6), seconds: hours(5) },
+      SYSTEM,
+    );
+    const old = await service.create(
+      { name: 'Combo viejo', priceMicros: usd(1), seconds: hours(1) },
+      SYSTEM,
+    );
+    await service.update(old.id, { active: false }, SYSTEM);
+    const pc = await world.pc(5);
+
+    expect(await listCombos(pc)).toEqual({
+      type: 'combos',
+      requestId: 'combos-1',
+      combos: [
+        {
+          comboId: combo5.id,
+          name: 'Combo 5 horas',
+          price: { micros: usd(6), currency: 'USD' },
+          seconds: hours(5),
+        },
+        {
+          comboId: combo20,
+          name: 'Combo 20 horas',
+          price: { micros: usd(20), currency: 'USD' },
+          seconds: hours(20),
+        },
+      ],
     });
   });
 });

@@ -117,6 +117,11 @@ export function buyCombo(client: PcTestClient, comboId: string): Promise<NodeToP
   return client.request({ type: 'buyCombo', comboId, requestId: 'buy-1' });
 }
 
+/** El Shell pide los combos a la venta; devuelve la respuesta del nodo. */
+export function listCombos(client: PcTestClient): Promise<NodeToPcMessage> {
+  return client.request({ type: 'listCombos', requestId: 'combos-1' });
+}
+
 /** El cliente cierra su sesión desde el Shell; devuelve la respuesta del nodo. */
 export function logout(client: PcTestClient): Promise<NodeToPcMessage> {
   return client.request({ type: 'logout', requestId: 'logout-1' });

@@ -91,8 +91,8 @@ consumo de dinero), en vez de una por latido. Durante la sesión solo se actuali
 
 | Dirección | Mensajes |
 |---|---|
-| PC → nodo | `hello` (identidad de la PC), `heartbeat` (session_id?, restante local), `login` (usuario, contraseña), `logout`, `buyCombo` (combo_id). Los tres últimos admiten un `requestId` opcional |
-| nodo → PC | `state` (bloqueada o en sesión: saldos, tarifa, tiempo total), `warning` (5 o 1 min), `sessionEnded` (motivo), `error` (código, mensaje en español y el `requestId` de la petición que falló, si lo traía) |
+| PC → nodo | `hello` (identidad de la PC), `heartbeat` (session_id?, restante local), `login` (usuario, contraseña), `logout`, `buyCombo` (combo_id), `listCombos` (T49). Los cuatro últimos admiten un `requestId` opcional |
+| nodo → PC | `state` (bloqueada o en sesión: saldos, tarifa, tiempo total; si responde a `buyCombo`, con su `requestId`), `warning` (5 o 1 min), `sessionEnded` (motivo), `combos` (los activos con id, nombre, precio y horas, en respuesta a `listCombos`), `error` (código, mensaje en español y el `requestId` de la petición que falló, si lo traía) |
 
 **Comportamiento del agente en el canal.** Lo imita el simulador (T36) y lo cumplirá el
 agente real (spec 003). El nodo decide; esto es solo lo que la PC dice y cuándo:

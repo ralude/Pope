@@ -8,6 +8,7 @@ import {
 } from '@pope/shared';
 import { eq } from 'drizzle-orm';
 
+import { CombosService } from '../combos/combos.service.js';
 import { Clock } from '../common/clock.js';
 import { CustomerAuthService } from '../customers/customer-auth.service.js';
 import { DATABASE, type Database } from '../db/database.js';
@@ -50,6 +51,7 @@ export class PcProtocolService {
     private readonly connections: PcConnections,
     private readonly sessions: SessionsService,
     private readonly customerAuth: CustomerAuthService,
+    private readonly combos: CombosService,
     private readonly clock: Clock,
   ) {}
 
@@ -133,8 +135,22 @@ export class PcProtocolService {
           connection.send(await this.sessions.stateFor(pc.id));
         }
         return;
-      case 'buyCombo':
-        connection.send(await this.sessions.buyCombo(pc.id, message.comboId));
+      case 'buyCombo': {
+        const state = await this.sessions.buyCombo(pc.id, message.comboId);
+        // El `state` lleva el `requestId` para que el Shell sepa que es la respuesta a su compra.
+        connection.send(
+          state.type === 'state' && state.status === 'active' && message.requestId !== undefined
+            ? { ...state, requestId: message.requestId }
+            : state,
+        );
+        return;
+      }
+      case 'listCombos':
+        connection.send({
+          type: 'combos',
+          ...(message.requestId !== undefined && { requestId: message.requestId }),
+          combos: await this.combos.forSale(),
+        });
         return;
     }
   }

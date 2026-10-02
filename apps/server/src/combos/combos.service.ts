@@ -8,6 +8,7 @@ import {
   type ComboUpdateRequest,
   micros,
   newId,
+  type PcCombo,
   seconds,
   type TariffTable,
 } from '@pope/shared';
@@ -60,6 +61,24 @@ export class CombosService {
       this.tariffs.table(),
     ]);
     return rows.map((row) => toCombo(row, table));
+  }
+
+  /**
+   * Combos a la venta para el Shell (REQ-001-81, REQ-001-85): solo los activos, de menos a
+   * más tiempo, con lo que necesita ver el cliente.
+   */
+  async forSale(): Promise<PcCombo[]> {
+    const rows = await this.db
+      .select()
+      .from(combos)
+      .where(eq(combos.active, true))
+      .orderBy(asc(combos.seconds));
+    return rows.map((row) => ({
+      comboId: row.id,
+      name: row.name,
+      price: { micros: micros(row.priceMicros), currency: 'USD' },
+      seconds: row.seconds,
+    }));
   }
 
   /** Un combo; 404 si no existe. */

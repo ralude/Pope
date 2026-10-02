@@ -78,12 +78,22 @@ export const buyComboMessageSchema = z.object({
   comboId: idSchema,
 });
 
+/**
+ * El Shell pide los combos a la venta para mostrarlos antes de comprar (REQ-001-85). El nodo
+ * responde con `combos` (pregunta resuelta de la spec 001).
+ */
+export const listCombosMessageSchema = z.object({
+  type: z.literal('listCombos'),
+  requestId: requestIdSchema.optional(),
+});
+
 export const pcToNodeMessageSchema = z.discriminatedUnion('type', [
   helloMessageSchema,
   heartbeatMessageSchema,
   loginMessageSchema,
   logoutMessageSchema,
   buyComboMessageSchema,
+  listCombosMessageSchema,
 ]);
 export type PcToNodeMessage = z.infer<typeof pcToNodeMessageSchema>;
 
@@ -139,6 +149,11 @@ export const stateMessageSchema = z.discriminatedUnion('status', [
     status: z.literal('active'),
     session: sessionStateSchema,
     vesRate: vesRateSchema.nullable(),
+    /**
+     * `requestId` de la petición a la que responde, si responde a una (p. ej. `buyCombo`).
+     * Así el Shell distingue la respuesta de un `state` de latido que se cruce. Opcional.
+     */
+    requestId: requestIdSchema.optional(),
   }),
 ]);
 
@@ -154,6 +169,26 @@ export const sessionEndedMessageSchema = z.object({
   type: z.literal('sessionEnded'),
   sessionId: idSchema,
   reason: sessionEndReasonSchema,
+});
+
+/** Combo a la venta, tal como lo ve el cliente en el Shell. */
+export const pcComboSchema = z.object({
+  comboId: idSchema,
+  name: z.string().min(1),
+  price: moneySchema,
+  /** Horas que da el combo, en segundos. */
+  seconds: z.int().positive(),
+});
+export type PcCombo = z.infer<typeof pcComboSchema>;
+
+/**
+ * Respuesta a `listCombos`: los combos activos, de menos a más tiempo (REQ-001-81,
+ * REQ-001-85). Lleva el `requestId` de la petición, si lo traía.
+ */
+export const combosMessageSchema = z.object({
+  type: z.literal('combos'),
+  requestId: requestIdSchema.optional(),
+  combos: z.array(pcComboSchema),
 });
 
 /** Códigos de error que la PC puede recibir. El texto para el cliente va en `message`. */
@@ -196,6 +231,7 @@ export const nodeToPcMessageSchema = z.union([
   stateMessageSchema,
   warningMessageSchema,
   sessionEndedMessageSchema,
+  combosMessageSchema,
   errorMessageSchema,
 ]);
 export type NodeToPcMessage = z.infer<typeof nodeToPcMessageSchema>;
