@@ -68,17 +68,24 @@ parte 1.
 
 ### Fase 1: Diseño y contratos
 
-- [ ] **T08: Diseño de Caja, Inventario y cierre**
+- [x] **T08: Diseño de Caja, Inventario y cierre**
   - **Cubre:** REQ-005-20, REQ-005-24, REQ-005-45, REQ-005-51
   - **Hacer:** artboards nuevos en el lienzo "Panel Pope · Fase 8": Caja (venta nueva a la izquierda, movimientos a la derecha), Inventario (página propia con buscador, productos con foto, modal "Nuevo producto" y conceptos), abrir turno con fondo, cerrar con conteo y confirmación, Cierres, y una maqueta del PDF de una página.
   - **Verificar:** aprobación del mantenedor.
   - **Commit:** sin commit (el diseño vive en el lienzo); se anota en ESTADO.md con el siguiente commit.
+  - **Decidido al implementarla:** artboards Caja, Inventario, NuevoProducto, AbrirCaja, CerrarCaja (conteo, confirmación y "Caja cerrada"), Cierres y ReportePDF (A4). El raíl gana Caja, Inventario y Cierres; "Turno de caja" pasa a ser Caja. El PDF del encargado no lleva líneas de firma (mantenedor). Aprobado por el mantenedor el 2026-10-02.
 
-- [ ] **T09: Contratos del inventario y la caja**
-  - **Cubre:** REQ-005-01 a REQ-005-05, REQ-005-10, REQ-005-20 a REQ-005-25, REQ-005-40, REQ-005-42, REQ-005-52
-  - **Hacer:** en `@pope/shared`, los esquemas de productos, conceptos, movimientos de stock, ventas (líneas y pagos), registro de caja, turno ampliado y canal (`cash`); los eventos nuevos y la versión 2 de `shift.opened` y `shift.closed`; funciones puras: importe en Bs con la tasa, grupo de cada cobro, lo esperado por método y la diferencia.
-  - **Verificar:** tests unitarios de las funciones y de los esquemas (incluido CA-005-02).
-  - **Commit:** `feat(shared): añade los contratos del inventario y la caja`
+- [ ] **T09a: Contratos del inventario**
+  - **Cubre:** REQ-005-01 a REQ-005-05, REQ-005-10 a REQ-005-14
+  - **Hacer:** en `@pope/shared`, los esquemas de productos (con la cantidad inicial como primera entrada), conceptos y movimientos de stock; el ajuste `allowNegativeStock` (REQ-005-12); los eventos `product.*`, `stock.moved` y `sale_concept.*`; el aviso de bajo mínimo.
+  - **Verificar:** tests unitarios de los esquemas, del bajo mínimo y de los eventos.
+  - **Commit:** `feat(shared): añade los contratos del inventario`
+
+- [ ] **T09b: Contratos de las ventas y la caja**
+  - **Cubre:** REQ-005-20 a REQ-005-25, REQ-005-40, REQ-005-42, REQ-005-52
+  - **Hacer:** en `@pope/shared`, los esquemas de ventas (líneas y pagos, con el método "saldo"), registro y lista de caja, apertura y cierre del turno y canal (`cash`); el tipo de movimiento `sale` del monedero; los eventos `sale.*` y la versión 2 de `shift.opened` y `shift.closed`; funciones puras: importe en Bs con la tasa, reparto de los pagos por grupo, totales por grupo, lo esperado por método y la diferencia.
+  - **Verificar:** tests unitarios de las funciones y de los esquemas (incluidos CA-005-02, CA-005-03 y los totales de CA-005-09).
+  - **Commit:** `feat(shared): añade los contratos de las ventas y la caja`
 
 ### Fase 2: Nodo
 
@@ -102,13 +109,13 @@ parte 1.
 
 - [ ] **T13: Registro de caja**
   - **Cubre:** REQ-005-24, REQ-005-41
-  - **Hacer:** tabla `cash_entries` con migración que pasa los cobros anteriores; recargas, sesiones temporales (abrir y añadir tiempo) y combos en caja escriben su fila en la misma transacción; `GET /shifts/current/entries`; mensaje `cash` del canal del panel.
+  - **Hacer:** tabla `cash_entries` con migración que pasa los cobros anteriores; recargas, sesiones temporales (abrir y añadir tiempo) y combos en caja escriben su fila en la misma transacción, en Bs con la tasa vigente si el método es de Bs (sin tasa, solo efectivo USD); `GET /shifts/current/entries`; mensaje `cash` del canal del panel.
   - **Verificar:** los e2e de la spec 001 siguen pasando; e2e nuevos de las filas de cada cobro y de la lista del turno.
   - **Commit:** `feat(server): anota todos los cobros en el registro de caja`
 
 - [ ] **T14: Ventas**
   - **Cubre:** REQ-005-20 a REQ-005-22, REQ-005-25, REQ-005-43
-  - **Hacer:** tablas `sales` y `sale_lines`; `POST /sales` con productos y conceptos, uno o varios pagos, Bs con la tasa vigente y pago con saldo (ledger `sale`); baja el stock; turno abierto obligatorio.
+  - **Hacer:** tablas `sales` y `sale_lines`; `POST /sales` con productos y conceptos, uno o varios pagos, Bs con la tasa vigente y pago con saldo (ledger `sale`); baja el stock (sin pasar de 0, salvo con `allowNegativeStock`); turno abierto obligatorio.
   - **Verificar:** e2e: CA-005-02, CA-005-07, CA-005-10, venta sin stock rechazada, sin tasa no se cobra en Bs, sin turno no se vende.
   - **Commit:** `feat(server): registra ventas de productos y conceptos`
 

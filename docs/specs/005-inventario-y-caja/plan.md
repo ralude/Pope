@@ -167,11 +167,11 @@ Convenciones de siempre: ids UUIDv7, fechas `timestamptz` en UTC, importes `bigi
 | Tabla | Campos clave | Notas |
 |---|---|---|
 | `products` | name, price_micros (µUSD), min_stock?, active, photo? (nombre del archivo), updated_at | REQ-005-01. Los cambios de precio quedan en su evento (REQ-005-02) |
-| `stock_movements` | product_id, kind (`entrada`/`venta`/`ajuste`/`merma`), quantity (con signo), reason?, sale_id?, actor, created_at | REQ-005-10. El stock es la suma (REQ-005-11). Anular una venta escribe un movimiento `venta` de signo contrario que apunta a la venta anulada (REQ-005-23) |
+| `stock_movements` | product_id, kind (`restock` entrada / `sale` venta / `adjustment` ajuste / `waste` merma), quantity (con signo), reason?, sale_id?, actor, created_at | REQ-005-10. El stock es la suma (REQ-005-11). Anular una venta escribe un movimiento `sale` de signo contrario que apunta a la venta anulada (REQ-005-23) |
 | `sale_concepts` | name, unit_price_micros (µUSD, sugerido), active | REQ-005-05 ("Impresiones"…) |
 | `sales` | shift_id, customer_id? (si se pagó con saldo), total_micros (µUSD), actor, created_at, voided_at?, void_reason?, voided_by? | Una fila por venta. La anulación no borra: marca y genera los movimientos inversos |
 | `sale_lines` | sale_id, product_id? o concept_id?, name (copia), quantity, unit_price_micros, total_micros | Copia de nombre y precio del momento, como los combos (ADR-0014) |
-| `cash_entries` | shift_id, source (`sale`/`recharge`/`temporary`/`combo`/`void`), source_id, group (`pc`/`snacks`/`other`), method (`cash_usd`/`cash_ves`/`mobile_payment`/`pos`/`balance`), currency (`USD`/`VES`), amount_micros (en su moneda), usd_micros, ves_rate?, actor, created_at | **Registro único de lo cobrado** (REQ-005-24). Una fila por pago; una venta con dos métodos escribe dos. Las anulaciones, con importe negativo |
+| `cash_entries` | shift_id, source (`sale`/`recharge`/`temporary`/`combo`/`void`), source_id, group (`pc`/`snacks`/`other`), method (`cash_usd`/`cash_ves`/`mobile_payment`/`pos`/`balance`), currency (`USD`/`VES`), amount_micros (en su moneda), usd_micros, ves_rate?, actor, created_at | **Registro único de lo cobrado** (REQ-005-24). Una fila por pago y grupo: una venta con dos métodos escribe dos, y un pago que cubre golosinas y conceptos se reparte en una fila por grupo. La lista del turno junta las filas de cada cobro en un solo movimiento. Las anulaciones, con importe negativo |
 | `cash_shifts` (amplía) | + opening_cash_usd_micros, opening_cash_ves_micros, counted (`jsonb`: lo contado por método), expected (`jsonb`), closed_by | REQ-005-40 y REQ-005-42. Lo esperado se guarda al cerrar, para que el reporte no cambie después |
 | `ledger` (amplía) | + kind `sale` | Pagar con saldo resta del monedero `money` del cliente (REQ-005-21, CA-005-10) |
 
@@ -181,12 +181,22 @@ por línea entre `snacks` y `other`.
 
 **Bolívares** (REQ-005-22, CA-005-02): un pago en efectivo Bs, pago móvil o punto se guarda en
 VES con la tasa vigente al cobrar (`amount_micros` = USD × tasa, redondeado al céntimo) y su
-equivalente en USD. Sin tasa no se puede cobrar en bolívares: el panel lo avisa y ofrece
-escribirla (de ahí que T04 de la parte 1 vaya antes de la Caja).
+equivalente en USD. Si un pago se reparte entre dos grupos, el importe en Bs se calcula una vez
+para todo el pago y se reparte, para que las filas sumen lo que pagó el cliente. Sin tasa no se
+puede cobrar en bolívares: el panel lo avisa y ofrece escribirla (de ahí que T04 de la parte 1
+vaya antes de la Caja). **Lo mismo vale para recargas, sesiones temporales y combos** de la
+spec 001 (mantenedor, 2026-10-02): cobrados en un método de Bs, se guardan en Bs con la tasa;
+sin tasa, solo se cobran en efectivo USD.
 
 **Cobros anteriores:** la migración pasa al registro de caja las recargas, temporales y combos
 de turnos ya existentes, en USD y sin tasa (entonces no se guardaba), para que la lista y los
-reportes del turno abierto estén completos.
+reportes del turno abierto estén completos. Los que se cobraron en un método de Bs no entran en
+lo esperado de ese método, que se cuenta en Bs; solo afecta a datos de desarrollo, porque Pope
+aún no se usa en el local.
+
+**Vender sin stock** (REQ-005-12, mantenedor, 2026-10-02): ajuste del nodo
+`allowNegativeStock` (0 o 1, apagado por defecto), que cambia el administrador como los de la
+spec 001. Vale para todos los productos.
 
 **Un turno al día** (REQ-005-44): el nodo ya impide dos turnos abiertos del mismo encargado;
 además impedirá abrir uno si hay otro abierto en el local.
@@ -226,10 +236,12 @@ stock; las pantallas abiertas vuelven a pedir lo que muestran. Así dos pestaña
 la misma lista.
 
 **Eventos** (con actor): `product.created`, `product.updated` (con el precio anterior y el
-nuevo, REQ-005-02), `stock.moved`, `sale_concept.created`, `sale_concept.updated`,
-`sale.recorded`, `sale.voided`, y **versión 2** de `shift.opened` (con el fondo) y
-`shift.closed` (con lo esperado, lo contado y la diferencia por método; CA-005-03). La
-versión 1 de esos dos sigue siendo válida para los eventos ya guardados.
+nuevo, REQ-005-02), `product.photo_set` (la foto también es un cambio de estado), `stock.moved`
+(entradas, ajustes y mermas; los de una venta o su anulación ya van en `sale.recorded` y
+`sale.voided`), `sale_concept.created`, `sale_concept.updated`, `sale.recorded`, `sale.voided`,
+y **versión 2** de `shift.opened` (con el fondo) y `shift.closed` (con lo esperado, lo contado
+y la diferencia por método; CA-005-03). La versión 1 de esos dos sigue siendo válida para los
+eventos ya guardados.
 
 ### Reportes PDF (REQ-005-51 a REQ-005-53)
 

@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · plan y tareas de la parte 2 de la spec 005 aprobados
+**Última actualización:** 2026-10-02 · diseño de la Caja y el Inventario aprobado (T08 de la spec 005)
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) por aprobar |
-| **Siguiente tarea** | **T08: Diseño de Caja, Inventario y cierre** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T08–T17, T04, T18–T24, T05–T07 |
-| **Progreso** | Spec 005: 3 / 24 tareas (parte 1: 3 / 7; parte 2: 0 / 17) |
+| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
+| **Siguiente tarea** | **T09a: Contratos del inventario** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T09a–T17, T04, T18–T24, T05–T07 |
+| **Progreso** | Spec 005: 4 / 25 tareas (parte 1: 3 / 7; parte 2: 1 / 18) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 3 / 24 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 4 / 25 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T08 (spec 005): diseño de Caja, Inventario, Nuevo producto, abrir y cerrar caja, Cierres y el PDF del encargado en el lienzo del panel, aprobado por el mantenedor (sin líneas de firma en el PDF). Decidido además: vender sin stock es un ajuste del nodo (`allowNegativeStock`, REQ-005-12), y las recargas, temporales y combos cobrados en un método de Bs se guardan en Bs con la tasa. T09 se divide en T09a (inventario) y T09b (ventas y caja).
 - **2026-10-02:** Spec 005, parte 2 redactada con el mantenedor: productos con foto, conceptos sin inventario ("Impresiones"), Caja con venta nueva a la izquierda y movimientos del turno a la derecha, fondo inicial, cierre con conteo por método y PDF de una página (más el detallado para administrador y dueño). La tasa queda en pausa tras T03 por decisión suya.
 - **2026-10-02:** T03 (spec 005): el `state` de las PCs lleva la tasa vigente y se reenvía al cambiarla (el Shell ya muestra el Bs), y el canal del panel anuncia `exchangeRate` al conectar, al cambiar y al pasar de día.
 - **2026-10-02:** T02 (spec 005): tabla `exchange_rates` (solo inserción), `ExchangeRatesService` con las últimas tasas en memoria y `GET`/`POST /exchange-rate` (guardan el encargado y el administrador; el dueño solo ve). Probado también contra PostgreSQL real.
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T50: «Cerrar sesión» con confirmación en el Shell; en las temporales, «Perderás X min». Verificado CA-001-09 con una temporal de 25 min abierta desde el panel. Fin de la fase 9.
 - **2026-10-02:** T49: diálogo «Comprar combo» en el Shell (desde el panel de la sesión y desde el aviso), con lo que alcanza el saldo y cómo quedan saldo y horas. Antes, `feat(server)`: mensaje `listCombos`/`combos` del canal y `requestId` en la respuesta a la compra. Verificado con recargas reales desde el panel.
 - **2026-10-02:** T48: avisos de 5 y 1 min (los del nodo, sin contradecir al contador) y pantalla «Tu sesión terminó» que vuelve al bloqueo a los 10 s. Antes, `feat(shell-ui)`: todos los tiempos sin segundos («4 h 15 min»), como pidió el mantenedor. Verificado con una sesión temporal de 6 min.
-- **2026-10-02:** T47: la sesión del Shell muestra el tiempo total, las horas de combo y el saldo con su tiempo equivalente, con cuenta atrás local hecha con el motor de cobro de `@pope/shared` (coincide con el nodo en cada latido). Sin catálogo y con la pausa desactivada, como decidió el mantenedor (anotado en la spec 001).
