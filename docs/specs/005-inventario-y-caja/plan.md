@@ -254,9 +254,12 @@ versión 1 de esos dos sigue siendo válida para los eventos ya guardados.
     USD y Bs; los pagos (uno o varios métodos; con saldo, buscando la cuenta del cliente).
   - **derecha, movimientos del turno:** la lista de REQ-005-24, con su total por grupo arriba
     y "Anular" para el administrador.
-- **Inventario** (`/inventario`): productos con foto, precio, stock y aviso de bajo mínimo;
-  alta y edición (administrador), "Entrada" (encargado y administrador), "Ajuste" y "Merma"
-  (administrador), y la pestaña de conceptos.
+- **Inventario** (`/inventario`), página propia: productos con foto, precio, stock y aviso de
+  bajo mínimo, con un **buscador** que filtra por nombre mientras se escribe. **"Nuevo producto"**
+  abre un modal (administrador) con nombre, foto, precio, stock mínimo y la cantidad que llegó,
+  que se guarda como su primera **entrada** (REQ-005-10: el stock nunca se escribe). Editar usa
+  el mismo modal sin la cantidad. Además, "Entrada" (encargado y administrador), "Ajuste" y
+  "Merma" (administrador), y la pestaña de conceptos.
 - **Turno:** abrir pide el fondo en USD y Bs. **Cerrar** muestra lo esperado por método, pide
   lo contado, enseña la diferencia, pregunta "¿Seguro que quieres cerrar la caja?" y, al
   confirmar, cierra y **descarga el PDF** del encargado (REQ-005-45).

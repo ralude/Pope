@@ -70,7 +70,7 @@ parte 1.
 
 - [ ] **T08: Diseño de Caja, Inventario y cierre**
   - **Cubre:** REQ-005-20, REQ-005-24, REQ-005-45, REQ-005-51
-  - **Hacer:** artboards nuevos en el lienzo "Panel Pope · Fase 8": Caja (venta nueva a la izquierda, movimientos a la derecha), Inventario (productos con foto y conceptos), abrir turno con fondo, cerrar con conteo y confirmación, Cierres, y una maqueta del PDF de una página.
+  - **Hacer:** artboards nuevos en el lienzo "Panel Pope · Fase 8": Caja (venta nueva a la izquierda, movimientos a la derecha), Inventario (página propia con buscador, productos con foto, modal "Nuevo producto" y conceptos), abrir turno con fondo, cerrar con conteo y confirmación, Cierres, y una maqueta del PDF de una página.
   - **Verificar:** aprobación del mantenedor.
   - **Commit:** sin commit (el diseño vive en el lienzo); se anota en ESTADO.md con el siguiente commit.
 
@@ -134,7 +134,7 @@ parte 1.
 
 - [ ] **T18: Inventario en el panel**
   - **Cubre:** REQ-005-01, REQ-005-03, REQ-005-04, REQ-005-10, REQ-005-13, REQ-005-14
-  - **Hacer:** pantalla `/inventario` según el diseño: productos con foto (reducida con `<canvas>` antes de subirla), alta y edición, entrada, ajuste y merma, y aviso de bajo mínimo.
+  - **Hacer:** página `/inventario` según el diseño: productos con foto y buscador por nombre; modal "Nuevo producto" (nombre, foto reducida con `<canvas>` antes de subirla, precio, stock mínimo y cantidad inicial, que se guarda como entrada) y el mismo modal para editar; entrada, ajuste y merma; aviso de bajo mínimo.
   - **Verificar:** CA-005-08 a mano en Chrome.
   - **Commit:** `feat(panel): muestra el inventario con fotos`
 
