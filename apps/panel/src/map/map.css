@@ -76,6 +76,32 @@
   border: 2px dashed #e4e7ec;
 }
 
+/* Organizar (T39b): se arrastra con el ratón o el teclado. */
+.tile-draggable {
+  cursor: grab;
+  touch-action: none;
+}
+
+.tile-dragging {
+  position: relative;
+  z-index: 2;
+  cursor: grabbing;
+  outline: 2px solid var(--accent-text);
+}
+
+.cell-slot {
+  width: 76px;
+  height: 52px;
+  border: 1px dashed var(--line-2);
+  border-radius: 7px;
+}
+
+.cell-over .cell-slot,
+.cell-over .tile:not(.tile-dragging) {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
 .tile-bar {
   width: 52px;
   height: 5px;

@@ -249,6 +249,28 @@ a {
   letter-spacing: 0.5px;
 }
 
+/* Pestañas en píldora de la cabecera (p. ej. Operar / Organizar del mapa). */
+.section-tab {
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 17px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.section-tab:hover {
+  color: var(--text);
+}
+
+.section-tab[aria-pressed='true'] {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
 .section-body {
   flex-grow: 1;
   min-height: 0;

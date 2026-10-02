@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-01 · T39a terminada (distribución del mapa)
+**Última actualización:** 2026-10-01 · T39b terminada (organizar el mapa)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T39b: Organizar el mapa arrastrando** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 53 / 68 tareas · fase 8 de 9 (Panel) |
+| **Siguiente tarea** | **T40: Clientes** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 54 / 68 tareas · fase 8 de 9 (Panel) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 53 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 54 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-01:** T39b: pestaña Organizar del mapa para el administrador con @dnd-kit/core: arrastrar con ratón o teclado, intercambiar, guardar o descartar. Verificado a mano: misma distribución al recargar y desde otra sesión.
 - **2026-10-01:** T39a: columnas map_row y map_col en pcs, PUT /pcs/map solo para el administrador (distribución completa en una transacción) y evento pc.map_changed con las PCs que cambian. Probado también contra PostgreSQL real.
 - **2026-10-01:** T39: mapa de PCs en vivo en el panel, con baldosas por estado, leyenda, ocupación y detalle de la PC con «Cerrar sesión». Cuenta el restante y el saldo con el reloj del nodo entre envíos del canal `/panel`. Medido con el simulador: 17–36 ms. Antes, `fix(panel)`: ya no aparece «sesión caducada» al abrir el panel sin sesión.
 - **2026-09-30:** T38a. GET /pcs/map (todo el personal) y canal WebSocket /panel con la cookie del personal (sin ella se cierra con 4401): el mapa completo al conectar y en cada cambio, como mucho uno por segundo. Esquemas pcMapSchema y panelMessageSchema en shared. EventsService.subscribe avisa de lo confirmado y PcConnections de las conexiones.
@@ -66,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T37a. POPE_MEMORY_LOG_MS (opcional, mínimo 1000) hace que el servidor registre cada ese tiempo Memoria: rss=… MB heapUsed=… MB. Probado en un arranque real: unos 84 MB en reposo (el primer registro, durante el arranque y las migraciones, marcó 260 MB).
 - **2026-09-30:** T36b. Subcomando interactive: consola con login, logout, red, reinicio, apagon, luz y estado sobre PCs simuladas. Probada contra PostgreSQL real: el corte de red de 20 s mantiene la sesión, el apagón la cierra sin latidos y el reinicio con la sesión ya nombrada la cierra al momento.
 - **2026-09-30:** T36a. CLI del simulador: seed (crea sim01…simNN y los recarga por la API del panel, con turno propio, idempotente) y run (PCs simuladas con --login y --duration). Probado contra PostgreSQL real: 5 PCs entran con 2:00:00 y salen con 0,05 USD menos tras 2 min; el ledger y los eventos cuadran. La prueba destapó que Fastify rechaza content-type JSON sin cuerpo.
-- **2026-09-30:** T36. Paquete tools/agent-sim (@pope/agent-sim) sin dependencias nuevas y clase SimulatedPc: hello, latido cada 10 s siempre, restante local, reconexión 1-30 s, corte de red, reinicio y apagón (sin cerrar la conexión, como en la realidad), login con latencia. 15 tests con conexión falsa y reloj simulado.

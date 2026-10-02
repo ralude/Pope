@@ -2,10 +2,19 @@ import { type PcMapItem, type PcMapSession, pcMapSessionSchema } from '@pope/sha
 import { describe, expect, it } from 'vitest';
 
 import {
+  cellId,
+  layoutOf,
   legendOf,
   liveAccount,
   liveRemaining,
+  MIN_ROWS,
+  movedCount,
+  moveTo,
+  neighborCell,
+  organizeRows,
+  parseCellId,
   placePcs,
+  withLayout,
   shortDuration,
   tileKind,
   tileLabel,
@@ -35,6 +44,58 @@ const pc = (n: number, over: Partial<PcMapItem> = {}): PcMapItem => ({
   connected: true,
   session: null,
   ...over,
+});
+
+describe('organizar el mapa (T39b, REQ-001-45)', () => {
+  const placed = placePcs([pc(1), pc(2), pc(3)], 4);
+  const layout = layoutOf(placed);
+
+  it('mueve una PC a una casilla vacía', () => {
+    const next = moveTo(layout, pc(1).id, { row: 3, col: 2 });
+    expect(next.get(pc(1).id)).toEqual({ row: 3, col: 2 });
+    expect(next.get(pc(2).id)).toEqual({ row: 0, col: 1 });
+    expect(movedCount(placed, next)).toBe(1);
+  });
+
+  it('intercambia dos PCs si la casilla está ocupada', () => {
+    const next = moveTo(layout, pc(1).id, { row: 0, col: 2 });
+    expect(next.get(pc(1).id)).toEqual({ row: 0, col: 2 });
+    expect(next.get(pc(3).id)).toEqual({ row: 0, col: 0 });
+    expect(movedCount(placed, next)).toBe(2);
+    // Soltarla en su sitio no cambia nada.
+    expect(movedCount(placed, moveTo(layout, pc(2).id, { row: 0, col: 1 }))).toBe(0);
+  });
+
+  it('la distribución en edición manda al colocar las PCs', () => {
+    const next = moveTo(layout, pc(3).id, { row: 2, col: 2 });
+    const again = placePcs(withLayout([pc(1), pc(2), pc(3), pc(4)], next), 4);
+    expect(again.map((p) => [p.pc.name, p.row, p.col])).toEqual([
+      ['PC 01', 0, 0],
+      ['PC 02', 0, 1],
+      ['PC 03', 2, 2],
+      // Una PC nueva, que no estaba al empezar a organizar, va detrás.
+      ['PC 04', 3, 0],
+    ]);
+  });
+
+  it('deja una fila vacía de sobra para bajar PCs, con 7 como mínimo', () => {
+    expect(organizeRows(placed)).toBe(MIN_ROWS);
+    expect(organizeRows([{ pc: pc(1), row: 9, col: 0 }])).toBe(11);
+  });
+
+  it('las flechas llevan a la casilla vecina, sin salir del mapa', () => {
+    expect(neighborCell({ row: 1, col: 1 }, 'ArrowRight', 7, 14)).toEqual({ row: 1, col: 2 });
+    expect(neighborCell({ row: 1, col: 1 }, 'ArrowUp', 7, 14)).toEqual({ row: 0, col: 1 });
+    expect(neighborCell({ row: 0, col: 0 }, 'ArrowLeft', 7, 14)).toBeNull();
+    expect(neighborCell({ row: 6, col: 13 }, 'ArrowDown', 7, 14)).toBeNull();
+    expect(neighborCell({ row: 1, col: 1 }, 'KeyA', 7, 14)).toBeNull();
+  });
+
+  it('los ids de casilla van y vuelven', () => {
+    expect(parseCellId(cellId({ row: 2, col: 13 }))).toEqual({ row: 2, col: 13 });
+    expect(parseCellId('01900000-0000-7000-8000-000000000001')).toBeNull();
+    expect(parseCellId(7)).toBeNull();
+  });
 });
 
 describe('mapa de PCs (T39)', () => {

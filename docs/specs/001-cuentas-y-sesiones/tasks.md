@@ -403,11 +403,12 @@ antes de seguir.
   - **Commit:** `feat(server): guarda la distribución del mapa de PCs`
   - **Decidido al implementarla:** el cuerpo es `{ positions: [{ pcId, row, col }] }` (`pcMapLayoutRequestSchema` en `shared`); las PCs que no vienen se quedan sin posición. El mapa tiene 14 columnas (`PC_MAP_COLUMNS`) y hasta 30 filas (`PC_MAP_MAX_ROWS`). Responde 204; el panel recibe el mapa nuevo por el canal `/panel`. Una PC que no existe da 404 y no se toca nada. Las PCs se bloquean (`FOR UPDATE`) mientras se guarda, por si dos administradores guardan a la vez. Probado también contra PostgreSQL real.
 
-- [ ] **T39b: Organizar el mapa arrastrando**
+- [x] **T39b: Organizar el mapa arrastrando**
   - **Cubre:** REQ-001-45
   - **Hacer:** pestaña "Organizar" del mapa (solo para el administrador) con `@dnd-kit/core`: arrastrar una PC a una casilla, intercambiar si está ocupada, guardar o descartar. También con teclado.
   - **Verificar:** a mano: reorganizar, guardar, recargar la página y ver la misma distribución en otro navegador.
   - **Commit:** `feat(panel): permite organizar el mapa arrastrando las PCs`
+  - **Decidido al implementarla:** con el ratón, la PC cae en la casilla bajo el puntero; con el teclado (Espacio o Intro, flechas, Espacio o Intro, Escape), cada flecha la lleva a la casilla vecina, y los avisos para lectores de pantalla van en español. Al organizar se ve una fila vacía de sobra para poder bajar PCs (7 filas como mínimo, 30 como máximo). Guardar envía la distribución de todas las PCs; la edición se mantiene hasta que el canal trae el mapa ya guardado. `@dnd-kit/core` suma 14 KB comprimidos al panel. Verificado a mano: ratón, teclado e intercambio; tras guardar, la misma distribución al recargar y desde otra sesión.
 
 - [ ] **T40: Clientes**
   - **Cubre:** REQ-001-01, REQ-001-02, REQ-001-04

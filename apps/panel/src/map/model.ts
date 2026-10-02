@@ -6,6 +6,7 @@ import {
   type PcMapItem,
   type PcMapSession,
   PC_MAP_COLUMNS,
+  PC_MAP_MAX_ROWS,
   seconds,
   startUsage,
 } from '@pope/shared';
@@ -63,6 +64,91 @@ export function placePcs(pcs: readonly PcMapItem[], columns = MAP_COLUMNS): Plac
     cursor += 1;
   }
   return placed;
+}
+
+// ─── Organizar el mapa (T39b, REQ-001-45) ─────────────────────────────────────────────────
+
+export interface Cell {
+  row: number;
+  col: number;
+}
+
+/** Distribución en edición: la casilla de cada PC, por id. */
+export type Layout = ReadonlyMap<string, Cell>;
+
+/** Filas mínimas del mapa, como en el diseño (14 × 7). */
+export const MIN_ROWS = 7;
+
+export const layoutOf = (placed: readonly PlacedPc[]): Layout =>
+  new Map(placed.map(({ pc, row, col }) => [pc.id, { row, col }]));
+
+/** Las PCs con la casilla de la distribución en edición, para `placePcs`. */
+export function withLayout(pcs: readonly PcMapItem[], layout: Layout | null): PcMapItem[] {
+  if (!layout) return [...pcs];
+  return pcs.map((pc) => {
+    const cell = layout.get(pc.id);
+    return cell ? { ...pc, row: cell.row, col: cell.col } : pc;
+  });
+}
+
+/**
+ * Filas al organizar: las del diseño o, si el mapa ocupa más, una vacía de sobra para poder
+ * bajar PCs; nunca más de las que acepta el nodo.
+ */
+export function organizeRows(placed: readonly PlacedPc[]): number {
+  const used = Math.max(0, ...placed.map((p) => p.row + 1));
+  return Math.min(PC_MAP_MAX_ROWS, Math.max(MIN_ROWS, used + 1));
+}
+
+/** Lleva una PC a una casilla; si estaba ocupada, la otra PC pasa a la casilla que queda libre. */
+export function moveTo(layout: Layout, pcId: string, target: Cell): Map<string, Cell> {
+  const next = new Map(layout);
+  const from = layout.get(pcId);
+  if (!from) return next;
+  for (const [otherId, cell] of layout) {
+    if (otherId !== pcId && cell.row === target.row && cell.col === target.col) {
+      next.set(otherId, from);
+    }
+  }
+  next.set(pcId, { row: target.row, col: target.col });
+  return next;
+}
+
+/** Cuántas PCs tienen en `layout` una casilla distinta de la de `placed`. */
+export function movedCount(placed: readonly PlacedPc[], layout: Layout): number {
+  return placed.filter(({ pc, row, col }) => {
+    const cell = layout.get(pc.id);
+    return cell !== undefined && (cell.row !== row || cell.col !== col);
+  }).length;
+}
+
+/** Id de la casilla para `@dnd-kit` (`cell:2:5`) y su lectura inversa. */
+export const cellId = (cell: Cell) => `cell:${String(cell.row)}:${String(cell.col)}`;
+
+export function parseCellId(id: unknown): Cell | null {
+  const match = typeof id === 'string' ? /^cell:(\d+):(\d+)$/.exec(id) : null;
+  return match ? { row: Number(match[1]), col: Number(match[2]) } : null;
+}
+
+const STEPS: Record<string, Cell> = {
+  ArrowUp: { row: -1, col: 0 },
+  ArrowDown: { row: 1, col: 0 },
+  ArrowLeft: { row: 0, col: -1 },
+  ArrowRight: { row: 0, col: 1 },
+};
+
+/** La casilla vecina en la dirección de la flecha, o `null` en el borde (mover con teclado). */
+export function neighborCell(
+  cell: Cell,
+  key: string,
+  rows: number,
+  columns = MAP_COLUMNS,
+): Cell | null {
+  const step = STEPS[key];
+  if (!step) return null;
+  const row = cell.row + step.row;
+  const col = cell.col + step.col;
+  return row < 0 || col < 0 || row >= rows || col >= columns ? null : { row, col };
 }
 
 /**

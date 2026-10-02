@@ -1,12 +1,14 @@
 // Mapa de PCs en vivo (T39, REQ-001-31): baldosas por estado, leyenda con recuentos y el
 // detalle de la PC elegida. Los datos llegan por el canal `/panel`; entre envíos, el restante
-// se cuenta aquí con el reloj del nodo.
+// se cuenta aquí con el reloj del nodo. El administrador lo organiza en la pestaña
+// «Organizar» (T39b, REQ-001-45).
 import '../map/map.css';
 
 import {
   formatDuration,
   formatLocalTime,
   formatMoney,
+  type PcMap,
   type PcMapItem,
   seconds,
 } from '@pope/shared';
@@ -22,18 +24,27 @@ import {
 import { ApiError } from '../api/client.js';
 import { useNodeNow, usePcMapFeed } from '../map/channel.js';
 import {
+  type Cell,
   ENDING_SECONDS,
+  type Layout,
+  layoutOf,
   type Legend,
   legendOf,
   liveAccount,
   liveRemaining,
   MAP_COLUMNS,
+  MIN_ROWS,
+  movedCount,
+  moveTo,
+  organizeRows,
   placePcs,
   shortDuration,
   type TileKind,
   tileKind,
   tileLabel,
+  withLayout,
 } from '../map/model.js';
+import { OrganizeGrid } from '../map/OrganizeGrid.js';
 import { useSession, useStaff } from '../session.js';
 import { Frame } from '../ui/Frame.js';
 
@@ -44,22 +55,92 @@ const KIND_LABEL: Record<TileKind, string> = {
   offline: 'Sin conexión',
 };
 
-/** Filas mínimas del mapa, como en el diseño (14 × 7): deja sitio para organizar (T39b). */
-const MIN_ROWS = 7;
+type Mode = 'operate' | 'organize';
+
+/**
+ * Distribución en edición. Tras guardarla, `savedWith` es el mapa que había entonces: en
+ * cuanto llega uno nuevo por el canal (ya con lo guardado), se deja de mostrar la edición.
+ */
+interface Edit {
+  layout: Layout;
+  savedWith: PcMap | null;
+}
 
 export function MapPage() {
+  const staff = useStaff();
+  const { api } = useSession();
   const feed = usePcMapFeed();
   const now = useNodeNow(feed.skewMs);
+  const [mode, setMode] = useState<Mode>('operate');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
+  const [edit, setEdit] = useState<Edit | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const pcs = feed.map?.pcs ?? [];
   const legend = legendOf(pcs, now);
   const selected = pcs.find((pc) => pc.id === selectedId) ?? null;
+  const isAdmin = staff.role === 'administrador';
+  const organizing = isAdmin && mode === 'organize';
+
+  const draft =
+    edit && (edit.savedWith === null || edit.savedWith === feed.map) ? edit.layout : null;
+  const serverPlaced = placePcs(pcs);
+  const organizePlaced = placePcs(withLayout(pcs, draft));
+  const moved = edit?.savedWith === null ? movedCount(serverPlaced, layoutOf(organizePlaced)) : 0;
+
+  const move = (pcId: string, target: Cell) => {
+    setSaveError(null);
+    setEdit({ layout: moveTo(layoutOf(organizePlaced), pcId, target), savedWith: null });
+  };
+
+  const save = () => {
+    const layout = layoutOf(organizePlaced);
+    const savedWith = feed.map;
+    setSaving(true);
+    setSaveError(null);
+    api
+      .send('PUT', '/pcs/map', {
+        positions: organizePlaced.map(({ pc, row, col }) => ({ pcId: pc.id, row, col })),
+      })
+      .then(
+        () => {
+          setEdit({ layout, savedWith });
+        },
+        (failure: unknown) => {
+          setSaveError(failure instanceof ApiError ? failure.message : String(failure));
+        },
+      )
+      .finally(() => {
+        setSaving(false);
+      });
+  };
+
+  const tab = (value: Mode, label: string) => (
+    <button
+      type="button"
+      className="section-tab"
+      aria-pressed={mode === value}
+      onClick={() => {
+        setMode(value);
+      }}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <Frame
       title="Mapa"
+      tabs={
+        isAdmin && (
+          <div style={{ display: 'flex', gap: 4 }}>
+            {tab('operate', 'Operar')}
+            {tab('organize', 'Organizar')}
+          </div>
+        )
+      }
       actions={
         <>
           <button
@@ -106,11 +187,33 @@ export function MapPage() {
                 : 'Conectando con el nodo…'}
             </div>
           )}
-          <MapGrid pcs={pcs} now={now} selectedId={selectedId} onSelect={setSelectedId} />
+          {organizing ? (
+            <OrganizeGrid
+              placed={organizePlaced}
+              rows={organizeRows(organizePlaced)}
+              onMove={move}
+            />
+          ) : (
+            <MapGrid pcs={pcs} now={now} selectedId={selectedId} onSelect={setSelectedId} />
+          )}
           {legendOpen && <LegendCard legend={legend} />}
         </div>
-        <aside className="map-detail" aria-label="Detalle de la PC">
-          {selected ? (
+        <aside
+          className="map-detail"
+          aria-label={organizing ? 'Organizar el mapa' : 'Detalle de la PC'}
+        >
+          {organizing ? (
+            <OrganizePanel
+              moved={moved}
+              saving={saving}
+              error={saveError}
+              onSave={save}
+              onDiscard={() => {
+                setEdit(null);
+                setSaveError(null);
+              }}
+            />
+          ) : selected ? (
             <PcDetail key={selected.id} pc={selected} now={now} />
           ) : (
             <p className="detail-note" style={{ margin: 0 }}>
@@ -172,6 +275,61 @@ function MapGrid({
         );
       })}
     </div>
+  );
+}
+
+function OrganizePanel({
+  moved,
+  saving,
+  error,
+  onSave,
+  onDiscard,
+}: {
+  moved: number;
+  saving: boolean;
+  error: string | null;
+  onSave: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <>
+      <h2 className="detail-title">Organizar el mapa</h2>
+      <p className="detail-note" style={{ margin: 0 }}>
+        Arrastra cada PC a su sitio real en el local. Si la sueltas sobre otra, se intercambian. Las
+        casillas vacías son pasillos o paredes.
+      </p>
+      <p className="detail-note" style={{ margin: 0 }}>
+        Con el teclado: elige la PC con Tab, tómala con Espacio, llévala con las flechas y suéltala
+        con Espacio. Escape cancela.
+      </p>
+      <p className="muted" role="status" style={{ margin: 0 }}>
+        {moved === 0
+          ? 'Sin cambios por guardar.'
+          : `${String(moved)} ${moved === 1 ? 'PC cambiada' : 'PCs cambiadas'} de sitio, sin guardar.`}
+      </p>
+      {error && (
+        <div role="alert" className="alert-error">
+          {error}
+        </div>
+      )}
+      <div style={{ flexGrow: 1 }} />
+      <button
+        type="button"
+        className="btn btn-primary btn-lg"
+        disabled={moved === 0 || saving}
+        onClick={onSave}
+      >
+        {saving ? 'Guardando…' : 'Guardar distribución'}
+      </button>
+      <button
+        type="button"
+        className="btn btn-ghost btn-lg"
+        disabled={moved === 0 || saving}
+        onClick={onDiscard}
+      >
+        Descartar cambios
+      </button>
+    </>
   );
 }
 
