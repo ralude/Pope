@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage.js';
 import { MapPage } from './pages/MapPage.js';
 import { SessionProvider, useSession } from './session.js';
 import { ShiftProvider } from './shift.js';
+import { TariffsPage } from './pages/TariffsPage.js';
 
 /** Sin sesión, cualquier dirección muestra el login; al entrar se queda en esa dirección. */
 function Routes() {
@@ -24,6 +25,7 @@ function Routes() {
       <Switch>
         <Route path="/" component={MapPage} />
         <Route path="/clientes" component={CustomersPage} />
+        <Route path="/tarifas" component={TariffsPage} />
         <Route>
           <Redirect to="/" />
         </Route>

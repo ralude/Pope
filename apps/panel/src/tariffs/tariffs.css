@@ -1,0 +1,61 @@
+/* Tarifas (T42): una tarjeta por día y, debajo, el precio nuevo para los días elegidos. */
+
+.tariffs {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tariffs-intro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tariff-days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.tariff-day {
+  height: 132px;
+  padding: 16px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: left;
+}
+
+button.tariff-day {
+  cursor: pointer;
+}
+
+button.tariff-day:hover {
+  border-color: #6b7380;
+}
+
+.tariff-day[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.tariff-day-name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tariff-day-rate {
+  font-size: 26px;
+}
+
+.tariff-editor {
+  padding: 20px;
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+}

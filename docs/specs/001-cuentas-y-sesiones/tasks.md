@@ -425,11 +425,12 @@ antes de seguir.
   - **Decidido al implementarla:** recargar y vender solo se ofrecen a cuentas activas. La recarga trae importes rápidos (1, 2, 5 y 10 USD) y muestra el saldo tras recargar; la venta de combo ofrece «Con su saldo» (si alcanza) o «Cobrar en caja» con método de pago. Sin turno, los diálogos lo piden y lo abren ahí mismo. En el mapa, el saldo que se muestra es el de la sesión en vivo. Verificado a mano contra PostgreSQL real con el simulador: abrir turno desde la recarga, recargar por pago móvil a una PC con sesión (saldo y tiempo cambian al momento), vender un combo con saldo y otro en caja, y cerrar el turno; eventos `shift.opened`, `wallet.recharged`, `combo.purchased` y `shift.closed` con Ana como actor.
   - **Decidido por el mantenedor (2026-10-02):** el turno se abre y se cierra desde una píldora de la barra superior («Sin turno · Abrir turno» o «Turno abierto · 14:02»), sin entrada en el raíl hasta la spec 005. «Recargar saldo» y «Vender combo» están en Clientes y también en el detalle de una PC con sesión de cuenta; para eso la sesión del mapa trae el id del cliente (commit de `server`/`shared` aparte).
 
-- [ ] **T42: Tabla de tarifas**
+- [x] **T42: Tabla de tarifas**
   - **Cubre:** REQ-001-10, REQ-001-15
   - **Hacer:** tabla de 7 días con selección múltiple (solo administrador).
   - **Verificar:** CA-001-20 a mano.
   - **Commit:** `feat(panel): permite editar las tarifas por día`
+  - **Decidido al implementarla:** pantalla `/tarifas` según el lienzo, sin el equivalente en Bs: una tarjeta por día que el administrador marca (también «Todos» y «Ninguno») y un precio en céntimos para los días marcados. Tras guardar se limpia la selección y se dice qué se guardó. Verificado a mano (CA-001-20): lunes a jueves a 1,50 y después el domingo a 3,00 dejan la tabla lunes–jueves 1,50, viernes–sábado 2,00 y domingo 3,00, con dos eventos `tariff.changed`.
   - **Decidido por el mantenedor (2026-10-02):** el encargado y el dueño ven la tabla sin poder cambiarla.
 
 - [ ] **T43: Administración de combos**
