@@ -7,13 +7,15 @@ import {
   LOCAL_TIME_ZONE,
   type SessionState,
   type VesRate,
+  type WarningMinutes,
 } from '@pope/shared';
 import { useEffect, useState } from 'react';
 
 import type { ChannelStatus } from '../channel/channel.js';
 import { Wallpaper } from '../lock/Wallpaper.js';
-import { formatTimeLeft } from './format.js';
+import { formatTimeLeft, warningMinutes } from './format.js';
 import { liveSession } from './live.js';
+import { WarningToast } from './WarningToast.js';
 
 /** Por debajo de 5 min el tiempo se pinta en ámbar, como los avisos (REQ-001-24). */
 const LOW_SECONDS = 300;
@@ -46,12 +48,17 @@ export function SessionScreen({
   stateAt,
   status,
   pcName,
+  warning,
+  onCloseWarning,
 }: {
   session: SessionState;
   vesRate: VesRate | null;
   stateAt: number;
   status: ChannelStatus;
   pcName: string;
+  /** Aviso de fin de tiempo que mandó el nodo (T48), si hay uno abierto. */
+  warning: WarningMinutes | null;
+  onCloseWarning: () => void;
 }) {
   const live = liveSession(session, useElapsed(stateAt));
   const remaining = live.remainingSeconds;
@@ -210,6 +217,14 @@ export function SessionScreen({
           ? 'Conectado al servidor del local'
           : 'Sin conexión con el servidor del local · el tiempo sigue contando'}
       </footer>
+
+      {warning !== null && remaining > 0 && (
+        <WarningToast
+          minutesLeft={warningMinutes(warning, remaining)}
+          temporary={session.kind === 'temporary'}
+          onClose={onCloseWarning}
+        />
+      )}
     </div>
   );
 }

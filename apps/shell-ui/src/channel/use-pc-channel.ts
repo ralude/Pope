@@ -10,7 +10,7 @@ import {
   NO_REPLY_MESSAGE,
 } from '../lock/login.js';
 import type { PcChannel } from './channel.js';
-import { applyEvent, INITIAL_FEED, type PcFeed } from './feed.js';
+import { applyEvent, dismissEnded, dismissWarning, INITIAL_FEED, type PcFeed } from './feed.js';
 
 interface PendingLogin {
   requestId: string;
@@ -21,6 +21,10 @@ interface PendingLogin {
 export function usePcChannel(channel: PcChannel): {
   feed: PcFeed;
   login: (username: string, password: string) => Promise<LoginResult>;
+  /** El cliente cierra el aviso de fin de tiempo. */
+  closeWarning: () => void;
+  /** Se deja de mostrar "Tu sesión terminó" y vuelve el bloqueo. */
+  closeEnded: () => void;
 } {
   const [feed, setFeed] = useState<PcFeed>(INITIAL_FEED);
   const pending = useRef<PendingLogin | null>(null);
@@ -74,5 +78,12 @@ export function usePcChannel(channel: PcChannel): {
     [channel, settle],
   );
 
-  return { feed, login };
+  const closeWarning = useCallback(() => {
+    setFeed(dismissWarning);
+  }, []);
+  const closeEnded = useCallback(() => {
+    setFeed(dismissEnded);
+  }, []);
+
+  return { feed, login, closeWarning, closeEnded };
 }

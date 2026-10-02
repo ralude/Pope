@@ -490,11 +490,12 @@ antes de seguir.
   - **Commit:** `feat(shell-ui): muestra el tiempo y los saldos de la sesión`
   - **Decidido al implementarla:** la cuenta atrás usa el motor de cobro de `@pope/shared` (`applyCheckpoint` y `affordableSeconds`) sobre el último `state`, con los segundos pasados desde que llegó (`performance.now()`): así coincide con el nodo sin saltos. El equivalente en tiempo del saldo es a la tarifa de la sesión (la que manda el nodo, REQ-001-14). Sin catálogo de apps y con el botón de pausa desactivado (decisiones del mantenedor, preguntas resueltas). Por debajo de 5 min el tiempo se pinta en ámbar. Verificado: CA-001-12 y CA-001-16 con tests de la lógica; a mano en Chrome con `sim01` (1:16:14 de combo + 5,96 USD a 2,00 USD/h = 4:15:08, «En uso» en el combo) y midiendo en la página que cuenta 22 s en 22 s y coincide con el `state` del nodo en cada latido. El Bs no se ha podido ver: aún no hay tasa (spec 005).
 
-- [ ] **T48: Avisos y fin de sesión**
+- [x] **T48: Avisos y fin de sesión**
   - **Cubre:** REQ-001-24, REQ-001-25
   - **Hacer:** avisos visibles a 5 y 1 min, y pantalla de "sesión terminada" que vuelve al bloqueo.
   - **Verificar:** manual con saldo bajo.
   - **Commit:** `feat(shell-ui): avisa del fin del tiempo`
+  - **Decidido al implementarla:** los avisos son los `warning` que manda el nodo; el Shell los muestra arriba hasta "Entendido", o hasta que cambie la sesión o el restante vuelva a subir (compra de tiempo). El aviso dice los minutos del nodo, pero nunca más de los que quedan: tras reiniciarse, el nodo reenvía el de 5 min aunque queden 3. "Tu sesión terminó" sale con cualquier motivo menos cuando la cierra el cliente, y vuelve sola al bloqueo a los 10 s (decisión del mantenedor). Verificado a mano en Chrome con una sesión temporal de 6 min abierta desde el panel (en lugar de saldo bajo, que no había en la base de desarrollo): aviso de 5 min a las 11:13:48, de 1 min a las 11:17:48, fin a las 11:18:48 y bloqueo a las 11:18:58. A mitad de prueba se paró el nodo: el Shell siguió contando, reconectó solo dentro de la gracia de latidos y la sesión continuó.
 
 - [ ] **T49: Comprar combo desde el Shell**
   - **Cubre:** REQ-001-85

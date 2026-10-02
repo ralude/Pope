@@ -662,3 +662,144 @@ input {
   font-size: 13px;
   color: var(--soft);
 }
+
+/* ─── Avisos y fin de sesión (T48) ───────────────────────────────────────────────────── */
+
+.btn-ghost {
+  height: 48px;
+  padding: 0 24px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.btn-small {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 15px;
+}
+
+.toast {
+  position: absolute;
+  top: 96px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 620px;
+  padding: 20px 22px;
+  border-radius: 18px;
+  backdrop-filter: blur(24px) saturate(140%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.toast-warn {
+  background: rgba(44, 32, 14, 0.78);
+  border: 1px solid #c98a2b;
+  color: #fff3df;
+}
+
+.toast-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 22px;
+  background: var(--amber);
+  color: #1a1206;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toast-title {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.toast-text {
+  font-size: 16px;
+  line-height: 1.45;
+  color: #f5ddb5;
+}
+
+.toast-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+}
+
+.ended-card {
+  width: 620px;
+  padding: 44px 48px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+
+.ended-card h1 {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.ended-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  background: rgba(240, 167, 58, 0.18);
+  color: var(--amber-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ended-text {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--soft);
+}
+
+.ended-progress {
+  width: 100%;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: #a855f7;
+  transition: width 1s linear;
+}
