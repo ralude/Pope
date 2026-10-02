@@ -88,7 +88,7 @@ describe('estado de las PCs para el panel (e2e, REQ-001-31)', () => {
   };
 
   it('el mapa refleja PCs con cuenta, temporales, libres y sin conexión', async () => {
-    await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
+    const juan = await createCustomerWithBalance(world.testApp, 'juan', { moneyMicros: usd(3) });
     await login(await world.pc(5), 'juan');
     await world.openTemporary(ana, 6, 30);
     await world.pc(7);
@@ -106,6 +106,7 @@ describe('estado de las PCs para el panel (e2e, REQ-001-31)', () => {
       connected: true,
       session: {
         kind: 'account',
+        customerId: juan.id,
         who: 'juan',
         openedBy: 'juan',
         remainingSeconds: 7200,
@@ -120,6 +121,7 @@ describe('estado de las PCs para el panel (e2e, REQ-001-31)', () => {
       connected: true,
       session: {
         kind: 'temporary',
+        customerId: null,
         who: 'Temporal · PC 06 · 18:00',
         openedBy: 'Ana',
         remainingSeconds: 1800,

@@ -10,6 +10,11 @@ const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
 export const pcMapSessionSchema = z.object({
   sessionId: idSchema,
   kind: sessionKindSchema,
+  /**
+   * Cliente de una sesión con cuenta, para recargarle o venderle un combo desde el mapa;
+   * `null` en una temporal.
+   */
+  customerId: idSchema.nullable(),
   /** Usuario del cliente, o nombre de la sesión temporal. */
   who: z.string(),
   /** Quién la abrió: el cliente, o el nombre del encargado (REQ-001-31). */

@@ -100,6 +100,7 @@ function summarize(
   return {
     sessionId: row.id,
     kind: row.kind,
+    customerId: isAccount ? row.customerId : null,
     who: isAccount ? (username ?? '') : (row.tempName ?? ''),
     openedBy: actorName(row.openedBy),
     startedAt: row.startedAt.toISOString(),

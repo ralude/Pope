@@ -14,6 +14,7 @@ const SESSION = '01900000-0000-7000-8000-000000000123';
 const session = {
   sessionId: SESSION,
   kind: 'account',
+  customerId: '01900000-0000-7000-8000-000000000777',
   who: 'juan',
   openedBy: 'juan',
   startedAt: '2026-09-28T22:00:00.000Z',
