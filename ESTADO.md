@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-09-30 · T38a terminada (estado de las PCs para el panel)
+**Última actualización:** 2026-10-01 · T39 terminada (mapa de PCs en vivo)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [001 · Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) |
-| **Siguiente tarea** | **T39: Mapa de PCs en vivo** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
-| **Progreso** | 51 / 68 tareas · fase 8 de 9 (Panel) |
+| **Siguiente tarea** | **T39a: Guardar la distribución del mapa** ([tasks.md](docs/specs/001-cuentas-y-sesiones/tasks.md)) |
+| **Progreso** | 52 / 68 tareas · fase 8 de 9 (Panel) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -44,7 +44,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 | Spec | Estado | Progreso |
 |---|---|---|
-| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 51 / 68 |
+| [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | En curso | 52 / 68 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Borrador | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
@@ -57,6 +57,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-01:** T39: mapa de PCs en vivo en el panel, con baldosas por estado, leyenda, ocupación y detalle de la PC con «Cerrar sesión». Cuenta el restante y el saldo con el reloj del nodo entre envíos del canal `/panel`. Medido con el simulador: 17–36 ms. Antes, `fix(panel)`: ya no aparece «sesión caducada» al abrir el panel sin sesión.
 - **2026-09-30:** T38a. GET /pcs/map (todo el personal) y canal WebSocket /panel con la cookie del personal (sin ella se cierra con 4401): el mapa completo al conectar y en cada cambio, como mucho uno por segundo. Esquemas pcMapSchema y panelMessageSchema en shared. EventsService.subscribe avisa de lo confirmado y PcConnections de las conexiones.
 - **2026-09-30:** T38. apps/panel (@pope/panel) con Vite, React 19 y wouter: tema oscuro del diseño estilo SENET para 1920×1080, Nunito incluida, barra superior con fecha y hora de Caracas, raíl de iconos y login. ApiClient valida cada respuesta con shared y da mensajes en español; un 401 fuera del login devuelve al login. Vite hace de proxy al nodo. Probado contra el servidor real: login correcto e incorrecto, sesión al recargar y salir.
 - **2026-09-30:** Decisiones del mantenedor para la fase 8: diseño de referencia el lienzo estilo SENET a 1920×1080, Nunito incluida, Bs oculto hasta la spec 005 y escrito «Bs», organizar el mapa arrastrando (REQ-001-45, @dnd-kit/core; tareas T39a y T39b) y el nodo sirve el panel compilado (T45a). Se añade T38a: estado de las PCs y canal WebSocket del panel.
@@ -66,4 +67,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-09-30:** T36a. CLI del simulador: seed (crea sim01…simNN y los recarga por la API del panel, con turno propio, idempotente) y run (PCs simuladas con --login y --duration). Probado contra PostgreSQL real: 5 PCs entran con 2:00:00 y salen con 0,05 USD menos tras 2 min; el ledger y los eventos cuadran. La prueba destapó que Fastify rechaza content-type JSON sin cuerpo.
 - **2026-09-30:** T36. Paquete tools/agent-sim (@pope/agent-sim) sin dependencias nuevas y clase SimulatedPc: hello, latido cada 10 s siempre, restante local, reconexión 1-30 s, corte de red, reinicio y apagón (sin cerrar la conexión, como en la realidad), login con latencia. 15 tests con conexión falsa y reloj simulado.
 - **2026-09-30:** T35a. devPcId y devPcName pasan a shared (de 1 a 99, con RangeError fuera de rango) y seedDevPcs/dev:seed-pcs admiten --count para crear hasta 99 PCs; sin duplicar al repetir.
-- **2026-09-30:** Revisión de T25–T35: 10 correcciones (no cobrar el tiempo de una PC muerta, no cerrar una sesión que la PC no llegó a conocer con la columna pc_confirmed_at, restante local en el hello, nada llega tarde tras un cierre, un solo sessionEnded, venta de combo en el panel cobrando antes la sesión, estado de la cuenta al abrir, importes en céntimos, claves de ajustes y compra de combo sin duplicados). Fase 7 partida en T35a, T36, T36a, T36b, T37a y T37 con las decisiones del mantenedor; el plan describe el comportamiento del agente en el canal y AGENTS.md añade el ámbito tools.

@@ -23,6 +23,8 @@ interface SessionValue {
   api: ApiClient;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  /** La sesión dejó de valer (p. ej. el canal en vivo se cerró con 4401): al login. */
+  expire: () => void;
 }
 
 const SessionContext = createContext<SessionValue | null>(null);
@@ -73,7 +75,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, [api]);
 
-  const value = useMemo(() => ({ state, api, login, logout }), [state, api, login, logout]);
+  const value = useMemo(
+    () => ({ state, api, login, logout, expire }),
+    [state, api, login, logout, expire],
+  );
   return <SessionContext value={value}>{children}</SessionContext>;
 }
 

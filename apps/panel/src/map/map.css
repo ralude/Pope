@@ -1,0 +1,269 @@
+/*
+ * Mapa de PCs (T39), a la medida de la pantalla del nodo (1920×1080): 14 columnas de
+ * baldosas a la izquierda y el detalle de la PC elegida a la derecha. Colores planos, sin
+ * transiciones: la gráfica integrada del i5-2400 repinta el mapa cada segundo.
+ */
+.map-layout {
+  height: 100%;
+  display: flex;
+}
+
+.map-area {
+  position: relative;
+  flex-grow: 1;
+  min-width: 0;
+  padding: 24px 28px;
+  background: var(--map-bg);
+  overflow: auto;
+}
+
+.map-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.map-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding-top: 6px;
+}
+
+.tile {
+  width: 76px;
+  height: 52px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tile:hover {
+  outline: 2px solid #6b7380;
+}
+
+.tile[aria-pressed='true'] {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+.tile-account {
+  background: var(--green);
+  color: #ffffff;
+}
+
+.tile-temporary {
+  background: var(--amber);
+  color: var(--bg);
+}
+
+.tile-free {
+  background: #2a2f38;
+  border-color: #353b45;
+  color: var(--text);
+}
+
+.tile-offline {
+  background: #17191d;
+  border-color: #262a31;
+  color: #8a929e;
+}
+
+/* Con sesión pero sin conexión (dentro del tiempo de gracia): borde discontinuo. */
+.tile-unlinked {
+  border: 2px dashed #e4e7ec;
+}
+
+.tile-bar {
+  width: 52px;
+  height: 5px;
+  border-radius: 3px;
+}
+
+.tile-sub {
+  height: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.swatch-account {
+  background: var(--green);
+}
+
+.swatch-temporary {
+  background: var(--amber);
+}
+
+.swatch-free {
+  background: #2a2f38;
+  border: 1px solid #4a515c;
+}
+
+.swatch-offline {
+  background: #17191d;
+  border: 1px solid var(--line-2);
+}
+
+.bar-account {
+  background: var(--green-bar);
+}
+
+.bar-temporary {
+  background: var(--amber-bar);
+}
+
+.bar-free {
+  background: #4a515c;
+}
+
+.bar-offline {
+  background: transparent;
+}
+
+.bar-ending {
+  background: var(--red);
+}
+
+.map-legend {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 330px;
+  padding: 20px 24px;
+  background: #252a36;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 17px;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.legend-swatch {
+  width: 24px;
+  height: 18px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.map-banner {
+  margin-bottom: 16px;
+}
+
+.map-detail {
+  width: 340px;
+  flex-shrink: 0;
+  padding: 24px;
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+}
+
+.detail-title {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.detail-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.detail-badge.badge-free,
+.detail-badge.badge-offline {
+  border-color: var(--line-2);
+}
+
+.badge-account {
+  background: var(--green);
+  color: #ffffff;
+}
+
+.badge-temporary {
+  background: var(--amber);
+  color: var(--bg);
+}
+
+.badge-free {
+  background: #2a2f38;
+}
+
+.badge-offline {
+  background: #17191d;
+  color: #8a929e;
+}
+
+.badge-ending {
+  background: var(--red);
+  color: #ffffff;
+}
+
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.detail-time {
+  font-size: 40px;
+  line-height: 1.1;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.detail-note {
+  color: var(--soft);
+  line-height: 1.5;
+}
+
+/* Diálogo centrado sobre una capa oscura (sin desenfoque). */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 9, 11, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog {
+  width: 480px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dialog h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

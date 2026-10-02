@@ -389,11 +389,12 @@ antes de seguir.
   - **Commit:** `feat(server): envía el estado de las PCs al panel`
   - **Decidido al implementarla (2026-10-01):** el canal se refresca con los eventos confirmados (`EventsService.subscribe`) y con las conexiones y desconexiones de las PCs; los latidos no emiten eventos, así que cada sesión lleva su restante y `billedUntil` para que el panel cuente en vivo. La sesión del personal se comprueba al abrir el canal (si luego desactivan a alguien, su canal sigue abierto hasta que recargue).
 
-- [ ] **T39: Mapa de PCs en vivo**
+- [x] **T39: Mapa de PCs en vivo**
   - **Cubre:** REQ-001-31
   - **Hacer:** mapa como en el diseño: baldosas en su posición guardada (o por número), con color de sesión con cuenta, temporal, libre o sin conexión, raya roja si quedan menos de 5 min, tiempo restante debajo, leyenda con recuentos, ocupación y panel de detalle de la PC elegida (cliente o nombre temporal, quién la abrió, restante, saldo o cobrado, tarifa y botones de acción). Se actualiza con el canal `/panel` de T38a.
   - **Verificar:** con la consola del simulador (T36b), el mapa cambia en < 1 s.
   - **Commit:** `feat(panel): muestra el mapa de PCs en vivo`
+  - **Decidido al implementarla:** de los botones de acción, T39 trae «Cerrar sesión» (REQ-001-26, con confirmación; el dueño no lo ve). «Recargar saldo» y «Vender combo» se añaden al detalle en T41 (necesitará el id del cliente en `pcMapSessionSchema`), y «Sesión temporal», «Abrir sesión temporal» y «Añadir tiempo», en T44. El mapa usa 14 columnas, como el diseño. Una PC con sesión pero desconectada conserva su color con borde discontinuo y cuenta en su tipo de sesión, no en «Sin conexión». Entre envíos, el restante y el saldo se cuentan en el panel con el reloj del nodo (`at` del mapa) y el motor de cobro de `shared`; el siguiente envío corrige cualquier diferencia. Medido con la consola del simulador: 17–36 ms del cambio al mensaje en el canal (hasta 1 s si llegan varios cambios seguidos, por el límite de T38a).
 
 - [ ] **T39a: Guardar la distribución del mapa**
   - **Cubre:** REQ-001-45
