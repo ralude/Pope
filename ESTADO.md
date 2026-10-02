@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · T03 (005) terminada: la tasa llega a las PCs y al panel
+**Última actualización:** 2026-10-02 · spec 005 parte 2 (inventario, ventas y caja) redactada, pendiente de aprobar
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [005 · parte 1: tasa de cambio manual](docs/specs/005-inventario-y-caja/plan.md) |
-| **Siguiente tarea** | **T04: La tasa en el panel** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)) |
-| **Progreso** | 3 / 7 tareas · fase 1 de 1 (tasa manual) |
+| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) por aprobar |
+| **Siguiente tarea** | **Esperando aprobación del mantenedor** de la parte 2 de la [spec 005](docs/specs/005-inventario-y-caja/spec.md); después, su plan y tareas. La tasa se retoma en T04 cuando lo decida el mantenedor |
+| **Progreso** | Parte 1 (tasa): 3 / 7 tareas · parte 2: sin plan aún |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** Spec 005, parte 2 redactada con el mantenedor: productos con foto, conceptos sin inventario ("Impresiones"), Caja con venta nueva a la izquierda y movimientos del turno a la derecha, fondo inicial, cierre con conteo por método y PDF de una página (más el detallado para administrador y dueño). La tasa queda en pausa tras T03 por decisión suya.
 - **2026-10-02:** T03 (spec 005): el `state` de las PCs lleva la tasa vigente y se reenvía al cambiarla (el Shell ya muestra el Bs), y el canal del panel anuncia `exchangeRate` al conectar, al cambiar y al pasar de día.
 - **2026-10-02:** T02 (spec 005): tabla `exchange_rates` (solo inserción), `ExchangeRatesService` con las últimas tasas en memoria y `GET`/`POST /exchange-rate` (guardan el encargado y el administrador; el dueño solo ve). Probado también contra PostgreSQL real.
 - **2026-10-02:** T01 (spec 005): contratos de la tasa en `@pope/shared`: esquemas de la API, evento `exchange_rate.set`, mensaje `exchangeRate` del canal del panel, tasa vigente y antigüedad en días hábiles. Antes, el mantenedor aprobó la parte 1 de la 005 y la spec 002 con su plan.
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T49: diálogo «Comprar combo» en el Shell (desde el panel de la sesión y desde el aviso), con lo que alcanza el saldo y cómo quedan saldo y horas. Antes, `feat(server)`: mensaje `listCombos`/`combos` del canal y `requestId` en la respuesta a la compra. Verificado con recargas reales desde el panel.
 - **2026-10-02:** T48: avisos de 5 y 1 min (los del nodo, sin contradecir al contador) y pantalla «Tu sesión terminó» que vuelve al bloqueo a los 10 s. Antes, `feat(shell-ui)`: todos los tiempos sin segundos («4 h 15 min»), como pidió el mantenedor. Verificado con una sesión temporal de 6 min.
 - **2026-10-02:** T47: la sesión del Shell muestra el tiempo total, las horas de combo y el saldo con su tiempo equivalente, con cuenta atrás local hecha con el motor de cobro de `@pope/shared` (coincide con el nodo en cada latido). Sin catálogo y con la pausa desactivada, como decidió el mantenedor (anotado en la spec 001).
-- **2026-10-02:** T46: nace `apps/shell-ui` (diseño "Shell Pope · Fase 9", con vidrio y desenfoques): pantalla de bloqueo con login y errores del nodo en español, y canal con el nodo detrás de `PcChannel` (en desarrollo, WebSocket directo que hace de agente). Antes, `docs(specs)`: en la spec 003 el técnico entra solo con usuario y contraseña, y se añade el fondo de bloqueo que sube el administrador.
