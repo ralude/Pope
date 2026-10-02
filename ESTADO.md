@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · caja del local (T13a de la spec 005)
+**Última actualización:** 2026-10-02 · eventos de los cobros en caja con el pago en Bs (T13b de la spec 005)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T13b: Registro de caja** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T13b–T17 (con T16b), T04, T18–T24, T05–T07 |
-| **Progreso** | Spec 005: 11 / 29 tareas (parte 1: 3 / 7; parte 2: 8 / 22) |
+| **Siguiente tarea** | **T13c: Registro de caja** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T13c–T17 (con T16b), T04, T18–T24, T05–T07 |
+| **Progreso** | Spec 005: 12 / 30 tareas (parte 1: 3 / 7; parte 2: 9 / 23) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 11 / 29 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 12 / 30 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T13b (spec 005): versión 2 de `wallet.recharged`, `session.started`, `session.time_added` y `combo.purchased`, con el pago completo (moneda, importe, USD y tasa), por decisión del mantenedor: la auditoría y la nube tendrán lo cobrado de verdad en Bs. El registro de caja pasa a T13c.
 - **2026-10-02:** T13a (spec 005): la caja de turno pasa a ser del local: una sola abierta, en la que cobran encargados y administradores; la cierra quien la abrió o un administrador. La migración cierra las cajas abiertas de más (solo en desarrollo).
 - **2026-10-02:** T12 (spec 005): entradas (encargado y administrador), ajustes y mermas con motivo (administrador) con `POST /products/:id/stock`; el stock no baja de 0 salvo con `allowNegativeStock`; `GET /products/:id/movements` para el detalle del producto.
 - **2026-10-02:** T11 (spec 005): fotos de los productos: `PUT /products/:id/photo` (WebP hasta 512 KB, solo administrador) y `GET` con caché larga; se guardan en `POPE_DATA_DIR` (variable nueva, documentada en AGENTS.md).
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T09b (spec 005): contratos de las ventas y el registro de caja: venta con productos, conceptos y varios pagos (también con saldo), importe en Bs al céntimo, reparto de los pagos por grupo, totales con el saldo aparte, lista del turno, eventos `sale.recorded` y `sale.voided`, y mensaje `cash` del canal. T09 queda en tres partes (T09c: apertura y cierre del turno).
 - **2026-10-02:** T09a (spec 005): contratos del inventario en `@pope/shared`: productos (con la cantidad inicial como primera entrada y la versión de la foto), conceptos, movimientos de stock, aviso de bajo mínimo, el ajuste `allowNegativeStock` y los eventos `product.*`, `stock.moved` y `sale_concept.*`.
 - **2026-10-02:** T08 (spec 005): diseño de Caja, Inventario, Nuevo producto, abrir y cerrar caja, Cierres y el PDF del encargado en el lienzo del panel, aprobado por el mantenedor (sin líneas de firma en el PDF). Decidido además: vender sin stock es un ajuste del nodo (`allowNegativeStock`, REQ-005-12), y las recargas, temporales y combos cobrados en un método de Bs se guardan en Bs con la tasa. T09 se divide en T09a (inventario) y T09b (ventas y caja).
-- **2026-10-02:** Spec 005, parte 2 redactada con el mantenedor: productos con foto, conceptos sin inventario ("Impresiones"), Caja con venta nueva a la izquierda y movimientos del turno a la derecha, fondo inicial, cierre con conteo por método y PDF de una página (más el detallado para administrador y dueño). La tasa queda en pausa tras T03 por decisión suya.

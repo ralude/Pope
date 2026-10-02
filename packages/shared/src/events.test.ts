@@ -376,6 +376,86 @@ describe('ventas (REQ-005-21, REQ-005-23)', () => {
   });
 });
 
+describe('cobros en caja, versión 2 (REQ-005-22)', () => {
+  const inBs = {
+    method: 'mobile_payment',
+    amount: { micros: 120_000_000, currency: 'VES' },
+    usd: usd(3_000_000),
+    vesRate: 40_000_000,
+  };
+  const inUsd = { method: 'cash_usd', amount: usd(3_000_000), usd: usd(3_000_000), vesRate: null };
+  const recharged = (payment: object) => ({
+    ...envelope('wallet.recharged', {
+      customer: JUAN,
+      amount: usd(3_000_000),
+      payment,
+      shiftId: SHIFT,
+    }),
+    version: 2,
+  });
+
+  it('la recarga lleva el pago en Bs con su tasa, o en USD sin ella', () => {
+    expect(valid(recharged(inBs))).toBe(true);
+    expect(valid(recharged(inUsd))).toBe(true);
+    expect(valid(recharged({ ...inBs, vesRate: null }))).toBe(false);
+    expect(valid(recharged({ ...inUsd, vesRate: 40_000_000 }))).toBe(false);
+    expect(valid(recharged({ ...inUsd, method: 'balance' }))).toBe(false);
+  });
+
+  it('la versión 2 ya no lleva paymentMethod suelto', () => {
+    const v1 = examples['wallet.recharged'];
+    expect(valid({ ...v1, version: 2 })).toBe(false);
+    expect(valid(v1)).toBe(true);
+  });
+
+  it('temporales, tiempo añadido y combos en caja llevan el pago completo', () => {
+    const started = {
+      ...envelope('session.started', {
+        kind: 'temporary',
+        sessionId: id(6),
+        pc: PC05,
+        name: 'Carlos',
+        rate: usd(1_500_000),
+        purchasedSeconds: 3600,
+        amount: usd(1_500_000),
+        payment: { ...inBs, amount: { micros: 60_000_000, currency: 'VES' }, usd: usd(1_500_000) },
+        shiftId: SHIFT,
+      }),
+      version: 2,
+    };
+    const added = {
+      ...envelope('session.time_added', {
+        sessionId: id(6),
+        pc: PC05,
+        seconds: 1800,
+        amount: usd(750_000),
+        payment: { ...inUsd, amount: usd(750_000), usd: usd(750_000) },
+        shiftId: SHIFT,
+      }),
+      version: 2,
+    };
+    const combo = {
+      ...envelope('combo.purchased', {
+        customer: JUAN,
+        combo: { id: id(5), name: 'Combo 20 horas', price: usd(20_000_000), seconds: 72_000 },
+        payment: {
+          via: 'cash_desk',
+          payment: { ...inUsd, amount: usd(20_000_000), usd: usd(20_000_000) },
+          shiftId: SHIFT,
+        },
+        sessionId: null,
+      }),
+      version: 2,
+    };
+    for (const event of [started, added, combo]) {
+      expect(domainEventSchema.parse(event)).toEqual(event);
+    }
+    expect(valid({ ...combo, payload: { ...combo.payload, payment: { via: 'balance' } } })).toBe(
+      true,
+    );
+  });
+});
+
 describe('turno de caja, versión 2 (REQ-005-40, REQ-005-42)', () => {
   const opened = {
     ...envelope('shift.opened', {

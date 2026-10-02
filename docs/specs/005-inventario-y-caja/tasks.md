@@ -126,9 +126,16 @@ parte 1.
   - **Commit:** `feat(server): hace la caja de turno única en el local`
   - **Decidido al implementarla:** `ShiftsService.findOpen()` ya no recibe a nadie: devuelve la caja abierta del local, y la usan `OpenShiftGuard`, `GET /shifts/current` y la venta de combos en caja. Mensajes nuevos: "Ya hay una caja abierta" (409), "No hay una caja abierta" (409) y "Solo quien abrió la caja o un administrador puede cerrarla" (403). El índice `cash_shifts_one_open_idx` es único sobre `(closed_at is null)` solo para las abiertas. La migración `0017_one_open_cash_shift` cierra antes las cajas abiertas de más (todas menos la más reciente), que solo existen en bases de desarrollo. Dos e2e de la spec 001 (temporales) suponían que el administrador necesitaba su propio turno: ahora cobra en la caja de Ana. Verificado: e2e del turno reescritos (segunda caja rechazada aunque la pida otra persona, quién cierra, reabrir el mismo día, el administrador cobra en la caja de la encargada).
 
-- [ ] **T13b: Registro de caja**
+- [x] **T13b: Eventos de los cobros en caja con el pago en Bs**
+  - **Cubre:** REQ-005-22
+  - **Hacer:** en `@pope/shared`, versión 2 de `wallet.recharged`, `session.started`, `session.time_added` y `combo.purchased` con el pago completo (método, moneda, importe, equivalente en USD y tasa), como `sale.recorded` (mantenedor, 2026-10-02). La versión 1 sigue siendo válida.
+  - **Verificar:** tests de los esquemas (un pago en Bs exige su tasa; la versión 1 sigue valiendo).
+  - **Commit:** `feat(shared): añade el pago en Bs a los eventos de los cobros en caja`
+  - **Decidido al implementarla:** decidido con el mantenedor antes de programar el registro de caja: los eventos de los cobros de la spec 001 llevan también el pago en Bs. Esquema común `cashDeskPaymentSchema` (método de la caja, importe con su moneda, equivalente en USD y tasa; un pago en Bs exige tasa y uno en USD no la lleva). En la versión 2, `paymentMethod` se sustituye por `payment`; en `combo.purchased`, dentro de `payment.via = cash_desk`. Cada tipo con dos versiones es una unión por `version`. El nodo sigue emitiendo la versión 1 hasta T13c.
+
+- [ ] **T13c: Registro de caja**
   - **Cubre:** REQ-005-24, REQ-005-41
-  - **Hacer:** tabla `cash_entries` con migración que pasa los cobros anteriores; recargas, sesiones temporales (abrir y añadir tiempo) y combos en caja escriben su fila en la misma transacción, en Bs con la tasa vigente si el método es de Bs (sin tasa, solo efectivo USD); `GET /shifts/current/entries`; mensaje `cash` del canal del panel.
+  - **Hacer:** tabla `cash_entries` con migración que pasa los cobros anteriores; recargas, sesiones temporales (abrir y añadir tiempo) y combos en caja escriben su fila en la misma transacción y emiten sus eventos en versión 2, en Bs con la tasa vigente si el método es de Bs (sin tasa, solo efectivo USD); `GET /shifts/current/entries`; mensaje `cash` del canal del panel.
   - **Verificar:** los e2e de la spec 001 siguen pasando; e2e nuevos de las filas de cada cobro y de la lista del turno.
   - **Commit:** `feat(server): anota todos los cobros en el registro de caja`
 

@@ -186,7 +186,10 @@ para todo el pago y se reparte, para que las filas sumen lo que pagó el cliente
 puede cobrar en bolívares: el panel lo avisa y ofrece escribirla (de ahí que T04 de la parte 1
 vaya antes de la Caja). **Lo mismo vale para recargas, sesiones temporales y combos** de la
 spec 001 (mantenedor, 2026-10-02): cobrados en un método de Bs, se guardan en Bs con la tasa;
-sin tasa, solo se cobran en efectivo USD.
+sin tasa, solo se cobran en efectivo USD. Sus eventos (`wallet.recharged`, `session.started`, `session.time_added` y
+`combo.purchased`) pasan a la versión 2 con el pago completo (moneda, importe, equivalente en
+USD y tasa), como `sale.recorded`, para que la auditoría y la nube tengan lo cobrado de verdad
+(mantenedor, 2026-10-02).
 
 **Cobros anteriores:** la migración pasa al registro de caja las recargas, temporales y combos
 de turnos ya existentes, en USD y sin tasa (entonces no se guardaba), para que la lista y los

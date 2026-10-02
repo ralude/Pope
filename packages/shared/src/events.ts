@@ -420,6 +420,103 @@ export const exchangeRateSetEventSchema = event(
   }),
 );
 
+// ─── Cobros en caja, versión 2 (spec 005, REQ-005-22) ───────────────────────────────────
+
+/**
+ * Un pago en caja: el método, el importe en la moneda en que se cobró, su equivalente en USD
+ * y la tasa aplicada si fue en Bs. Un pago en Bs lleva siempre su tasa, y uno en USD, no.
+ */
+export const cashDeskPaymentSchema = z
+  .strictObject({
+    method: paymentMethodSchema,
+    amount: z.strictObject({
+      micros: microsSchema.refine((m) => m > 0, 'El importe debe ser mayor que cero'),
+      currency: currencySchema,
+    }),
+    usd: positiveUsdSchema,
+    vesRate: vesRateSchema.nullable(),
+  })
+  .refine(
+    (payment) => (payment.amount.currency === 'VES') === (payment.vesRate !== null),
+    'Un pago en Bs lleva la tasa aplicada, y uno en USD no',
+  );
+
+/** Recarga en caja con el pago completo (REQ-001-03, REQ-005-22). */
+export const walletRechargedV2EventSchema = event(
+  'wallet.recharged',
+  2,
+  z.strictObject({
+    customer: customerRefSchema,
+    amount: positiveUsdSchema,
+    payment: cashDeskPaymentSchema,
+    shiftId: idSchema,
+  }),
+);
+
+/** Sesión abierta; las temporales, con el pago completo de su cobro en caja. */
+export const sessionStartedV2EventSchema = event(
+  'session.started',
+  2,
+  z.discriminatedUnion('kind', [
+    z.strictObject({
+      kind: z.literal('account'),
+      sessionId: idSchema,
+      pc: pcRefSchema,
+      customer: customerRefSchema,
+      rate: usdSchema,
+    }),
+    z.strictObject({
+      kind: z.literal('temporary'),
+      sessionId: idSchema,
+      pc: pcRefSchema,
+      name: z.string().min(1),
+      rate: usdSchema,
+      purchasedSeconds: positiveSeconds,
+      amount: positiveUsdSchema,
+      payment: cashDeskPaymentSchema,
+      shiftId: idSchema,
+    }),
+  ]),
+);
+
+/** Tiempo añadido a una sesión temporal, con el pago completo (REQ-001-70). */
+export const sessionTimeAddedV2EventSchema = event(
+  'session.time_added',
+  2,
+  z.strictObject({
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    seconds: positiveSeconds,
+    amount: positiveUsdSchema,
+    payment: cashDeskPaymentSchema,
+    shiftId: idSchema,
+  }),
+);
+
+/** Compra de combo; en caja, con el pago completo (REQ-001-84, REQ-005-22). */
+export const comboPurchasedV2EventSchema = event(
+  'combo.purchased',
+  2,
+  z.strictObject({
+    customer: customerRefSchema,
+    combo: z.strictObject({
+      id: idSchema,
+      name: z.string().min(1),
+      price: positiveUsdSchema,
+      seconds: positiveSeconds,
+    }),
+    payment: z.discriminatedUnion('via', [
+      z.strictObject({
+        via: z.literal('cash_desk'),
+        payment: cashDeskPaymentSchema,
+        shiftId: idSchema,
+      }),
+      z.strictObject({ via: z.literal('balance') }),
+    ]),
+    sessionId: idSchema.nullable(),
+  }),
+);
+
 // ─── Inventario (spec 005, parte 2) ─────────────────────────────────────────────────────
 
 const productRefSchema = z.strictObject({ id: idSchema, name: z.string().min(1) });
@@ -565,16 +662,16 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   customerStatusChangedEventSchema,
   customerLoginLockedEventSchema,
   customerLoginUnlockedEventSchema,
-  walletRechargedEventSchema,
+  z.discriminatedUnion('version', [walletRechargedEventSchema, walletRechargedV2EventSchema]),
   comboCreatedEventSchema,
   comboUpdatedEventSchema,
-  comboPurchasedEventSchema,
+  z.discriminatedUnion('version', [comboPurchasedEventSchema, comboPurchasedV2EventSchema]),
   tariffChangedEventSchema,
   settingChangedEventSchema,
-  sessionStartedEventSchema,
+  z.discriminatedUnion('version', [sessionStartedEventSchema, sessionStartedV2EventSchema]),
   sessionEndedEventSchema,
   sessionRemainingCorrectedEventSchema,
-  sessionTimeAddedEventSchema,
+  z.discriminatedUnion('version', [sessionTimeAddedEventSchema, sessionTimeAddedV2EventSchema]),
   sessionRestoredEventSchema,
   // Dos versiones del mismo tipo: se distinguen por `version`.
   z.discriminatedUnion('version', [shiftOpenedEventSchema, shiftOpenedV2EventSchema]),
