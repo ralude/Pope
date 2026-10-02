@@ -5,7 +5,7 @@ import { CurrentStaff, Roles } from '../auth/decorators.js';
 import { ShiftsService } from './shifts.service.js';
 
 /**
- * Turno de caja de quien usa el panel (T17). Solo quien opera la caja (encargado y
+ * Caja de turno del local (T17, REQ-005-44). Solo quien opera la caja (encargado y
  * administrador); el dueño no cobra.
  */
 @Roles('encargado', 'administrador')
@@ -13,19 +13,19 @@ import { ShiftsService } from './shifts.service.js';
 export class ShiftsController {
   constructor(private readonly shifts: ShiftsService) {}
 
-  /** El turno abierto de quien pregunta, o `{ shift: null }`. */
+  /** La caja abierta del local, o `{ shift: null }`. */
   @Get('current')
-  async current(@CurrentStaff() member: StaffProfile): Promise<CurrentShiftResponse> {
-    return { shift: await this.shifts.findOpen(member.id) };
+  async current(): Promise<CurrentShiftResponse> {
+    return { shift: await this.shifts.findOpen() };
   }
 
-  /** Abre turno. Responde 409 si ya tiene uno abierto. */
+  /** Abre la caja. Responde 409 si ya hay una abierta en el local. */
   @Post()
   open(@CurrentStaff() member: StaffProfile): Promise<CashShift> {
     return this.shifts.open(member);
   }
 
-  /** Cierra el turno abierto. Responde 409 si no tiene ninguno. */
+  /** Cierra la caja: quien la abrió o un administrador. Responde 409 si no hay ninguna. */
   @Post('current/close')
   @HttpCode(200)
   close(@CurrentStaff() member: StaffProfile): Promise<CashShift> {

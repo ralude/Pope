@@ -202,17 +202,18 @@ describe('añadir tiempo a una sesión temporal (e2e, REQ-001-70)', () => {
       (await addTime(session.id, body, await loginAsStaff(world.testApp, 'duena', 'dueno')))
         .statusCode,
     ).toBe(403);
+    // El administrador cobra en la caja que abrió Ana (REQ-005-44).
     expect(
       (await addTime(session.id, body, await loginAsStaff(world.testApp, 'admin', 'administrador')))
         .statusCode,
-    ).toBe(409);
+    ).toBe(201);
 
     // Una sesión ya cerrada no admite más tiempo.
     await world.testApp.app.get(SessionsService).closeByStaff(session.id, { kind: 'system' });
     const ended = await addTime(session.id, body);
     expect(ended.statusCode).toBe(409);
     expect(message(ended)).toBe('La sesión ya terminó');
-    expect(await world.testApp.database.db.select().from(sessionTopups)).toHaveLength(1);
+    expect(await world.testApp.database.db.select().from(sessionTopups)).toHaveLength(2);
   });
 
   it('un cierre por agotamiento no salta si se acaba de añadir tiempo', async () => {

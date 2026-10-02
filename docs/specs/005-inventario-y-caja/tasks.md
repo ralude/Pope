@@ -119,11 +119,12 @@ parte 1.
   - **Commit:** `feat(server): registra el stock con movimientos`
   - **Decidido al implementarla:** `StockService` en el módulo `products`. `POST /products/:id/stock` admite encargado y administrador, y el servicio responde 403 si el encargado pide un ajuste o una merma. Ningún movimiento deja el stock en negativo salvo con `allowNegativeStock` (409 "No hay tanto stock de…"), no solo las ventas: no se puede mermar lo que no hay. El producto se bloquea (`for update`) mientras se calcula el stock. Endpoint nuevo `GET /products/:id/movements` (los 50 últimos, el más reciente arriba, con el nombre de quien lo hizo), para el detalle del diseño de Inventario. Verificado: 5 tests e2e (CA-005-01 con la venta simulada, roles, bajo mínimo, stock negativo y validación).
 
-- [ ] **T13a: Caja del local**
+- [x] **T13a: Caja del local**
   - **Cubre:** REQ-005-44
   - **Hacer:** el turno pasa a ser del local: uno solo abierto (índice único parcial; la migración cierra los que sobren), encargados y administradores cobran en él, `GET /shifts/current` devuelve la caja abierta y `@RequiresOpenShift()` exige la del local.
   - **Verificar:** e2e: un segundo turno se rechaza aunque lo pida otra persona; el administrador cobra en la caja que abrió la encargada; los e2e de la spec 001 siguen pasando.
   - **Commit:** `feat(server): hace la caja de turno única en el local`
+  - **Decidido al implementarla:** `ShiftsService.findOpen()` ya no recibe a nadie: devuelve la caja abierta del local, y la usan `OpenShiftGuard`, `GET /shifts/current` y la venta de combos en caja. Mensajes nuevos: "Ya hay una caja abierta" (409), "No hay una caja abierta" (409) y "Solo quien abrió la caja o un administrador puede cerrarla" (403). El índice `cash_shifts_one_open_idx` es único sobre `(closed_at is null)` solo para las abiertas. La migración `0017_one_open_cash_shift` cierra antes las cajas abiertas de más (todas menos la más reciente), que solo existen en bases de desarrollo. Dos e2e de la spec 001 (temporales) suponían que el administrador necesitaba su propio turno: ahora cobra en la caja de Ana. Verificado: e2e del turno reescritos (segunda caja rechazada aunque la pida otra persona, quién cierra, reabrir el mismo día, el administrador cobra en la caja de la encargada).
 
 - [ ] **T13b: Registro de caja**
   - **Cubre:** REQ-005-24, REQ-005-41

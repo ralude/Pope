@@ -18,7 +18,7 @@ class ShiftProbeController {
   }
 }
 
-describe('turno de caja mínimo (e2e, T17, REQ-001-03)', () => {
+describe('caja de turno del local (e2e, T17, REQ-001-03, REQ-005-44)', () => {
   let testApp: TestApp;
   let ana: string;
   let luis: string;
@@ -80,10 +80,10 @@ describe('turno de caja mínimo (e2e, T17, REQ-001-03)', () => {
       expect(second.id).not.toBe(first.id);
     });
 
-    it('cerrar sin turno abierto responde 409', async () => {
+    it('cerrar sin caja abierta responde 409', async () => {
       const response = await request('POST', '/shifts/current/close', ana);
       expect(response.statusCode).toBe(409);
-      expect(response.json()).toMatchObject({ message: 'No tienes un turno de caja abierto' });
+      expect(response.json()).toMatchObject({ message: 'No hay una caja abierta' });
     });
 
     it('el dueño no abre ni consulta turnos', async () => {
@@ -92,53 +92,79 @@ describe('turno de caja mínimo (e2e, T17, REQ-001-03)', () => {
     });
   });
 
-  describe('un solo turno abierto por miembro del personal', () => {
-    it('un segundo turno abierto responde 409 sin emitir evento', async () => {
+  describe('una sola caja abierta en el local (REQ-005-44)', () => {
+    it('una segunda caja responde 409 sin emitir evento, aunque la pida otra persona', async () => {
       await openShift(ana);
       const before = await allEvents();
-      const response = await request('POST', '/shifts', ana);
-      expect(response.statusCode).toBe(409);
-      expect(response.json()).toMatchObject({ message: 'Ya tienes un turno de caja abierto' });
+      for (const cookie of [ana, luis]) {
+        const response = await request('POST', '/shifts', cookie);
+        expect(response.statusCode).toBe(409);
+        expect(response.json()).toMatchObject({ message: 'Ya hay una caja abierta' });
+      }
       expect(await allEvents()).toHaveLength(before.length);
     });
 
-    it('cada miembro del personal tiene su propio turno', async () => {
-      const anaShift = await openShift(ana);
-      const luisShift = await openShift(luis);
-      expect(anaShift.id).not.toBe(luisShift.id);
-      await request('POST', '/shifts/current/close', luis);
-      expect(await current(ana)).toEqual(anaShift);
+    it('todos ven la caja que abrió la encargada', async () => {
+      const shift = await openShift(ana);
+      expect(await current(luis)).toEqual(shift);
     });
 
-    it('la base de datos rechaza un segundo turno abierto aunque se salte el servicio', async () => {
+    it('la cierra quien la abrió o un administrador, no otra encargada', async () => {
+      const eva = await loginAsStaff(testApp, 'eva', 'encargado', 'Eva');
       const shift = await openShift(ana);
+      const byEva = await request('POST', '/shifts/current/close', eva);
+      expect(byEva.statusCode).toBe(403);
+      expect(byEva.json()).toMatchObject({
+        message: 'Solo quien abrió la caja o un administrador puede cerrarla',
+      });
+      const byLuis = await request('POST', '/shifts/current/close', luis);
+      expect(byLuis.statusCode).toBe(200);
+      expect(byLuis.json<CashShift>().id).toBe(shift.id);
+      expect((await allEvents()).at(-1)).toMatchObject({
+        type: 'shift.closed',
+        actor: { kind: 'staff', name: 'Luis' },
+      });
+    });
+
+    it('cerrada, se puede abrir otra el mismo día', async () => {
+      const first = await openShift(ana);
+      await request('POST', '/shifts/current/close', ana);
+      const second = await openShift(luis);
+      expect(second.id).not.toBe(first.id);
+      expect(second.staffId).not.toBe(first.staffId);
+    });
+
+    it('la base de datos rechaza una segunda caja abierta aunque se salte el servicio', async () => {
+      await openShift(ana);
+      const luisId = (await request('GET', '/auth/me', luis)).json<{ id: string }>().id;
       const insertOpen = testApp.database.db
         .insert(cashShifts)
-        .values({ id: newId(), staffId: shift.staffId, openedAt: new Date() });
+        .values({ id: newId(), staffId: luisId, openedAt: new Date() });
       await expect(insertOpen).rejects.toThrow();
     });
   });
 
   describe('guard "requiere turno abierto"', () => {
-    it('sin turno abierto rechaza con 409', async () => {
+    it('sin caja abierta rechaza con 409', async () => {
       const response = await request('POST', '/test-shift/charge', ana);
       expect(response.statusCode).toBe(409);
       expect(response.json()).toMatchObject({ message: 'Abre un turno de caja para continuar' });
     });
 
-    it('con turno abierto deja pasar y entrega el turno al endpoint', async () => {
+    it('con caja abierta deja pasar y entrega la caja al endpoint', async () => {
       const shift = await openShift(ana);
       const response = await request('POST', '/test-shift/charge', ana);
       expect(response.statusCode).toBe(201);
       expect(response.json()).toEqual({ shiftId: shift.id });
     });
 
-    it('el turno de otro no sirve y, tras cerrar el propio, vuelve a rechazar', async () => {
-      await openShift(luis);
-      expect((await request('POST', '/test-shift/charge', ana)).statusCode).toBe(409);
-      await openShift(ana);
+    it('el administrador cobra en la caja que abrió la encargada; cerrada, nadie cobra', async () => {
+      const shift = await openShift(ana);
+      const byLuis = await request('POST', '/test-shift/charge', luis);
+      expect(byLuis.statusCode).toBe(201);
+      expect(byLuis.json()).toEqual({ shiftId: shift.id });
       await request('POST', '/shifts/current/close', ana);
-      expect((await request('POST', '/test-shift/charge', ana)).statusCode).toBe(409);
+      expect((await request('POST', '/test-shift/charge', luis)).statusCode).toBe(409);
     });
 
     it('sin sesión responde 401 antes de mirar el turno', async () => {

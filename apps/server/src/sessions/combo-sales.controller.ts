@@ -39,7 +39,7 @@ export class ComboSalesController {
   ): Promise<Customer> {
     let payment: ComboPayment = { via: 'balance' };
     if (body.payment.via === 'cash_desk') {
-      const shift = await this.shifts.findOpen(member.id);
+      const shift = await this.shifts.findOpen();
       if (!shift) {
         throw new ConflictException(NO_OPEN_SHIFT_MESSAGE);
       }

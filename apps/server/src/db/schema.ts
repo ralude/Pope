@@ -120,8 +120,9 @@ export const customers = pgTable(
 );
 
 /**
- * Turnos de caja (T17). **Mínima**: solo abrir y cerrar; la spec 005 añade el fondo, el
- * conteo y las diferencias. Las recargas y los cobros en caja apuntan aquí (REQ-001-03).
+ * Turnos de caja (T17): la caja del local, una abierta como mucho (REQ-005-44). La spec 005
+ * añade el fondo, el conteo y las diferencias. Los cobros en caja apuntan aquí (REQ-001-03).
+ * `staff_id` es quien la abrió.
  */
 export const cashShifts = pgTable(
   'cash_shifts',
@@ -135,10 +136,10 @@ export const cashShifts = pgTable(
     closedAt: timestamp('closed_at', { withTimezone: true }),
   },
   (t) => [
-    // Como mucho un turno abierto por miembro del personal, también ante peticiones
-    // simultáneas.
-    uniqueIndex('cash_shifts_open_staff_idx')
-      .on(t.staffId)
+    // Como mucho una caja abierta en el local (REQ-005-44), también ante peticiones
+    // simultáneas: todas las abiertas darían el mismo valor (`true`) en el índice.
+    uniqueIndex('cash_shifts_one_open_idx')
+      .on(sql`(${t.closedAt} is null)`)
       .where(sql`${t.closedAt} is null`),
     index('cash_shifts_staff_opened_idx').on(t.staffId, t.openedAt),
     check('cash_shifts_closed_after_opened', sql`${t.closedAt} >= ${t.openedAt}`),

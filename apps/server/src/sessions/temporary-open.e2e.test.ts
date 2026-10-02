@@ -211,12 +211,19 @@ describe('abrir sesión temporal (e2e, REQ-001-22, REQ-001-60, REQ-001-61, REQ-0
 
     expect((await open({ ...on(5), minutes: 30 }, null)).statusCode).toBe(401);
     expect((await open({ ...on(5), minutes: 30 }, owner)).statusCode).toBe(403);
-    // El administrador cobra igual que el encargado, pero con su propio turno.
-    const noShift = await open({ ...on(5), minutes: 30 }, admin);
+    // El administrador cobra en la caja que abrió Ana: la caja es del local (REQ-005-44).
+    expect((await open({ ...on(5), minutes: 30 }, admin)).statusCode).toBe(201);
+    // Sin caja abierta no se cobra.
+    await world.pc(6);
+    await world.testApp.app.inject({
+      method: 'POST',
+      url: '/shifts/current/close',
+      headers: { cookie: ana },
+    });
+    const noShift = await open({ ...on(6), minutes: 30 });
     expect(noShift.statusCode).toBe(409);
     expect(noShift.json<{ message: string }>().message).toBe(
       'Abre un turno de caja para continuar',
     );
-    expect((await open({ ...on(5), minutes: 30 })).statusCode).toBe(201);
   });
 });
