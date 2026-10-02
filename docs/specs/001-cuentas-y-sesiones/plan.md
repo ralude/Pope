@@ -36,7 +36,7 @@ Convenciones: ids UUIDv7, fechas `timestamptz` en UTC, importes `bigint` en µ-u
 |---|---|---|
 | `staff` | username, display_name, role (`encargado`/`administrador`/`dueno`), password_hash, active | REQ-001-40 |
 | `customers` | username (único, sin distinguir mayúsculas), password_hash, name?, phone?, status (`active`/`blocked`/`disabled`), failed_logins, locked_until | REQ-001-01, 02, 04, 52 |
-| `pcs` | name ("PC 05"), created_at | Mínima; la spec 003 añade el registro y las credenciales |
+| `pcs` | name ("PC 05"), created_at, map_row?, map_col? | Mínima; la spec 003 añade el registro y las credenciales. `map_row`/`map_col`: posición en el mapa del panel (REQ-001-45); sin ella, la PC va al final |
 | `tariff_days` | weekday (1–7, PK), rate_micros_per_hour, updated_at, updated_by | REQ-001-10, 15. Siete filas fijas |
 | `combos` | name, price_micros, seconds, active | REQ-001-80, 81 |
 | `cash_shifts` | staff_id, opened_at, closed_at | **Mínima**: solo abrir y cerrar. La spec 005 añade fondos, conteo y diferencias |
@@ -109,6 +109,8 @@ agente real (spec 003). El nodo decide; esto es solo lo que la PC dice y cuándo
 
 **API del panel (REST + WebSocket para el mapa en vivo):**
 - `auth`: login y logout del personal (cookie httpOnly).
+- `pcs`: estado de cada PC para el mapa (`GET /pcs/map`) y guardar la distribución (solo administrador, REQ-001-45).
+- Canal del panel: WebSocket `/panel`, autenticado con la cookie del personal, que envía el estado de las PCs cuando cambia (como mucho una vez por segundo).
 - `customers`: listar, buscar, crear, bloquear, recargar, comprar combo.
 - `combos`: CRUD con precio por hora y descuento calculados.
 - `tariffs`: leer y guardar la tabla semanal.
@@ -118,7 +120,14 @@ agente real (spec 003). El nodo decide; esto es solo lo que la PC dice y cuándo
 **Eventos** (versionados): `customer.created`, `customer.status_changed`, `customer.login_locked`,
 `customer.login_unlocked`, `wallet.recharged`,
 `combo.created`, `combo.updated`, `combo.purchased`, `tariff.changed`, `session.started`,
-`session.ended`, `session.remaining_corrected`, `session.time_added`, `session.restored`, `shift.opened`, `shift.closed`, `setting.changed`.
+`session.ended`, `session.remaining_corrected`, `session.time_added`, `session.restored`, `shift.opened`, `shift.closed`, `setting.changed`, `pc.map_changed`.
+
+**Panel (`apps/panel`).** Diseño de referencia: el lienzo "Panel Pope · Fase 8 (estilo SENET)",
+para que al encargado le resulte familiar. Tema oscuro, raíl de iconos a la izquierda, mapa de
+PCs como baldosas con raya de estado y botones en píldora. Se diseña para la pantalla del
+servidor del local, de **1920×1080**, con la gráfica integrada del i5-2400 (HD 2000): colores
+planos, sin desenfoques, sombras difuminadas ni animaciones; la única transparencia es la capa
+de los diálogos. El equivalente en Bs no se muestra hasta que exista una tasa (spec 005).
 
 ## Seguridad
 
@@ -150,6 +159,10 @@ agente real (spec 003). El nodo decide; esto es solo lo que la PC dice y cuándo
 | `@node-rs/argon2` | server | Hash seguro sin compilación. **Verificar en el i5 de 2ª gen** |
 | `zod`, `uuid` | shared | Validación e ids v7 |
 | `react`, `react-dom`, `wouter` | panel, shell-ui | Router de ~2 KB; **sin librería de componentes** para mantener el panel ligero |
+| `@dnd-kit/core` | panel | Arrastrar las PCs al organizar el mapa (REQ-001-45). ~10 KB comprimido, sin dependencias; mueve con `transform`, que la gráfica integrada maneja bien, y funciona con teclado |
+| `@fontsource/nunito` | panel | Fuente del diseño incluida en el panel, porque el local trabaja sin internet. Solo los woff2 de 3 pesos (~60 KB) |
+| `@fastify/static` | server | Servir el panel compilado desde el propio nodo (ADR-0011): el encargado lo abre en el navegador sin instalar nada |
+| `vite`, `@vitejs/plugin-react` | solo desarrollo | Compilar el panel y servirlo con recarga en caliente mientras se desarrolla |
 | `vitest`, `@electric-sql/pglite` | solo desarrollo | Tests con PostgreSQL en WASM, sin Docker en Windows |
 | (ninguna) | `tools/agent-sim` | El simulador usa el `WebSocket` que ya trae Node 24, `node:util` (`parseArgs`) y `node:readline`; solo depende de `@pope/shared`. No se instala en el nodo local |
 

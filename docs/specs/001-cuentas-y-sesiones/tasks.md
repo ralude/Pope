@@ -368,17 +368,43 @@ antes de seguir.
 
 ## Fase 8: Panel (`apps/panel`)
 
+> **Decidido antes de empezar la fase (2026-10-01, mantenedor).** El diseño de referencia
+> es el lienzo "Panel Pope · Fase 8 (estilo SENET)" (plan, "Panel"), para la pantalla de
+> 1920×1080 del servidor. Fuente Nunito incluida con `@fontsource/nunito`. El equivalente
+> en Bs queda oculto hasta la spec 005 y se escribe «Bs». Organizar el mapa arrastrando
+> (REQ-001-45) lleva tareas propias con `@dnd-kit/core`. El panel compilado lo sirve el nodo
+> (T45a). Las pantallas solo tienen tests de su lógica (cliente de API, cálculos), no de
+> DOM; se verifican a mano contra el servidor y el simulador.
+
 - [ ] **T38: Esqueleto del panel y login**
   - **Cubre:** REQ-001-40
-  - **Hacer:** Vite + React + wouter, cliente de API tipado con `shared` y pantalla de login del personal.
-  - **Verificar:** login contra el servidor local en el navegador.
+  - **Hacer:** `apps/panel` (`@pope/panel`) con Vite + React + wouter, con las convenciones de paquete de AGENTS.md. Cliente de API tipado que valida las respuestas con los esquemas de `shared` y convierte los errores del nodo en mensajes en español. Tema del diseño (colores, Nunito, raíl de iconos y barra superior con el personal y "Salir") y pantalla de login. Las rutas sin sesión llevan al login; al entrar se va al mapa (de momento, vacío). En desarrollo, Vite hace de proxy de `/auth`, `/customers`… y de los WebSocket al nodo, para que la cookie sea del mismo origen.
+  - **Verificar:** tests del cliente de API (respuesta válida, 401, error con mensaje del nodo, respuesta que no cumple el esquema). A mano: login correcto e incorrecto, recargar la página sigue dentro, "Salir" vuelve al login.
   - **Commit:** `feat(panel): crea el panel con el login del personal`
+
+- [ ] **T38a: Estado de las PCs para el panel**
+  - **Cubre:** REQ-001-31
+  - **Hacer:** en `shared`, el esquema del estado de cada PC para el mapa: id, nombre, posición, conectada, y su sesión activa resumida (tipo, quién, abierta por, restante, saldo o cobrado, tarifa, si quedan menos de 5 min). En el servidor, `GET /pcs/map` (todo el personal) y el canal WebSocket `/panel`, autenticado con la cookie del personal (sin ella, se cierra), que envía el estado completo de las PCs al conectar y cada vez que algo cambia (sesión abierta o cerrada, latido, PC conectada o desconectada), como mucho una vez por segundo.
+  - **Verificar:** tests e2e: el mapa refleja PCs libres, con cuenta, temporales y desconectadas; un login desde la PC llega por el canal; sin cookie el canal se cierra.
+  - **Commit:** `feat(server): envía el estado de las PCs al panel`
 
 - [ ] **T39: Mapa de PCs en vivo**
   - **Cubre:** REQ-001-31
-  - **Hacer:** cuadrícula de PCs (libre, en uso) con cliente o nombre temporal, quién la abrió y tiempo restante, actualizada por WebSocket.
+  - **Hacer:** mapa como en el diseño: baldosas en su posición guardada (o por número), con color de sesión con cuenta, temporal, libre o sin conexión, raya roja si quedan menos de 5 min, tiempo restante debajo, leyenda con recuentos, ocupación y panel de detalle de la PC elegida (cliente o nombre temporal, quién la abrió, restante, saldo o cobrado, tarifa y botones de acción). Se actualiza con el canal `/panel` de T38a.
   - **Verificar:** con la consola del simulador (T36b), el mapa cambia en < 1 s.
   - **Commit:** `feat(panel): muestra el mapa de PCs en vivo`
+
+- [ ] **T39a: Guardar la distribución del mapa**
+  - **Cubre:** REQ-001-45
+  - **Hacer:** columnas `map_row` y `map_col` en `pcs` (únicas juntas cuando no son nulas), evento `pc.map_changed` (las PCs que cambian, con su posición anterior y la nueva) y `PUT /pcs/map` solo para el administrador, que guarda la distribución completa en una transacción.
+  - **Verificar:** tests e2e: guardar, intercambiar dos PCs, evento solo con las que cambian, dos PCs en la misma casilla rechazado y acceso denegado a quien no es administrador.
+  - **Commit:** `feat(server): guarda la distribución del mapa de PCs`
+
+- [ ] **T39b: Organizar el mapa arrastrando**
+  - **Cubre:** REQ-001-45
+  - **Hacer:** pestaña "Organizar" del mapa (solo para el administrador) con `@dnd-kit/core`: arrastrar una PC a una casilla, intercambiar si está ocupada, guardar o descartar. También con teclado.
+  - **Verificar:** a mano: reorganizar, guardar, recargar la página y ver la misma distribución en otro navegador.
+  - **Commit:** `feat(panel): permite organizar el mapa arrastrando las PCs`
 
 - [ ] **T40: Clientes**
   - **Cubre:** REQ-001-01, REQ-001-02, REQ-001-04
@@ -422,6 +448,12 @@ antes de seguir.
   - **Hacer:** vista de sesiones interrumpidas y del respaldo por PC, con el botón Restaurar y la elección de PC.
   - **Verificar:** simular un apagón con la consola del simulador (`apagon N`, T36b) y restaurar (CA-001-06).
   - **Commit:** `feat(panel): muestra y restaura sesiones interrumpidas`
+
+- [ ] **T45a: Servir el panel desde el nodo**
+  - **Cubre:** ADR-0011, REQ-001-53
+  - **Hacer:** el servidor sirve `apps/panel/dist` con `@fastify/static` en modo `local` (las rutas de la API y los WebSocket tienen prioridad; cualquier otra ruta devuelve `index.html` para que funcione wouter). Documentar en AGENTS.md cómo compilar y abrir el panel.
+  - **Verificar:** test e2e de que `/` devuelve el panel y `/clientes` también; a mano, el panel en `http://127.0.0.1:3000` sin el servidor de Vite.
+  - **Commit:** `feat(server): sirve el panel compilado`
 
 ## Fase 9: Shell (`apps/shell-ui`)
 

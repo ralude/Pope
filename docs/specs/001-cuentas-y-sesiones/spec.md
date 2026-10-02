@@ -98,6 +98,10 @@ cuando se apaga todo.
 
 - **REQ-001-40:** Roles mínimos: `encargado`, `administrador` (del local) y `dueño`. Cada miembro del personal tiene credenciales propias; no se comparten.
 
+**Panel del local**
+
+- **REQ-001-45:** El administrador puede organizar el mapa de PCs del panel arrastrando cada PC a su sitio real en el local. La distribución se guarda en el nodo, la ve todo el personal y cada cambio genera un evento. Una PC sin posición aparece al final del mapa, por número.
+
 ## Requisitos no funcionales
 
 - **REQ-001-50:** El inicio de sesión responde en < 2 s en la LAN con 40 PCs conectadas, en el hardware del ADR-0011.
@@ -220,7 +224,9 @@ cuando se apaga todo.
 - [x] ¿Qué tarifa se aplica si una sesión pasa de la medianoche? **Resuelta: la del día en que empezó** (REQ-001-14).
 - [x] ¿Las tarifas son fijas? **Resuelta: no; el administrador cambia el precio de cada día cuando quiera** (REQ-001-15, REQ-001-16).
 - [x] ¿Cómo se redondea el saldo a céntimos al mostrarlo? **Resuelta: al céntimo más cercano, la mitad hacia arriba** (2,245833 → 2,25 USD). Los negativos, igual en valor absoluto (REQ-001-23, ADR-0015).
-- [x] ¿Cómo se muestra el equivalente en bolívares? **Resuelta: `3,00 USD (≈ 120,00 VES)`**, con el código `VES`, miles con punto y decimales con coma; en tarifas, `1,50 USD/h (≈ 60,00 VES/h)` (REQ-001-13).
+- [x] ¿Cómo se muestra el equivalente en bolívares? **Resuelta (cambiada el 2026-10-01 por el mantenedor): `3,00 USD (≈ 120,00 Bs)`**, con «Bs», que es como se lee en el local, miles con punto y decimales con coma; en tarifas, `1,50 USD/h (≈ 60,00 Bs/h)`. El código ISO `VES` se sigue usando en los datos; solo cambia el texto que se ve. Antes se mostraba `VES` (REQ-001-13).
+- [x] ¿Puede el panel organizar el mapa de PCs como en SENET? **Resuelta: sí, solo el administrador, arrastrando cada PC a su sitio** (REQ-001-45). Se usa `@dnd-kit/core` porque también funciona con el teclado.
+- [x] ¿Para qué pantalla se diseña el panel? **Resuelta: la del servidor del local, de 1920×1080.** El diseño de referencia es el lienzo "Panel Pope · Fase 8 (estilo SENET)".
 - [x] Si un latido llega tarde y el tiempo transcurrido supera el saldo, ¿qué se cobra? **Resuelta: como mucho lo que había.** El saldo nunca queda negativo y los segundos de más no se cobran, porque el sistema es solo prepago (REQ-001-23, REQ-001-25).
 - [x] Si una sesión empieza con menos de 5 min, ¿qué avisos recibe? **Resuelta: el de 5 min al empezar y el de 1 min al llegar.** Si después compra tiempo y vuelve a superar un umbral, ese aviso se rearma y se repite al cruzarlo otra vez (REQ-001-24). Si empieza con menos de 1 min, solo se envía el de 1 min, para no mostrar dos avisos seguidos (criterio de T07, pendiente de confirmar por el mantenedor).
 - [x] ¿Cómo sabe la nube los nombres del encargado, la PC o el cliente de cada evento? **Resuelta: cada evento lleva, además del id, una copia del nombre del momento** (`actor: { staffId, name: "Ana" }`, `pc: { id, name: "PC 05" }`). La auditoría se entiende sola y un renombrado no cambia el pasado (REQ-001-30, REQ-001-31).
