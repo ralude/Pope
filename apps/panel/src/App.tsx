@@ -2,6 +2,7 @@ import { Redirect, Route, Switch } from 'wouter';
 
 import { CombosPage } from './pages/CombosPage.js';
 import { CustomersPage } from './pages/CustomersPage.js';
+import { PanelChannelProvider } from './map/channel.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { MapPage } from './pages/MapPage.js';
 import { SessionProvider, useSession } from './session.js';
@@ -23,18 +24,20 @@ function Routes() {
     return <LoginPage notice={state.notice} />;
   }
   return (
-    <ShiftProvider>
-      <Switch>
-        <Route path="/" component={MapPage} />
-        <Route path="/clientes" component={CustomersPage} />
-        <Route path="/combo-horas" component={CombosPage} />
-        <Route path="/tarifas" component={TariffsPage} />
-        {state.staff.role === 'administrador' && <Route path="/personal" component={StaffPage} />}
-        <Route>
-          <Redirect to="/" />
-        </Route>
-      </Switch>
-    </ShiftProvider>
+    <PanelChannelProvider>
+      <ShiftProvider>
+        <Switch>
+          <Route path="/" component={MapPage} />
+          <Route path="/clientes" component={CustomersPage} />
+          <Route path="/combo-horas" component={CombosPage} />
+          <Route path="/tarifas" component={TariffsPage} />
+          {state.staff.role === 'administrador' && <Route path="/personal" component={StaffPage} />}
+          <Route>
+            <Redirect to="/" />
+          </Route>
+        </Switch>
+      </ShiftProvider>
+    </PanelChannelProvider>
   );
 }
 

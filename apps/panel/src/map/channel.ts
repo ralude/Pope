@@ -1,5 +1,6 @@
 // Canal en vivo del panel (T38a): el nodo envía el mapa completo al conectar y cada vez que
 // algo cambia. Si se corta, se reconecta solo; con 4401 la sesión del personal ya no vale.
+// Hay una sola conexión por sesión del personal, compartida por todas las pantallas.
 import {
   PANEL_CHANNEL_PATH,
   PANEL_UNAUTHORIZED_CLOSE,
@@ -7,7 +8,7 @@ import {
   panelMessageSchema,
   type PcMap,
 } from '@pope/shared';
-import { useEffect, useState } from 'react';
+import { createContext, createElement, type ReactNode, use, useEffect, useState } from 'react';
 
 import { useSession } from '../session.js';
 
@@ -38,7 +39,24 @@ export interface PcMapFeed {
   skewMs: number;
 }
 
+const PcMapFeedContext = createContext<PcMapFeed | null>(null);
+
+/** Abre el canal para todas las pantallas de la sesión del personal. */
+export function PanelChannelProvider({ children }: { children: ReactNode }) {
+  const feed = useChannel();
+  return createElement(PcMapFeedContext, { value: feed }, children);
+}
+
+/** Lo último que llegó por el canal. */
 export function usePcMapFeed(): PcMapFeed {
+  const feed = use(PcMapFeedContext);
+  if (!feed) {
+    throw new Error('usePcMapFeed fuera de PanelChannelProvider');
+  }
+  return feed;
+}
+
+function useChannel(): PcMapFeed {
   const { expire } = useSession();
   const [feed, setFeed] = useState<PcMapFeed>({ map: null, live: false, skewMs: 0 });
 
