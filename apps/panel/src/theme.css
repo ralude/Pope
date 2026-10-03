@@ -367,6 +367,8 @@ a {
 .dialog-backdrop {
   position: fixed;
   inset: 0;
+  /* Por encima de todo: los diálogos de la barra superior van antes que la sección en el DOM. */
+  z-index: 100;
   background: rgba(8, 9, 11, 0.72);
   display: flex;
   align-items: center;
