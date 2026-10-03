@@ -118,6 +118,26 @@ const examples = {
     name: 'Carlos',
     seconds: 2400,
   }),
+  'session.paused': envelope(
+    'session.paused',
+    {
+      sessionId: id(6),
+      pc: PC05,
+      pauseNumber: { inSession: 1, today: 3 },
+      maxUntil: '2026-09-25T22:45:00Z',
+    },
+    { kind: 'customer', customerId: JUAN.id, username: 'juan' },
+  ),
+  'session.resumed': envelope(
+    'session.resumed',
+    { sessionId: id(6), pc: PC05, unbilledSeconds: 600 },
+    { kind: 'customer', customerId: JUAN.id, username: 'juan' },
+  ),
+  'session.pause_expired': envelope(
+    'session.pause_expired',
+    { sessionId: id(6), pc: PC05, action: 'resume_billing' },
+    { kind: 'system' },
+  ),
   'shift.opened': envelope('shift.opened', { shiftId: SHIFT }),
   'shift.closed': envelope('shift.closed', { shiftId: SHIFT }),
   'staff.created': envelope(
@@ -547,6 +567,44 @@ describe('turno de caja, versión 2 (REQ-005-40, REQ-005-42)', () => {
     expect(valid(examples['shift.opened'])).toBe(true);
     expect(valid(examples['shift.closed'])).toBe(true);
     expect(valid({ ...examples['shift.closed'], version: 3 })).toBe(false);
+  });
+});
+
+describe('pausa de sesión (REQ-002-32)', () => {
+  it('la pausa lleva su número en la sesión y en el día, y hasta cuándo dura', () => {
+    const paused = examples['session.paused'];
+    const withPayload = (payload: object) => ({
+      ...paused,
+      payload: { ...paused.payload, ...payload },
+    });
+    expect(valid(withPayload({ pauseNumber: { inSession: 0, today: 1 } }))).toBe(false);
+    expect(valid(withPayload({ pauseNumber: { inSession: 1 } }))).toBe(false);
+    expect(valid(withPayload({ maxUntil: '2026-09-25T18:45:00-04:00' }))).toBe(false);
+  });
+
+  it('el encargado también puede reanudar: el actor dice quién fue (REQ-002-13)', () => {
+    expect(valid({ ...examples['session.resumed'], actor: ANA })).toBe(true);
+    expect(
+      valid({
+        ...examples['session.resumed'],
+        payload: { ...examples['session.resumed'].payload, unbilledSeconds: -1 },
+      }),
+    ).toBe(false);
+  });
+
+  it('al vencer, la acción es volver a cobrar o cerrar (REQ-002-22)', () => {
+    const expired = examples['session.pause_expired'];
+    const withAction = (action: string) => ({
+      ...expired,
+      payload: { ...expired.payload, action },
+    });
+    expect(valid(withAction('close'))).toBe(true);
+    expect(valid(withAction('reserve'))).toBe(false);
+  });
+
+  it('una sesión puede cerrarse porque se venció la pausa', () => {
+    const ended = examples['session.ended'];
+    expect(valid({ ...ended, payload: { ...ended.payload, reason: 'pause_expired' } })).toBe(true);
   });
 });
 

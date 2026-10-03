@@ -15,7 +15,7 @@ import { customerStatusSchema } from './customer.js';
 import { exchangeRateSourceSchema, localDateSchema } from './exchange-rate.js';
 import { currencySchema, microsSchema, vesRateSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
-import { settingKeySchema } from './settings.js';
+import { pauseOverrunSchema, settingKeySchema } from './settings.js';
 import { staffRoleSchema, staffStatusSchema } from './staff.js';
 import { weekdaySchema } from './tariff.js';
 import { paymentMethodSchema } from './wallet.js';
@@ -285,6 +285,58 @@ export const sessionRestoredEventSchema = event(
     pc: pcRefSchema,
     name: z.string().min(1),
     seconds: positiveSeconds,
+  }),
+);
+
+// ─── Pausa de sesión (spec 002) ─────────────────────────────────────────────────────────
+
+/**
+ * Sesión con cuenta en pausa: desde ese instante no se cobra (REQ-002-03). Lleva qué pausa es
+ * en la sesión y en el día de Caracas (REQ-002-21, REQ-002-24) y hasta cuándo dura, con la
+ * duración máxima vigente al empezar (REQ-002-20; mantenedor, 2026-10-03). El actor es el
+ * cliente.
+ */
+export const sessionPausedEventSchema = event(
+  'session.paused',
+  1,
+  z.strictObject({
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    pauseNumber: z.strictObject({
+      inSession: z.int().positive(),
+      today: z.int().positive(),
+    }),
+    maxUntil: utcInstantSchema,
+  }),
+);
+
+/**
+ * Pausa quitada (REQ-002-10, REQ-002-13). Quién la quitó es el actor: el cliente desde el
+ * Shell o el encargado desde el panel. `unbilledSeconds` es el tiempo que no se cobró: toda la
+ * pausa o, si venció con la opción a), hasta `maxUntil` (mantenedor, 2026-10-03).
+ */
+export const sessionResumedEventSchema = event(
+  'session.resumed',
+  1,
+  z.strictObject({
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    unbilledSeconds: nonNegativeSeconds,
+  }),
+);
+
+/**
+ * La pausa llegó a su duración máxima (REQ-002-22) y se aplicó `action`: volver a cobrar con
+ * la PC aún en pausa, o cerrar la sesión (que emite además `session.ended` con el motivo
+ * `pause_expired`). El actor es el sistema.
+ */
+export const sessionPauseExpiredEventSchema = event(
+  'session.pause_expired',
+  1,
+  z.strictObject({
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    action: pauseOverrunSchema,
   }),
 );
 
@@ -723,6 +775,9 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   sessionRemainingCorrectedEventSchema,
   z.discriminatedUnion('version', [sessionTimeAddedEventSchema, sessionTimeAddedV2EventSchema]),
   sessionRestoredEventSchema,
+  sessionPausedEventSchema,
+  sessionResumedEventSchema,
+  sessionPauseExpiredEventSchema,
   // Dos versiones del mismo tipo: se distinguen por `version`.
   z.discriminatedUnion('version', [shiftOpenedEventSchema, shiftOpenedV2EventSchema]),
   z.discriminatedUnion('version', [shiftClosedEventSchema, shiftClosedV2EventSchema]),

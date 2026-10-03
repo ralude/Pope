@@ -113,9 +113,9 @@ Cerrar ya existe (`POST /sessions/:id/close`). El mapa del panel (`PcMapSession`
 
 | Evento | Datos |
 |---|---|
-| `session.paused` | `sessionId`, `pcId`, número de pausa en la sesión y en el día |
-| `session.resumed` | `sessionId`, segundos en pausa, quién reanudó (cliente o personal) |
-| `session.pause_expired` | `sessionId`, `action` (`resume_billing` o `close`) |
+| `session.paused` | `sessionId`, `pc`, número de pausa en la sesión y en el día, y `maxUntil` (mantenedor, 2026-10-03) |
+| `session.resumed` | `sessionId`, `pc` y `unbilledSeconds`: lo que no se cobró, toda la pausa o hasta `maxUntil` si venció con a). Quién reanudó (cliente o personal) es el actor (mantenedor, 2026-10-03) |
+| `session.pause_expired` | `sessionId`, `pc`, `action` (`resume_billing` o `close`) |
 
 ## Shell (diseño "Shell Pope · Fase 9")
 

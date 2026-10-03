@@ -60,11 +60,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(shared): añade la pausa al canal de la PC y al mapa`
   - **Decidido al implementarla:** la pausa (`sessionPauseSchema`) y las pausas usadas (`pausesUsedSchema`) viven en `pause.ts` y las comparten el `state` y el mapa. En el `state` los tres campos son opcionales (compatibilidad); en el mapa son obligatorios y admiten `null` (`pausesUsed` es `null` en una temporal), porque el panel y el nodo se entregan juntos: hasta T10 el nodo manda `pause: null` y 0 pausas usadas. El JSON Schema del canal se regenera al compilar shared (`dist/json-schema`, no se sube). `resume` sin pausa no es un error: responde el `state`. **Decidido por el mantenedor (2026-10-03):** el motivo de cierre `pause_expired` se llama «Se venció la pausa» (panel y simulador); el Shell sigue mostrando el mismo «Tu sesión terminó» para cualquier motivo.
 
-- [ ] **T04: Eventos de la pausa**
+- [x] **T04: Eventos de la pausa**
   - **Cubre:** REQ-002-32
   - **Hacer:** `session.paused` (sesión, PC, número de pausa en la sesión y en el día), `session.resumed` (sesión, segundos en pausa, quién reanudó: cliente o personal) y `session.pause_expired` (sesión, `action`), versión 1 y con actor. `session.ended` acepta el motivo `pause_expired`: solo añade un valor, así que los eventos ya guardados siguen siendo válidos.
   - **Verificar:** tests de `events.test.ts`.
   - **Commit:** `feat(shared): añade los eventos de la pausa`
+  - **Decidido al implementarla:** los tres llevan `pc` (id y nombre), como los demás eventos de sesión. **Decidido por el mantenedor (2026-10-03):** `session.paused` guarda también `maxUntil` (con qué duración empezó, aunque luego cambie el ajuste); `session.resumed` guarda solo `unbilledSeconds`, lo que no se cobró (toda la pausa, o hasta `maxUntil` si venció con a); y quién reanudó lo dice el actor, sin campo repetido.
 
 ## Fase 2: Nodo (`apps/server`)
 
