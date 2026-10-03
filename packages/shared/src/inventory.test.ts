@@ -19,11 +19,20 @@ describe('productos (REQ-005-01, REQ-005-04)', () => {
   const doritos = { name: ' Doritos ', priceMicros: usd(1.5), minStock: 5, initialQuantity: 24 };
 
   it('CA-005-08: alta con precio, mínimo y lo que llegó', () => {
-    expect(productCreateRequestSchema.parse(doritos)).toEqual({ ...doritos, name: 'Doritos' });
+    expect(productCreateRequestSchema.parse(doritos)).toEqual({
+      ...doritos,
+      name: 'Doritos',
+      active: true,
+    });
     expect(productCreateRequestSchema.safeParse({ ...doritos, minStock: null }).success).toBe(true);
     expect(productCreateRequestSchema.safeParse({ ...doritos, initialQuantity: 0 }).success).toBe(
       true,
     );
+  });
+
+  it('sale activo salvo que se diga lo contrario', () => {
+    expect(productCreateRequestSchema.parse(doritos).active).toBe(true);
+    expect(productCreateRequestSchema.parse({ ...doritos, active: false }).active).toBe(false);
   });
 
   it('rechaza nombre vacío, precio 0, cantidades negativas o con decimales', () => {

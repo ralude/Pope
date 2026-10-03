@@ -38,6 +38,13 @@ describe('productos y conceptos (e2e, REQ-005-01 a REQ-005-05)', () => {
   }
 
   describe('productos', () => {
+    it('se puede dar de alta ya desactivado, y queda así en el evento', async () => {
+      const product = await createProduct({ ...DORITOS, active: false });
+      expect(product.active).toBe(false);
+      const created = (await allEvents()).find((event) => event.type === 'product.created');
+      expect(created?.payload).toMatchObject({ product: { active: false } });
+    });
+
     it('CA-005-08 (sin la foto): Doritos a 1,50 USD con una entrada de 24', async () => {
       const product = await createProduct();
       expect(product).toMatchObject({

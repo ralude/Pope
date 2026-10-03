@@ -31,13 +31,15 @@ const productNameSchema = z.string().trim().min(1, 'Pon un nombre al producto').
 
 /**
  * Cuerpo de `POST /products` (REQ-005-01, REQ-005-04). Lo que llegó se guarda como su
- * primera entrada, nunca como una cantidad escrita (REQ-005-10); 0 si aún no hay.
+ * primera entrada, nunca como una cantidad escrita (REQ-005-10); 0 si aún no hay. Puede darse
+ * de alta ya desactivado (mantenedor, T18); si no se dice, sale activo.
  */
 export const productCreateRequestSchema = z.object({
   name: productNameSchema,
   priceMicros: priceSchema,
   minStock: minStockSchema,
   initialQuantity: z.int().min(0).max(MAX_STOCK_QUANTITY),
+  active: z.boolean().default(true),
 });
 export type ProductCreateRequest = z.infer<typeof productCreateRequestSchema>;
 

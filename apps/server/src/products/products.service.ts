@@ -101,8 +101,8 @@ export class ProductsService {
   }
 
   /**
-   * Da de alta un producto activo y emite `product.created`. Lo que llegó se guarda como su
-   * primera entrada, con su `stock.moved` (REQ-005-10).
+   * Da de alta un producto (activo, salvo que se pida lo contrario) y emite `product.created`.
+   * Lo que llegó se guarda como su primera entrada, con su `stock.moved` (REQ-005-10).
    */
   async create(input: ProductCreateRequest, actor: Actor): Promise<Product> {
     return this.events.inTransaction(async (tx, emit) => {
@@ -114,6 +114,7 @@ export class ProductsService {
           name: input.name,
           priceMicros: input.priceMicros,
           minStock: input.minStock,
+          active: input.active,
           createdAt: now,
         })
         .returning();
