@@ -16,6 +16,7 @@ import {
   WEEKDAYS,
   weekdayTitle,
 } from '../tariffs/model.js';
+import { Bolivares } from '../ui/Bolivares.js';
 import { Frame } from '../ui/Frame.js';
 import { parseUsd } from '../ui/money.js';
 
@@ -139,8 +140,11 @@ export function TariffsPage() {
               const content = (
                 <>
                   <span className="tariff-day-name">{weekdayTitle(day)}</span>
-                  <span className="num tariff-day-rate">
-                    {dayRate === undefined ? '—' : formatMoney(dayRate, { suffix: '/h' })}
+                  <span>
+                    <span className="num tariff-day-rate">
+                      {dayRate === undefined ? '—' : formatMoney(dayRate, { suffix: '/h' })}
+                    </span>
+                    {dayRate !== undefined && <Bolivares amount={dayRate} suffix="/h" size={13} />}
                   </span>
                 </>
               );
@@ -191,6 +195,7 @@ export function TariffsPage() {
               {text.trim() !== '' && rate === null && (
                 <span className="field-error">Escribe un precio mayor que cero, p. ej. 1,50.</span>
               )}
+              {rate !== null && <Bolivares amount={rate} suffix="/h" size={13} />}
               {error && (
                 <span role="alert" className="field-error">
                   {error}

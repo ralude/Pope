@@ -48,11 +48,12 @@ antes de seguir.
   - **Commit:** `feat(panel): muestra el equivalente en Bs en el mapa y los cobros`
   - **Decidido al implementarla:** componente `ui/Bolivares` («≈ 1.742,72 Bs», línea gris debajo del importe, como en el diseño), que toma la tasa del canal del panel y no pinta nada sin tasa. Va en el detalle de la PC del mapa (saldo, cobrado de una temporal y tarifa con «/h»), en Clientes (saldo en la tabla y en el detalle), en Recargar saldo (el importe escrito, el saldo y «Tras recargar») y en Vender combo (el precio de cada combo, el saldo y «Le quedan»). De paso se corrigió en un commit aparte el «≈» repetido del Bs del otro ingreso de la Caja (T27). Verificado en Chrome con la tasa de desarrollo (871,36 Bs por USD): Clientes, Recargar saldo a juan, Vender combo a juan y el detalle de la PC 01 con sim01 conectado por el simulador (saldo 0,96 USD ≈ 839,41 Bs y tarifa 2,00 USD/h ≈ 1.742,72 Bs/h). **Sin tasa no se pudo probar a mano**: la base de desarrollo ya tiene una y las tasas no se borran; que no se pinte nada sin tasa es la misma condición que ya usan Inventario y la Caja.
 
-- [ ] **T06: Bs en tarifas, combos y sesiones temporales**
+- [x] **T06: Bs en tarifas, combos y sesiones temporales**
   - **Cubre:** REQ-005-30, REQ-001-13
   - **Hacer:** equivalente en Bs en Tarifas, Combos (precio y precio por hora) y en el diálogo de sesión temporal.
   - **Verificar:** a mano, con tasa y sin tasa.
   - **Commit:** `feat(panel): muestra el equivalente en Bs en tarifas, combos y temporales`
+  - **Decidido al implementarla:** con el mismo `ui/Bolivares` de T05. En Tarifas, «≈ … Bs/h» debajo del precio de cada día y del «Nuevo precio por hora» mientras se escribe. En Combos, cada fila de la lista lleva una segunda línea «≈ … Bs · ≈ … Bs/h» (precio y precio por hora), y el editor el Bs debajo del campo Precio y debajo de «Con este combo la hora sale a». Las frases de descuento frente a la tarifa («33 % menos que…») siguen solo en USD: son una comparación, no un importe que se cobre. En la sesión temporal, el Bs de lo que se cobra debajo de «Se cobra…» o «Da…», en los dos modos. Verificado en Chrome con la tasa de desarrollo (871,36 Bs por USD): Lunes 1,50 USD/h ≈ 1.307,04 Bs/h, nuevo precio 1,75 ≈ 1.524,88 Bs/h, Combo 20 horas ≈ 17.427,20 Bs · ≈ 871,36 Bs/h, temporal de 60 min ≈ 1.742,72 Bs y de 3,00 USD ≈ 2.614,08 Bs. Sin tasa, con una base nueva (`pope_t07`, la de T07): ninguna de las tres pantallas pinta Bs.
 
 ### Cierre de la parte 1
 

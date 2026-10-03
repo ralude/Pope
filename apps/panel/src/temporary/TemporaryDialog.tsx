@@ -16,6 +16,7 @@ import { type SyntheticEvent, useEffect, useState } from 'react';
 import { ApiError } from '../api/client.js';
 import { useSession } from '../session.js';
 import { useShift } from '../shift.js';
+import { Bolivares } from '../ui/Bolivares.js';
 import { PaymentMethodField, ShiftRequirement } from '../ui/charge.js';
 import { Dialog } from '../ui/Dialog.js';
 import { type ChargeMode, chargeOf, minutesLabel, QUICK_MINUTES } from './model.js';
@@ -175,6 +176,7 @@ export function TemporaryDialog({
                 ) : (
                   'Escribe un importe que dé como mucho 24 h.'
                 )}
+                {charge && <Bolivares amount={charge.purchase.charge} size={13} />}
               </span>
             </div>
             {mode === 'minutes' && (

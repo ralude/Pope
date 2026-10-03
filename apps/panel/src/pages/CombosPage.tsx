@@ -7,6 +7,7 @@ import '../combos/combos.css';
 import {
   type Combo,
   comboSchema,
+  formatBolivares,
   formatDuration,
   formatMoney,
   type TariffTable,
@@ -17,7 +18,9 @@ import { type SyntheticEvent, useEffect, useState } from 'react';
 
 import { ApiError, listOf } from '../api/client.js';
 import { comboPreview, formatHoursInput, parseHours } from '../combos/model.js';
+import { usePcMapFeed } from '../map/channel.js';
 import { useSession, useStaff } from '../session.js';
+import { Bolivares } from '../ui/Bolivares.js';
 import { Frame } from '../ui/Frame.js';
 import { formatUsdInput, parseUsd } from '../ui/money.js';
 
@@ -109,6 +112,7 @@ export function CombosPage() {
                   {formatDuration(seconds(combo.seconds))} · {formatMoney(combo.priceMicros)} ·{' '}
                   {formatMoney(combo.ratePerHourMicros, { suffix: '/h' })}
                 </span>
+                <ComboBolivares combo={combo} />
               </div>
               <span className={`status-pill ${combo.active ? 'status-active' : 'status-disabled'}`}>
                 {combo.active ? 'A la venta' : 'Desactivado'}
@@ -149,6 +153,18 @@ export function CombosPage() {
         )}
       </div>
     </Frame>
+  );
+}
+
+/** El precio y la hora del combo en Bs, en una línea como la de USD (REQ-005-30). */
+function ComboBolivares({ combo }: { combo: Combo }) {
+  const rate = usePcMapFeed().rate?.rate?.vesPerUsd;
+  if (rate === undefined) return null;
+  return (
+    <span className="muted num" style={{ fontSize: 12 }}>
+      {formatBolivares(combo.priceMicros, rate)} ·{' '}
+      {formatBolivares(combo.ratePerHourMicros, rate, '/h')}
+    </span>
   );
 }
 
@@ -245,6 +261,7 @@ function ComboEditor({
               setPriceText(event.target.value);
             }}
           />
+          {price !== null && <Bolivares amount={price} size={13} />}
         </div>
         <div className="field">
           <label className="label" htmlFor="combo-horas">
@@ -269,6 +286,7 @@ function ComboEditor({
         <span className="num" style={{ fontSize: 26 }}>
           {preview ? formatMoney(preview.rate, { suffix: '/h' }) : '—'}
         </span>
+        {preview && <Bolivares amount={preview.rate} suffix="/h" size={15} />}
         {preview ? (
           preview.lines.map((line) => (
             <span key={line} style={{ color: 'var(--soft)' }}>
