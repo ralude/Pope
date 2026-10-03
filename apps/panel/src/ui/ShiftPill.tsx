@@ -1,31 +1,16 @@
-// Turno de caja en la barra superior (T41, decidido por el mantenedor): «Sin turno · Abrir
-// turno» lo abre al momento; «Turno abierto · 14:02» pide confirmación para cerrarlo. El
+// Caja en la barra superior, como en el diseño: «Caja cerrada · Abrir» abre el diálogo con el
+// fondo (REQ-005-40) y «Turno abierto · 14:02» el de cerrar con el conteo (REQ-005-42). El
 // dueño no cobra, así que no la ve.
 import { formatLocalTime } from '@pope/shared';
-import { type SyntheticEvent, useCallback, useState } from 'react';
 
-import { ApiError } from '../api/client.js';
 import { useShift } from '../shift.js';
-import { Dialog } from './Dialog.js';
-
-function errorMessage(failure: unknown): string {
-  return failure instanceof ApiError ? failure.message : String(failure);
-}
 
 export function ShiftPill() {
-  const { canCharge, shift, startOpen, close } = useShift();
-  const [closing, setClosing] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const stopClosing = useCallback(() => {
-    setClosing(false);
-    setError(null);
-  }, []);
+  const { canCharge, shift, startOpen, startClose } = useShift();
 
   if (!canCharge || shift === undefined) return null;
 
   if (!shift) {
-    // Abrir pide el fondo inicial (REQ-005-40): lo hace el diálogo "Abrir caja".
     return (
       <button type="button" className="shift-pill shift-closed" onClick={startOpen}>
         <span className="status-dot" style={{ background: 'var(--amber-bar)' }} />
@@ -34,56 +19,10 @@ export function ShiftPill() {
     );
   }
 
-  const openedAt = formatLocalTime(new Date(shift.openedAt));
-  const submit = (event: SyntheticEvent) => {
-    event.preventDefault();
-    setBusy(true);
-    setError(null);
-    close().then(
-      () => {
-        setBusy(false);
-        setClosing(false);
-      },
-      (failure: unknown) => {
-        setBusy(false);
-        setError(errorMessage(failure));
-      },
-    );
-  };
-
   return (
-    <>
-      <button
-        type="button"
-        className="shift-pill shift-open"
-        onClick={() => {
-          setClosing(true);
-        }}
-      >
-        <span className="status-dot" style={{ background: 'var(--green-bar)' }} />
-        Turno abierto · {openedAt}
-      </button>
-      {closing && (
-        <Dialog title="Cerrar el turno de caja" onClose={stopClosing} onSubmit={submit}>
-          <p className="detail-note" style={{ margin: 0 }}>
-            Tu turno está abierto desde las {openedAt}. Al cerrarlo ya no podrás recargar, vender
-            combos en caja ni abrir sesiones temporales hasta que abras otro.
-          </p>
-          {error && (
-            <div role="alert" className="alert-error">
-              {error}
-            </div>
-          )}
-          <div className="dialog-actions">
-            <button autoFocus type="button" className="btn btn-ghost" onClick={stopClosing}>
-              Cancelar
-            </button>
-            <button type="submit" className="btn btn-primary" disabled={busy}>
-              {busy ? 'Cerrando…' : 'Cerrar turno'}
-            </button>
-          </div>
-        </Dialog>
-      )}
-    </>
+    <button type="button" className="shift-pill shift-open" onClick={startClose}>
+      <span className="status-dot" style={{ background: 'var(--green-bar)' }} />
+      Turno abierto · {formatLocalTime(new Date(shift.openedAt))}
+    </button>
   );
 }

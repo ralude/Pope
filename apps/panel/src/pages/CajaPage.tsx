@@ -47,7 +47,7 @@ function errorMessage(failure: unknown): string {
 
 export function CajaPage() {
   const { api } = useSession();
-  const { canCharge, shift, startOpen } = useShift();
+  const { canCharge, shift, startOpen, startClose } = useShift();
   const staff = useStaff();
   const { rate, cashVersion } = usePcMapFeed();
   const vesRate = rate?.rate?.vesPerUsd;
@@ -100,11 +100,16 @@ export function CajaPage() {
       }
       actions={
         canCharge &&
-        shift === null && (
+        shift !== undefined &&
+        (shift === null ? (
           <button type="button" className="btn btn-primary" onClick={startOpen}>
             Abrir caja
           </button>
-        )
+        ) : (
+          <button type="button" className="btn btn-ghost" onClick={startClose}>
+            Cerrar caja
+          </button>
+        ))
       }
     >
       <div className="caja-layout">

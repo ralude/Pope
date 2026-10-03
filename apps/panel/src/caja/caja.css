@@ -400,3 +400,64 @@
   cursor: pointer;
   font-family: inherit;
 }
+
+/* Cerrar caja (T22b), más ancho que los demás diálogos, como en el diseño. */
+.dialog:has(.closing-table) {
+  width: 680px;
+}
+
+.closing-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.closing-table th {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  text-align: left;
+}
+
+.closing-table td {
+  padding: 8px;
+  border-bottom: 1px solid #22262d;
+}
+
+.closing-table .num-cell {
+  text-align: right;
+}
+
+.closing-input {
+  width: 130px;
+  text-align: right;
+}
+
+.closing-diff {
+  font-weight: 700;
+}
+
+.closing-none {
+  color: var(--muted);
+}
+
+.closing-ok {
+  color: #a7e0b5;
+}
+
+.closing-over {
+  color: #f5d9a8;
+}
+
+.closing-short {
+  color: #ffb4b0;
+}
+
+.closing-totals {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bg);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}

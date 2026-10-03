@@ -227,11 +227,12 @@ parte 1.
   - **Commit:** `feat(panel): abre la caja con su fondo`
   - **Decidido al implementarla:** `OpenCashDialog` («Abrir caja» del diseño: efectivo en USD y en Bs). Vive en `ShiftProvider`, que expone `startOpen()`: lo usan la píldora (ahora «Caja cerrada · Abrir», como en el diseño), «Abrir caja» en la cabecera de la Caja (solo quien cobra) y el aviso de los diálogos de cobro, que deja de abrir la caja sin fondo y pasa a decir «la caja» en vez de «tu turno». `parseAmount` lee lo contado y admite 0: la coma es decimal y los puntos agrupan miles («12.500,50»), salvo un único punto con uno o dos decimales («25.50»). Verificado en Chrome: tras cerrar por la API la caja de desarrollo abierta desde las 01:49 (contando lo esperado, sin diferencias), la píldora dijo «Caja cerrada · Abrir»; se abrió con 20 USD y «1.500,00» Bs, quedaron 20 000 000 µUSD y 1 500 000 000 µVES y `shift.opened` v2.
 
-- [ ] **T22b: Cerrar la caja con conteo y reporte**
+- [x] **T22b: Cerrar la caja con conteo y reporte**
   - **Cubre:** REQ-005-42, REQ-005-45
   - **Hacer:** "Cerrar caja" del diseño: lo esperado por método, lo contado, la diferencia, "¿Seguro que quieres cerrar la caja?" y la descarga del PDF del encargado; "Caja cerrada" al terminar.
   - **Verificar:** tests de la diferencia; a mano CA-005-03 y CA-005-09, con el PDF impreso en una página.
   - **Commit:** `feat(panel): cierra la caja con su conteo y su reporte`
+  - **Decidido al implementarla:** `CloseCashDialog` en tres pasos, como en el diseño: (1) «Cerrar caja» con lo esperado por método (`GET /shifts/current/closing`), una pista con el fondo y lo cobrado en el efectivo, el campo «Contado» (vacío: hay que contar; `parseAmount`), la diferencia en color (cuadra, sobra o falta) y los totales vendidos y lo pagado con saldo; (2) «¿Seguro que quieres cerrar la caja?» con el aviso de las diferencias; (3) «Caja cerrada» tras descargar el PDF del encargado (enlace con `download` a `/shifts/:id/report.pdf`, nombre `cierre-caja-AAAA-MM-DD.pdf`) y «Descargarlo otra vez». Se abre desde la píldora «Turno abierto · hh:mm» (que pierde su diálogo viejo sin conteo) y desde «Cerrar caja» en la Caja. La cabecera dice «Abierta a las…» porque el cierre no trae el nombre de quien abrió. Lógica en `caja/closing.ts`, con tests (CA-005-03). Verificado en Chrome con permiso del mantenedor para la descarga: caja con fondo 20 USD y 1.500 Bs, una recarga de 5, 2 Doritos y 12 impresiones en efectivo USD; contado 24,20 frente a 29,20 esperados dio «-5,00 USD» en el cierre y en «¿Seguro?»; quedó `shift.closed` v2 con la diferencia y se descargó el PDF de una página con los totales y el cuadre.
 
 - [ ] **T23: Historial de cierres**
   - **Cubre:** REQ-005-53

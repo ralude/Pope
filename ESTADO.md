@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · abrir la caja con fondo en el panel (T22a de la spec 005)
+**Última actualización:** 2026-10-02 · cerrar la caja con conteo y reporte en el panel (T22b de la spec 005)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T22b: Cerrar la caja con conteo y reporte** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T22b–T24 (con T23b), T05–T07 |
-| **Progreso** | Spec 005: 26 / 33 tareas (parte 1: 4 / 7; parte 2: 22 / 26) |
+| **Siguiente tarea** | **T23: Historial de cierres** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T23–T24 (con T23b), T05–T07 |
+| **Progreso** | Spec 005: 27 / 33 tareas (parte 1: 4 / 7; parte 2: 23 / 26) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 26 / 33 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 27 / 33 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T22b (spec 005): «Cerrar caja» con lo esperado, lo contado y la diferencia, «¿Seguro?» y descarga del PDF; probado en Chrome (CA-005-03 y el PDF de una página).
 - **2026-10-02:** T22a (spec 005): diálogo «Abrir caja» con el fondo en USD y Bs, desde la píldora, la Caja y los cobros; probado en Chrome. T22 se divide en dos (T22b: cerrar con conteo y reporte).
 - **2026-10-02:** T21 (spec 005): lista de movimientos de la caja con los totales por grupo, en vivo, y «Anular» con motivo para el administrador; probada en Chrome (CA-005-11).
 - **2026-10-02:** T20b (spec 005): cobro en la Caja con un método o «Dividir pago», el importe en Bs con la tasa y la cuenta que paga con su saldo; probado en Chrome (CA-005-07 y CA-005-10).
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T18a (spec 005): página Inventario con buscador, estado de cada producto, detalle con sus movimientos y entrada, ajuste y merma; se refresca sola con el aviso `cash`. Probada en Chrome. T18 se divide en dos (T18b: alta y edición con foto).
 - **2026-10-02:** T04 (spec 005): píldora de la tasa en la barra superior (vigente, sin tasa o desactualizada) y diálogo «Tasa del día» para el encargado y el administrador; probado en Chrome con dos pestañas a la vez.
 - **2026-10-02:** T17 (spec 005): reportes del cierre en PDF con `pdfkit`: resumen de una página (lo vendido por grupo, lo pagado con saldo, la tasa y el cuadre por método) y detallado (movimientos, anulaciones y stock por producto). Termina la fase 2 (nodo); probada también contra PostgreSQL real.
-- **2026-10-02:** T16b (spec 005): el nombre del local es un ajuste de texto (`localName`, por defecto "Pope") que cambia el administrador; `setting.changed` pasa a la versión 2 con valores de número o de texto.

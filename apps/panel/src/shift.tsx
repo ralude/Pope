@@ -2,10 +2,13 @@
 // sesiones temporales se cobran en ella. El dueño no cobra, así que no la abre. Abrir pide el
 // fondo (REQ-005-40) con el diálogo "Abrir caja", que vive aquí para todas las pantallas.
 import {
+  type CashByMethod,
   type CashShift,
   cashShiftSchema,
   currentShiftResponseSchema,
   type OpeningCash,
+  type ShiftSummary,
+  shiftSummarySchema,
 } from '@pope/shared';
 import {
   createContext,
@@ -17,6 +20,7 @@ import {
   useState,
 } from 'react';
 
+import { CloseCashDialog } from './caja/CloseCashDialog.js';
 import { OpenCashDialog } from './caja/OpenCashDialog.js';
 import { useSession, useStaff } from './session.js';
 
@@ -27,7 +31,8 @@ interface ShiftValue {
   shift: CashShift | null | undefined;
   /** Abre el diálogo "Abrir caja" (fondo inicial). */
   startOpen: () => void;
-  close: () => Promise<void>;
+  /** Abre el diálogo "Cerrar caja" (conteo, confirmación y reporte). */
+  startClose: () => void;
 }
 
 const ShiftContext = createContext<ShiftValue | null>(null);
@@ -38,6 +43,7 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
   const canCharge = staff.role !== 'dueno';
   const [shift, setShift] = useState<CashShift | null | undefined>(canCharge ? undefined : null);
   const [opening, setOpening] = useState(false);
+  const [closing, setClosing] = useState(false);
 
   useEffect(() => {
     if (!canCharge) return;
@@ -69,19 +75,30 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
     setOpening(false);
   }, []);
 
-  const close = useCallback(async () => {
-    await api.post('/shifts/current/close', undefined, cashShiftSchema);
-    setShift(null);
-  }, [api]);
+  const close = useCallback(
+    async (counted: CashByMethod): Promise<ShiftSummary> => {
+      const summary = await api.post('/shifts/current/close', { counted }, shiftSummarySchema);
+      setShift(null);
+      return summary;
+    },
+    [api],
+  );
+  const startClose = useCallback(() => {
+    setClosing(true);
+  }, []);
+  const stopClosing = useCallback(() => {
+    setClosing(false);
+  }, []);
 
   const value = useMemo(
-    () => ({ canCharge, shift, startOpen, close }),
-    [canCharge, shift, startOpen, close],
+    () => ({ canCharge, shift, startOpen, startClose }),
+    [canCharge, shift, startOpen, startClose],
   );
   return (
     <ShiftContext value={value}>
       {children}
       {opening && <OpenCashDialog onOpen={open} onClose={stopOpening} />}
+      {closing && <CloseCashDialog close={close} onClose={stopClosing} />}
     </ShiftContext>
   );
 }
