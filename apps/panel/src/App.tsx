@@ -1,6 +1,7 @@
 import { Redirect, Route, Switch } from 'wouter';
 
 import { CajaPage } from './pages/CajaPage.js';
+import { ClosingsPage } from './pages/ClosingsPage.js';
 import { CombosPage } from './pages/CombosPage.js';
 import { CustomersPage } from './pages/CustomersPage.js';
 import { PanelChannelProvider } from './map/channel.js';
@@ -34,6 +35,7 @@ function Routes() {
           <Route path="/clientes" component={CustomersPage} />
           <Route path="/caja" component={CajaPage} />
           <Route path="/inventario" component={InventoryPage} />
+          {state.staff.role !== 'encargado' && <Route path="/cierres" component={ClosingsPage} />}
           <Route path="/interrumpidas" component={InterruptedPage} />
           <Route path="/combo-horas" component={CombosPage} />
           <Route path="/tarifas" component={TariffsPage} />

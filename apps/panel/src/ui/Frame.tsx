@@ -16,6 +16,12 @@ const SECTIONS: { href: string; label: string; icon: IconName; roles?: StaffRole
   { href: '/clientes', label: 'Clientes', icon: 'clientes' },
   { href: '/caja', label: 'Caja', icon: 'caja' },
   { href: '/inventario', label: 'Inventario', icon: 'inventario' },
+  {
+    href: '/cierres',
+    label: 'Cierres de caja',
+    icon: 'cierres',
+    roles: ['administrador', 'dueno'],
+  },
   { href: '/interrumpidas', label: 'Interrumpidas', icon: 'interrumpidas' },
   { href: '/combo-horas', label: 'Combos', icon: 'combos' },
   { href: '/tarifas', label: 'Tarifas', icon: 'tarifas' },

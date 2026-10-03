@@ -20,6 +20,12 @@ const PATHS = {
       <path d="M5 9V5h7v4M14 6h2M6 13h2M10 13h4" />
     </>
   ),
+  cierres: (
+    <>
+      <rect x="4.5" y="2.5" width="11" height="15" rx="1.5" />
+      <path d="M7.5 7h5M7.5 10h5M7.5 13h3" />
+    </>
+  ),
   inventario: (
     <>
       <path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5z" />

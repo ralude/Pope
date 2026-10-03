@@ -461,3 +461,62 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
+
+/* Cierres de caja (T23). */
+.closings-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.closings-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  text-align: left;
+}
+
+.closings-table td {
+  height: 52px;
+  padding: 0 10px;
+  border-bottom: 1px solid #22262d;
+}
+
+.closings-table .num-cell {
+  text-align: right;
+}
+
+.closings-link {
+  height: 32px;
+  margin-left: 6px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.closing-pill {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.closing-pill-ok {
+  background: #17271b;
+  color: #a7e0b5;
+}
+
+.closing-pill-short {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.closing-pill-over {
+  background: #2a2113;
+  color: #f5d9a8;
+}
+
+.closing-pill-open {
+  background: var(--surface-2);
+  color: var(--soft);
+}

@@ -241,11 +241,12 @@ parte 1.
   - **Commit:** `feat(server): añade lo vendido por artículo al reporte del encargado`
   - **Decidido al implementarla:** pedido por el mantenedor a partir del Z-Report de SENET (2026-10-03): REQ-005-51 cambia y el PDF del encargado ya no es siempre de una página. `ShiftReportService.sold`: las líneas de las ventas de la caja sin anular, agrupadas por producto o concepto (con el nombre copiado en la venta), y para los productos el stock al cerrar (el final de la tabla de stock; `StockLine` gana `productId`). En el PDF, «Lo vendido por artículo» (Artículo, Cantidad vendida, En almacén; «—» en las otras ventas) va tras el cuadre en los dos reportes, ordenado por nombre. Los totales y el cuadre caben siempre en la primera página; la tabla sigue en otra si hace falta (el escritor ya salta de página). Queda como pregunta abierta de la spec lo de «Fondos agregados» y «Retiradas de efectivo» del Z-Report, para más adelante. Verificado: e2e (Impresiones 12 con «—» y Papas 2 con 8 en almacén; una venta anulada no cuenta; CA-005-09 sigue en una página) y dos muestras a ojo: los artículos del Z-Report en una página y 45 artículos con la tabla siguiendo en la segunda.
 
-- [ ] **T23: Historial de cierres**
+- [x] **T23: Historial de cierres**
   - **Cubre:** REQ-005-53
   - **Hacer:** pantalla `/cierres` para el administrador y el dueño, con los totales de cada día y los dos PDF.
   - **Verificar:** a mano, por rol.
   - **Commit:** `feat(panel): muestra el historial de cierres`
+  - **Decidido al implementarla:** página `/cierres` (raíl «Cierres de caja», solo administrador y dueño; la ruta tampoco existe para el encargado) con `GET /shifts`: día y horas en Caracas, quién abrió, horas de PC, golosinas, otras ventas, total, diferencia y los dos PDF (enlaces con `download` a `report.pdf` y `report.pdf?full=1`). El diseño muestra una sola diferencia en USD, pero el cierre la guarda por método y en dos monedas que no se suman sin tasa: se ve «Cuadra» o las diferencias en su moneda («-5,00 USD · +10,00 Bs»), en rojo si falta algo y en ámbar si sobra; «Abierta» para la caja en curso y «Sin conteo» para las cerradas antes de T16a (fallo visto en la prueba y corregido, con su test). Se refresca con `cash`. Verificado en Chrome como administrador: tres cajas de la base de desarrollo (−5,00 USD, Cuadra y Sin conteo) y el resumen PDF responde 200 `application/pdf`.
 
 - [ ] **T23b: Ajustes del local en el panel**
   - **Cubre:** REQ-005-12, REQ-005-51
