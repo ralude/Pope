@@ -155,7 +155,13 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     }
     const now = this.clock.now();
     const used = await pausesUsed(db, row.id, row.customerId, now);
-    return { open, allowance: pauseAllowance(await this.settings.get(db), used), now };
+    const settings = await this.settings.get(db);
+    return {
+      open,
+      allowance: pauseAllowance(settings, used),
+      now,
+      maxSeconds: settings.pauseMaxSeconds,
+    };
   }
 
   /**

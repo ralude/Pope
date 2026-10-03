@@ -130,6 +130,7 @@ describe('nodo → PC', () => {
       },
       pausesLeft: 2,
       pauseLimit: null,
+      pauseMaxSeconds: 900,
     };
     expect(validOut({ type: 'state', status: 'active', session: paused, vesRate: null })).toBe(
       true,

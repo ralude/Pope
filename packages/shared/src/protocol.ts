@@ -160,6 +160,11 @@ export const accountSessionStateSchema = z.object({
    * (CA-002-04, CA-002-06, REQ-002-23).
    */
   pauseLimit: pauseLimitSchema.nullable().optional(),
+  /**
+   * Duración máxima de una pausa en el local (REQ-002-20), para la confirmación del Shell
+   * («Puedes estar en pausa hasta 15 min»; mantenedor, 2026-10-03).
+   */
+  pauseMaxSeconds: z.int().positive().optional(),
 });
 
 /** Sesión temporal sin cuenta (REQ-001-60, REQ-001-61). */

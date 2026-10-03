@@ -104,8 +104,11 @@ describe('límites de las pausas (e2e, spec 002)', () => {
 
   it('los límites que cambia el administrador valen al momento', async () => {
     const admin = await loginAsStaff(world.testApp, 'admin', 'administrador', 'Luis');
-    await world.api('PUT', '/settings', admin, { pauseMaxPerSession: 1 });
-    expect(allowance(await login(pc, 'juan'))).toEqual({ left: 1, limit: null });
+    await world.api('PUT', '/settings', admin, { pauseMaxPerSession: 1, pauseMaxSeconds: 600 });
+    const state = await login(pc, 'juan');
+    expect(allowance(state)).toEqual({ left: 1, limit: null });
+    // La duración máxima va también en el state, para la confirmación del Shell.
+    expect(activeSession(state)).toMatchObject({ pauseMaxSeconds: 600 });
     expect(allowance(await pauses(1))).toEqual({ left: 0, limit: 'session' });
   });
 });

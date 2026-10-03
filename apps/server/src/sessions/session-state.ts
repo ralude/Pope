@@ -42,6 +42,8 @@ export interface PauseStatus {
   allowance: PauseAllowance;
   /** Ahora, en el reloj del nodo: para los segundos de pausa que quedan. */
   now: Date;
+  /** Duración máxima de una pausa en el local (REQ-002-20). */
+  maxSeconds: number;
 }
 
 /** La pausa tal como la ven la PC y el panel (REQ-002-06, REQ-002-14). */
@@ -153,7 +155,11 @@ export function activeState(
               secondsLeft: pauseSecondsLeft(pause.open.maxUntil, pause.now),
             }
           : null,
-        ...(pause && { pausesLeft: pause.allowance.left, pauseLimit: pause.allowance.limit }),
+        ...(pause && {
+          pausesLeft: pause.allowance.left,
+          pauseLimit: pause.allowance.limit,
+          pauseMaxSeconds: pause.maxSeconds,
+        }),
       },
     };
   }

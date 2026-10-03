@@ -62,6 +62,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** Spec 002: el `state` de la PC lleva también la duración máxima de la pausa, para la confirmación del Shell (decisión del mantenedor antes de T16).
 - **2026-10-03:** T15 (spec 002): el Shell pausa y reanuda por el canal y, en una pausa que no cobra, su tiempo no baja; la pausa cuenta hacia atrás desde lo que dice el nodo.
 - **2026-10-03:** Spec 002: el `state` de la PC lleva los segundos de pausa que quedan, calculados por el nodo, para la cuenta atrás del Shell (decisión del mantenedor antes de T15).
 - **2026-10-03:** T14 (spec 002): diseño de la pausa en el lienzo del Shell (botón, confirmación, pantalla de pausa, vencida y «¿Eres juan?»), aprobado. Además, el mantenedor decide la pestaña plegada para el modo técnico (REQ-003-42, ya en el lienzo) y cambiar los avisos de 5 y 1 min tras la fase 1.
@@ -71,4 +72,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T10 (spec 002): el encargado reanuda una sesión en pausa desde el panel (`POST /sessions/:id/resume`) y el mapa trae la pausa y las pausas usadas. Termina la fase del nodo.
 - **2026-10-03:** T09 (spec 002): en pausa la sesión no se cierra por falta de latidos ni porque la PC se reinicie (vuelve a la pantalla de pausa); vencida con a), la gracia cuenta desde el fin de la pausa.
 - **2026-10-03:** T08 (spec 002): la pausa vence a los 15 min: con a) vuelve a cobrar desde `maxUntil` con la PC en pausa (CA-002-05), con b) cierra la sesión sin cobrar la pausa; al arrancar, el nodo aplica las vencidas. Se aplica la opción vigente al vencer (mantenedor).
-- **2026-10-03:** T07 (spec 002): límites de 3 pausas por sesión y 5 por día de Caracas, y la pausa desactivable; cada `state` lleva las pausas que quedan y el límite. CA-002-04 y CA-002-06 con test e2e.
