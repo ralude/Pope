@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · T31 de la spec 005 (tabla de movimientos de la Caja)
+**Última actualización:** 2026-10-03 · verificación de la parte 2 de la spec 005 rehecha (T24, en revisión)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T04; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T24: Verificación de la parte 2**, a rehacer con los cambios del 2026-10-03 (CA-005-07 nuevo, CA-005-12 y CA-005-13) y en revisión del mantenedor. Después, T05–T07 |
+| **Siguiente tarea** | **T24: Verificación de la parte 2**, en revisión del mantenedor: tabla rehecha en [mediciones.md](docs/specs/005-inventario-y-caja/mediciones.md) con los cambios del 2026-10-03. Después, T05–T07 |
 | **Progreso** | Spec 005: 38 / 42 tareas (parte 1: 4 / 7; parte 2: 34 / 35) |
 | **Bloqueos** | Ninguno |
 
@@ -61,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T24 (spec 005) rehecha tras los cambios del día: los 10 criterios de la parte 2 (con el CA-005-07 nuevo y los CA-005-12 y CA-005-13) tienen test automático y prueba a mano; falta la revisión del mantenedor.
 - **2026-10-03:** T31 (spec 005): la Caja muestra los movimientos en una tabla como la de SENET, con los ingresos del día, la apertura, el informe X y «Cerrar caja (informe Z)»; probada en Chrome (CA-005-12).
 - **2026-10-03:** T30 (spec 005): informe X, el PDF del encargado de la caja abierta con lo esperado, sin cerrarla.
 - **2026-10-03:** T29 (spec 005): cada movimiento de la caja lleva la cuenta del cliente y, las ventas, sus líneas; la migración 0023 rellena la cuenta en los cobros anteriores.
@@ -70,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T26 (spec 005): el nodo vende otros ingresos (importe y comentario), los guarda con su comentario, emite `sale.recorded` v2 y los junta en «Otros ingresos» en el reporte.
 - **2026-10-03:** T25 (spec 005): contratos del otro ingreso (importe en USD y comentario opcional) y `sale.recorded` v2 con líneas de producto u otro ingreso.
 - **2026-10-03:** Spec 005: el mantenedor aprueba el plan y las tareas de los cambios (T25 a T31): otro ingreso con su migración desde los conceptos, el cliente y las líneas en los movimientos, el informe X y la tabla de la Caja.
-- **2026-10-03:** Spec 005, parte 2: el mantenedor aprueba tres cambios tomados de SENET. El «otro ingreso» (importe y comentario) sustituye a los conceptos; la lista de movimientos pasa a ser una tabla con los ingresos del día en grande y la apertura al final; y se añade el informe X (el reporte de la caja abierta, sin cerrarla). T24 queda pendiente de rehacer.
