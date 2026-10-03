@@ -1,6 +1,6 @@
 // Caja (spec 005, REQ-005-20): como en SENET, el catálogo a la izquierda (golosinas con su foto
 // y otras ventas con cantidad y precio) y la venta nueva al lado, con su total en USD y Bs. El
-// cobro (T20b) y los movimientos del turno (T21) completan la pantalla.
+// cobro va debajo del total (T20b) y los movimientos del turno, a la derecha (T21).
 import '../caja/caja.css';
 
 import {
@@ -29,6 +29,7 @@ import {
   changeQuantity,
   quantityInCart,
 } from '../caja/model.js';
+import { Checkout } from '../caja/Checkout.js';
 import { filterByName, initials } from '../inventory/model.js';
 import { usePcMapFeed } from '../map/channel.js';
 import { useSession } from '../session.js';
@@ -55,6 +56,7 @@ export function CajaPage() {
   const [tab, setTab] = useState<'snacks' | 'other'>('snacks');
   const [query, setQuery] = useState('');
   const [cart, setCart] = useState<CartLine[]>([]);
+  const [lastSale, setLastSale] = useState<string | null>(null);
 
   // El catálogo, al entrar y con cada cambio de stock o de precios (`cash`).
   useEffect(() => {
@@ -214,6 +216,21 @@ export function CajaPage() {
               )}
             </div>
           </div>
+          <Checkout
+            cart={cart}
+            total={total}
+            vesRate={vesRate}
+            shiftOpen={Boolean(shift)}
+            onSold={(movement) => {
+              setCart([]);
+              setLastSale(`Cobrado: ${movement.description} · ${formatMoney(movement.usdMicros)}`);
+            }}
+          />
+          {lastSale && cart.length === 0 && (
+            <span role="status" className="field-hint">
+              {lastSale}
+            </span>
+          )}
         </section>
       </div>
     </Frame>

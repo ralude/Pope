@@ -206,11 +206,12 @@ parte 1.
   - **Commit:** `feat(panel): monta la venta nueva en la caja`
   - **Decidido al implementarla:** pantalla `/caja` (raíl: Caja antes de Inventario, como en el diseño) con el catálogo (430 px) y la venta nueva (300 px); los movimientos del turno llegan en T21. Pestañas «Golosinas | Otras ventas» con buscador. Golosinas: tarjetas con foto (o iniciales), precio y disponibles descontando lo que va en el carrito («Quedan 5 · bajo mínimo», «Agotado»); una agotada no se puede añadir salvo con `allowNegativeStock` (el panel lee `GET /settings`). Otras ventas: los conceptos activos y un formulario con cantidad y precio por unidad (propone el sugerido al elegir otro concepto y no lo pisa al refrescar). El carrito junta las líneas iguales (un concepto a otro precio es otra línea), con − y +, y el total en USD y Bs. Se refresca con `cash`. Lógica en `caja/model.ts`, con tests. Verificado en Chrome: 2 Doritos, 1 Pepito y 12 impresiones sumaron 5,00 USD ≈ 202,50 Bs.
 
-- [ ] **T20b: Caja: cobro**
+- [x] **T20b: Caja: cobro**
   - **Cubre:** REQ-005-20 a REQ-005-22, REQ-005-25
   - **Hacer:** método de pago (un método, como en el diseño, y «Dividir pago» para añadir un segundo con su importe; mantenedor, 2026-10-02), lo que se cobra en Bs con la tasa, la cuenta que paga con su saldo y «Cobrar».
   - **Verificar:** tests del reparto de pagos; a mano CA-005-07 y CA-005-10.
   - **Commit:** `feat(panel): cobra las ventas de la caja`
+  - **Decidido al implementarla:** `Checkout` bajo el total de la venta nueva: los cinco métodos del diseño (efectivo USD, efectivo Bs, pago móvil, punto de venta y con saldo); «Dividir pago» añade un segundo método con su importe en USD y el primero cubre el resto (`buildPayments`: el segundo debe ser menor que el total y con otro método); con un pago en Bs dice «Se cobran X Bs a Y Bs por USD» (`vesAmount`, al céntimo); con saldo pide la cuenta (búsqueda de cuentas activas con `GET /customers` y su saldo). «Cobrar» se desactiva con la caja cerrada, sin tasa para un pago en Bs o sin cuenta, y lo dice. Tras cobrar se vacía el carrito y se lee «Cobrado: … · importe». Verificado en Chrome: CA-005-07 (12 impresiones a 0,10 en efectivo USD: fila «Impresiones × 12», otras ventas, 1,20 USD) y CA-005-10 con `maria` (12,40 USD) pagando unos Doritos de 1,50 con su saldo: le quedaron 10,90 USD, el stock bajó y la fila quedó con método saldo, fuera del dinero de la caja.
 
 - [ ] **T21: Caja: movimientos del turno**
   - **Cubre:** REQ-005-23, REQ-005-24
