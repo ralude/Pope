@@ -11,7 +11,7 @@ base de desarrollo.
 | CA | Requisitos | Tests | A mano |
 |---|---|---|---|
 | CA-005-01 | REQ-005-10, 11 | servidor `products/stock.e2e.test.ts` (10, una venta de 3 y una merma de 1 dejan 6, con actor y hora); shared `inventory.test.ts` | T18a (una entrada de 12 y una merma de 1 «bolsa rota»: 24 + 12 − 1 = 35, con sus movimientos) |
-| CA-005-02 | REQ-005-22 | servidor `sales/sales.e2e.test.ts` (40,00 Bs con la tasa 40, en la fila y en `sale.recorded`); panel `caja/payment.test.ts`; shared `cash.test.ts`, `events.test.ts` | — |
+| CA-005-02 | REQ-005-22 | servidor `sales/sales.e2e.test.ts` (40,00 Bs con la tasa 40, en la fila y en `sale.recorded`); panel `caja/payment.test.ts`; shared `cash.test.ts`, `events.test.ts` | T24 (con la tasa a 40, un «Refresco» de 1,00 USD en efectivo Bs: «Se cobran 40,00 Bs a 40,00 Bs por USD»; la fila guarda 40,00 Bs, 1,00 USD y la tasa 40, y `sale.recorded` lleva el mismo pago) |
 | CA-005-03 | REQ-005-42 | servidor `shifts/shifts-closing.e2e.test.ts` (−5 USD en el cierre y en `shift.closed` v2); panel `caja/closing.test.ts`; shared `shift.test.ts`, `events.test.ts` | T22b (29,20 USD esperados y 24,20 contados: «-5,00 USD» en el cierre, en «¿Seguro?», en el evento y en el PDF) |
 | CA-005-07 | REQ-005-05, 20, 24 | servidor `sales/sales.e2e.test.ts` («Impresiones × 12», 1,20 USD, efectivo USD, con la hora y quién); panel `caja/model.test.ts`, `caja/movements.test.ts`; shared `sale.test.ts` | T19 («Impresiones» a 0,10 USD), T20b (12 impresiones cobradas en efectivo USD) |
 | CA-005-08 | REQ-005-01, 03, 10 | servidor `products/products.e2e.test.ts` (alta con la entrada de 24), `products/product-photos.e2e.test.ts` (foto); shared `inventory.test.ts` | T18b («Chocolate Savoy» a 1,50 USD con 24 que llegaron y su foto, reducida a WebP de 512×320 y 16 KB, en la venta nueva con 24 disponibles) |
@@ -20,8 +20,7 @@ base de desarrollo.
 | CA-005-11 | REQ-005-23 | servidor `sales/void-sale.e2e.test.ts` (vuelve el stock, la caja descuenta, la venta y la anulación en la lista; no se anula dos veces ni de una caja cerrada); panel `caja/movements.test.ts`; shared `cash.test.ts`, `shift.test.ts` | T21 (2 Doritos anulados con «error de cobro»: fila de −3,00 USD con el motivo, venta tachada, stock de vuelta) |
 
 Todos los criterios de la parte 2 quedan cubiertos por al menos un test automático y por una
-prueba a mano en el panel, salvo CA-005-02, que solo tiene tests: las ventas probadas a mano se
-cobraron en USD y con saldo.
+prueba a mano en el panel.
 
 **Resultado de la batería** (2026-10-03, equipo de desarrollo): `pnpm test` en verde (shared
 233, servidor 332, panel 99, Shell 39, simulador 42). Contra PostgreSQL real, 331 de 332: falla
