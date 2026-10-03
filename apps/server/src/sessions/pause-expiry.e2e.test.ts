@@ -67,6 +67,7 @@ describe('vencimiento de la pausa (e2e, REQ-002-20, REQ-002-22)', () => {
       startedAt: '2026-09-28T22:10:00.000Z',
       maxUntil: '2026-09-28T22:25:00.000Z',
       billing: true,
+      secondsLeft: 0,
     });
     expect(summary(expired).remainingSeconds).toBe(minutes(50));
     // De los 20 min en pausa se cobran los 5 de después del vencimiento.

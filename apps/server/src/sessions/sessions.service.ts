@@ -153,8 +153,9 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     if (row.kind !== 'account' || !row.customerId) {
       return null;
     }
-    const used = await pausesUsed(db, row.id, row.customerId, this.clock.now());
-    return { open, allowance: pauseAllowance(await this.settings.get(db), used) };
+    const now = this.clock.now();
+    const used = await pausesUsed(db, row.id, row.customerId, now);
+    return { open, allowance: pauseAllowance(await this.settings.get(db), used), now };
   }
 
   /**

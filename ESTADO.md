@@ -62,6 +62,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** Spec 002: el `state` de la PC lleva los segundos de pausa que quedan, calculados por el nodo, para la cuenta atrás del Shell (decisión del mantenedor antes de T15).
 - **2026-10-03:** T14 (spec 002): diseño de la pausa en el lienzo del Shell (botón, confirmación, pantalla de pausa, vencida y «¿Eres juan?»), aprobado. Además, el mantenedor decide la pestaña plegada para el modo técnico (REQ-003-42, ya en el lienzo) y cambiar los avisos de 5 y 1 min tras la fase 1.
 - **2026-10-03:** T13 (spec 002): el detalle de una PC en pausa muestra desde cuándo, cuánto queda y las pausas usadas, con «Reanudar» y «Cerrar sesión»; probado en Chrome (CA-002-08). Termina la fase del panel.
 - **2026-10-03:** T12 (spec 002): el mapa del panel pinta las PCs en pausa en morado, con lo que queda de pausa, y con borde ámbar si ya cobra; la leyenda las cuenta. Probado en Chrome.
@@ -71,4 +72,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T08 (spec 002): la pausa vence a los 15 min: con a) vuelve a cobrar desde `maxUntil` con la PC en pausa (CA-002-05), con b) cierra la sesión sin cobrar la pausa; al arrancar, el nodo aplica las vencidas. Se aplica la opción vigente al vencer (mantenedor).
 - **2026-10-03:** T07 (spec 002): límites de 3 pausas por sesión y 5 por día de Caracas, y la pausa desactivable; cada `state` lleva las pausas que quedan y el límite. CA-002-04 y CA-002-06 con test e2e.
 - **2026-10-03:** T06 (spec 002): la PC pausa y reanuda; mientras la pausa no cobra no se cobra nada (latido, compra, cambio de tasa, cierre) ni se avisa; las temporales no pausan. CA-002-01 y CA-002-07 con test e2e.
-- **2026-10-03:** T05 (spec 002): tabla `session_pauses` (migración 0024), con una sola pausa abierta por sesión y sus índices para contar las de la sesión y las del día.

@@ -71,11 +71,15 @@ describe('pausar y reanudar desde la PC (e2e, spec 002)', () => {
       startedAt: '2026-09-28T22:20:00.000Z',
       maxUntil: '2026-09-28T22:35:00.000Z',
       billing: false,
+      secondsLeft: 15 * 60,
     });
 
     // 10 min en pausa, latiendo como siempre: no se cobra nada (REQ-002-03).
     await world.run(5, 10 * MINUTE);
-    expect(summary(await heartbeat(pc)).remainingSeconds).toBe(minutes(40));
+    const beat = await heartbeat(pc);
+    expect(summary(beat).remainingSeconds).toBe(minutes(40));
+    // La cuenta atrás de la pausa la da el nodo: quedan 5 de los 15 min.
+    expect(pauseOf(beat)?.secondsLeft).toBe(5 * 60);
 
     const resumed = await resume(pc);
     expect(resumed).toMatchObject({ type: 'state', requestId: 'resume-1' });

@@ -9,6 +9,7 @@ import {
   micros,
   type NodeToPcMessage,
   type PauseAllowance,
+  pauseSecondsLeft,
   type ProtocolErrorCode,
   seconds,
   secondsUntilExhausted,
@@ -39,17 +40,21 @@ export function pauseBilling(pause: PauseRow): boolean {
 export interface PauseStatus {
   open: PauseRow | null;
   allowance: PauseAllowance;
+  /** Ahora, en el reloj del nodo: para los segundos de pausa que quedan. */
+  now: Date;
 }
 
 /** La pausa tal como la ven la PC y el panel (REQ-002-06, REQ-002-14). */
 export function pauseView(pause: PauseRow | null): SessionPause | null {
-  return pause
-    ? {
-        startedAt: pause.startedAt.toISOString(),
-        maxUntil: pause.maxUntil.toISOString(),
-        billing: pauseBilling(pause),
-      }
-    : null;
+  return pause ? pauseOf(pause) : null;
+}
+
+function pauseOf(pause: PauseRow): SessionPause {
+  return {
+    startedAt: pause.startedAt.toISOString(),
+    maxUntil: pause.maxUntil.toISOString(),
+    billing: pauseBilling(pause),
+  };
 }
 
 /** Petición de la PC rechazada con un código del protocolo y un mensaje en español. */
@@ -142,7 +147,12 @@ export function activeState(
         money: { micros: micros(Math.max(0, live.moneyMicros)), currency: 'USD' },
         moneySeconds,
         remainingSeconds: seconds(Math.max(0, live.comboSeconds) + moneySeconds),
-        pause: pauseView(pause?.open ?? null),
+        pause: pause?.open
+          ? {
+              ...pauseOf(pause.open),
+              secondsLeft: pauseSecondsLeft(pause.open.maxUntil, pause.now),
+            }
+          : null,
         ...(pause && { pausesLeft: pause.allowance.left, pauseLimit: pause.allowance.limit }),
       },
     };

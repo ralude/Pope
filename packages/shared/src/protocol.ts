@@ -120,6 +120,15 @@ export type PcToNodeMessage = z.infer<typeof pcToNodeMessageSchema>;
 
 // ─── nodo → PC ──────────────────────────────────────────────────────────────────────────
 
+/**
+ * La pausa tal como la ve la PC: la del mapa más los segundos de pausa que quedan, calculados
+ * por el nodo al enviar el `state`. El Shell descuenta desde ahí, sin fiarse del reloj de la PC
+ * (ADR-0007; mantenedor, 2026-10-03).
+ */
+export const pcSessionPauseSchema = sessionPauseSchema.extend({
+  secondsLeft: nonNegativeSeconds,
+});
+
 /** Sesión con cuenta: saldos en vivo por separado y tiempo total (REQ-001-12, REQ-001-88). */
 export const accountSessionStateSchema = z.object({
   kind: z.literal('account'),
@@ -140,7 +149,7 @@ export const accountSessionStateSchema = z.object({
    * La pausa en curso, o `null` (REQ-002-06). Este campo y los dos siguientes son
    * opcionales: el simulador y los agentes que no conocen la pausa siguen siendo compatibles.
    */
-  pause: sessionPauseSchema.nullable().optional(),
+  pause: pcSessionPauseSchema.nullable().optional(),
   /**
    * Pausas que quedan: el mínimo entre las de la sesión y las del día (REQ-002-02,
    * REQ-002-21, REQ-002-24); 0 con la pausa desactivada.

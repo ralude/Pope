@@ -97,7 +97,7 @@ vencieron mientras estaba apagado, con la hora de `max_until` (REQ-002-31).
 |---|---|---|
 | PC → nodo | `pause` (`requestId`?) | Responde un `state` con la pausa y su `requestId`, o un `error` |
 | PC → nodo | `resume` (`requestId`?) | Responde un `state` sin pausa y su `requestId` |
-| nodo → PC | `state` activo con cuenta: campo nuevo `pause` | `{ startedAt, maxUntil, billing }` o `null`; `billing` es `true` tras vencer con la opción a) |
+| nodo → PC | `state` activo con cuenta: campo nuevo `pause` | `{ startedAt, maxUntil, billing, secondsLeft }` o `null`; `billing` es `true` tras vencer con la opción a). `secondsLeft` son los segundos de pausa que quedan, calculados por el nodo al enviar el `state`: el Shell descuenta desde ahí, sin fiarse del reloj de la PC (mantenedor, 2026-10-03) |
 | nodo → PC | `state` activo con cuenta: campo nuevo `pausesLeft` | Las que quedan: el mínimo entre las de la sesión y las del día; `0` si la pausa está desactivada (REQ-002-02, CA-002-04, CA-002-06) |
 | nodo → PC | `state` activo con cuenta: campo nuevo `pauseLimit` | Por qué no se puede pausar: `null` si quedan pausas, `'session'` o `'day'` según el límite alcanzado, `'disabled'` si la pausa está desactivada. Así el Shell elige el mensaje (CA-002-04, CA-002-06; mantenedor, 2026-10-03) |
 | nodo → PC | `error` con código nuevo `pause_unavailable` | Sesión temporal, pausa desactivada, sin pausas o ya en pausa, con su texto en español: "Las sesiones temporales no se pueden pausar", "La pausa no está disponible en este local", "Sin pausas disponibles", "Sin pausas disponibles hoy" y "Tu sesión ya está en pausa" (mantenedor, 2026-10-03). Si se agotan a la vez las pausas de la sesión y las del día, manda el día |

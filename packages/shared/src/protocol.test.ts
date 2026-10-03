@@ -126,6 +126,7 @@ describe('nodo → PC', () => {
         startedAt: '2026-09-24T22:30:00Z',
         maxUntil: '2026-09-24T22:45:00Z',
         billing: false,
+        secondsLeft: 720,
       },
       pausesLeft: 2,
       pauseLimit: null,
@@ -155,6 +156,16 @@ describe('nodo → PC', () => {
     expect(bad({ pausesLeft: -1 })).toBe(false);
     expect(bad({ pausesLeft: 1.5 })).toBe(false);
     expect(bad({ pause: { startedAt: '2026-09-24T22:30:00Z', billing: false } })).toBe(false);
+    // Sin los segundos que quedan, el Shell no puede contar la pausa.
+    expect(
+      bad({
+        pause: {
+          startedAt: '2026-09-24T22:30:00Z',
+          maxUntil: '2026-09-24T22:45:00Z',
+          billing: false,
+        },
+      }),
+    ).toBe(false);
   });
 
   it('un state sin los campos de la pausa sigue siendo válido (simulador y agentes antiguos)', () => {
