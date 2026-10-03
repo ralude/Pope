@@ -1,5 +1,5 @@
 // Caja (spec 005, REQ-005-20): como en SENET, el catálogo a la izquierda (golosinas con su foto
-// y otras ventas con cantidad y precio) y la venta nueva al lado, con su total en USD y Bs. El
+// y el otro ingreso, con su importe y su comentario) y la venta nueva al lado, con su total en USD y Bs. El
 // cobro va debajo del total (T20b) y los movimientos del turno, a la derecha (T21).
 import '../caja/caja.css';
 
@@ -7,20 +7,19 @@ import {
   formatBolivares,
   formatLocalTime,
   formatMoney,
-  lineTotal,
+  MAX_OTHER_COMMENT_LENGTH,
   type Micros,
   type Product,
   productPhotoPath,
   productSchema,
-  type SaleConcept,
-  saleConceptSchema,
   settingsSchema,
+  type VesRate,
 } from '@pope/shared';
 import { useEffect, useState } from 'react';
 
 import { ApiError, listOf } from '../api/client.js';
 import {
-  addConcept,
+  addOther,
   addProduct,
   availability,
   type CartLine,
@@ -36,10 +35,9 @@ import { usePcMapFeed } from '../map/channel.js';
 import { useSession, useStaff } from '../session.js';
 import { useShift } from '../shift.js';
 import { Frame } from '../ui/Frame.js';
-import { formatUsdInput, parseUsd } from '../ui/money.js';
+import { parseUsd } from '../ui/money.js';
 
 const productsSchema = listOf(productSchema);
-const conceptsSchema = listOf(saleConceptSchema);
 
 function errorMessage(failure: unknown): string {
   return failure instanceof ApiError ? failure.message : String(failure);
@@ -52,7 +50,6 @@ export function CajaPage() {
   const { rate, cashVersion } = usePcMapFeed();
   const vesRate = rate?.rate?.vesPerUsd;
   const [products, setProducts] = useState<Product[]>([]);
-  const [concepts, setConcepts] = useState<SaleConcept[]>([]);
   const [allowNegative, setAllowNegative] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<'snacks' | 'other'>('snacks');
@@ -63,15 +60,10 @@ export function CajaPage() {
   // El catálogo, al entrar y con cada cambio de stock o de precios (`cash`).
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      api.get('/products', productsSchema),
-      api.get('/sale-concepts', conceptsSchema),
-      api.get('/settings', settingsSchema),
-    ]).then(
-      ([productList, conceptList, settings]) => {
+    Promise.all([api.get('/products', productsSchema), api.get('/settings', settingsSchema)]).then(
+      ([productList, settings]) => {
         if (cancelled) return;
         setProducts(productList.filter((p) => p.active));
-        setConcepts(conceptList.filter((c) => c.active));
         setAllowNegative(settings.allowNegativeStock === 1);
         setLoadError(null);
       },
@@ -161,10 +153,10 @@ export function CajaPage() {
               }}
             />
           ) : (
-            <OtherSales
-              concepts={filterByName(concepts, query)}
-              onAdd={(concept, quantity, price) => {
-                setCart((prev) => addConcept(prev, concept, quantity, price));
+            <OtherIncome
+              vesRate={vesRate}
+              onAdd={(amount, comment) => {
+                setCart((prev) => addOther(prev, amount, comment));
               }}
             />
           )}
@@ -180,7 +172,8 @@ export function CajaPage() {
             )}
             {cart.map((line, index) => (
               <div
-                key={`${line.kind}-${line.name}-${String(line.unitPriceMicros)}`}
+                // Dos otros ingresos pueden ser iguales: se distinguen por su posición.
+                key={line.kind === 'product' ? line.productId : `other-${String(index)}`}
                 className="caja-line"
               >
                 <div style={{ flexGrow: 1, minWidth: 0 }}>
@@ -307,101 +300,78 @@ function Snacks({
   );
 }
 
-function OtherSales({
-  concepts,
+/**
+ * El otro ingreso del diseño (REQ-005-05): lo que no es golosina ni horas de PC, con el
+ * importe en USD (y su Bs) y un comentario opcional.
+ */
+function OtherIncome({
+  vesRate,
   onAdd,
 }: {
-  concepts: SaleConcept[];
-  onAdd: (concept: SaleConcept, quantity: number, price: Micros) => void;
+  vesRate: VesRate | undefined;
+  onAdd: (amount: Micros, comment: string) => void;
 }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const selected = concepts.find((c) => c.id === selectedId) ?? concepts[0];
-  const [quantityText, setQuantityText] = useState('1');
-  const [priceText, setPriceText] = useState('');
-  // Al elegir otro concepto se propone su precio sugerido (REQ-005-05). Solo entonces: si se
-  // refresca el catálogo, lo que haya escrito el encargado se queda.
-  const selectedKey = selected?.id;
-  const suggested = selected?.unitPriceMicros;
-  useEffect(() => {
-    if (suggested !== undefined) setPriceText(formatUsdInput(suggested));
-  }, [selectedKey, suggested]);
-  const quantity = /^\d{1,4}$/.test(quantityText.trim()) ? Number(quantityText.trim()) : 0;
-  const price = parseUsd(priceText);
-  const subtotal = price === null || quantity <= 0 ? null : lineTotal(quantity, price);
-
-  if (concepts.length === 0 || !selected) {
-    return <span className="muted">No hay otras ventas configuradas.</span>;
-  }
+  const [amountText, setAmountText] = useState('');
+  const [comment, setComment] = useState('');
+  const amount = parseUsd(amountText);
+  const valid = amount !== null && amount > 0;
   return (
-    <div className="caja-concepts">
-      {concepts.map((concept) => (
-        <button
-          key={concept.id}
-          type="button"
-          className="caja-concept"
-          aria-pressed={concept.id === selected.id}
-          onClick={() => {
-            setSelectedId(concept.id);
-            setQuantityText('1');
+    <form
+      className="card caja-other"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!valid) return;
+        onAdd(amount, comment);
+        setAmountText('');
+        setComment('');
+      }}
+    >
+      <div>
+        <div style={{ fontSize: 15, fontWeight: 700 }}>Otro ingreso</div>
+        <div className="muted" style={{ fontSize: 13, lineHeight: 1.4 }}>
+          Lo que no es golosina ni horas de PC: impresiones, copias, plastificado…
+        </div>
+      </div>
+      <div className="field">
+        <label className="label" htmlFor="otro-importe">
+          Introduce la suma (USD)
+        </label>
+        <input
+          id="otro-importe"
+          className="input num caja-other-amount"
+          inputMode="decimal"
+          autoComplete="off"
+          placeholder="0,00"
+          value={amountText}
+          onChange={(event) => {
+            setAmountText(event.target.value);
           }}
-        >
-          <span style={{ flexGrow: 1, textAlign: 'left', fontWeight: 700 }}>{concept.name}</span>
-          <span className="muted num">{formatMoney(concept.unitPriceMicros)} c/u</span>
-        </button>
-      ))}
-      <form
-        className="card caja-concept-form"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (price === null || quantity <= 0) return;
-          onAdd(selected, quantity, price);
-          setQuantityText('1');
-        }}
-      >
-        <strong>{selected.name}</strong>
-        <div className="detail-grid">
-          <div className="field">
-            <label className="label" htmlFor="concepto-cantidad">
-              Cantidad
-            </label>
-            <input
-              id="concepto-cantidad"
-              className="input num"
-              inputMode="numeric"
-              autoComplete="off"
-              value={quantityText}
-              onChange={(event) => {
-                setQuantityText(event.target.value);
-              }}
-            />
-          </div>
-          <div className="field">
-            <label className="label" htmlFor="concepto-precio-unidad">
-              Precio por unidad (USD)
-            </label>
-            <input
-              id="concepto-precio-unidad"
-              className="input num"
-              inputMode="decimal"
-              autoComplete="off"
-              value={priceText}
-              onChange={(event) => {
-                setPriceText(event.target.value);
-              }}
-            />
-          </div>
+        />
+        <div className="muted num" style={{ fontSize: 12, textAlign: 'center' }}>
+          {valid && vesRate !== undefined
+            ? `≈ ${formatBolivares(amount, vesRate)}`
+            : 'Se cobra después con cualquier método, también en Bs'}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span className="muted num">
-            {subtotal === null || price === null
-              ? 'Escribe la cantidad y el precio.'
-              : `${String(quantity)} × ${formatMoney(price)} = ${formatMoney(subtotal)}`}
-          </span>
-          <button type="submit" className="btn btn-primary" disabled={subtotal === null}>
-            Añadir a la venta
-          </button>
-        </div>
-      </form>
-    </div>
+      </div>
+      <div className="field">
+        <label className="label" htmlFor="otro-comentario">
+          Comentario (opcional)
+        </label>
+        <input
+          id="otro-comentario"
+          className="input"
+          autoComplete="off"
+          placeholder="p. ej. 12 impresiones a color"
+          maxLength={MAX_OTHER_COMMENT_LENGTH}
+          value={comment}
+          onChange={(event) => {
+            setComment(event.target.value);
+          }}
+        />
+      </div>
+      <button type="submit" className="btn btn-primary caja-other-add" disabled={!valid}>
+        Añadir a la venta
+      </button>
+    </form>
   );
 }

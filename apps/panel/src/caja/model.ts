@@ -1,28 +1,31 @@
-// La venta nueva de la Caja (spec 005, REQ-005-20): el carrito con golosinas y conceptos, y
-// su total. Todo en µUSD enteros (ADR-0015).
+// La venta nueva de la Caja (spec 005, REQ-005-20): el carrito con golosinas y otros
+// ingresos, y su total. Todo en µUSD enteros (ADR-0015).
 import {
   lineTotal,
   type Micros,
   micros,
+  OTHER_INCOME_NAME,
   type Product,
-  type SaleConcept,
   type SaleLineRequest,
 } from '@pope/shared';
 
-/** Una línea del carrito. Un concepto lleva el precio por unidad que dijo el encargado. */
+/**
+ * Una línea del carrito. Un otro ingreso lleva el importe que escribió el encargado y su
+ * comentario, que es también su nombre en el carrito, como en el diseño (REQ-005-05).
+ */
 export type CartLine =
   | { kind: 'product'; productId: string; name: string; unitPriceMicros: Micros; quantity: number }
-  | { kind: 'concept'; conceptId: string; name: string; unitPriceMicros: Micros; quantity: number };
+  | {
+      kind: 'other';
+      comment: string | null;
+      name: string;
+      unitPriceMicros: Micros;
+      quantity: number;
+    };
 
+/** Solo se juntan las golosinas iguales: cada otro ingreso es su propia línea. */
 function sameItem(line: CartLine, other: CartLine): boolean {
-  if (line.kind === 'product' && other.kind === 'product') {
-    return line.productId === other.productId;
-  }
-  if (line.kind === 'concept' && other.kind === 'concept') {
-    // El mismo concepto a otro precio es otra línea: así se ve qué se cobró a cada precio.
-    return line.conceptId === other.conceptId && line.unitPriceMicros === other.unitPriceMicros;
-  }
-  return false;
+  return line.kind === 'product' && other.kind === 'product' && line.productId === other.productId;
 }
 
 /** Añade una línea, o suma su cantidad a la que ya hay del mismo artículo. */
@@ -45,19 +48,19 @@ export function addProduct(cart: readonly CartLine[], product: Product): CartLin
   });
 }
 
-/** Un concepto con la cantidad y el precio por unidad que escribió el encargado (REQ-005-05). */
-export function addConcept(
+/** Un otro ingreso con su importe y su comentario, recortado; vacío, sin comentario (REQ-005-05). */
+export function addOther(
   cart: readonly CartLine[],
-  concept: SaleConcept,
-  quantity: number,
-  unitPriceMicros: Micros,
+  usdMicros: Micros,
+  comment: string,
 ): CartLine[] {
+  const trimmed = comment.trim();
   return add(cart, {
-    kind: 'concept',
-    conceptId: concept.id,
-    name: concept.name,
-    unitPriceMicros,
-    quantity,
+    kind: 'other',
+    comment: trimmed === '' ? null : trimmed,
+    name: trimmed === '' ? OTHER_INCOME_NAME : trimmed,
+    unitPriceMicros: usdMicros,
+    quantity: 1,
   });
 }
 
@@ -89,17 +92,19 @@ export function quantityInCart(cart: readonly CartLine[], productId: string): nu
     .reduce((sum, line) => sum + line.quantity, 0);
 }
 
-/** Las líneas tal como las pide `POST /sales`. */
+/**
+ * Las líneas tal como las pide `POST /sales`. Un otro ingreso con «+» va repetido: el nodo
+ * guarda cada otro ingreso con cantidad 1.
+ */
 export function saleLines(cart: readonly CartLine[]): SaleLineRequest[] {
-  return cart.map((line) =>
+  return cart.flatMap((line): SaleLineRequest[] =>
     line.kind === 'product'
-      ? { kind: 'product', productId: line.productId, quantity: line.quantity }
-      : {
-          kind: 'concept',
-          conceptId: line.conceptId,
-          quantity: line.quantity,
-          unitPriceMicros: line.unitPriceMicros,
-        },
+      ? [{ kind: 'product', productId: line.productId, quantity: line.quantity }]
+      : Array.from({ length: line.quantity }, () => ({
+          kind: 'other' as const,
+          usdMicros: line.unitPriceMicros,
+          comment: line.comment,
+        })),
   );
 }
 

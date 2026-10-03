@@ -110,38 +110,22 @@
   color: #ffb4b0;
 }
 
-.caja-concepts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.caja-concept {
-  height: 48px;
-  padding: 0 14px;
-  border: 1px solid var(--line-2);
-  border-radius: 10px;
-  background: var(--bg);
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 15px;
-}
-
-.caja-concept[aria-pressed='true'] {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-}
-
-.caja-concept-form {
-  margin-top: 8px;
+.caja-other {
   padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+}
+
+.caja-other-amount {
+  height: 56px;
+  font-size: 26px;
+  text-align: center;
+}
+
+.caja-other-add {
+  height: 44px;
+  border-radius: 22px;
 }
 
 .caja-sale {

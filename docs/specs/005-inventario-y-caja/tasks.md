@@ -274,11 +274,12 @@ Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artbo
   - **Commit:** `feat(server): vende otros ingresos con importe y comentario`
   - **Decidido al implementarla:** la línea `other` entra en la unión de la venta. Migración `0021_sale_other_income`: `sale_lines.comment` y las restricciones (un otro ingreso no tiene producto ni concepto y lleva cantidad 1; solo él lleva comentario). Se guarda como "Otro ingreso" con su importe como precio. Toda venta emite ya `sale.recorded` v2; mientras queden conceptos (hasta T28b), su línea va en el evento como un otro ingreso con "Nombre × cantidad" de comentario, como los convertirá la migración. En lo vendido por artículo, las líneas sin producto ni concepto se juntan en "Otros ingresos · importe", con cuántas son. Verificado: e2e (CA-005-07 con la fila, la línea guardada y el evento v2; comentario en blanco a `null` y tope de 80; venta con golosinas y otro ingreso repartida por grupo; CA-005-09 y el reporte con dos otros ingresos y uno anulado), también contra PostgreSQL real.
 
-- [ ] **T27: Caja: otro ingreso**
+- [x] **T27: Caja: otro ingreso**
   - **Cubre:** REQ-005-05, REQ-005-20
   - **Hacer:** en la Caja, la pestaña «Otro ingreso» del diseño (importe en USD con su Bs, comentario opcional, «Añadir a la venta») en lugar de «Otras ventas»; el carrito y el cobro con esas líneas.
   - **Verificar:** tests del carrito; a mano, CA-005-07.
   - **Commit:** `feat(panel): cobra otros ingresos en la caja`
+  - **Decidido al implementarla:** la pestaña sigue llamándose «Otras ventas», como en el diseño (es el grupo del reporte), y dentro va la tarjeta «Otro ingreso» del diseño: «Introduce la suma (USD)» grande y centrada, con su Bs debajo (o «Se cobra después con cualquier método, también en Bs»), «Comentario (opcional)» de 80 caracteres como mucho y «Añadir a la venta». En el carrito el otro ingreso se llama como su comentario (o «Otro ingreso»), como en el diseño; cada uno es su propia línea, y con «+» se repite al mandarlo al nodo, que guarda cada otro ingreso con cantidad 1. La Caja ya no pide `/sale-concepts` (la pestaña de Inventario se quita en T28a). Verificado en Chrome (CA-005-07): 1,20 USD con «12 impresiones» (≈ 48,60 Bs a 40,50) en efectivo USD dejó la fila «Otro ingreso · 12 impresiones · Efectivo USD · 1,20 USD», otras ventas a 1,20, la línea `other` guardada con su comentario y `sale.recorded` v2.
 
 - [ ] **T28a: Quitar los conceptos del panel**
   - **Cubre:** REQ-005-05
