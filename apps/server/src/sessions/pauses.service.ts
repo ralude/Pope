@@ -1,7 +1,9 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   Logger,
+  NotFoundException,
   type OnApplicationBootstrap,
   type OnModuleDestroy,
 } from '@nestjs/common';
@@ -20,7 +22,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { customers, pcs, sessionPauses, sessions } from '../db/schema.js';
+import { customers, type PauseEndReason, pcs, sessionPauses, sessions } from '../db/schema.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { openPauseOf, pausesUsed } from './pause-queries.js';
@@ -150,7 +152,7 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
         customerId: locked.customerId,
         username: customer?.username ?? '',
       };
-      await this.end(locked, pause, actor, tx, emit);
+      await this.end(locked, pause, actor, 'resumed', tx, emit);
       return true;
     });
     if (resumed) {
@@ -160,6 +162,48 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
     // al vencer, la PC ya recibió `sessionEnded` y aquí recibe el bloqueo.
     const { state } = await this.sessions.review(eq(sessions.pcId, pcId));
     return state;
+  }
+
+  /**
+   * El encargado quita la pausa de una sesión desde el panel (REQ-002-13, CA-002-08): la
+   * sesión vuelve a cobrar y la PC recibe su `state` al momento. Responde 404 si la sesión no
+   * existe y 409 si ya está cerrada (también si se cerró al vencer su pausa con la opción b)
+   * o no está en pausa.
+   */
+  async resumeByStaff(sessionId: string, actor: Actor): Promise<void> {
+    const [existing] = await this.db
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(eq(sessions.id, sessionId));
+    if (!existing) {
+      throw new NotFoundException('No existe esa sesión');
+    }
+    await this.expireIfDue(sessionId);
+    const outcome = await this.events.inTransaction(async (tx, emit) => {
+      const [locked] = await tx
+        .select()
+        .from(sessions)
+        .where(and(eq(sessions.id, sessionId), eq(sessions.status, 'active')))
+        .for('update');
+      if (!locked) {
+        return 'closed' as const;
+      }
+      const pause = await openPauseOf(locked.id, tx);
+      if (!pause) {
+        return 'not_paused' as const;
+      }
+      await this.end(locked, pause, actor, 'staff_resumed', tx, emit);
+      return { pcId: locked.pcId };
+    });
+    if (outcome === 'closed') {
+      throw new ConflictException('La sesión ya está cerrada');
+    }
+    if (outcome === 'not_paused') {
+      throw new ConflictException('La sesión no está en pausa');
+    }
+    this.cancel(sessionId);
+    const { state } = await this.sessions.review(eq(sessions.id, sessionId));
+    this.connections.send(outcome.pcId, state);
   }
 
   /**
@@ -309,13 +353,15 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
 
   /**
    * Cierra la pausa abierta de la sesión `locked` (bloqueada en `tx`) y emite
-   * `session.resumed` con lo que no se cobró. Si no cobraba, la sesión vuelve a cobrar desde
-   * ahora; si ya cobraba (venció con la opción a), sigue igual.
+   * `session.resumed` con lo que no se cobró; quién la quitó es el actor (el cliente o el
+   * encargado). Si no cobraba, la sesión vuelve a cobrar desde ahora; si ya cobraba (venció
+   * con la opción a), sigue igual.
    */
   private async end(
     locked: SessionRow,
     pause: PauseRow,
     actor: Actor,
+    reason: Extract<PauseEndReason, 'resumed' | 'staff_resumed'>,
     tx: Transaction,
     emit: Emit,
   ): Promise<void> {
@@ -325,7 +371,7 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
     const unbilledUntil = pause.billingResumedAt ?? now;
     await tx
       .update(sessionPauses)
-      .set({ endedAt: now, endReason: 'resumed', endedBy: actor })
+      .set({ endedAt: now, endReason: reason, endedBy: actor })
       .where(eq(sessionPauses.id, pause.id));
     if (!pauseBilling(pause)) {
       await tx.update(sessions).set({ lastHeartbeatAt: now }).where(eq(sessions.id, row.id));

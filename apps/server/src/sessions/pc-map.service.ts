@@ -6,6 +6,7 @@ import {
   type PcMap,
   type PcMapItem,
   type PcMapSession,
+  type PausesUsed,
   seconds,
   SECONDS_PER_MINUTE,
 } from '@pope/shared';
@@ -14,10 +15,13 @@ import { asc, eq, inArray, sql } from 'drizzle-orm';
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { customerBalances, customers, pcs, sessions, sessionTopups } from '../db/schema.js';
+import { pausesOfSessions } from './pause-queries.js';
 import { PcConnections } from './pc-connections.js';
 import {
   accountBalances,
   actorName,
+  pauseView,
+  type PauseRow,
   remainingSeconds,
   type SessionRow,
   usageOf,
@@ -63,13 +67,30 @@ export class PcMapService {
       }
     }
 
+    const pauses = await pausesOfSessions(
+      this.db,
+      active.flatMap(({ session }) =>
+        session.customerId ? [{ sessionId: session.id, customerId: session.customerId }] : [],
+      ),
+      this.clock.now(),
+    );
+
     const byPc = new Map<string, PcMapSession>();
     for (const { session, username, balances } of active) {
       const cached: CustomerBalances = {
         moneyMicros: micros(balances?.moneyMicros ?? 0),
         comboSeconds: balances?.comboSeconds ?? 0,
       };
-      byPc.set(session.pcId, summarize(session, username, cached, charged.get(session.id) ?? 0));
+      byPc.set(
+        session.pcId,
+        summarize(
+          session,
+          username,
+          cached,
+          charged.get(session.id) ?? 0,
+          pauses.get(session.id) ?? null,
+        ),
+      );
     }
 
     const items: PcMapItem[] = pcRows.map((pc) => ({
@@ -93,6 +114,8 @@ function summarize(
   username: string | null,
   balances: CustomerBalances,
   chargedMicros: number,
+  /** Su pausa abierta y las pausas usadas; `null` en una temporal (spec 002). */
+  pause: { open: PauseRow | null; used: PausesUsed } | null,
 ): PcMapSession {
   const isAccount = row.kind === 'account';
   const remaining = remainingSeconds(row, isAccount ? balances : null);
@@ -110,8 +133,7 @@ function summarize(
     amountMicros: micros(live ? Math.max(0, live.moneyMicros) : chargedMicros),
     comboSeconds: seconds(live ? Math.max(0, live.comboSeconds) : 0),
     ending: remaining <= ENDING_SECONDS,
-    // La pausa llega con T10 de la spec 002; hasta entonces ninguna sesión está en pausa.
-    pause: null,
-    pausesUsed: isAccount ? { inSession: 0, today: 0 } : null,
+    pause: pauseView(pause?.open ?? null),
+    pausesUsed: pause?.used ?? null,
   };
 }

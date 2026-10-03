@@ -1,6 +1,6 @@
 // Consultas de la pausa que comparten las sesiones y la pausa misma (spec 002).
 import { type PausesUsed, pausesOnDayOf } from '@pope/shared';
-import { and, count, eq, gte, isNull } from 'drizzle-orm';
+import { and, count, eq, gte, inArray, isNull, or } from 'drizzle-orm';
 
 import type { Database } from '../db/database.js';
 import { sessionPauses } from '../db/schema.js';
@@ -48,4 +48,52 @@ export async function pausesUsed(
       now,
     ),
   };
+}
+
+/**
+ * Para el mapa del panel (REQ-002-13, REQ-002-14): de cada sesión con cuenta, su pausa
+ * abierta y las pausas usadas en la sesión y en el día, con una sola consulta.
+ */
+export async function pausesOfSessions(
+  db: Database,
+  active: readonly { sessionId: string; customerId: string }[],
+  now: Date,
+): Promise<Map<string, { open: PauseRow | null; used: PausesUsed }>> {
+  const result = new Map<string, { open: PauseRow | null; used: PausesUsed }>();
+  if (active.length === 0) {
+    return result;
+  }
+  const rows = await db
+    .select()
+    .from(sessionPauses)
+    .where(
+      or(
+        inArray(
+          sessionPauses.sessionId,
+          active.map((a) => a.sessionId),
+        ),
+        and(
+          inArray(
+            sessionPauses.customerId,
+            active.map((a) => a.customerId),
+          ),
+          gte(sessionPauses.startedAt, new Date(now.getTime() - PAUSES_LOOKBACK_MS)),
+        ),
+      ),
+    );
+  for (const { sessionId, customerId } of active) {
+    const ofSession = rows.filter((p) => p.sessionId === sessionId);
+    const ofCustomer = rows.filter((p) => p.customerId === customerId);
+    result.set(sessionId, {
+      open: ofSession.find((p) => p.endedAt === null) ?? null,
+      used: {
+        inSession: ofSession.length,
+        today: pausesOnDayOf(
+          ofCustomer.map((p) => p.startedAt),
+          now,
+        ),
+      },
+    });
+  }
+  return result;
 }

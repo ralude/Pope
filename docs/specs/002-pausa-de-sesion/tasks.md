@@ -104,11 +104,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(server): mantiene la pausa tras cortes y reinicios`
   - **Decidido al implementarla:** `closeStale` excluye con `not exists` las sesiones con una pausa abierta que no cobra; tras vencer con a), la marca quedó en `max_until` y la gracia cuenta desde ahí. En `reconcile`, cualquier pausa abierta (cobre o no) evita el cierre: la PC sigue en la pantalla de pausa. Ya no hace falta el latido que el test del arranque de T08 añadía.
 
-- [ ] **T10: Reanudar desde el panel y la pausa en el mapa**
+- [x] **T10: Reanudar desde el panel y la pausa en el mapa**
   - **Cubre:** REQ-002-13, REQ-002-14, CA-002-08
   - **Hacer:** `POST /sessions/:id/resume` (encargado y administrador): cierra la pausa como `staff_resumed`, con el personal como actor, y la PC recibe su `state` al momento; 404 si no existe, 409 si no está en pausa. El cierre que ya existe (`POST /sessions/:id/close`) sirve para una sesión en pausa. `GET /pcs/map` y el canal del panel llevan `pause` y las pausas usadas.
   - **Verificar:** e2e: reanudar desde el panel (actor, evento, `state` en la PC); el dueño recibe 403; el mapa con la pausa y su `maxUntil`; cerrar una sesión en pausa.
   - **Commit:** `feat(server): reanuda la pausa desde el panel`
+  - **Decidido al implementarla:** `PausesService.resumeByStaff`; antes de reanudar aplica el vencimiento pendiente, como la reanudación desde la PC (con b, la sesión ya está cerrada: 409). El 409 de una sesión abierta sin pausa dice «La sesión no está en pausa» (el de una cerrada, «La sesión ya está cerrada», como al cerrar). El mapa saca las pausas de todas las sesiones activas con una sola consulta (`pausesOfSessions`) y las cuenta en memoria, porque se recalcula hasta una vez por segundo. Cualquier evento ya refrescaba el mapa del panel, así que los de la pausa también.
 
 ## Fase 3: Panel (`apps/panel`)
 
