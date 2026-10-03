@@ -18,11 +18,19 @@ const API = [
   '/staff',
   '/pcs',
   '/health',
+  // Spec 005.
+  '/exchange-rate',
+  '/products',
+  '/sale-concepts',
+  '/sales',
 ];
 
 export default defineConfig({
   plugins: [react()],
   server: {
+    // Siempre en IPv4: en Windows, `localhost` puede quedarse solo en IPv6 (::1) y entonces
+    // http://127.0.0.1:5173 (la dirección de AGENTS.md) no responde.
+    host: '127.0.0.1',
     proxy: {
       ...Object.fromEntries(API.map((path) => [path, { target: NODE }])),
       // Canal en vivo del panel (T38a).
