@@ -1,5 +1,6 @@
 import { Redirect, Route, Switch } from 'wouter';
 
+import { CajaPage } from './pages/CajaPage.js';
 import { CombosPage } from './pages/CombosPage.js';
 import { CustomersPage } from './pages/CustomersPage.js';
 import { PanelChannelProvider } from './map/channel.js';
@@ -31,6 +32,7 @@ function Routes() {
         <Switch>
           <Route path="/" component={MapPage} />
           <Route path="/clientes" component={CustomersPage} />
+          <Route path="/caja" component={CajaPage} />
           <Route path="/inventario" component={InventoryPage} />
           <Route path="/interrumpidas" component={InterruptedPage} />
           <Route path="/combo-horas" component={CombosPage} />

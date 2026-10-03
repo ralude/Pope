@@ -14,6 +14,12 @@ const PATHS = {
       <path d="M3.5 17c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5" />
     </>
   ),
+  caja: (
+    <>
+      <rect x="3" y="9" width="14" height="8" rx="1.5" />
+      <path d="M5 9V5h7v4M14 6h2M6 13h2M10 13h4" />
+    </>
+  ),
   inventario: (
     <>
       <path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5z" />

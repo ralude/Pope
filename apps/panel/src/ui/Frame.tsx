@@ -14,6 +14,7 @@ import { ShiftPill } from './ShiftPill.js';
 const SECTIONS: { href: string; label: string; icon: IconName; roles?: StaffRole[] }[] = [
   { href: '/', label: 'Mapa de PCs', icon: 'mapa' },
   { href: '/clientes', label: 'Clientes', icon: 'clientes' },
+  { href: '/caja', label: 'Caja', icon: 'caja' },
   { href: '/inventario', label: 'Inventario', icon: 'inventario' },
   { href: '/interrumpidas', label: 'Interrumpidas', icon: 'interrumpidas' },
   { href: '/combo-horas', label: 'Combos', icon: 'combos' },

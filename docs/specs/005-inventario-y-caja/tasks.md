@@ -199,11 +199,18 @@ parte 1.
   - **Commit:** `feat(panel): gestiona los conceptos de venta`
   - **Decidido al implementarla:** pestañas «Productos | Otras ventas» en Inventario, junto al buscador, que filtra también los conceptos (`filterByName`, antes `filterProducts`). `ConceptsTab`: tabla con nombre, precio por unidad sugerido con su Bs y Activo/Inactivo, y la nota del diseño. El diseño no dibuja el modal de los conceptos: `ConceptDialog` sigue al de productos con lo que admite el contrato (nombre y precio al crear; además «Activo» al editar). Solo el administrador ve «Nuevo concepto» y «Editar». Verificado en Chrome: «Impresiones» a 0,10 USD (≈ 4,05 Bs) quedó en la lista, activo.
 
-- [ ] **T20: Caja: venta nueva**
+- [x] **T20a: Caja: catálogo y venta nueva**
+  - **Cubre:** REQ-005-20
+  - **Hacer:** pantalla `/caja` según el diseño, catálogo y venta nueva: golosinas con su foto y disponibles, otras ventas con cantidad y precio por unidad editable, y el carrito con su total en USD y Bs.
+  - **Verificar:** tests del carrito; a mano, montar una venta con golosinas e impresiones.
+  - **Commit:** `feat(panel): monta la venta nueva en la caja`
+  - **Decidido al implementarla:** pantalla `/caja` (raíl: Caja antes de Inventario, como en el diseño) con el catálogo (430 px) y la venta nueva (300 px); los movimientos del turno llegan en T21. Pestañas «Golosinas | Otras ventas» con buscador. Golosinas: tarjetas con foto (o iniciales), precio y disponibles descontando lo que va en el carrito («Quedan 5 · bajo mínimo», «Agotado»); una agotada no se puede añadir salvo con `allowNegativeStock` (el panel lee `GET /settings`). Otras ventas: los conceptos activos y un formulario con cantidad y precio por unidad (propone el sugerido al elegir otro concepto y no lo pisa al refrescar). El carrito junta las líneas iguales (un concepto a otro precio es otra línea), con − y +, y el total en USD y Bs. Se refresca con `cash`. Lógica en `caja/model.ts`, con tests. Verificado en Chrome: 2 Doritos, 1 Pepito y 12 impresiones sumaron 5,00 USD ≈ 202,50 Bs.
+
+- [ ] **T20b: Caja: cobro**
   - **Cubre:** REQ-005-20 a REQ-005-22, REQ-005-25
-  - **Hacer:** pantalla `/caja`, mitad izquierda: golosinas y otras ventas, carrito, pagos (varios métodos, Bs con la tasa, saldo de una cuenta).
-  - **Verificar:** tests del carrito y del reparto de pagos; a mano CA-005-07 y CA-005-10.
-  - **Commit:** `feat(panel): vende golosinas y conceptos desde la caja`
+  - **Hacer:** método de pago (un método, como en el diseño, y «Dividir pago» para añadir un segundo con su importe; mantenedor, 2026-10-02), lo que se cobra en Bs con la tasa, la cuenta que paga con su saldo y «Cobrar».
+  - **Verificar:** tests del reparto de pagos; a mano CA-005-07 y CA-005-10.
+  - **Commit:** `feat(panel): cobra las ventas de la caja`
 
 - [ ] **T21: Caja: movimientos del turno**
   - **Cubre:** REQ-005-23, REQ-005-24
