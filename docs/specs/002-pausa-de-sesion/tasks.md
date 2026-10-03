@@ -83,11 +83,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(server): pausa y reanuda la sesión sin cobrar la pausa`
   - **Decidido al implementarla:** `PausesService` (`sessions/pauses.service.ts`) abre y cierra las pausas; `SessionsService.checkpoint` devuelve además la pausa abierta y, si no cobra, no cobra nada y lleva la marca hasta ahora, como mucho hasta `maxUntil` (desde ahí cobrará el vencimiento con a, T08). Con la pausa que no cobra, la sesión deja de vigilarse (`attend`: sin avisos ni temporizador) hasta que se reanuda. Si al cobrar hasta el instante de la pausa la sesión se agota, no se pausa: se cierra como agotada, igual que haría el siguiente latido. `resume` sin pausa responde el `state`. El `state` de `pause` y `resume` lleva el `requestId`, como el de `buyCombo` (helper `answering`). Al reanudar, un aviso pendiente puede llegar antes que la respuesta, como ya pasa con las compras. El número de pausa del día cuenta las de los dos últimos días con `pausesOnDayOf`. Con PostgreSQL real pasan 350 de 351: solo el test inestable de `no-heartbeat`.
 
-- [ ] **T07: Límites de pausas por sesión y por día**
+- [x] **T07: Límites de pausas por sesión y por día**
   - **Cubre:** REQ-002-21, REQ-002-23, REQ-002-24, CA-002-04, CA-002-06
   - **Hacer:** al pausar, contar las pausas de la sesión y las de la cuenta en el día de Caracas; rechazar con `pause_unavailable` y su texto si no quedan o si la pausa está desactivada. Cada `state` de una sesión con cuenta lleva `pausesLeft` y `pauseLimit`, también fuera de la pausa, para que el Shell pinte el botón.
   - **Verificar:** e2e: tras 3 pausas en la sesión, `pausesLeft` 0 con `pauseLimit` `session` y la cuarta rechazada (CA-002-04); 5 pausas en dos sesiones del mismo día dejan la tercera sesión sin pausas con `day` (CA-002-06), y al día siguiente vuelven; con `pauseEnabled` 0, `disabled`.
   - **Commit:** `feat(server): limita las pausas por sesión y por día`
+  - **Decidido al implementarla:** las consultas de la pausa (`openPauseOf`, `pausesUsed`) pasan a `sessions/pause-queries.ts`, que comparten `SessionsService` y `PausesService` sin dependencia circular. `SessionsService.pauseStatus` calcula la pausa abierta y las que quedan con los ajustes del momento; lo usa cada `state` de una sesión con cuenta (login, latido, compra, venta desde el panel, cambio de tasa). Al pausar se comprueba en este orden: temporal, ya en pausa, y después los límites con `pauseRefusal`. Un cambio de los límites vale al momento (test).
 
 - [ ] **T08: Vencimiento de la pausa**
   - **Cubre:** REQ-002-20, REQ-002-22, REQ-002-31, REQ-002-32, CA-002-05

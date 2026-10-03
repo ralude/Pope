@@ -8,6 +8,7 @@ import {
   liveBalances,
   micros,
   type NodeToPcMessage,
+  type PauseAllowance,
   type ProtocolErrorCode,
   seconds,
   secondsUntilExhausted,
@@ -29,6 +30,15 @@ export type PauseRow = typeof sessionPauses.$inferSelect;
  */
 export function pauseBilling(pause: PauseRow): boolean {
   return pause.billingResumedAt !== null;
+}
+
+/**
+ * La pausa de una sesión con cuenta: la abierta, si hay, y las que le quedan con el límite
+ * alcanzado (REQ-002-02, REQ-002-21, REQ-002-24, CA-002-04, CA-002-06).
+ */
+export interface PauseStatus {
+  open: PauseRow | null;
+  allowance: PauseAllowance;
 }
 
 /** La pausa tal como la ven la PC y el panel (REQ-002-06, REQ-002-14). */
@@ -111,8 +121,8 @@ export function activeState(
   account: { username: string; balances: CustomerBalances } | null,
   /** Tasa vigente, para que el Shell muestre el Bs (REQ-005-36); `null` si no hay. */
   vesRate: VesRate | null,
-  /** La pausa abierta de una sesión con cuenta, o `null` (REQ-002-06). */
-  pause: PauseRow | null,
+  /** La pausa de una sesión con cuenta (REQ-002-06); `null` en una temporal. */
+  pause: PauseStatus | null,
 ): NodeToPcMessage {
   const base = { sessionId: row.id, startedAt: row.startedAt.toISOString() };
   if (row.kind === 'account' && account) {
@@ -132,7 +142,8 @@ export function activeState(
         money: { micros: micros(Math.max(0, live.moneyMicros)), currency: 'USD' },
         moneySeconds,
         remainingSeconds: seconds(Math.max(0, live.comboSeconds) + moneySeconds),
-        pause: pauseView(pause),
+        pause: pauseView(pause?.open ?? null),
+        ...(pause && { pausesLeft: pause.allowance.left, pauseLimit: pause.allowance.limit }),
       },
     };
   }

@@ -15,6 +15,7 @@ import {
   type CustomerBalances,
   newId,
   type NodeToPcMessage,
+  pauseAllowance,
   pendingWarnings,
   seconds,
   secondsUntilAttention,
@@ -36,6 +37,7 @@ import {
   UnknownComboError,
 } from '../combos/combo-sales.service.js';
 import { customers, type PauseEndReason, pcs, sessionPauses, sessions } from '../db/schema.js';
+import { SettingsService } from '../settings/settings.service.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
@@ -48,12 +50,14 @@ import {
   LOCKED_STATE,
   pauseBilling,
   type PauseRow,
+  type PauseStatus,
   PcRequestRefused,
   remainingSeconds,
   type SessionRow,
   temporaryUsageOf,
   usageOf,
 } from './session-state.js';
+import { openPauseOf, pausesUsed } from './pause-queries.js';
 
 /** Saldo mínimo para abrir una sesión: el de 1 minuto (REQ-001-20). */
 export const MIN_SESSION_SECONDS = 60;
@@ -84,15 +88,6 @@ interface AccountView {
  */
 function onHold(pause: PauseRow | null): boolean {
   return pause !== null && !pauseBilling(pause);
-}
-
-/** La pausa abierta de una sesión, si tiene (spec 002). */
-export async function openPauseOf(sessionId: string, db: Database): Promise<PauseRow | null> {
-  const [pause] = await db
-    .select()
-    .from(sessionPauses)
-    .where(and(eq(sessionPauses.sessionId, sessionId), isNull(sessionPauses.endedAt)));
-  return pause ?? null;
 }
 
 /** Lo que la PC dice de su sesión en un `hello` o un `heartbeat`. */
@@ -133,6 +128,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     private readonly comboSales: ComboSalesService,
     private readonly connections: PcConnections,
     private readonly rates: ExchangeRatesService,
+    private readonly settings: SettingsService,
     private readonly clock: Clock,
   ) {}
 
@@ -140,9 +136,25 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
   private stateOf(
     row: SessionRow,
     account: Parameters<typeof activeState>[1],
-    pause: PauseRow | null,
+    pause: PauseStatus | null,
   ): NodeToPcMessage {
     return activeState(row, account, this.rates.current()?.vesPerUsd ?? null, pause);
+  }
+
+  /**
+   * La pausa de una sesión con cuenta para su `state`: la abierta y las que le quedan, con
+   * los ajustes del local (spec 002). `null` en una temporal, que no pausa (REQ-002-11).
+   */
+  async pauseStatus(
+    row: SessionRow,
+    open: PauseRow | null,
+    db: Database = this.db,
+  ): Promise<PauseStatus | null> {
+    if (row.kind !== 'account' || !row.customerId) {
+      return null;
+    }
+    const used = await pausesUsed(db, row.id, row.customerId, this.clock.now());
+    return { open, allowance: pauseAllowance(await this.settings.get(db), used) };
   }
 
   /**
@@ -202,7 +214,8 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     if (!row) {
       return LOCKED_STATE;
     }
-    return this.stateOf(row, await this.accountOf(row, db), await openPauseOf(row.id, db));
+    const status = await this.pauseStatus(row, await openPauseOf(row.id, db), db);
+    return this.stateOf(row, await this.accountOf(row, db), status);
   }
 
   /**
@@ -288,7 +301,11 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       return {
         row,
         remaining,
-        state: this.stateOf(row, { username: customer.username, balances }, null),
+        state: this.stateOf(
+          row,
+          { username: customer.username, balances },
+          await this.pauseStatus(row, null, tx),
+        ),
       };
     });
     this.touch(pc.id);
@@ -333,7 +350,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     this.attend(bought.row, remaining, bought.pause);
     return this.ended.has(bought.row.id)
       ? LOCKED_STATE
-      : this.stateOf(bought.row, bought.account, bought.pause);
+      : this.stateOf(bought.row, bought.account, await this.pauseStatus(bought.row, bought.pause));
   }
 
   /**
@@ -370,7 +387,8 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       const session = checked.row;
       const account = { username: customer.username, balances: customer.balances };
       const remaining = remainingSeconds(session, customer.balances);
-      this.connections.send(session.pcId, this.stateOf(session, account, checked.pause));
+      const status = await this.pauseStatus(session, checked.pause);
+      this.connections.send(session.pcId, this.stateOf(session, account, status));
       this.attend(session, remaining, checked.pause);
     }
     return customer;
@@ -812,7 +830,9 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     this.attend(row, remaining, pause);
     // Si la cerraron mientras tanto, la PC ya recibió `sessionEnded`: no hay que desbloquearla.
     return {
-      state: this.ended.has(row.id) ? LOCKED_STATE : this.stateOf(row, account, pause),
+      state: this.ended.has(row.id)
+        ? LOCKED_STATE
+        : this.stateOf(row, account, await this.pauseStatus(row, pause)),
       closedId: null,
     };
   }

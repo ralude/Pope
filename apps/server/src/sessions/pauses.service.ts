@@ -1,21 +1,22 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   type Actor,
   newId,
   type NodeToPcMessage,
   PAUSE_REFUSAL_MESSAGES,
+  pauseAllowance,
   pauseMaxUntil,
-  type PausesUsed,
-  pausesOnDayOf,
+  pauseRefusal,
   seconds,
 } from '@pope/shared';
-import { and, count, eq, gte } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
-import { DATABASE, type Database } from '../db/database.js';
+import type { Database } from '../db/database.js';
 import { customers, pcs, sessionPauses, sessions } from '../db/schema.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { SettingsService } from '../settings/settings.service.js';
+import { openPauseOf, pausesUsed } from './pause-queries.js';
 import {
   pauseBilling,
   type PauseRow,
@@ -23,10 +24,7 @@ import {
   remainingSeconds,
   type SessionRow,
 } from './session-state.js';
-import { openPauseOf, SessionsService } from './sessions.service.js';
-
-/** Basta mirar dos días atrás para contar las pausas de un día de Caracas. */
-const PAUSES_LOOKBACK_MS = 2 * 24 * 60 * 60 * 1000;
+import { SessionsService } from './sessions.service.js';
 
 /**
  * Pausa de las sesiones con cuenta (spec 002). Mientras una pausa no cobra, el tiempo de la
@@ -36,7 +34,6 @@ const PAUSES_LOOKBACK_MS = 2 * 24 * 60 * 60 * 1000;
 @Injectable()
 export class PausesService {
   constructor(
-    @Inject(DATABASE) private readonly db: Database,
     private readonly events: EventsService,
     private readonly sessions: SessionsService,
     private readonly settings: SettingsService,
@@ -45,9 +42,10 @@ export class PausesService {
 
   /**
    * El cliente pausa su sesión desde la PC (REQ-002-01). Se cobra hasta este instante y desde
-   * él ya no (REQ-002-03). Las temporales no pausan (REQ-002-11) y una sesión en pausa no
-   * vuelve a pausar. Si al cobrar se agota, no se pausa: se cierra como cualquier sesión
-   * agotada. Devuelve el `state` que debe mostrar la PC.
+   * él ya no (REQ-002-03). Las temporales no pausan (REQ-002-11), una sesión en pausa no
+   * vuelve a pausar, y hacen falta pausas libres en la sesión y en el día y la pausa activada
+   * en el local (REQ-002-21, REQ-002-23, REQ-002-24). Si al cobrar se agota, no se pausa: se
+   * cierra como cualquier sesión agotada. Devuelve el `state` que debe mostrar la PC.
    */
   async pause(pcId: string): Promise<NodeToPcMessage> {
     await this.events.inTransaction(async (tx, emit) => {
@@ -55,17 +53,23 @@ export class PausesService {
       if (locked.kind !== 'account' || !locked.customerId) {
         throw new PcRequestRefused('pause_unavailable', PAUSE_REFUSAL_MESSAGES.temporary);
       }
+      const customerId = locked.customerId;
       const { row, account, pause } = await this.sessions.checkpoint(locked, tx);
-      if (pause) {
-        throw new PcRequestRefused('pause_unavailable', PAUSE_REFUSAL_MESSAGES.already_paused);
+      const now = this.clock.now();
+      const settings = await this.settings.get(tx);
+      const used = await pausesUsed(tx, row.id, customerId, now);
+      const refusal = pauseRefusal({
+        kind: row.kind,
+        paused: pause !== null,
+        allowance: pauseAllowance(settings, used),
+      });
+      if (refusal) {
+        throw new PcRequestRefused('pause_unavailable', PAUSE_REFUSAL_MESSAGES[refusal]);
       }
       if (remainingSeconds(row, account?.balances ?? null) === 0) {
         return;
       }
-      const customerId = locked.customerId;
-      const now = this.clock.now();
-      const maxUntil = pauseMaxUntil(now, await this.settings.get(tx));
-      const used = await this.pausesUsed(row.id, customerId, now, tx);
+      const maxUntil = pauseMaxUntil(now, settings);
       const actor: Actor = { kind: 'customer', customerId, username: account?.username ?? '' };
       await tx.insert(sessionPauses).values({
         id: newId(),
@@ -168,38 +172,6 @@ export class PausesService {
       throw new PcRequestRefused('no_active_session', 'No tienes una sesión abierta');
     }
     return locked;
-  }
-
-  /**
-   * Pausas ya usadas: las de la sesión (REQ-002-21) y las de la cuenta en el día de Caracas,
-   * en todas sus sesiones (REQ-002-24).
-   */
-  async pausesUsed(
-    sessionId: string,
-    customerId: string,
-    now: Date,
-    db: Database = this.db,
-  ): Promise<PausesUsed> {
-    const [inSession] = await db
-      .select({ n: count() })
-      .from(sessionPauses)
-      .where(eq(sessionPauses.sessionId, sessionId));
-    const recent = await db
-      .select({ startedAt: sessionPauses.startedAt })
-      .from(sessionPauses)
-      .where(
-        and(
-          eq(sessionPauses.customerId, customerId),
-          gte(sessionPauses.startedAt, new Date(now.getTime() - PAUSES_LOOKBACK_MS)),
-        ),
-      );
-    return {
-      inSession: inSession?.n ?? 0,
-      today: pausesOnDayOf(
-        recent.map((p) => p.startedAt),
-        now,
-      ),
-    };
   }
 
   private async pcRef(pcId: string, db: Database): Promise<{ id: string; name: string }> {
