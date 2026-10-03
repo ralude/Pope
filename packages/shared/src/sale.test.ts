@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { usd } from './money.js';
 import {
   lineTotal,
+  MAX_OTHER_COMMENT_LENGTH,
+  otherIncomeLabel,
+  otherSaleLineRequestSchema,
   saleGroupTotals,
   saleLineGroup,
   saleRequestSchema,
@@ -65,9 +68,10 @@ describe('importes y grupos de la venta (REQ-005-52)', () => {
     expect(lineTotal(12, usd(0.1))).toBe(usd(1.2));
   });
 
-  it('productos a golosinas y conceptos a otras ventas', () => {
+  it('productos a golosinas; conceptos y otros ingresos a otras ventas', () => {
     expect(saleLineGroup('product')).toBe('snacks');
     expect(saleLineGroup('concept')).toBe('other');
+    expect(saleLineGroup('other')).toBe('other');
   });
 
   it('suma por grupo en el orden de las líneas', () => {
@@ -81,6 +85,41 @@ describe('importes y grupos de la venta (REQ-005-52)', () => {
       { group: 'other', usdMicros: usd(1.2) },
       { group: 'snacks', usdMicros: usd(3) },
     ]);
+  });
+});
+
+describe('otro ingreso (REQ-005-05)', () => {
+  const parse = (line: object) =>
+    otherSaleLineRequestSchema.safeParse({ kind: 'other', usdMicros: usd(1.2), ...line });
+
+  it('CA-005-07: un importe en USD con su comentario', () => {
+    expect(parse({ comment: '  12 impresiones ' }).data).toEqual({
+      kind: 'other',
+      usdMicros: usd(1.2),
+      comment: '12 impresiones',
+    });
+  });
+
+  it('el comentario es opcional: vacío o en blanco queda en null', () => {
+    expect(parse({ comment: null }).data?.comment).toBeNull();
+    expect(parse({ comment: '' }).data?.comment).toBeNull();
+    expect(parse({ comment: '   ' }).data?.comment).toBeNull();
+  });
+
+  it(`el comentario no pasa de ${String(MAX_OTHER_COMMENT_LENGTH)} caracteres`, () => {
+    expect(parse({ comment: 'a'.repeat(MAX_OTHER_COMMENT_LENGTH) }).success).toBe(true);
+    expect(parse({ comment: 'a'.repeat(MAX_OTHER_COMMENT_LENGTH + 1) }).success).toBe(false);
+  });
+
+  it('el importe es mayor que cero', () => {
+    expect(parse({ usdMicros: 0, comment: null }).success).toBe(false);
+    expect(parse({ usdMicros: usd(-1), comment: null }).success).toBe(false);
+    expect(parse({ comment: null, usdMicros: undefined }).success).toBe(false);
+  });
+
+  it('se lee "Otro ingreso · comentario", o "Otro ingreso" sin él', () => {
+    expect(otherIncomeLabel('20 impresiones')).toBe('Otro ingreso · 20 impresiones');
+    expect(otherIncomeLabel(null)).toBe('Otro ingreso');
   });
 });
 

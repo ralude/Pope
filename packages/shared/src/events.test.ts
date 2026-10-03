@@ -370,6 +370,34 @@ describe('ventas (REQ-005-21, REQ-005-23)', () => {
     expect(valid(withPayload({ total: usd(0) }))).toBe(false);
   });
 
+  it('versión 2 (REQ-005-05): productos y otros ingresos, con comentario o sin él', () => {
+    const recorded = examples['sale.recorded'];
+    const refresco = {
+      kind: 'product',
+      id: id(13),
+      name: 'Refresco',
+      quantity: 1,
+      unitPrice: usd(1_000_000),
+      total: usd(1_000_000),
+    };
+    const concepto = { ...refresco, kind: 'concept', name: 'Impresiones', quantity: 12 };
+    const v2 = (lines: object[]) => ({
+      ...recorded,
+      version: 2,
+      payload: { ...recorded.payload, lines },
+    });
+    const impresiones = { kind: 'other', comment: '12 impresiones', total: usd(1_200_000) };
+    expect(valid(v2([refresco, impresiones]))).toBe(true);
+    expect(valid(v2([{ ...impresiones, comment: null }]))).toBe(true);
+    expect(valid(v2([{ ...impresiones, comment: '' }]))).toBe(false);
+    expect(valid(v2([{ ...impresiones, total: usd(0) }]))).toBe(false);
+    // La v2 ya no admite conceptos, ni la v1 otros ingresos.
+    expect(valid(v2([concepto]))).toBe(false);
+    expect(valid({ ...v2([impresiones]), version: 1 })).toBe(false);
+    // Las ventas ya guardadas en la v1 siguen siendo válidas.
+    expect(valid(recorded)).toBe(true);
+  });
+
   it('la anulación pide motivo', () => {
     const voided = examples['sale.voided'];
     expect(valid({ ...voided, payload: { ...voided.payload, reason: '' } })).toBe(false);

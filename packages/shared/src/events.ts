@@ -618,10 +618,36 @@ export const saleConceptUpdatedEventSchema = event(
 
 // ─── Ventas del mostrador (spec 005, parte 2) ───────────────────────────────────────────
 
+/** Un pago de la venta, con su moneda y la tasa si se pagó en Bs (REQ-005-22). */
+const salePaymentsSchema = z
+  .array(
+    z.strictObject({
+      method: cashMethodSchema,
+      amount: z.strictObject({
+        micros: microsSchema.refine((m) => m > 0, 'El importe debe ser mayor que cero'),
+        currency: currencySchema,
+      }),
+      usd: positiveUsdSchema,
+      vesRate: vesRateSchema.nullable(),
+    }),
+  )
+  .min(1);
+
+/** Una línea de producto, con la copia del nombre y del precio del momento. */
+const productSaleLineSchema = {
+  id: idSchema,
+  name: z.string().min(1),
+  quantity: z.int().positive(),
+  unitPrice: positiveUsdSchema,
+  total: positiveUsdSchema,
+};
+
 /**
  * Venta registrada (REQ-005-20 a REQ-005-22): sus líneas, con la copia del nombre y del
  * precio del momento, y sus pagos, con la moneda y la tasa si se pagó en Bs. Las líneas de
  * productos implican su movimiento de stock `sale`. `customer` es quien pagó con su saldo.
+ * Versión 1: con los conceptos que sustituyó el otro ingreso; sigue válida para las ya
+ * guardadas.
  */
 export const saleRecordedEventSchema = event(
   'sale.recorded',
@@ -631,30 +657,37 @@ export const saleRecordedEventSchema = event(
     shiftId: idSchema,
     customer: customerRefSchema.nullable(),
     lines: z
-      .array(
-        z.strictObject({
-          kind: z.enum(['product', 'concept']),
-          id: idSchema,
-          name: z.string().min(1),
-          quantity: z.int().positive(),
-          unitPrice: positiveUsdSchema,
-          total: positiveUsdSchema,
-        }),
-      )
+      .array(z.strictObject({ kind: z.enum(['product', 'concept']), ...productSaleLineSchema }))
       .min(1),
-    payments: z
+    payments: salePaymentsSchema,
+    total: positiveUsdSchema,
+  }),
+);
+
+/**
+ * Venta registrada, versión 2 (REQ-005-05): las líneas son productos u otros ingresos, con
+ * su importe y su comentario (o `null`).
+ */
+export const saleRecordedV2EventSchema = event(
+  'sale.recorded',
+  2,
+  z.strictObject({
+    saleId: idSchema,
+    shiftId: idSchema,
+    customer: customerRefSchema.nullable(),
+    lines: z
       .array(
-        z.strictObject({
-          method: cashMethodSchema,
-          amount: z.strictObject({
-            micros: microsSchema.refine((m) => m > 0, 'El importe debe ser mayor que cero'),
-            currency: currencySchema,
+        z.discriminatedUnion('kind', [
+          z.strictObject({ kind: z.literal('product'), ...productSaleLineSchema }),
+          z.strictObject({
+            kind: z.literal('other'),
+            comment: z.string().min(1).nullable(),
+            total: positiveUsdSchema,
           }),
-          usd: positiveUsdSchema,
-          vesRate: vesRateSchema.nullable(),
-        }),
+        ]),
       )
       .min(1),
+    payments: salePaymentsSchema,
     total: positiveUsdSchema,
   }),
 );
@@ -700,7 +733,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   stockMovedEventSchema,
   saleConceptCreatedEventSchema,
   saleConceptUpdatedEventSchema,
-  saleRecordedEventSchema,
+  z.discriminatedUnion('version', [saleRecordedEventSchema, saleRecordedV2EventSchema]),
   saleVoidedEventSchema,
 ]);
 export type DomainEvent = z.infer<typeof domainEventSchema>;

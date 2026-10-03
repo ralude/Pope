@@ -260,11 +260,12 @@ la parte 1.
 Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artboards «Caja» y
 «Caja · otro ingreso»).
 
-- [ ] **T25: Contratos del otro ingreso**
+- [x] **T25: Contratos del otro ingreso**
   - **Cubre:** REQ-005-05, REQ-005-52
   - **Hacer:** en `@pope/shared`, la línea `{ kind: 'other', usdMicros, comment }` en la petición de venta (de momento junto a `concept`, que se quita en T28b), su grupo `other` y `sale.recorded` v2 con líneas `product` u `other`.
   - **Verificar:** tests unitarios: importe mayor que cero, comentario vacío a `null` y su tope, v1 y v2 válidas.
   - **Commit:** `feat(shared): añade el otro ingreso a las ventas`
+  - **Decidido al implementarla:** `otherSaleLineRequestSchema` (`{ kind: 'other', usdMicros, comment }`; el comentario se recorta y vacío o en blanco queda en `null`, hasta 80 caracteres) va aparte y entra en la unión de la venta en T26: si entrara ya, el nodo no compilaría sin saber venderlo. `OTHER_INCOME_NAME` y `otherIncomeLabel` ("Otro ingreso · comentario") para el nodo y el panel; `saleLineGroup` lleva `other` a otras ventas. `sale.recorded` v2 con líneas `product` u `other` (comentario o `null`, y total); los pagos y la línea de producto se comparten con la v1, que sigue válida.
 
 - [ ] **T26: Ventas con otro ingreso en el nodo**
   - **Cubre:** REQ-005-05, REQ-005-51, REQ-005-52

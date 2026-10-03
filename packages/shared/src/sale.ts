@@ -1,5 +1,5 @@
-// Ventas del mostrador (spec 005, parte 2): golosinas del inventario y conceptos sin
-// inventario, pagadas con uno o varios métodos (REQ-005-20, REQ-005-21).
+// Ventas del mostrador (spec 005, parte 2): golosinas del inventario y otros ingresos sin
+// inventario, pagadas con uno o varios métodos (REQ-005-05, REQ-005-20, REQ-005-21).
 import { z } from 'zod';
 
 import { type CashGroup, cashMethodSchema } from './cash.js';
@@ -18,9 +18,34 @@ const positiveMicrosSchema = microsSchema.refine(
   'El importe debe ser mayor que cero',
 );
 
+/** Tope del comentario de un otro ingreso. */
+export const MAX_OTHER_COMMENT_LENGTH = 80;
+
+/** Comentario de un otro ingreso (REQ-005-05): opcional; vacío o en blanco, `null`. */
+const otherCommentSchema = z
+  .string()
+  .trim()
+  .max(
+    MAX_OTHER_COMMENT_LENGTH,
+    `El comentario no puede pasar de ${String(MAX_OTHER_COMMENT_LENGTH)} caracteres`,
+  )
+  .nullable()
+  .transform((comment) => (comment === '' ? null : comment));
+
+/**
+ * Un otro ingreso (REQ-005-05): lo que no es golosina ni horas de PC, con el importe que
+ * escribe el encargado y un comentario si quiere. Entra en la venta con T26.
+ */
+export const otherSaleLineRequestSchema = z.object({
+  kind: z.literal('other'),
+  usdMicros: positiveMicrosSchema,
+  comment: otherCommentSchema,
+});
+export type OtherSaleLineRequest = z.infer<typeof otherSaleLineRequestSchema>;
+
 /**
  * Una línea de la venta. El precio de un producto lo pone el nodo; el de un concepto lo
- * escribe el encargado, que puede cambiar el sugerido (REQ-005-05).
+ * escribe el encargado, que puede cambiar el sugerido.
  */
 export const saleLineRequestSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('product'), productId: idSchema, quantity: lineQuantitySchema }),
@@ -66,8 +91,18 @@ export function lineTotal(quantity: number, unitPriceMicros: Micros): Micros {
   return micros(quantity * unitPriceMicros);
 }
 
-/** Grupo del reporte de cada línea (REQ-005-52): productos a golosinas, conceptos a otras. */
-export function saleLineGroup(kind: SaleLineRequest['kind']): CashGroup {
+/** Nombre con que se guarda un otro ingreso, y su descripción en la lista y el reporte. */
+export const OTHER_INCOME_NAME = 'Otro ingreso';
+
+/** "Otro ingreso · 20 impresiones", o "Otro ingreso" sin comentario (REQ-005-05). */
+export function otherIncomeLabel(comment: string | null): string {
+  return comment === null ? OTHER_INCOME_NAME : `${OTHER_INCOME_NAME} · ${comment}`;
+}
+
+/** Grupo del reporte de cada línea (REQ-005-52): productos a golosinas; lo demás, a otras. */
+export function saleLineGroup(
+  kind: SaleLineRequest['kind'] | OtherSaleLineRequest['kind'],
+): CashGroup {
   return kind === 'product' ? 'snacks' : 'other';
 }
 
@@ -76,7 +111,10 @@ export function saleLineGroup(kind: SaleLineRequest['kind']): CashGroup {
  * reparte `splitPayments`.
  */
 export function saleGroupTotals(
-  lines: readonly { kind: SaleLineRequest['kind']; totalMicros: Micros }[],
+  lines: readonly {
+    kind: SaleLineRequest['kind'] | OtherSaleLineRequest['kind'];
+    totalMicros: Micros;
+  }[],
 ): { group: CashGroup; usdMicros: Micros }[] {
   const totals = new Map<CashGroup, number>();
   for (const line of lines) {
