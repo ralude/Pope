@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { events } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
+import { NO_OPENING_CASH } from '../testing/shifts.js';
 
 describe('movimientos de stock (e2e, REQ-005-10 a REQ-005-14)', () => {
   let testApp: TestApp;
@@ -43,7 +44,7 @@ describe('movimientos de stock (e2e, REQ-005-10 a REQ-005-14)', () => {
     (await request('GET', `/products/${refresco.id}/movements`, dueno)).json<StockMovement[]>();
 
   it('CA-005-01: con 10, 3 vendidos y 1 de merma quedan 6, con actor y hora', async () => {
-    await request('POST', '/shifts', ana);
+    await request('POST', '/shifts', ana, NO_OPENING_CASH);
     const sale = await request('POST', '/sales', ana, {
       lines: [{ kind: 'product', productId: refresco.id, quantity: 3 }],
       payments: [{ method: 'cash_usd', usdMicros: usd(3) }],

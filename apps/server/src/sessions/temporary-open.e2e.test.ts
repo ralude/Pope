@@ -7,6 +7,7 @@ import { devPcId } from '../pcs/dev-pcs.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { buyCombo, login, PcWorld } from '../testing/pc-world.js';
+import { NO_OPENING_CASH, NOTHING_COUNTED } from '../testing/shifts.js';
 
 const MINUTE = 60_000;
 // 18:00 en Caracas de un lunes (1,50 USD/h) y de un jueves (2,00 USD/h).
@@ -25,6 +26,7 @@ describe('abrir sesión temporal (e2e, REQ-001-22, REQ-001-60, REQ-001-61, REQ-0
       method: 'POST',
       url: '/shifts',
       headers: { cookie: ana },
+      payload: NO_OPENING_CASH,
     });
     shiftId = shift.json<{ id: string }>().id;
   }
@@ -219,6 +221,7 @@ describe('abrir sesión temporal (e2e, REQ-001-22, REQ-001-60, REQ-001-61, REQ-0
       method: 'POST',
       url: '/shifts/current/close',
       headers: { cookie: ana },
+      payload: NOTHING_COUNTED,
     });
     const noShift = await open({ ...on(6), minutes: 30 });
     expect(noShift.statusCode).toBe(409);

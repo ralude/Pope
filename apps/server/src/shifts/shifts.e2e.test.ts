@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cashShifts, events } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
+import { NO_OPENING_CASH, NOTHING_COUNTED } from '../testing/shifts.js';
 import { CurrentShift, RequiresOpenShift } from './open-shift.guard.js';
 
 /** Endpoint solo para el test, para probar el guard "requiere turno abierto". */
@@ -35,8 +36,20 @@ describe('caja de turno del local (e2e, T17, REQ-001-03, REQ-005-44)', () => {
     await testApp.close();
   });
 
+  /**
+   * Abrir y cerrar llevan por defecto fondo 0 y nada contado: aquí no importan los importes
+   * (los prueba shifts-closing.e2e.test.ts).
+   */
   function request(method: 'GET' | 'POST', url: string, cookie: string) {
-    return testApp.app.inject({ method, url, headers: { cookie } });
+    const payload =
+      method !== 'POST'
+        ? undefined
+        : url === '/shifts'
+          ? NO_OPENING_CASH
+          : url === '/shifts/current/close'
+            ? NOTHING_COUNTED
+            : undefined;
+    return testApp.app.inject({ method, url, headers: { cookie }, ...(payload && { payload }) });
   }
 
   async function openShift(cookie: string): Promise<CashShift> {

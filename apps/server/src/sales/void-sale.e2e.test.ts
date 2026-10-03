@@ -13,6 +13,7 @@ import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
+import { NO_OPENING_CASH, NOTHING_COUNTED } from '../testing/shifts.js';
 
 describe('anular una venta (e2e, REQ-005-23)', () => {
   let testApp: TestApp;
@@ -32,7 +33,7 @@ describe('anular una venta (e2e, REQ-005-23)', () => {
         initialQuantity: 10,
       })
     ).json<Product>();
-    await request('POST', '/shifts', ana);
+    await request('POST', '/shifts', ana, NO_OPENING_CASH);
   });
 
   afterEach(async () => {
@@ -131,8 +132,8 @@ describe('anular una venta (e2e, REQ-005-23)', () => {
 
   it('una venta de una caja ya cerrada no se anula', async () => {
     const sale = await sellTwo([{ method: 'cash_usd', usdMicros: usd(2) }]);
-    await request('POST', '/shifts/current/close', ana);
-    await request('POST', '/shifts', ana);
+    await request('POST', '/shifts/current/close', ana, NOTHING_COUNTED);
+    await request('POST', '/shifts', ana, NO_OPENING_CASH);
     const response = await voidSale(sale.sourceId);
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({

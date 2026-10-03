@@ -5,6 +5,7 @@
 // micro-unidades (ADR-0015) y tiempos en segundos `integer`.
 import type {
   Actor,
+  CashByMethod,
   CashGroup,
   CashMethod,
   CashSource,
@@ -138,8 +139,27 @@ export const cashShifts = pgTable(
     openedAt: timestamp('opened_at', { withTimezone: true }).notNull(),
     /** `null` mientras está abierto. */
     closedAt: timestamp('closed_at', { withTimezone: true }),
+    /** Fondo inicial en efectivo USD y Bs, en µ-unidades (REQ-005-40). */
+    openingCashUsdMicros: bigint('opening_cash_usd_micros', { mode: 'number' })
+      .notNull()
+      .default(0),
+    openingCashVesMicros: bigint('opening_cash_ves_micros', { mode: 'number' })
+      .notNull()
+      .default(0),
+    /**
+     * Lo esperado y lo contado por método al cerrar (REQ-005-42). Lo esperado se guarda, para
+     * que el reporte no cambie después.
+     */
+    expected: jsonb('expected').$type<CashByMethod>(),
+    counted: jsonb('counted').$type<CashByMethod>(),
+    /** Quién la cerró: quien la abrió o un administrador. */
+    closedBy: jsonb('closed_by').$type<Actor>(),
   },
   (t) => [
+    check(
+      'cash_shifts_opening_nonnegative',
+      sql`${t.openingCashUsdMicros} >= 0 and ${t.openingCashVesMicros} >= 0`,
+    ),
     // Como mucho una caja abierta en el local (REQ-005-44), también ante peticiones
     // simultáneas: todas las abiertas darían el mismo valor (`true`) en el índice.
     uniqueIndex('cash_shifts_one_open_idx')

@@ -6,6 +6,7 @@ import { createTestApp, type TestApp } from './app.js';
 import { loginAsStaff } from './auth.js';
 import { FakeClock } from './clock.js';
 import { listenForPcs, PcTestClient } from './pc-client.js';
+import { NO_OPENING_CASH } from './shifts.js';
 
 /**
  * Nodo de test para las sesiones: reloj simulado en la hora indicada, las PCs de ejemplo
@@ -74,7 +75,7 @@ export class PcWorld {
   /** Un encargado con sesión iniciada y el turno de caja abierto; devuelve su cookie. */
   async cashier(username = 'ana', displayName = 'Ana'): Promise<string> {
     const cookie = await loginAsStaff(this.testApp, username, 'encargado', displayName);
-    await this.api('POST', '/shifts', cookie);
+    await this.api('POST', '/shifts', cookie, NO_OPENING_CASH);
     return cookie;
   }
 

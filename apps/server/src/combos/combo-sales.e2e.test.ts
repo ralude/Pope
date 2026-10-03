@@ -6,6 +6,7 @@ import { events, ledger } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
+import { NO_OPENING_CASH, NOTHING_COUNTED } from '../testing/shifts.js';
 
 describe('compra de combos desde el panel (e2e, REQ-001-82, REQ-001-84, REQ-001-85)', () => {
   let testApp: TestApp;
@@ -40,7 +41,8 @@ describe('compra de combos desde el panel (e2e, REQ-001-82, REQ-001-84, REQ-001-
     return testApp.app.inject({ method, url, headers: { cookie }, ...(body && { payload: body }) });
   }
 
-  const openShift = async () => (await request('POST', '/shifts', ana)).json<CashShift>();
+  const openShift = async () =>
+    (await request('POST', '/shifts', ana, NO_OPENING_CASH)).json<CashShift>();
 
   async function rechargeJuan(amount: number) {
     await openShift();
@@ -125,7 +127,7 @@ describe('compra de combos desde el panel (e2e, REQ-001-82, REQ-001-84, REQ-001-
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({ message: 'Abre un turno de caja para continuar' });
     await rechargeJuan(usd(20));
-    await request('POST', '/shifts/current/close', ana);
+    await request('POST', '/shifts/current/close', ana, NOTHING_COUNTED);
     expect((await buy({ via: 'balance' })).statusCode).toBe(201);
   });
 

@@ -12,6 +12,7 @@ import { createCustomerWithBalance } from '../testing/customers.js';
 import { PanelClient } from '../testing/panel-client.js';
 import { PcWorld } from '../testing/pc-world.js';
 import { NO_RATE_MESSAGE } from './cash-register.service.js';
+import { NOTHING_COUNTED } from '../testing/shifts.js';
 
 // Lunes 28 de septiembre de 2026, 18:00 en Caracas.
 const MONDAY = '2026-09-28T22:00:00Z';
@@ -151,7 +152,7 @@ describe('registro de caja (e2e, REQ-005-22, REQ-005-24, REQ-005-41)', () => {
   it('el dueño también ve la lista; sin caja abierta responde 409', async () => {
     const owner = await loginAsStaff(world.testApp, 'duena', 'dueno');
     expect((await world.api('GET', '/shifts/current/entries', owner)).statusCode).toBe(200);
-    await world.api('POST', '/shifts/current/close', ana);
+    await world.api('POST', '/shifts/current/close', ana, NOTHING_COUNTED);
     const closed = await world.api('GET', '/shifts/current/entries', owner);
     expect(closed.statusCode).toBe(409);
     expect(closed.json()).toMatchObject({ message: 'No hay una caja abierta' });

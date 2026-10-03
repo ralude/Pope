@@ -9,6 +9,7 @@ import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { login, PcWorld } from '../testing/pc-world.js';
 import { SessionsService } from './sessions.service.js';
+import { NO_OPENING_CASH } from '../testing/shifts.js';
 
 const MINUTE = 60_000;
 // 18:00 en Caracas de un lunes: 1,50 USD/h.
@@ -28,6 +29,7 @@ describe('añadir tiempo a una sesión temporal (e2e, REQ-001-70)', () => {
       method: 'POST',
       url: '/shifts',
       headers: { cookie: ana },
+      payload: NO_OPENING_CASH,
     });
     shiftId = shift.json<{ id: string }>().id;
   }

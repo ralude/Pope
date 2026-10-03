@@ -6,6 +6,7 @@ import { events, ledger } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
+import { NO_OPENING_CASH } from '../testing/shifts.js';
 
 describe('recargas desde el panel (e2e, REQ-001-03)', () => {
   let testApp: TestApp;
@@ -31,7 +32,7 @@ describe('recargas desde el panel (e2e, REQ-001-03)', () => {
   }
 
   const openShift = async (cookie: string) =>
-    (await request('POST', '/shifts', cookie)).json<CashShift>();
+    (await request('POST', '/shifts', cookie, NO_OPENING_CASH)).json<CashShift>();
 
   const recharge = (body: object, cookie = ana, customerId = juan.id) =>
     request('POST', `/customers/${customerId}/recharges`, cookie, body);

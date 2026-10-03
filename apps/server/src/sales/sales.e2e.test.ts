@@ -15,6 +15,7 @@ import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
+import { NO_OPENING_CASH, NOTHING_COUNTED } from '../testing/shifts.js';
 
 describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-005-43)', () => {
   let testApp: TestApp;
@@ -36,7 +37,7 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
         unitPriceMicros: usd(0.1),
       })
     ).json<SaleConcept>();
-    await request('POST', '/shifts', ana);
+    await request('POST', '/shifts', ana, NO_OPENING_CASH);
   });
 
   afterEach(async () => {
@@ -242,7 +243,7 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
       payments: [{ method: 'cash_usd', usdMicros: usd(1) }],
     };
     expect((await sell(body, owner)).statusCode).toBe(403);
-    await request('POST', '/shifts/current/close', ana);
+    await request('POST', '/shifts/current/close', ana, NOTHING_COUNTED);
     const closed = await sell(body);
     expect(closed.statusCode).toBe(409);
     expect(closed.json()).toMatchObject({ message: 'Abre un turno de caja para continuar' });
