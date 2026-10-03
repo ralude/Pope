@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · nombre del local como ajuste (T16b de la spec 005)
+**Última actualización:** 2026-10-02 · reportes del cierre en PDF; fase 2 (nodo) de la spec 005 terminada
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T17: Reportes PDF** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T17, T04, T18–T24, T05–T07 |
-| **Progreso** | Spec 005: 17 / 30 tareas (parte 1: 3 / 7; parte 2: 14 / 23) |
+| **Siguiente tarea** | **T04: La tasa en el panel** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T04, T18–T24 (con T23b), T05–T07 |
+| **Progreso** | Spec 005: 18 / 30 tareas (parte 1: 3 / 7; parte 2: 15 / 23) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 17 / 30 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 18 / 30 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T17 (spec 005): reportes del cierre en PDF con `pdfkit`: resumen de una página (lo vendido por grupo, lo pagado con saldo, la tasa y el cuadre por método) y detallado (movimientos, anulaciones y stock por producto). Termina la fase 2 (nodo); probada también contra PostgreSQL real.
 - **2026-10-02:** T16b (spec 005): el nombre del local es un ajuste de texto (`localName`, por defecto "Pope") que cambia el administrador; `setting.changed` pasa a la versión 2 con valores de número o de texto.
 - **2026-10-02:** T16a (spec 005): la caja se abre con fondo en USD y Bs y se cierra con lo contado por método; el nodo guarda lo esperado y da la diferencia (CA-005-03), con eventos v2; `GET /shifts/current/closing` y el historial `GET /shifts`. Hasta T22, el panel no puede abrir ni cerrar la caja (no envía fondo ni conteo).
 - **2026-10-02:** T15 (spec 005): el administrador anula una venta de la caja abierta con motivo: vuelven el stock y el saldo, la caja escribe sus filas negativas con la misma tasa de la venta, y la lista marca la venta anulada.
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T13a (spec 005): la caja de turno pasa a ser del local: una sola abierta, en la que cobran encargados y administradores; la cierra quien la abrió o un administrador. La migración cierra las cajas abiertas de más (solo en desarrollo).
 - **2026-10-02:** T12 (spec 005): entradas (encargado y administrador), ajustes y mermas con motivo (administrador) con `POST /products/:id/stock`; el stock no baja de 0 salvo con `allowNegativeStock`; `GET /products/:id/movements` para el detalle del producto.
 - **2026-10-02:** T11 (spec 005): fotos de los productos: `PUT /products/:id/photo` (WebP hasta 512 KB, solo administrador) y `GET` con caché larga; se guardan en `POPE_DATA_DIR` (variable nueva, documentada en AGENTS.md).
-- **2026-10-02:** T10 (spec 005): tablas `products`, `stock_movements` y `sale_concepts`; alta y edición de productos y conceptos por el administrador, con sus eventos; la cantidad inicial de un producto se guarda como su primera entrada, y `GET /products` da el stock calculado.

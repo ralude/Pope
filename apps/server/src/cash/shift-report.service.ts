@@ -1,0 +1,124 @@
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { type CashMovement, type ShiftSummary, type VesRate, vesRate } from '@pope/shared';
+import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm';
+
+import { Clock } from '../common/clock.js';
+import { DATABASE, type Database } from '../db/database.js';
+import { cashEntries, cashShifts, products, stockMovements } from '../db/schema.js';
+import { actorName } from '../sessions/session-state.js';
+import { SettingsService } from '../settings/settings.service.js';
+import { ShiftsService } from '../shifts/shifts.service.js';
+import { CashRegisterService } from './cash-register.service.js';
+
+/** Cómo se movió el stock de un producto durante la caja (REQ-005-53). */
+export interface StockLine {
+  name: string;
+  initial: number;
+  restocked: number;
+  /** Vendido, ya descontadas las anulaciones. */
+  sold: number;
+  adjusted: number;
+  wasted: number;
+  final: number;
+}
+
+/** Todo lo que lleva el reporte de una caja. */
+export interface ShiftReport {
+  localName: string;
+  summary: ShiftSummary;
+  /** Quién la abrió y quién la cerró (ids, para los permisos, y nombre). */
+  openedById: string;
+  closedById: string | null;
+  closedByName: string | null;
+  /** La última tasa con que se cobró en Bs en esta caja, si se cobró en Bs. */
+  rate: VesRate | null;
+  /** Los movimientos en orden de hora, el más antiguo primero. */
+  movements: CashMovement[];
+  stock: StockLine[];
+  generatedAt: Date;
+}
+
+/**
+ * Reúne los datos de los reportes del cierre (REQ-005-51 a REQ-005-53): los totales y el
+ * cuadre de la caja, y para el detallado, sus movimientos y el stock de cada producto.
+ */
+@Injectable()
+export class ShiftReportService {
+  constructor(
+    @Inject(DATABASE) private readonly db: Database,
+    private readonly shifts: ShiftsService,
+    private readonly register: CashRegisterService,
+    private readonly settings: SettingsService,
+    private readonly clock: Clock,
+  ) {}
+
+  /** El reporte de una caja, abierta o cerrada; 404 si no existe. */
+  async report(id: string): Promise<ShiftReport> {
+    const summary = await this.shifts.summary(id);
+    const [row] = await this.db.select().from(cashShifts).where(eq(cashShifts.id, id));
+    if (!summary || !row) {
+      throw new NotFoundException('No existe esa caja');
+    }
+    const [{ localName }, list, [lastRate]] = await Promise.all([
+      this.settings.get(),
+      this.register.list(id),
+      this.db
+        .select({ rate: cashEntries.vesRate })
+        .from(cashEntries)
+        .where(and(eq(cashEntries.shiftId, id), isNotNull(cashEntries.vesRate)))
+        .orderBy(desc(cashEntries.createdAt))
+        .limit(1),
+    ]);
+    const now = this.clock.now();
+    return {
+      localName,
+      summary,
+      openedById: row.staffId,
+      closedById: row.closedBy?.kind === 'staff' ? row.closedBy.staffId : null,
+      closedByName: row.closedBy ? actorName(row.closedBy) : null,
+      rate: lastRate?.rate ? vesRate(lastRate.rate) : null,
+      movements: [...list.movements].reverse(),
+      stock: await this.stock(row.openedAt, row.closedAt ?? now),
+      generatedAt: now,
+    };
+  }
+
+  /**
+   * Stock de cada producto en la caja: el de la apertura, lo que entró, se vendió, se ajustó
+   * o se perdió mientras estuvo abierta, y el del cierre. Solo los activos o los que se
+   * movieron.
+   */
+  private async stock(from: Date, to: Date): Promise<StockLine[]> {
+    const inRange = sql`${stockMovements.createdAt} >= ${from} and ${stockMovements.createdAt} <= ${to}`;
+    const sum = (condition: ReturnType<typeof sql>) =>
+      sql<number>`coalesce(sum(${stockMovements.quantity}) filter (where ${condition}), 0)`.mapWith(
+        Number,
+      );
+    const rows = await this.db
+      .select({
+        name: products.name,
+        active: products.active,
+        initial: sum(sql`${stockMovements.createdAt} < ${from}`),
+        restocked: sum(sql`${stockMovements.kind} = 'restock' and ${inRange}`),
+        sold: sum(sql`${stockMovements.kind} = 'sale' and ${inRange}`),
+        adjusted: sum(sql`${stockMovements.kind} = 'adjustment' and ${inRange}`),
+        wasted: sum(sql`${stockMovements.kind} = 'waste' and ${inRange}`),
+        moved: sql<number>`count(${stockMovements.id}) filter (where ${inRange})`.mapWith(Number),
+      })
+      .from(products)
+      .leftJoin(stockMovements, eq(stockMovements.productId, products.id))
+      .groupBy(products.id)
+      .orderBy(asc(sql`lower(${products.name})`));
+    return rows
+      .filter((row) => row.active || row.moved > 0)
+      .map((row) => ({
+        name: row.name,
+        initial: row.initial,
+        restocked: row.restocked,
+        sold: -row.sold,
+        adjusted: row.adjusted,
+        wasted: -row.wasted,
+        final: row.initial + row.restocked + row.sold + row.adjusted + row.wasted,
+      }));
+  }
+}

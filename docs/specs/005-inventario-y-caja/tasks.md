@@ -168,11 +168,12 @@ parte 1.
   - **Commit:** `feat(server): guarda el nombre del local como ajuste`
   - **Decidido al implementarla:** ajuste `localName` (de 1 a 60 caracteres, sin espacios al principio ni al final, por defecto "Pope"). `setting.changed` versión 2 con `from` y `to` de número o de texto; el nodo emite ya la v2 para todos los ajustes. `SettingsService.get` valida cada ajuste guardado por separado (si uno no vale, usa su valor por defecto) y luego el conjunto con su esquema. Sin migración: los ajustes sin fila valen su valor por defecto. Verificado: tests de los esquemas y e2e del ajuste (evento v2, rechazo del nombre vacío).
 
-- [ ] **T17: Reportes PDF**
+- [x] **T17: Reportes PDF**
   - **Cubre:** REQ-005-51, REQ-005-52, REQ-005-53
   - **Hacer:** `pdfkit` (justificado en el plan); `GET /shifts/:id/report.pdf` con el resumen de una página y el detallado (`?full=1`), con sus roles.
   - **Verificar:** e2e: CA-005-09 (el texto del PDF lleva los totales y tiene una página), el detallado con movimientos y stock, y el encargado no descarga el detallado.
   - **Commit:** `feat(server): genera los reportes del cierre en PDF`
+  - **Decidido al implementarla:** `pdfkit` 0.20 (y `@types/pdfkit`) en el servidor. `ShiftReportService` reúne los datos (resumen de la caja, quién la abrió y la cerró, última tasa con que se cobró en Bs, movimientos en orden de hora y el stock de cada producto activo o movido: inicial, entradas, ventas ya descontadas las anulaciones, ajustes, mermas y final). `report-pdf.ts` lo dibuja en A4 con Helvetica, sin colores y **sin comprimir** (es pequeño y así los tests leen su texto con `testing/pdf-text.ts`). El resumen solo lleva totales y el cuadre por método (fondo, esperado, contado y diferencia, cada uno en la moneda del método con `formatVes` o `formatMoney`), así que cabe siempre en una página; el detallado añade movimientos, anulaciones con su motivo y stock, en las páginas que hagan falta. Las horas van en hora de Caracas. `GET /shifts/:id/report.pdf` (`?full=1` el detallado) se descarga como `cierre-caja-AAAA-MM-DD.pdf`; el encargado solo el resumen de las cajas que abrió o cerró. Antes, `feat(shared)`: `formatVes`. Verificado: 3 tests e2e (CA-005-09 con una página, detallado con anulación y stock, permisos) y toda la batería contra PostgreSQL real (330 de 331; falla solo `no-heartbeat`, el inestable ya anotado).
 
 ### Fase 3: Panel
 
