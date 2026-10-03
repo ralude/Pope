@@ -169,6 +169,13 @@
       "when": 1791004967682,
       "tag": "0023_cash_entry_customer",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791041390409,
+      "tag": "0024_session_pauses",
+      "breakpoints": true
     }
   ]
 }

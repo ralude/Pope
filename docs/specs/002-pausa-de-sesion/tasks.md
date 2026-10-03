@@ -69,11 +69,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
 
 ## Fase 2: Nodo (`apps/server`)
 
-- [ ] **T05: Tabla de pausas**
+- [x] **T05: Tabla de pausas**
   - **Cubre:** REQ-002-21, REQ-002-24, REQ-002-31
   - **Hacer:** tabla `session_pauses` del plan, con su migración (`db:generate`): índice único parcial por `session_id` donde `ended_at` es nulo (una sola pausa abierta por sesión) e índice por `customer_id` y `started_at` para contar las del día.
   - **Verificar:** `db/migrations.test.ts`; la migración se aplica con PGlite y con `test:pg`.
   - **Commit:** `feat(server): añade la tabla de pausas`
+  - **Decidido al implementarla:** migración `0024_session_pauses`. Además de los dos índices del plan, uno por `session_id` para contar las pausas de la sesión, y `check` de coherencia: `max_until` posterior al inicio, `billing_resumed_at` no anterior a `max_until`, motivos de fin válidos, y una pausa cerrada lleva a la vez `ended_at`, `end_reason` y `ended_by`. El tipo `PauseEndReason` vive en el esquema del servidor (no viaja por ningún contrato). Test nuevo `pcs/session-pauses-schema.test.ts`. Con PostgreSQL real pasan 341 de 342: falla solo el test inestable de `no-heartbeat` ya anotado en `ESTADO.md`.
 
 - [ ] **T06: Pausar y reanudar desde la PC, sin cobrar la pausa**
   - **Cubre:** REQ-002-03, REQ-002-11, REQ-002-32, CA-002-01, CA-002-07

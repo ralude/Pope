@@ -375,6 +375,65 @@ export const sessions = pgTable(
 );
 
 /**
+ * Cómo terminó una pausa: la quitó el cliente, la quitó el encargado desde el panel
+ * (REQ-002-13), venció con la opción b) y cerró la sesión (REQ-002-22), o la sesión se cerró
+ * por otro motivo estando en pausa.
+ */
+export type PauseEndReason = 'resumed' | 'staff_resumed' | 'expired_closed' | 'session_closed';
+
+/**
+ * Pausas de las sesiones con cuenta (spec 002). Una fila por pausa; nada se borra, porque
+ * son auditoría (ADR-0008). La pausa abierta de una sesión es la fila sin `ended_at`.
+ */
+export const sessionPauses = pgTable(
+  'session_pauses',
+  {
+    id: uuid('id').primaryKey(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id),
+    /** La cuenta de la sesión, para contar sus pausas del día (REQ-002-24). */
+    customerId: uuid('customer_id')
+      .notNull()
+      .references(() => customers.id),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    /** Inicio más la duración máxima vigente al empezar (REQ-002-20). */
+    maxUntil: timestamp('max_until', { withTimezone: true }).notNull(),
+    /** Si venció con la opción a): desde cuándo se vuelve a cobrar, `max_until` (REQ-002-22). */
+    billingResumedAt: timestamp('billing_resumed_at', { withTimezone: true }),
+    endedAt: timestamp('ended_at', { withTimezone: true }),
+    endReason: text('end_reason').$type<PauseEndReason>(),
+    /** Quién pausó: el cliente. */
+    startedBy: jsonb('started_by').$type<Actor>().notNull(),
+    /** Quién la quitó: el cliente, el encargado o el sistema. */
+    endedBy: jsonb('ended_by').$type<Actor>(),
+  },
+  (t) => [
+    // Una sola pausa abierta por sesión.
+    uniqueIndex('session_pauses_open_idx')
+      .on(t.sessionId)
+      .where(sql`${t.endedAt} is null`),
+    // Pausas de la sesión (REQ-002-21) y de la cuenta en el día (REQ-002-24).
+    index('session_pauses_session_idx').on(t.sessionId),
+    index('session_pauses_customer_started_idx').on(t.customerId, t.startedAt),
+    check('session_pauses_max_until_check', sql`${t.maxUntil} > ${t.startedAt}`),
+    check(
+      'session_pauses_billing_check',
+      sql`${t.billingResumedAt} is null or ${t.billingResumedAt} >= ${t.maxUntil}`,
+    ),
+    check(
+      'session_pauses_end_reason_check',
+      sql`${t.endReason} in ('resumed', 'staff_resumed', 'expired_closed', 'session_closed')`,
+    ),
+    check(
+      'session_pauses_ended_fields',
+      sql`(${t.endedAt} is null) = (${t.endReason} is null)
+        and (${t.endedAt} is null) = (${t.endedBy} is null)`,
+    ),
+  ],
+);
+
+/**
  * Cobros en caja de las sesiones temporales: el de la apertura y los de "añadir tiempo"
  * (REQ-001-60, REQ-001-70). Solo se insertan. Van ligados al turno de quien cobró, que es
  * donde los cuenta la caja (spec 005). Una restauración no cobra, así que no tiene fila.
