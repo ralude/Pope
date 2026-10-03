@@ -136,11 +136,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
 
 ## Fase 4: Shell (`apps/shell-ui`)
 
-- [ ] **T14: Diseño de la pausa en el Shell**
+- [x] **T14: Diseño de la pausa en el Shell**
   - **Cubre:** REQ-002-01, REQ-002-02, REQ-002-06, REQ-002-10, CA-002-03, CA-002-04, CA-002-06
   - **Hacer:** en el lienzo "Shell Pope · Fase 9": el botón Pausar activo y desactivado con "Sin pausas disponibles" y "Sin pausas disponibles hoy"; la confirmación (aviso de los juegos online y pausas que quedan); la pantalla de pausa con vidrio (tiempo de pausa, pausas que quedan y saldo), y su variante "Tu tiempo vuelve a correr" en ámbar; y "¿Eres juan?" al reanudar.
   - **Verificar:** aprobación del mantenedor.
   - **Commit:** sin commit (el diseño vive en el lienzo); se anota en `ESTADO.md` con el siguiente commit.
+  - **Decidido al implementarla:** fila «Pausa de sesión · Spec 002» del lienzo, con cinco artboards que importan «Inicio» en cada estado (propiedades «pausa» y «pausas»): botón Pausar sin pausas (con el motivo al lado: «Sin pausas disponibles», «… hoy» o «La pausa no está disponible en este local»), confirmación («¿Pausar tu sesión?», «Tu tiempo se detiene hasta que vuelvas. Puedes estar en pausa hasta 15 min; después, el tiempo vuelve a correr.», recuadro ámbar de los juegos online y «Te quedan 2 pausas», con «Seguir jugando» y «Pausar»), pantalla de pausa a pantalla completa (fondo de Pope, tarjeta de vidrio, «Sesión en pausa», el tiempo de pausa en grande con «Hasta las…», pausas que quedan, «Tu tiempo · detenido» y saldo, y «Reanudar»), su variante vencida («Tu tiempo vuelve a correr» en ámbar y el restante bajando) y «¿Eres juan?» («Al reanudar, el tiempo de juan vuelve a correr. Si no eres juan, avisa al encargado.», con «Cancelar» y «Sí, reanudar»). El botón del encabezado pasa a icono con el texto «Pausar». La pantalla de pausa no ofrece «Cerrar sesión». **Aprobado por el mantenedor el 2026-10-03.**
 
 - [ ] **T15: Pausa en el canal y en el tiempo en vivo del Shell**
   - **Cubre:** REQ-002-03, REQ-002-06
