@@ -51,6 +51,19 @@ describe('cliente de la API del panel (REQ-001-40)', () => {
     expect(calls[0]?.init).toMatchObject({ method: 'GET', credentials: 'same-origin', body: null });
   });
 
+  it('sube un archivo tal cual, con su tipo (REQ-005-03)', async () => {
+    const { fn, calls } = fakeFetch(200, ANA);
+    const client = new ApiClient({ fetch: fn });
+    const photo = new Blob(['RIFF'], { type: 'image/webp' });
+
+    await client.upload('/products/x/photo', photo, staffProfileSchema);
+    expect(calls[0]?.init).toMatchObject({
+      method: 'PUT',
+      headers: { 'content-type': 'image/webp' },
+      body: photo,
+    });
+  });
+
   it('envía el cuerpo como JSON y solo entonces pone el content-type', async () => {
     const { fn, calls } = fakeFetch(200, ANA);
     const client = new ApiClient({ fetch: fn });

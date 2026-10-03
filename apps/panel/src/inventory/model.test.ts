@@ -7,6 +7,7 @@ import {
   initials,
   movementDetail,
   movementLabel,
+  parseCount,
   parseQuantity,
   productStatus,
 } from './model.js';
@@ -69,6 +70,15 @@ describe('cantidades de los movimientos (REQ-005-10, REQ-005-14)', () => {
     for (const text of ['0', '-2', '2,5', 'abc', '', '1000000']) {
       expect(parseQuantity(text)).toBeNull();
     }
+  });
+
+  it('el mínimo y lo que llegó admiten 0 o nada', () => {
+    expect(parseCount('')).toBeNull();
+    expect(parseCount(' 0 ')).toBe(0);
+    expect(parseCount('24')).toBe(24);
+    expect(parseCount('-1')).toBeUndefined();
+    expect(parseCount('2,5')).toBeUndefined();
+    expect(parseCount('100001')).toBeUndefined();
   });
 
   it('un ajuste puede restar, pero no ser 0', () => {

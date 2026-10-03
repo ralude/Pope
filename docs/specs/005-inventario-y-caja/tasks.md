@@ -185,11 +185,12 @@ parte 1.
   - **Commit:** `feat(panel): muestra el inventario y sus movimientos de stock`
   - **Decidido al implementarla:** página `/inventario` (raíl: Inventario tras Clientes) con buscador sin mayúsculas ni tildes, tabla con foto o iniciales, precio con su Bs si hay tasa, stock, mínimo y estado (Desactivado, Agotado si es 0 o menos, Bajo mínimo según el nodo, Bien), y a la derecha el producto elegido con sus 50 últimos movimientos («Venta anulada» para una venta que vuelve). `StockDialog` para entrada (encargado y administrador, nota opcional), ajuste (con signo, «-2») y merma (administrador, con motivo), con «Quedará». El canal del panel lleva `cashVersion`, que sube con cada mensaje `cash`: Inventario vuelve a pedir la lista y los movimientos cuando cambia. El dueño ve todo sin botones; el encargado ve Ajuste y Merma desactivados («Solo el administrador»), como en el diseño. Verificado en Chrome: dos productos de prueba creados desde la sesión del administrador aparecieron solos en la lista; Pepito (5 de mínimo 5) sale «Bajo mínimo»; una entrada de 12 y una merma de 1 («bolsa rota») dejaron Doritos en 35 con sus tres movimientos; el buscador filtra.
 
-- [ ] **T18b: Inventario en el panel: alta y edición con foto**
+- [x] **T18b: Inventario en el panel: alta y edición con foto**
   - **Cubre:** REQ-005-01, REQ-005-03, REQ-005-04, REQ-005-10
   - **Hacer:** modal "Nuevo producto" (nombre, foto reducida con `<canvas>` a WebP antes de subirla, precio, stock mínimo, cantidad que llegó, que se guarda como entrada, y activo) y el mismo modal para editar.
   - **Verificar:** tests del tamaño de la foto; CA-005-08 a mano en Chrome.
   - **Commit:** `feat(panel): da de alta y edita productos con foto`
+  - **Decidido al implementarla:** `ProductDialog` (alta y edición, solo administrador; el encargado ve «Editar» desactivado): foto, nombre, precio con su Bs, stock mínimo opcional («Avisa al llegar a esta cantidad»), cantidad que llegó (solo al dar de alta; vacía es 0) y «Activo». La foto se reduce en el navegador (`shrinkPhoto`: `createImageBitmap` y `<canvas>`, lado mayor de 512 px, WebP probando calidades 0,85 a 0,4 hasta caber en 512 KB) y se sube después de guardar el producto con `ApiClient.upload` (PUT con el archivo tal cual). Si la foto falla tras el alta, el modal se queda con el producto ya guardado y dice que vuelvas a guardar para reintentar solo la foto. `ProductPhoto` pasa a su propio archivo. Verificado en Chrome (CA-005-08): «Chocolate Savoy» a 1,50 USD con 24 que llegaron y una foto JPG de 1,35 MB quedó en la lista con su foto y 24 disponibles; en el nodo, WebP de 512×320 y 16 KB; «Editar» cambió el precio a 1,75 conservando la foto.
 
 - [ ] **T19: Conceptos en el panel**
   - **Cubre:** REQ-005-05

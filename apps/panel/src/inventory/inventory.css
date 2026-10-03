@@ -152,6 +152,52 @@
 
 .inventory-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+/* Modal de alta y edición (T18b), más ancho que los demás diálogos, como en el diseño. */
+.dialog:has(.product-form) {
+  width: 600px;
+}
+
+.product-form {
+  display: flex;
+  gap: 20px;
+}
+
+.product-photo-field {
+  width: 150px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.product-photo-pick {
+  width: 150px;
+  height: 150px;
+  padding: 0;
+  border: 2px dashed var(--line-2);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--soft);
+  font-weight: 700;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.product-photo-pick img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-fields {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }

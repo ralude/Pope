@@ -98,3 +98,15 @@ export function movementDetail(movement: StockMovement): string {
     .filter((part) => part !== null && part !== '')
     .join(' · ');
 }
+
+/**
+ * Un número entero de 0 en adelante, o nada: el stock mínimo (opcional) o lo que llegó al dar
+ * de alta (vacío es 0). `null` si está vacío y `undefined` si no vale.
+ */
+export function parseCount(text: string): number | null | undefined {
+  const trimmed = text.trim();
+  if (trimmed === '') return null;
+  if (!/^\d{1,6}$/.test(trimmed)) return undefined;
+  const value = Number(trimmed);
+  return value > MAX_STOCK_QUANTITY ? undefined : value;
+}

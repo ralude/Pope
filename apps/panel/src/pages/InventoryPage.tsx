@@ -7,7 +7,6 @@ import {
   formatBolivares,
   formatMoney,
   type Product,
-  productPhotoPath,
   productSchema,
   type StockMovement,
   stockMovementSchema,
@@ -18,12 +17,13 @@ import { ApiError, listOf } from '../api/client.js';
 import {
   filterProducts,
   formatQuantity,
-  initials,
   movementDetail,
   movementLabel,
   productStatus,
   STATUS_LABEL,
 } from '../inventory/model.js';
+import { ProductDialog } from '../inventory/ProductDialog.js';
+import { ProductPhoto } from '../inventory/ProductPhoto.js';
 import { StockDialog, type StockKind } from '../inventory/StockDialog.js';
 import { usePcMapFeed } from '../map/channel.js';
 import { useSession, useStaff } from '../session.js';
@@ -36,22 +36,6 @@ function errorMessage(failure: unknown): string {
   return failure instanceof ApiError ? failure.message : String(failure);
 }
 
-/** La foto del producto o, si no tiene, sus iniciales. */
-export function ProductPhoto({ product, size }: { product: Product; size: number }) {
-  const path = productPhotoPath(product);
-  return path ? (
-    <img className="product-photo" src={path} alt="" width={size} height={size} />
-  ) : (
-    <div
-      className="product-photo product-initials"
-      style={{ width: size, height: size, fontSize: Math.round(size / 3) }}
-      aria-hidden="true"
-    >
-      {initials(product.name)}
-    </div>
-  );
-}
-
 export function InventoryPage() {
   const { api } = useSession();
   const staff = useStaff();
@@ -61,6 +45,8 @@ export function InventoryPage() {
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [stockKind, setStockKind] = useState<StockKind | null>(null);
+  /** El producto que se edita, o 'new' para el alta. */
+  const [editing, setEditing] = useState<Product | 'new' | null>(null);
 
   // Lista de productos: al entrar y cada vez que el nodo avisa de un cambio en el stock.
   useEffect(() => {
@@ -87,7 +73,19 @@ export function InventoryPage() {
 
   const closeDialog = useCallback(() => {
     setStockKind(null);
+    setEditing(null);
   }, []);
+
+  const saved = (product: Product) => {
+    setProducts((prev) => {
+      const list = prev ?? [];
+      return list.some((p) => p.id === product.id)
+        ? list.map((p) => (p.id === product.id ? product : p))
+        : [...list, product];
+    });
+    setSelectedId(product.id);
+    setEditing(null);
+  };
 
   return (
     <Frame
@@ -103,6 +101,19 @@ export function InventoryPage() {
             setQuery(event.target.value);
           }}
         />
+      }
+      actions={
+        staff.role === 'administrador' && (
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => {
+              setEditing('new');
+            }}
+          >
+            Nuevo producto
+          </button>
+        )
       }
     >
       <div className="inventory-layout">
@@ -190,6 +201,9 @@ export function InventoryPage() {
               vesRate={vesRate}
               role={staff.role}
               onStock={setStockKind}
+              onEdit={() => {
+                setEditing(selected);
+              }}
             />
           ) : (
             <p className="detail-note" style={{ margin: 0 }}>
@@ -198,6 +212,14 @@ export function InventoryPage() {
           )}
         </aside>
       </div>
+      {editing && (
+        <ProductDialog
+          product={editing === 'new' ? null : editing}
+          vesRate={vesRate}
+          onClose={closeDialog}
+          onDone={saved}
+        />
+      )}
       {selected && stockKind && (
         <StockDialog
           product={selected}
@@ -219,12 +241,14 @@ function ProductDetail({
   vesRate,
   role,
   onStock,
+  onEdit,
 }: {
   product: Product;
   cashVersion: number;
   vesRate: Parameters<typeof formatBolivares>[1] | undefined;
   role: 'encargado' | 'administrador' | 'dueno';
   onStock: (kind: StockKind) => void;
+  onEdit: () => void;
 }) {
   const { api } = useSession();
   const [movements, setMovements] = useState<StockMovement[] | null>(null);
@@ -312,6 +336,15 @@ function ProductDetail({
             Entrada de mercancía
           </button>
           <div className="inventory-actions">
+            <button
+              type="button"
+              className="btn btn-ghost"
+              disabled={!isAdmin}
+              title={isAdmin ? undefined : 'Solo el administrador'}
+              onClick={onEdit}
+            >
+              Editar
+            </button>
             {(['adjustment', 'waste'] as const).map((kind) => (
               <button
                 key={kind}

@@ -89,6 +89,14 @@ export class ApiClient {
     return this.request('PATCH', path, schema, body);
   }
 
+  /**
+   * Sube un archivo como cuerpo binario, con su tipo (p. ej. la foto WebP de un producto,
+   * REQ-005-03). Sin JSON: el cuerpo entero es el archivo.
+   */
+  upload<T>(path: string, file: Blob, schema: Schema<T>): Promise<T> {
+    return this.request('PUT', path, schema, file);
+  }
+
   /** Petición sin respuesta que leer (p. ej. 204). */
   async send(method: string, path: string, body?: unknown): Promise<void> {
     await this.raw(method, path, body);
@@ -120,9 +128,12 @@ export class ApiClient {
       response = await this.fetchFn(path, {
         method,
         credentials: 'same-origin',
-        // Fastify rechaza `application/json` con el cuerpo vacío.
-        headers: body === undefined ? {} : { 'content-type': 'application/json' },
-        body: body === undefined ? null : JSON.stringify(body),
+        // Fastify rechaza `application/json` con el cuerpo vacío. Un archivo va tal cual.
+        headers:
+          body === undefined
+            ? {}
+            : { 'content-type': body instanceof Blob ? body.type : 'application/json' },
+        body: body === undefined ? null : body instanceof Blob ? body : JSON.stringify(body),
       });
     } catch {
       throw new ApiError(0, NETWORK_ERROR);
