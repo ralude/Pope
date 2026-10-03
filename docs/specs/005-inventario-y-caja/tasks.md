@@ -248,11 +248,12 @@ parte 1.
   - **Commit:** `feat(panel): muestra el historial de cierres`
   - **Decidido al implementarla:** página `/cierres` (raíl «Cierres de caja», solo administrador y dueño; la ruta tampoco existe para el encargado) con `GET /shifts`: día y horas en Caracas, quién abrió, horas de PC, golosinas, otras ventas, total, diferencia y los dos PDF (enlaces con `download` a `report.pdf` y `report.pdf?full=1`). El diseño muestra una sola diferencia en USD, pero el cierre la guarda por método y en dos monedas que no se suman sin tasa: se ve «Cuadra» o las diferencias en su moneda («-5,00 USD · +10,00 Bs»), en rojo si falta algo y en ámbar si sobra; «Abierta» para la caja en curso y «Sin conteo» para las cerradas antes de T16a (fallo visto en la prueba y corregido, con su test). Se refresca con `cash`. Verificado en Chrome como administrador: tres cajas de la base de desarrollo (−5,00 USD, Cuadra y Sin conteo) y el resumen PDF responde 200 `application/pdf`.
 
-- [ ] **T23b: Ajustes del local en el panel**
+- [x] **T23b: Ajustes del local en el panel**
   - **Cubre:** REQ-005-12, REQ-005-51
   - **Hacer:** pantalla de ajustes para el administrador con el nombre del local y "Permitir vender sin stock" (el panel aún no tenía pantalla de ajustes).
   - **Verificar:** a mano, cambiar los dos y verlos en el PDF y en la Caja.
   - **Commit:** `feat(panel): permite cambiar los ajustes del local`
+  - **Decidido al implementarla:** página `/ajustes` («Ajustes del local» en el raíl, tras Personal; solo administrador) con el nombre del local y «Permitir vender sin stock»; guarda solo lo que cambió con `PUT /settings`. No hay artboard: sigue el estilo de las demás pantallas. Solo los dos ajustes de la tarea; los de la spec 001 (gracia sin latidos, temporales conservadas) siguen sin pantalla. La barra superior aún no muestra el nombre del local (el diseño tiene «[NOMBRE DEL LOCAL]»): no lo pide ninguna tarea. Verificado en Chrome: «Ciber de prueba» y vender sin stock se guardaron, y el nombre salió en el PDF del último cierre (una página); después se devolvieron los ajustes de la base de desarrollo a «Pope» y sin vender sin stock. Que la Caja deje vender un agotado con el ajuste lo prueban los e2e del nodo (REQ-005-12) y lo lee la Caja desde T20a.
 
 ### Cierre de la parte 2
 

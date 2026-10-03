@@ -11,6 +11,7 @@ import { LoginPage } from './pages/LoginPage.js';
 import { MapPage } from './pages/MapPage.js';
 import { SessionProvider, useSession } from './session.js';
 import { ShiftProvider } from './shift.js';
+import { SettingsPage } from './pages/SettingsPage.js';
 import { StaffPage } from './pages/StaffPage.js';
 import { TariffsPage } from './pages/TariffsPage.js';
 
@@ -40,6 +41,9 @@ function Routes() {
           <Route path="/combo-horas" component={CombosPage} />
           <Route path="/tarifas" component={TariffsPage} />
           {state.staff.role === 'administrador' && <Route path="/personal" component={StaffPage} />}
+          {state.staff.role === 'administrador' && (
+            <Route path="/ajustes" component={SettingsPage} />
+          )}
           <Route>
             <Redirect to="/" />
           </Route>
