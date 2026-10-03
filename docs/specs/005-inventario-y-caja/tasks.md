@@ -213,11 +213,12 @@ parte 1.
   - **Commit:** `feat(panel): cobra las ventas de la caja`
   - **Decidido al implementarla:** `Checkout` bajo el total de la venta nueva: los cinco métodos del diseño (efectivo USD, efectivo Bs, pago móvil, punto de venta y con saldo); «Dividir pago» añade un segundo método con su importe en USD y el primero cubre el resto (`buildPayments`: el segundo debe ser menor que el total y con otro método); con un pago en Bs dice «Se cobran X Bs a Y Bs por USD» (`vesAmount`, al céntimo); con saldo pide la cuenta (búsqueda de cuentas activas con `GET /customers` y su saldo). «Cobrar» se desactiva con la caja cerrada, sin tasa para un pago en Bs o sin cuenta, y lo dice. Tras cobrar se vacía el carrito y se lee «Cobrado: … · importe». Verificado en Chrome: CA-005-07 (12 impresiones a 0,10 en efectivo USD: fila «Impresiones × 12», otras ventas, 1,20 USD) y CA-005-10 con `maria` (12,40 USD) pagando unos Doritos de 1,50 con su saldo: le quedaron 10,90 USD, el stock bajó y la fila quedó con método saldo, fuera del dinero de la caja.
 
-- [ ] **T21: Caja: movimientos del turno**
+- [x] **T21: Caja: movimientos del turno**
   - **Cubre:** REQ-005-23, REQ-005-24
   - **Hacer:** mitad derecha de `/caja`: lista en vivo (mensaje `cash`), totales por grupo y "Anular" para el administrador.
   - **Verificar:** a mano: una recarga desde Clientes y una venta aparecen en la lista; CA-005-11.
   - **Commit:** `feat(panel): muestra los movimientos del turno en la caja`
+  - **Decidido al implementarla:** `MovementList` a la derecha de la Caja, como en el diseño: cuántos movimientos, cuatro casillas (horas de PC, golosinas, otras ventas y total en caja) y, si lo hay, lo pagado con saldo aparte; la lista (`GET /shifts/current/entries`) con hora, qué fue, quién (y «con saldo» o el motivo de una anulación), los métodos, el importe y lo cobrado en Bs. La venta anulada sale tachada «· anulada» y su anulación como otra fila. «Anular» (solo administrador, ventas sin anular) abre un diálogo con motivo obligatorio. Se refresca con `cash`. El Bs de cada fila sale de la moneda guardada, no del método: un cobro antiguo con pago móvil guardado en USD no muestra Bs (fallo visto en la prueba y corregido, con su test). El componente se llama `MovementList.tsx` porque `Movements.tsx` chocaba en Windows con `movements.ts`. Verificado en Chrome: CA-005-11 (2 Doritos en efectivo y anulados con «error de cobro»: fila de anulación de −3,00 USD con el motivo, venta tachada, golosinas a 0, stock de vuelta en 34) y una recarga de juan hecha por la API apareció sola arriba de la lista.
 
 - [ ] **T22: Abrir y cerrar la caja**
   - **Cubre:** REQ-005-40, REQ-005-42, REQ-005-45

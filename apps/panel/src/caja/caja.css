@@ -276,3 +276,127 @@
   cursor: pointer;
   font-family: inherit;
 }
+
+/* Movimientos del turno (T21). */
+.caja-moves {
+  flex-grow: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.caja-moves-head {
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.caja-tiles {
+  padding: 0 16px 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.caja-tile {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.caja-tile-total {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.caja-balance-note {
+  padding: 0 16px 10px;
+  font-size: 12px;
+}
+
+.caja-move-list {
+  flex-grow: 1;
+  min-height: 0;
+  overflow: auto;
+  border-top: 1px solid var(--line);
+}
+
+.caja-empty {
+  margin: 0;
+  padding: 16px;
+}
+
+.caja-move {
+  padding: 10px 16px;
+  border-bottom: 1px solid #22262d;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.caja-move[data-voided='true'] {
+  opacity: 0.6;
+}
+
+.caja-move[data-voided='true'] .caja-move-what {
+  text-decoration: line-through;
+}
+
+.caja-move-time {
+  width: 44px;
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.caja-move-what {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.caja-move-detail {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.caja-pill {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--soft);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.caja-pill-balance {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.caja-move-amount {
+  width: 90px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.caja-void {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid #5a2a2e;
+  border-radius: 14px;
+  background: transparent;
+  color: #ffb4b0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}

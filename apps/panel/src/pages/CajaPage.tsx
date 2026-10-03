@@ -30,9 +30,10 @@ import {
   quantityInCart,
 } from '../caja/model.js';
 import { Checkout } from '../caja/Checkout.js';
+import { MovementList } from '../caja/MovementList.js';
 import { filterByName, initials } from '../inventory/model.js';
 import { usePcMapFeed } from '../map/channel.js';
-import { useSession } from '../session.js';
+import { useSession, useStaff } from '../session.js';
 import { useShift } from '../shift.js';
 import { Frame } from '../ui/Frame.js';
 import { formatUsdInput, parseUsd } from '../ui/money.js';
@@ -47,6 +48,7 @@ function errorMessage(failure: unknown): string {
 export function CajaPage() {
   const { api } = useSession();
   const { shift } = useShift();
+  const staff = useStaff();
   const { rate, cashVersion } = usePcMapFeed();
   const vesRate = rate?.rate?.vesPerUsd;
   const [products, setProducts] = useState<Product[]>([]);
@@ -232,6 +234,11 @@ export function CajaPage() {
             </span>
           )}
         </section>
+        <MovementList
+          shiftId={shift?.id ?? null}
+          cashVersion={cashVersion}
+          isAdmin={staff.role === 'administrador'}
+        />
       </div>
     </Frame>
   );
