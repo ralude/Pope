@@ -42,6 +42,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
       heartbeatGraceSeconds: 180,
       temporarySessionsKeptPerPc: 3,
       allowNegativeStock: 0,
+      localName: 'Pope',
     });
   });
 
@@ -52,6 +53,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
       heartbeatGraceSeconds: 300,
       temporarySessionsKeptPerPc: 3,
       allowNegativeStock: 0,
+      localName: 'Pope',
     });
     expect((await get(ana)).json<Settings>().heartbeatGraceSeconds).toBe(300);
     expect(await settingEvents()).toMatchObject([
@@ -98,6 +100,17 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
     expect(await settingEvents()).toEqual([]);
   });
 
+  it('REQ-005-51: el nombre del local es un ajuste de texto, con su evento v2', async () => {
+    const response = await put({ localName: '  Ciber Ana  ' });
+    expect(response.statusCode).toBe(200);
+    expect(response.json<Settings>().localName).toBe('Ciber Ana');
+    expect((await settingEvents()).at(-1)).toMatchObject({
+      version: 2,
+      payload: { key: 'localName', from: 'Pope', to: 'Ciber Ana' },
+    });
+    expect((await put({ localName: '   ' })).statusCode).toBe(400);
+  });
+
   it('un valor inválido guardado a mano no tumba el nodo: se usa el valor por defecto', async () => {
     await put({ heartbeatGraceSeconds: 300 });
     await testApp.database.db
@@ -108,6 +121,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
       heartbeatGraceSeconds: 180,
       temporarySessionsKeptPerPc: 3,
       allowNegativeStock: 0,
+      localName: 'Pope',
     });
   });
 });

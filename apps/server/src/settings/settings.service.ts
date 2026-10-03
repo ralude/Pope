@@ -32,7 +32,9 @@ export class SettingsService {
   /** Todos los ajustes; los que nunca se cambiaron valen su valor por defecto. */
   async get(db: Database = this.db): Promise<Settings> {
     const stored = new Map((await db.select().from(settings)).map((row) => [row.key, row.value]));
-    const current = { ...DEFAULT_SETTINGS };
+    // Cada ajuste se valida por separado; al final, el conjunto con su esquema (los hay de
+    // número y de texto).
+    const current: Record<SettingKey, unknown> = { ...DEFAULT_SETTINGS };
     for (const key of KEYS) {
       if (!stored.has(key)) {
         continue;
@@ -45,7 +47,7 @@ export class SettingsService {
         this.logger.warn(`El ajuste ${key} no es válido: se usa el valor por defecto`);
       }
     }
-    return current;
+    return settingsSchema.parse(current);
   }
 
   /**
@@ -67,7 +69,7 @@ export class SettingsService {
           .onConflictDoUpdate({ target: settings.key, set: row });
         emit({
           type: 'setting.changed',
-          version: 1,
+          version: 2,
           actor,
           payload: { key, from: before[key], to },
         });

@@ -327,6 +327,20 @@ export const settingChangedEventSchema = event(
   z.strictObject({ key: settingKeySchema, from: z.number().int(), to: z.number().int() }),
 );
 
+/**
+ * Versión 2 (spec 005): los ajustes pueden ser de texto, como el nombre del local
+ * (REQ-005-51).
+ */
+export const settingChangedV2EventSchema = event(
+  'setting.changed',
+  2,
+  z.strictObject({
+    key: settingKeySchema,
+    from: z.union([z.number().int(), z.string()]),
+    to: z.union([z.number().int(), z.string()]),
+  }),
+);
+
 // ─── Turno de caja ──────────────────────────────────────────────────────────────────────
 
 /** Versión 1 (spec 001): el turno mínimo, sin fondo. Sigue valiendo para los ya guardados. */
@@ -667,7 +681,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   comboUpdatedEventSchema,
   z.discriminatedUnion('version', [comboPurchasedEventSchema, comboPurchasedV2EventSchema]),
   tariffChangedEventSchema,
-  settingChangedEventSchema,
+  z.discriminatedUnion('version', [settingChangedEventSchema, settingChangedV2EventSchema]),
   z.discriminatedUnion('version', [sessionStartedEventSchema, sessionStartedV2EventSchema]),
   sessionEndedEventSchema,
   sessionRemainingCorrectedEventSchema,

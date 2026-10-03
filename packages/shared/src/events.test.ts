@@ -376,6 +376,18 @@ describe('ventas (REQ-005-21, REQ-005-23)', () => {
   });
 });
 
+describe('ajustes, versión 2 (REQ-005-51)', () => {
+  it('un ajuste de texto, como el nombre del local', () => {
+    const changed = {
+      ...envelope('setting.changed', { key: 'localName', from: 'Pope', to: 'Ciber Ana' }),
+      version: 2,
+    };
+    expect(domainEventSchema.parse(changed)).toEqual(changed);
+    expect(valid({ ...changed, version: 1 })).toBe(false);
+    expect(valid({ ...changed, payload: { key: 'colorFavorito', from: 1, to: 2 } })).toBe(false);
+  });
+});
+
 describe('cobros en caja, versión 2 (REQ-005-22)', () => {
   const inBs = {
     method: 'mobile_payment',

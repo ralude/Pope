@@ -161,11 +161,12 @@ parte 1.
   - **Commit:** `feat(server): abre la caja con fondo y la cierra con conteo`
   - **Decidido al implementarla:** `cash_shifts` gana el fondo (`opening_cash_usd_micros`, `opening_cash_ves_micros`, 0 en las cajas antiguas), `expected`, `counted` (jsonb por método) y `closed_by`; migración `0020_cash_shift_counts`. Por decisión del mantenedor, el nodo exige ya el fondo al abrir y lo contado al cerrar (400 sin ellos), aunque el panel no los envía hasta T22: hasta entonces, abrir y cerrar la caja desde el panel da error. Lo esperado se calcula con `expectedCash` sobre el registro de caja (sin depender del módulo `cash`, para no crear un ciclo con `ShiftsModule`, que es global). Al cerrar se guardan lo esperado y lo contado; la diferencia se calcula al leer. `shift.opened` y `shift.closed` se emiten en la versión 2. `POST /shifts/current/close` responde el cierre (`ShiftSummary`). `GET /shifts` (administrador y dueño) da todas las cajas, la más reciente arriba, con quien la abrió, los totales y, si está cerrada, lo esperado, lo contado y la diferencia. Los tests que no miran importes usan `NO_OPENING_CASH` y `NOTHING_COUNTED` (`testing/shifts.ts`). Verificado: 8 tests e2e nuevos (fondo y evento, CA-005-03, lo esperado en Bs, validación, historial por rol).
 
-- [ ] **T16b: Nombre del local**
+- [x] **T16b: Nombre del local**
   - **Cubre:** REQ-005-51
   - **Hacer:** ajuste de texto `localName` (por defecto "Pope") en `@pope/shared` y en el nodo; versión 2 de `setting.changed`, con valores de número o de texto.
   - **Verificar:** tests de los esquemas y e2e de los ajustes (el administrador lo cambia y queda el evento v2).
   - **Commit:** `feat(server): guarda el nombre del local como ajuste`
+  - **Decidido al implementarla:** ajuste `localName` (de 1 a 60 caracteres, sin espacios al principio ni al final, por defecto "Pope"). `setting.changed` versión 2 con `from` y `to` de número o de texto; el nodo emite ya la v2 para todos los ajustes. `SettingsService.get` valida cada ajuste guardado por separado (si uno no vale, usa su valor por defecto) y luego el conjunto con su esquema. Sin migración: los ajustes sin fila valen su valor por defecto. Verificado: tests de los esquemas y e2e del ajuste (evento v2, rechazo del nombre vacío).
 
 - [ ] **T17: Reportes PDF**
   - **Cubre:** REQ-005-51, REQ-005-52, REQ-005-53

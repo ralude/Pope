@@ -21,6 +21,11 @@ export const settingsSchema = z.strictObject({
    * Apagado por defecto. Es un número, como los demás ajustes, para que valga el mismo evento.
    */
   allowNegativeStock: z.number().int().min(0).max(1),
+  /**
+   * Nombre del local, para el reporte del cierre (REQ-005-51) y la cabecera del panel. Por
+   * defecto "Pope" hasta que el administrador lo escriba.
+   */
+  localName: z.string().trim().min(1, 'Escribe el nombre del local').max(60),
 });
 export type Settings = z.infer<typeof settingsSchema>;
 
@@ -33,6 +38,7 @@ export const DEFAULT_SETTINGS: Settings = {
   heartbeatGraceSeconds: 180,
   temporarySessionsKeptPerPc: MIN_TEMPORARY_SESSIONS_KEPT,
   allowNegativeStock: 0,
+  localName: 'Pope',
 };
 
 /** Cuerpo de `PUT /settings`: uno o varios ajustes; los que no vienen no cambian. */

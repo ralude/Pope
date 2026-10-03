@@ -13,7 +13,15 @@ describe('ajustes del nodo (REQ-001-27, REQ-001-64)', () => {
       heartbeatGraceSeconds: 180,
       temporarySessionsKeptPerPc: 3,
       allowNegativeStock: 0,
+      localName: 'Pope',
     });
+  });
+
+  it('el nombre del local es un texto de 1 a 60 caracteres (REQ-005-51)', () => {
+    const parse = (localName: string) => settingsUpdateRequestSchema.safeParse({ localName });
+    expect(parse('  Ciber Ana  ').data).toEqual({ localName: 'Ciber Ana' });
+    expect(parse('   ').success).toBe(false);
+    expect(parse('x'.repeat(61)).success).toBe(false);
   });
 
   it('vender sin stock está apagado por defecto y solo vale 0 o 1 (REQ-005-12)', () => {
