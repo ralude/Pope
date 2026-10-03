@@ -7,7 +7,7 @@ import type { NodeToPcMessage, PcToNodeMessage } from '@pope/shared';
 /** Peticiones que hace el Shell. `hello` y los latidos son cosa del agente. */
 export type ShellRequest = Extract<
   PcToNodeMessage,
-  { type: 'login' | 'logout' | 'buyCombo' | 'listCombos' }
+  { type: 'login' | 'logout' | 'buyCombo' | 'listCombos' | 'pause' | 'resume' }
 >;
 
 /**

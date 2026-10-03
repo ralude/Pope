@@ -143,11 +143,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** sin commit (el diseño vive en el lienzo); se anota en `ESTADO.md` con el siguiente commit.
   - **Decidido al implementarla:** fila «Pausa de sesión · Spec 002» del lienzo, con cinco artboards que importan «Inicio» en cada estado (propiedades «pausa» y «pausas»): botón Pausar sin pausas (con el motivo al lado: «Sin pausas disponibles», «… hoy» o «La pausa no está disponible en este local»), confirmación («¿Pausar tu sesión?», «Tu tiempo se detiene hasta que vuelvas. Puedes estar en pausa hasta 15 min; después, el tiempo vuelve a correr.», recuadro ámbar de los juegos online y «Te quedan 2 pausas», con «Seguir jugando» y «Pausar»), pantalla de pausa a pantalla completa (fondo de Pope, tarjeta de vidrio, «Sesión en pausa», el tiempo de pausa en grande con «Hasta las…», pausas que quedan, «Tu tiempo · detenido» y saldo, y «Reanudar»), su variante vencida («Tu tiempo vuelve a correr» en ámbar y el restante bajando) y «¿Eres juan?» («Al reanudar, el tiempo de juan vuelve a correr. Si no eres juan, avisa al encargado.», con «Cancelar» y «Sí, reanudar»). El botón del encabezado pasa a icono con el texto «Pausar». La pantalla de pausa no ofrece «Cerrar sesión». **Aprobado por el mantenedor el 2026-10-03.**
 
-- [ ] **T15: Pausa en el canal y en el tiempo en vivo del Shell**
+- [x] **T15: Pausa en el canal y en el tiempo en vivo del Shell**
   - **Cubre:** REQ-002-03, REQ-002-06
   - **Hacer:** `PcChannel` envía `pause` y `resume` con `requestId` y espera su respuesta, como `buyCombo`; `session/live.ts` no descuenta durante la pausa (salvo con `billing`) y calcula el tiempo de pausa que queda.
   - **Verificar:** tests de `channel/` y `session/live.test.ts`.
   - **Commit:** `feat(shell-ui): pausa y reanuda por el canal de la PC`
+  - **Decidido al implementarla:** `ShellRequest` admite `pause` y `resume`; `usePcChannel` expone `pause()` y `resume()`, que esperan su `state` con el `requestId` o el `error` (`session/pause.ts`, `pauseReply`). Si el nodo falla de forma inesperada: «No se pudo pausar. Si se repite, avisa al encargado.» o «No se pudo reanudar…», como el texto del login. En `session/live.ts`, `onHold` y `livePause`: el tiempo de la sesión no baja en una pausa que no cobra, y los segundos de pausa se descuentan desde `secondsLeft`. **Decidido por el mantenedor (2026-10-03), en un commit aparte antes de esta tarea:** el `state` lleva los segundos de pausa que quedan (`secondsLeft`), calculados por el nodo, en lugar de calcularlos con el reloj de la PC.
 
 - [ ] **T16: Botón Pausar y confirmación**
   - **Cubre:** REQ-002-01, REQ-002-02, REQ-002-11, REQ-002-23, CA-002-04, CA-002-06, CA-002-07

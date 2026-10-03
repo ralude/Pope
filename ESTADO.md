@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · T14 de la spec 002 (diseño de la pausa en el Shell, aprobado)
+**Última actualización:** 2026-10-03 · T15 de la spec 002 (la pausa en el canal del Shell)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [002 · Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md), fase 1 (todo en TypeScript). La 005 espera la revisión de T07 |
-| **Siguiente tarea** | **T15: Pausa en el canal y en el tiempo en vivo del Shell** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
-| **Progreso** | Spec 002: 14 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
+| **Siguiente tarea** | **T16: Botón Pausar y confirmación** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
+| **Progreso** | Spec 002: 15 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -50,7 +50,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 68 / 68 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 14 / 19 |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 15 / 19 |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
@@ -62,6 +62,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T15 (spec 002): el Shell pausa y reanuda por el canal y, en una pausa que no cobra, su tiempo no baja; la pausa cuenta hacia atrás desde lo que dice el nodo.
 - **2026-10-03:** Spec 002: el `state` de la PC lleva los segundos de pausa que quedan, calculados por el nodo, para la cuenta atrás del Shell (decisión del mantenedor antes de T15).
 - **2026-10-03:** T14 (spec 002): diseño de la pausa en el lienzo del Shell (botón, confirmación, pantalla de pausa, vencida y «¿Eres juan?»), aprobado. Además, el mantenedor decide la pestaña plegada para el modo técnico (REQ-003-42, ya en el lienzo) y cambiar los avisos de 5 y 1 min tras la fase 1.
 - **2026-10-03:** T13 (spec 002): el detalle de una PC en pausa muestra desde cuándo, cuánto queda y las pausas usadas, con «Reanudar» y «Cerrar sesión»; probado en Chrome (CA-002-08). Termina la fase del panel.
@@ -71,4 +72,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T09 (spec 002): en pausa la sesión no se cierra por falta de latidos ni porque la PC se reinicie (vuelve a la pantalla de pausa); vencida con a), la gracia cuenta desde el fin de la pausa.
 - **2026-10-03:** T08 (spec 002): la pausa vence a los 15 min: con a) vuelve a cobrar desde `maxUntil` con la PC en pausa (CA-002-05), con b) cierra la sesión sin cobrar la pausa; al arrancar, el nodo aplica las vencidas. Se aplica la opción vigente al vencer (mantenedor).
 - **2026-10-03:** T07 (spec 002): límites de 3 pausas por sesión y 5 por día de Caracas, y la pausa desactivable; cada `state` lleva las pausas que quedan y el límite. CA-002-04 y CA-002-06 con test e2e.
-- **2026-10-03:** T06 (spec 002): la PC pausa y reanuda; mientras la pausa no cobra no se cobra nada (latido, compra, cambio de tasa, cierre) ni se avisa; las temporales no pausan. CA-002-01 y CA-002-07 con test e2e.

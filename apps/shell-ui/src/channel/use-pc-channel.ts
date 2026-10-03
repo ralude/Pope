@@ -12,6 +12,7 @@ import {
 } from '../lock/login.js';
 import { type BuyResult, buyReply, type CombosResult, combosReply } from '../session/combos.js';
 import { type LogoutResult, logoutReply } from '../session/logout.js';
+import { type PauseResult, pauseReply, RESUME_FAILED_MESSAGE } from '../session/pause.js';
 import type { PcChannel, ShellRequest } from './channel.js';
 import { applyEvent, dismissEnded, dismissWarning, INITIAL_FEED, type PcFeed } from './feed.js';
 
@@ -39,6 +40,10 @@ export function usePcChannel(channel: PcChannel): {
   buyCombo: (comboId: string) => Promise<BuyResult>;
   /** El cliente cierra su sesión (T50, REQ-001-26). */
   logout: () => Promise<LogoutResult>;
+  /** El cliente pausa su sesión (spec 002, REQ-002-01). */
+  pause: () => Promise<PauseResult>;
+  /** El cliente quita la pausa tras confirmar que es él (spec 002, REQ-002-10). */
+  resume: () => Promise<PauseResult>;
   /** El cliente cierra el aviso de fin de tiempo. */
   closeWarning: () => void;
   /** Se deja de mostrar "Tu sesión terminó" y vuelve el bloqueo. */
@@ -128,6 +133,23 @@ export function usePcChannel(channel: PcChannel): {
     [request],
   );
 
+  const pause = useCallback(
+    () =>
+      request(
+        (requestId) => ({ type: 'pause', requestId }),
+        (m, id) => pauseReply(m, id),
+      ),
+    [request],
+  );
+  const resume = useCallback(
+    () =>
+      request(
+        (requestId) => ({ type: 'resume', requestId }),
+        (m, id) => pauseReply(m, id, RESUME_FAILED_MESSAGE),
+      ),
+    [request],
+  );
+
   const closeWarning = useCallback(() => {
     setFeed(dismissWarning);
   }, []);
@@ -135,5 +157,5 @@ export function usePcChannel(channel: PcChannel): {
     setFeed(dismissEnded);
   }, []);
 
-  return { feed, login, listCombos, buyCombo, logout, closeWarning, closeEnded };
+  return { feed, login, listCombos, buyCombo, logout, pause, resume, closeWarning, closeEnded };
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { formatDuration, formatMoney, type SessionState, seconds, usd } from '@pope/shared';
 
-import { liveSession } from './live.js';
+import { livePause, liveSession, onHold } from './live.js';
 
 const SESSION_ID = '01900000-0000-7000-8000-0000000000aa';
 
@@ -86,5 +86,38 @@ describe('liveSession (T47)', () => {
       remainingSeconds: 1435,
     });
     expect(liveSession(temporary, 99_999).remainingSeconds).toBe(0);
+  });
+});
+
+describe('en pausa (T15, REQ-002-03, REQ-002-06)', () => {
+  const paused = (billing: boolean, secondsLeft: number): SessionState => {
+    const session = account(3, 0, 1.5);
+    if (session.kind !== 'account') throw new Error('Se esperaba una sesión con cuenta');
+    return {
+      ...session,
+      pause: {
+        startedAt: '2026-10-01T22:30:00.000Z',
+        maxUntil: '2026-10-01T22:45:00.000Z',
+        billing,
+        secondsLeft: seconds(secondsLeft),
+      },
+    };
+  };
+
+  it('CA-002-01: mientras la pausa no cobra, ni el tiempo ni el saldo bajan', () => {
+    expect(onHold(paused(false, 720))).toBe(true);
+    expect(shown(paused(false, 720), 600)).toMatchObject({ total: '2:00:00', money: '3,00 USD' });
+  });
+
+  it('la pausa cuenta hacia atrás desde los segundos que dio el nodo, sin bajar de 0', () => {
+    expect(livePause(paused(false, 720), 0)).toEqual({ secondsLeft: 720, billing: false });
+    expect(livePause(paused(false, 720), 100.7)).toEqual({ secondsLeft: 620, billing: false });
+    expect(livePause(paused(false, 720), 900)).toEqual({ secondsLeft: 0, billing: false });
+    expect(livePause(account(3, 0, 1.5), 10)).toBeNull();
+  });
+
+  it('CA-002-05: si ya cobra, el tiempo vuelve a correr aunque siga en pausa', () => {
+    expect(onHold(paused(true, 0))).toBe(false);
+    expect(shown(paused(true, 0), 1800)).toMatchObject({ total: '1:30:00', money: '2,25 USD' });
   });
 });
