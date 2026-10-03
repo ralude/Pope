@@ -383,7 +383,7 @@ function OtherIncome({
         />
         <div className="muted num" style={{ fontSize: 12, textAlign: 'center' }}>
           {valid && vesRate !== undefined
-            ? `≈ ${formatBolivares(amount, vesRate)}`
+            ? formatBolivares(amount, vesRate)
             : 'Se cobra después con cualquier método, también en Bs'}
         </div>
       </div>
