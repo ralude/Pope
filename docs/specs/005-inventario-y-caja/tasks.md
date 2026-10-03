@@ -318,9 +318,9 @@ Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artbo
 
 ### Cierre de la parte 2
 
-- [ ] **T24: Verificación de la parte 2**
+- [x] **T24: Verificación de la parte 2**
   - **Cubre:** CA-005-01 a CA-005-03, CA-005-07 a CA-005-13
   - **Hacer:** tabla en `mediciones.md` de la spec 005 con cada criterio y su test o prueba a mano, como en la spec 001.
   - **Verificar:** revisión del mantenedor.
   - **Commit:** `docs(specs): verifica el inventario y la caja de la spec 005`
-  - **Nota (2026-10-03):** la tabla de `mediciones.md` se hizo antes de los cambios del 2026-10-03 y se rehízo tras T31 (CA-005-07 nuevo, CA-005-12 y CA-005-13). Pendiente de la revisión del mantenedor.
+  - **Nota (2026-10-03):** la tabla de `mediciones.md` se hizo antes de los cambios del 2026-10-03 y se rehízo tras T31 (CA-005-07 nuevo, CA-005-12 y CA-005-13). Aprobada por el mantenedor el 2026-10-03.

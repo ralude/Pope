@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · verificación de la parte 2 de la spec 005 rehecha (T24, en revisión)
+**Última actualización:** 2026-10-03 · parte 2 de la spec 005 verificada (T24)
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T04; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T24: Verificación de la parte 2**, en revisión del mantenedor: tabla rehecha en [mediciones.md](docs/specs/005-inventario-y-caja/mediciones.md) con los cambios del 2026-10-03. Después, T05–T07 |
-| **Progreso** | Spec 005: 38 / 42 tareas (parte 1: 4 / 7; parte 2: 34 / 35) |
+| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) desde T05; parte 2 (inventario, ventas y caja) verificada |
+| **Siguiente tarea** | **T05: Bs en el mapa, Clientes y cobros** (parte 1 de la spec 005); después T06 y T07 |
+| **Progreso** | Spec 005: 39 / 42 tareas (parte 1: 4 / 7; parte 2: 35 / 35) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -52,7 +52,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 38 / 42 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 3 en borrador | 39 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -61,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T24 (spec 005) aprobada por el mantenedor: la parte 2 (inventario, ventas y caja) queda verificada. Siguen T05–T07 de la parte 1.
 - **2026-10-03:** T24 (spec 005) rehecha tras los cambios del día: los 10 criterios de la parte 2 (con el CA-005-07 nuevo y los CA-005-12 y CA-005-13) tienen test automático y prueba a mano; falta la revisión del mantenedor.
 - **2026-10-03:** T31 (spec 005): la Caja muestra los movimientos en una tabla como la de SENET, con los ingresos del día, la apertura, el informe X y «Cerrar caja (informe Z)»; probada en Chrome (CA-005-12).
 - **2026-10-03:** T30 (spec 005): informe X, el PDF del encargado de la caja abierta con lo esperado, sin cerrarla.
@@ -70,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T27 (spec 005): la Caja cobra otros ingresos con importe y comentario, como en el diseño; probado en Chrome (CA-005-07).
 - **2026-10-03:** T26 (spec 005): el nodo vende otros ingresos (importe y comentario), los guarda con su comentario, emite `sale.recorded` v2 y los junta en «Otros ingresos» en el reporte.
 - **2026-10-03:** T25 (spec 005): contratos del otro ingreso (importe en USD y comentario opcional) y `sale.recorded` v2 con líneas de producto u otro ingreso.
-- **2026-10-03:** Spec 005: el mantenedor aprueba el plan y las tareas de los cambios (T25 a T31): otro ingreso con su migración desde los conceptos, el cliente y las líneas en los movimientos, el informe X y la tabla de la Caja.
