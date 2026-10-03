@@ -39,11 +39,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
 
 ## Fase 1: Contratos (`packages/shared`)
 
-- [ ] **T01: Ajustes de la pausa**
+- [x] **T01: Ajustes de la pausa**
   - **Cubre:** REQ-002-20, REQ-002-21, REQ-002-22, REQ-002-23, REQ-002-24
   - **Hacer:** en `settingsSchema` y `DEFAULT_SETTINGS`: `pauseEnabled` (1 o 0, por defecto 1), `pauseMaxSeconds` (60 a 3600, por defecto 900), `pauseMaxPerSession` (1 a 20, por defecto 3), `pauseMaxPerDay` (1 a 50, por defecto 5) y `pauseOverrun` (`resume_billing` o `close`, por defecto `resume_billing`).
   - **Verificar:** tests de los límites y valores por defecto en shared; e2e en el servidor: `PUT /settings` los acepta, rechaza los que se salen y emite `setting.changed` v2.
   - **Commit:** `feat(shared): añade los ajustes de la pausa`
+  - **Decidido al implementarla:** el esquema exporta además `pauseOverrunSchema` (`resume_billing` o `close`), que usarán las reglas (T02) y el evento de vencimiento (T04). No hace falta migración: un ajuste sin fila en `settings` vale su valor por defecto. La pantalla «Ajustes del local» del panel no cambia: solo envía lo que se edita en ella.
 
 - [ ] **T02: Reglas puras de la pausa**
   - **Cubre:** REQ-002-11, REQ-002-20, REQ-002-21, REQ-002-22, REQ-002-23, REQ-002-24

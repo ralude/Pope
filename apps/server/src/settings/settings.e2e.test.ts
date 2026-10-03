@@ -7,6 +7,15 @@ import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { SettingsService } from './settings.service.js';
 
+/** Ajustes de la pausa por defecto (spec 002). */
+const PAUSE_DEFAULTS = {
+  pauseEnabled: 1,
+  pauseMaxSeconds: 900,
+  pauseMaxPerSession: 3,
+  pauseMaxPerDay: 5,
+  pauseOverrun: 'resume_billing',
+};
+
 describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
   let testApp: TestApp;
   let admin: string;
@@ -43,6 +52,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
       temporarySessionsKeptPerPc: 3,
       allowNegativeStock: 0,
       localName: 'Pope',
+      ...PAUSE_DEFAULTS,
     });
   });
 
@@ -54,6 +64,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
       temporarySessionsKeptPerPc: 3,
       allowNegativeStock: 0,
       localName: 'Pope',
+      ...PAUSE_DEFAULTS,
     });
     expect((await get(ana)).json<Settings>().heartbeatGraceSeconds).toBe(300);
     expect(await settingEvents()).toMatchObject([
@@ -111,6 +122,48 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
     expect((await put({ localName: '   ' })).statusCode).toBe(400);
   });
 
+  it('REQ-002-20 a 24: el administrador cambia los ajustes de la pausa, con sus eventos v2', async () => {
+    const response = await put({
+      pauseEnabled: 0,
+      pauseMaxSeconds: 600,
+      pauseMaxPerSession: 2,
+      pauseMaxPerDay: 4,
+      pauseOverrun: 'close',
+    });
+    expect(response.statusCode).toBe(200);
+    expect(response.json<Settings>()).toMatchObject({
+      pauseEnabled: 0,
+      pauseMaxSeconds: 600,
+      pauseMaxPerSession: 2,
+      pauseMaxPerDay: 4,
+      pauseOverrun: 'close',
+    });
+    const changed = await settingEvents();
+    expect(changed.every((e) => e.version === 2)).toBe(true);
+    expect(changed.map((e) => e.payload)).toEqual([
+      { key: 'pauseEnabled', from: 1, to: 0 },
+      { key: 'pauseMaxSeconds', from: 900, to: 600 },
+      { key: 'pauseMaxPerSession', from: 3, to: 2 },
+      { key: 'pauseMaxPerDay', from: 5, to: 4 },
+      { key: 'pauseOverrun', from: 'resume_billing', to: 'close' },
+    ]);
+  });
+
+  it('rechaza ajustes de la pausa fuera de sus límites', async () => {
+    for (const body of [
+      { pauseEnabled: 2 },
+      { pauseEnabled: false },
+      { pauseMaxSeconds: 30 },
+      { pauseMaxSeconds: 3601 },
+      { pauseMaxPerSession: 0 },
+      { pauseMaxPerDay: 51 },
+      { pauseOverrun: 'reserve' },
+    ]) {
+      expect((await put(body)).statusCode).toBe(400);
+    }
+    expect(await settingEvents()).toEqual([]);
+  });
+
   it('un valor inválido guardado a mano no tumba el nodo: se usa el valor por defecto', async () => {
     await put({ heartbeatGraceSeconds: 300 });
     await testApp.database.db
@@ -122,6 +175,7 @@ describe('ajustes del nodo (e2e, REQ-001-27, REQ-001-64)', () => {
       temporarySessionsKeptPerPc: 3,
       allowNegativeStock: 0,
       localName: 'Pope',
+      ...PAUSE_DEFAULTS,
     });
   });
 });
