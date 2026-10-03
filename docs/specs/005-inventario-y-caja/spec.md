@@ -158,6 +158,7 @@ hoja de papel se sigue usando de respaldo.
 - Varios almacenes.
 - Código de barras, costo y margen de los productos, y categorías (por ahora; REQ-005-01).
 - Varios turnos de caja en un mismo día (REQ-005-44).
+- **Varias cajas abiertas a la vez**, como en SENET (donde se elige la caja de cada cobro): el mantenedor lo quiere estudiar **después del piloto** (2026-10-03). Hasta entonces, una sola caja del local (REQ-005-44).
 
 ## Preguntas abiertas
 
