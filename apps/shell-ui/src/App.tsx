@@ -7,7 +7,7 @@ import { EndedScreen } from './session/EndedScreen.js';
 import { SessionScreen } from './session/SessionScreen.js';
 
 export function App({ channel, pcName }: { channel: PcChannel; pcName: string }) {
-  const { feed, login, listCombos, buyCombo, logout, closeWarning, closeEnded } =
+  const { feed, login, listCombos, buyCombo, logout, pause, closeWarning, closeEnded } =
     usePcChannel(channel);
   if (feed.state?.status === 'active') {
     return (
@@ -22,6 +22,7 @@ export function App({ channel, pcName }: { channel: PcChannel; pcName: string })
         listCombos={listCombos}
         buyCombo={buyCombo}
         logout={logout}
+        pause={pause}
       />
     );
   }

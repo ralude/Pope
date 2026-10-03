@@ -1,6 +1,6 @@
 // Pausa de la sesión desde el Shell (spec 002, T15): respuestas del nodo a `pause` y `resume`.
 // El nodo decide si se puede pausar (ADR-0007); el Shell solo muestra lo que dice el `state`.
-import type { NodeToPcMessage } from '@pope/shared';
+import { type NodeToPcMessage, PAUSE_REFUSAL_MESSAGES, type SessionState } from '@pope/shared';
 
 import { withPeriod } from '../lock/login.js';
 
@@ -28,4 +28,33 @@ export function pauseReply(
       : { ok: false, message: withPeriod(message.message) };
   }
   return null;
+}
+
+/**
+ * El botón Pausar de la barra (REQ-002-01): no aparece en una sesión temporal (CA-002-07); si no
+ * quedan pausas o la pausa está desactivada, se ve apagado con el motivo al lado (CA-002-04,
+ * CA-002-06, REQ-002-23; mantenedor, 2026-10-03).
+ */
+export function pauseButton(session: SessionState): {
+  visible: boolean;
+  blocked: boolean;
+  reason: string | null;
+} {
+  if (session.kind !== 'account') return { visible: false, blocked: true, reason: null };
+  const limit = session.pauseLimit ?? null;
+  if (limit !== null)
+    return { visible: true, blocked: true, reason: PAUSE_REFUSAL_MESSAGES[limit] };
+  // Un nodo que no manda las pausas que quedan no sabe pausar: el botón queda apagado.
+  const left = session.pausesLeft ?? 0;
+  return { visible: true, blocked: left === 0, reason: null };
+}
+
+/** «Te quedan 2 pausas» o «Te queda 1 pausa» (REQ-002-02). */
+export function pausesLeftText(left: number): string {
+  return left === 1 ? 'Te queda 1 pausa' : `Te quedan ${String(left)} pausas`;
+}
+
+/** Duración máxima de una pausa para la confirmación: `15 min` (REQ-002-20). */
+export function pauseMaxText(maxSeconds: number): string {
+  return `${String(Math.round(maxSeconds / 60))} min`;
 }

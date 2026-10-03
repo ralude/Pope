@@ -150,11 +150,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(shell-ui): pausa y reanuda por el canal de la PC`
   - **Decidido al implementarla:** `ShellRequest` admite `pause` y `resume`; `usePcChannel` expone `pause()` y `resume()`, que esperan su `state` con el `requestId` o el `error` (`session/pause.ts`, `pauseReply`). Si el nodo falla de forma inesperada: «No se pudo pausar. Si se repite, avisa al encargado.» o «No se pudo reanudar…», como el texto del login. En `session/live.ts`, `onHold` y `livePause`: el tiempo de la sesión no baja en una pausa que no cobra, y los segundos de pausa se descuentan desde `secondsLeft`. **Decidido por el mantenedor (2026-10-03), en un commit aparte antes de esta tarea:** el `state` lleva los segundos de pausa que quedan (`secondsLeft`), calculados por el nodo, en lugar de calcularlos con el reloj de la PC.
 
-- [ ] **T16: Botón Pausar y confirmación**
+- [x] **T16: Botón Pausar y confirmación**
   - **Cubre:** REQ-002-01, REQ-002-02, REQ-002-11, REQ-002-23, CA-002-04, CA-002-06, CA-002-07
   - **Hacer:** el botón de la barra (hoy desactivado) se activa en sesiones con cuenta con pausas; si no quedan, desactivado con "Sin pausas disponibles" o "Sin pausas disponibles hoy" según `pauseLimit`; con la pausa desactivada, desactivado y con su mensaje (pregunta 2); no aparece en temporales. La confirmación avisa de que los juegos online pueden desconectarle y dice las pausas que quedan, con «Pausar» y «Seguir jugando»; muestra el texto del nodo si rechaza.
   - **Verificar:** tests de la lógica del botón; a mano en Chrome (CA-002-04, CA-002-06, CA-002-07).
   - **Commit:** `feat(shell-ui): añade el botón Pausar con su confirmación`
+  - **Decidido al implementarla:** `pauseButton` en `session/pause.ts` decide si se ve y si está apagado, con el motivo de `PAUSE_REFUSAL_MESSAGES` (los mismos textos que el nodo); un nodo que no manda las pausas que quedan deja el botón apagado sin motivo. `PauseDialog` es la confirmación del diseño; si el nodo rechaza, muestra su texto. **Decidido por el mantenedor (2026-10-03), en un commit aparte antes de esta tarea:** el `state` lleva la duración máxima de la pausa (`pauseMaxSeconds`) para la frase «Puedes estar en pausa hasta 15 min». Verificado en Chrome con el Shell de desarrollo: «Pausar» activo, la confirmación con «15 min» y «Te quedan 3 pausas», pausar cierra el diálogo; con el límite en 1 y la pausa quitada desde el panel, el botón queda apagado (`disabled`) con «Sin pausas disponibles» al lado. Los casos «hoy», desactivada y temporal, con test.
 
 - [ ] **T17: Pantalla de pausa y reanudar**
   - **Cubre:** REQ-002-06, REQ-002-10, CA-002-03, CA-002-05

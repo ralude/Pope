@@ -454,6 +454,38 @@ input {
   cursor: default;
 }
 
+/* Botón Pausar de la barra (spec 002, T16; diseño aprobado en T14). */
+.pause-btn {
+  height: 46px;
+  padding: 0 20px 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 23px;
+  background: rgba(255, 255, 255, 0.07);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.pause-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.pause-btn:disabled {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: #7c8591;
+  cursor: not-allowed;
+}
+
+.pause-reason {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--soft);
+}
+
 .session-body {
   flex-grow: 1;
   min-height: 0;
@@ -1024,4 +1056,35 @@ input {
 
 .btn-danger:hover:not(:disabled) {
   background: rgba(229, 72, 77, 0.16);
+}
+
+/* ─── Pausa (spec 002) ───────────────────────────────────────────────────────────────── */
+
+.dialog.pausing {
+  width: 560px;
+}
+
+.pause-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 16px;
+}
+
+.pause-warn svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #f5c26b;
+}
+
+.pauses-left {
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dialog.pausing .btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }

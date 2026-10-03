@@ -19,6 +19,8 @@ import type { LogoutResult } from './logout.js';
 import type { BuyResult, CombosResult } from './combos.js';
 import { formatTimeLeft, warningMinutes } from './format.js';
 import { liveSession } from './live.js';
+import { type PauseResult, pauseButton } from './pause.js';
+import { PauseDialog, PauseIcon } from './PauseDialog.js';
 import { WarningToast } from './WarningToast.js';
 
 /** Por debajo de 5 min el tiempo se pinta en ámbar, como los avisos (REQ-001-24). */
@@ -72,6 +74,7 @@ export function SessionScreen({
   listCombos,
   buyCombo,
   logout,
+  pause,
 }: {
   session: SessionState;
   vesRate: VesRate | null;
@@ -84,6 +87,7 @@ export function SessionScreen({
   listCombos: () => Promise<CombosResult>;
   buyCombo: (comboId: string) => Promise<BuyResult>;
   logout: () => Promise<LogoutResult>;
+  pause: () => Promise<PauseResult>;
 }) {
   const live = liveSession(session, useElapsed(stateAt));
   const remaining = live.remainingSeconds;
@@ -91,6 +95,8 @@ export function SessionScreen({
   const who = session.kind === 'account' ? session.username : session.name;
   const [buying, setBuying] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [pausing, setPausing] = useState(false);
+  const pauseState = pauseButton(session);
   const notice = useNotice();
 
   const openCombos = () => {
@@ -109,28 +115,28 @@ export function SessionScreen({
           <span className="dot dot-green" />
           {pcName} · En uso
         </div>
-        <button
-          type="button"
-          className="icon-btn"
-          disabled
-          aria-label="Pausar la sesión (próximamente)"
-          title="Pausa: próximamente"
-        >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <rect x="5" y="4" width="3.5" height="12" rx="1" />
-            <rect x="11.5" y="4" width="3.5" height="12" rx="1" />
-          </svg>
-        </button>
+        {pauseState.visible && (
+          <>
+            {pauseState.reason !== null && (
+              <div id="pausa-motivo" className="pause-reason">
+                {pauseState.reason}
+              </div>
+            )}
+            <button
+              type="button"
+              className="pause-btn"
+              disabled={pauseState.blocked}
+              aria-describedby={pauseState.reason !== null ? 'pausa-motivo' : undefined}
+              onClick={() => {
+                onCloseWarning();
+                setPausing(true);
+              }}
+            >
+              <PauseIcon size={20} />
+              Pausar
+            </button>
+          </>
+        )}
       </header>
 
       <div className="session-body">
@@ -313,6 +319,17 @@ export function SessionScreen({
           onBought={(text) => {
             setBuying(false);
             notice.show(text);
+          }}
+        />
+      )}
+
+      {pausing && session.kind === 'account' && (
+        <PauseDialog
+          pausesLeft={session.pausesLeft ?? 0}
+          maxSeconds={session.pauseMaxSeconds ?? null}
+          pause={pause}
+          onClose={() => {
+            setPausing(false);
           }}
         />
       )}
