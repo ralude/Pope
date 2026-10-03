@@ -1,7 +1,7 @@
 # Tareas 005: Inventario y caja
 
-- **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T03.
-- **Parte 2 · Inventario, ventas y caja:** Aprobado (2026-10-02).
+- **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T04.
+- **Parte 2 · Inventario, ventas y caja:** Aprobado (2026-10-02). **Cambios del 2026-10-03** (otro ingreso, tabla de movimientos e informe X): Aprobados (mantenedor, 2026-10-03).
 - **Plan:** [plan.md](plan.md)
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa. Cada
@@ -64,8 +64,8 @@ antes de seguir.
 ## Parte 2 · Inventario, ventas y caja
 
 **Orden** (plan, "Orden de implementación"): T08 a T17 (T13a, la caja del local, antes del registro de caja); después **T04** de la parte 1 (la tasa
-en el panel, necesaria para cobrar en bolívares); después T18 a T24 (con T23b); y al final T05 a T07 de la
-parte 1.
+en el panel, necesaria para cobrar en bolívares); después T18 a T23b; después los cambios del 2026-10-03 (T25 a T31); después T24; y al final T05 a T07 de
+la parte 1.
 
 ### Fase 1: Diseño y contratos
 
@@ -255,10 +255,64 @@ parte 1.
   - **Commit:** `feat(panel): permite cambiar los ajustes del local`
   - **Decidido al implementarla:** página `/ajustes` («Ajustes del local» en el raíl, tras Personal; solo administrador) con el nombre del local y «Permitir vender sin stock»; guarda solo lo que cambió con `PUT /settings`. No hay artboard: sigue el estilo de las demás pantallas. Solo los dos ajustes de la tarea; los de la spec 001 (gracia sin latidos, temporales conservadas) siguen sin pantalla. La barra superior aún no muestra el nombre del local (el diseño tiene «[NOMBRE DEL LOCAL]»): no lo pide ninguna tarea. Verificado en Chrome: «Ciber de prueba» y vender sin stock se guardaron, y el nombre salió en el PDF del último cierre (una página); después se devolvieron los ajustes de la base de desarrollo a «Pope» y sin vender sin stock. Que la Caja deje vender un agotado con el ajuste lo prueban los e2e del nodo (REQ-005-12) y lo lee la Caja desde T20a.
 
+### Fase 4: Cambios del 2026-10-03 (otro ingreso, tabla de movimientos e informe X)
+
+Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artboards «Caja» y
+«Caja · otro ingreso»).
+
+- [ ] **T25: Contratos del otro ingreso**
+  - **Cubre:** REQ-005-05, REQ-005-52
+  - **Hacer:** en `@pope/shared`, la línea `{ kind: 'other', usdMicros, comment }` en la petición de venta (de momento junto a `concept`, que se quita en T28b), su grupo `other` y `sale.recorded` v2 con líneas `product` u `other`.
+  - **Verificar:** tests unitarios: importe mayor que cero, comentario vacío a `null` y su tope, v1 y v2 válidas.
+  - **Commit:** `feat(shared): añade el otro ingreso a las ventas`
+
+- [ ] **T26: Ventas con otro ingreso en el nodo**
+  - **Cubre:** REQ-005-05, REQ-005-51, REQ-005-52
+  - **Hacer:** columna `comment` en `sale_lines` (migración), venta con líneas `other` (nombre "Otro ingreso", cantidad 1), descripción "Otro ingreso · comentario", `sale.recorded` v2, y la línea "Otros ingresos" en lo vendido por artículo.
+  - **Verificar:** e2e: CA-005-07 en el nodo (fila "Otro ingreso · 12 impresiones", 1,20 USD, efectivo USD, grupo otras ventas, evento v2); una venta con golosinas y otro ingreso; el reporte con "Otros ingresos" sin los anulados; CA-005-09 con un otro ingreso.
+  - **Commit:** `feat(server): vende otros ingresos con importe y comentario`
+
+- [ ] **T27: Caja: otro ingreso**
+  - **Cubre:** REQ-005-05, REQ-005-20
+  - **Hacer:** en la Caja, la pestaña «Otro ingreso» del diseño (importe en USD con su Bs, comentario opcional, «Añadir a la venta») en lugar de «Otras ventas»; el carrito y el cobro con esas líneas.
+  - **Verificar:** tests del carrito; a mano, CA-005-07.
+  - **Commit:** `feat(panel): cobra otros ingresos en la caja`
+
+- [ ] **T28a: Quitar los conceptos del panel**
+  - **Cubre:** REQ-005-05
+  - **Hacer:** quitar la pestaña «Otras ventas» de Inventario (`ConceptsTab`, `ConceptDialog`), lo que quede de conceptos en la Caja y `/sale-concepts` del proxy de Vite.
+  - **Verificar:** `pnpm test`, `lint` y `typecheck`; a mano, Inventario sin pestañas.
+  - **Commit:** `refactor(panel): quita los conceptos de venta`
+
+- [ ] **T28b: Quitar los conceptos del nodo**
+  - **Cubre:** REQ-005-05
+  - **Hacer:** quitar el módulo de conceptos y sus rutas, la línea `concept` de la petición de venta (shared) y, con una migración, pasar las líneas `concept` a `other` y borrar `concept_id` y `sale_concepts`. Los eventos `sale_concept.*` y `sale.recorded` v1 se quedan en shared para leer los guardados.
+  - **Verificar:** e2e: `/sale-concepts` responde 404 y una venta con `concept` se rechaza; la migración convierte una línea de concepto; `test:pg`.
+  - **Commit:** `refactor(server): quita los conceptos de venta`
+
+- [ ] **T29: Lista de movimientos con cliente y líneas**
+  - **Cubre:** REQ-005-24
+  - **Hacer:** `CashMovement` gana `customerName` y `lines` (shared); columna `customer_name` en `cash_entries`, que rellenan las ventas, recargas, combos y anulaciones, y la migración en las filas anteriores.
+  - **Verificar:** e2e: recarga, combo, venta con saldo y su anulación con el cliente; temporal y venta sin cuenta con `null`; las líneas de una venta.
+  - **Commit:** `feat(server): añade el cliente y las líneas a los movimientos de la caja`
+
+- [ ] **T30: Informe X**
+  - **Cubre:** REQ-005-46
+  - **Hacer:** `GET /shifts/current/report.pdf` para todo el personal: el PDF del encargado de la caja abierta, con "Informe X · caja abierta", la hora en que se sacó y solo lo esperado por método.
+  - **Verificar:** e2e: CA-005-13 (el texto, el total y lo esperado, sin contado ni diferencia; la caja sigue abierta y no hay eventos nuevos); los tres roles pueden; 404 sin caja abierta.
+  - **Commit:** `feat(server): genera el informe X de la caja abierta`
+
+- [ ] **T31: Caja: tabla de movimientos**
+  - **Cubre:** REQ-005-24, REQ-005-26, REQ-005-45, REQ-005-46
+  - **Hacer:** la mitad derecha de la Caja según el diseño: «Informe X», «Cerrar caja (informe Z)», los ingresos del día en grande, los grupos y lo pagado con saldo, la tabla (hora, cliente, estado, descripción, método y total con signo y Bs) con su detalle al tocar una fila y «Anular» en él, y la apertura al final.
+  - **Verificar:** tests del estado, el método y el signo de cada fila; a mano, CA-005-12 y CA-005-13 en Chrome.
+  - **Commit:** `feat(panel): muestra los movimientos de la caja en una tabla`
+
 ### Cierre de la parte 2
 
 - [ ] **T24: Verificación de la parte 2**
-  - **Cubre:** CA-005-01 a CA-005-03, CA-005-07 a CA-005-11
+  - **Cubre:** CA-005-01 a CA-005-03, CA-005-07 a CA-005-13
   - **Hacer:** tabla en `mediciones.md` de la spec 005 con cada criterio y su test o prueba a mano, como en la spec 001.
   - **Verificar:** revisión del mantenedor.
   - **Commit:** `docs(specs): verifica el inventario y la caja de la spec 005`
+  - **Nota (2026-10-03):** la tabla de `mediciones.md` se hizo antes de los cambios del 2026-10-03; se rehace al terminar T31 (CA-005-07 nuevo, CA-005-12 y CA-005-13).

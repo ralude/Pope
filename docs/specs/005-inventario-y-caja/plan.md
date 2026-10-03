@@ -1,8 +1,8 @@
 # Plan 005: Inventario y caja
 
 - **Spec:** [spec.md](spec.md)
-- **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T03.
-- **Parte 2 · Inventario, ventas y caja:** Aprobado (2026-10-02).
+- **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T04.
+- **Parte 2 · Inventario, ventas y caja:** Aprobado (2026-10-02). **Cambios del 2026-10-03** (otro ingreso, tabla de movimientos e informe X): Aprobados (mantenedor, 2026-10-03).
 - **ADRs que aplican:** ADR-0001 (local-first), ADR-0007 (el nodo decide), ADR-0008 (eventos),
   ADR-0011 (recursos), ADR-0015 (micro-unidades).
 - **ADRs nuevos que propone:** ninguno.
@@ -329,6 +329,86 @@ eventos ya guardados.
 4. **T04 de la parte 1** (la tasa en el panel), necesaria para cobrar en bolívares.
 5. Panel: Inventario, Caja (venta y movimientos), turno y cierre, historial de cierres.
 6. Verificación de la parte 2. Después, T05 a T07 de la parte 1.
+
+### Cambios del 2026-10-03: otro ingreso, tabla de movimientos e informe X
+
+Alcance: REQ-005-05, REQ-005-20, REQ-005-21, REQ-005-24, REQ-005-26, REQ-005-45, REQ-005-46,
+REQ-005-51 a REQ-005-53 tal como quedaron el 2026-10-03, y CA-005-07, CA-005-12 y CA-005-13.
+El diseño aprobado está en el lienzo del panel (artboards «Caja» y «Caja · otro ingreso»).
+
+**Otro ingreso en lugar de los conceptos (REQ-005-05)**
+
+- **Petición de la venta:** la línea `concept` se sustituye por
+  `{ kind: 'other', usdMicros, comment }`: el importe en µUSD (mayor que cero, sin tope propio,
+  como el precio de un concepto) y el comentario (hasta 80 caracteres; vacío se guarda como
+  `null`).
+- **Base de datos:** `sale_lines` gana `comment` (texto, opcional). Una línea `other` lleva el
+  nombre "Otro ingreso", cantidad 1 y como precio el importe; la restricción de la tabla pasa a
+  ser "producto u otro ingreso". Su grupo del reporte es `other` ("otras ventas", REQ-005-52).
+- **Evento:** `sale.recorded` pasa a la **versión 2**, con líneas `product` (id, nombre,
+  cantidad, precio y total) u `other` (comentario y total). La versión 1 sigue siendo válida
+  para los eventos ya guardados.
+- **Descripción del movimiento:** "Otro ingreso · 20 impresiones", o "Otro ingreso" sin
+  comentario; en una venta con golosinas, detrás de ellas ("Doritos × 2, Otro ingreso · 20
+  impresiones").
+- **Quitar los conceptos** (mantenedor, 2026-10-03: "del todo"): se borran el módulo de
+  conceptos del nodo (`GET/POST/PATCH /sale-concepts`), su pestaña en Inventario y la tabla
+  `sale_concepts` con la columna `concept_id`. Una migración pasa antes las líneas `concept`
+  que existan a `other`, con el comentario "Impresiones × 12" (nombre y cantidad), cantidad 1
+  y su total. Solo hay datos de desarrollo: Pope aún no se usa en el local. **Los eventos ya
+  guardados no cambian** (ADR-0008): `sale_concept.created`, `sale_concept.updated` y
+  `sale.recorded` v1 siguen en `@pope/shared` para poder leerlos, pero ya no se emiten.
+- **Reporte** (REQ-005-51): en "Lo vendido por artículo", los otros ingresos van en una línea,
+  "Otros ingresos · 3,20 USD", con cuántos se cobraron (sin los anulados) y "—" en almacén. En
+  el detallado, cada movimiento ya lleva el comentario en su descripción (REQ-005-53).
+
+**Tabla de movimientos (REQ-005-24, REQ-005-26)**
+
+- `CashMovement` (`GET /shifts/current/entries`) gana:
+  - `customerName`: la cuenta del cobro (quien recarga, compra el combo o paga con su saldo);
+    `null` en las sesiones temporales y en las ventas sin cuenta. Se copia al cobrar en una
+    columna nueva `customer_name` de `cash_entries`, como la descripción; la migración la
+    rellena en las filas anteriores desde el ledger, las compras de combos y las ventas.
+  - `lines`: en las ventas y sus anulaciones, cada línea con su nombre, cantidad e importe (el
+    detalle de la fila); vacío en lo demás.
+- El **estado** lo pone el panel: "Anulación" (fuente `void`), "Anulada" (`voided`), "Con
+  saldo" (todo pagado con saldo) o "Cobrado". El **método** junta los métodos de la fila con
+  "+" ("Efectivo USD + Pago móvil").
+- Los **ingresos del día** son el `total` de `cashTotals`, que ya no cuenta lo pagado con
+  saldo y resta las anulaciones; debajo, los grupos y lo pagado con saldo, que la respuesta ya
+  trae. No hace falta nada nuevo en el nodo.
+- La **fila de apertura** sale de la caja abierta que ya tiene el panel (`ShiftProvider`:
+  hora, quién y fondo): tampoco cambia el nodo.
+- Al tocar una fila se despliega su detalle (líneas, pagos con su Bs y su tasa, quién y el
+  motivo); "Anular" pasa a ese detalle, con el mismo diálogo de motivo.
+
+**Informe X (REQ-005-46) y "Cerrar caja (informe Z)" (REQ-005-45)**
+
+- `GET /shifts/current/report.pdf`, para todo el personal (encargado, administrador y dueño);
+  404 si no hay caja abierta. Usa el mismo `ShiftReportService` y el mismo PDF del encargado,
+  con dos diferencias: arriba dice "Informe X · caja abierta" y "Sacado a las hh:mm" (hora de
+  Caracas), y la tabla por método solo lleva lo esperado. No guarda nada ni emite eventos: es
+  una lectura.
+- `GET /shifts/:id/report.pdf` no cambia: el PDF del cierre es el informe Z.
+- En el panel, encima de la tabla: "Informe X" (descarga `informe-x-AAAA-MM-DD-hhmm.pdf`) y
+  "Cerrar caja (informe Z)", que sale para quien puede cerrar (quien abrió o un administrador)
+  y abre el mismo `CloseCashDialog`. El "Cerrar caja" de la cabecera de la Caja se quita.
+
+**Pruebas**
+
+| Nivel | Qué | REQ / CA |
+|---|---|---|
+| Unitarias (shared) | Línea `other` (importe, comentario vacío a `null`, tope del comentario); `sale.recorded` v1 y v2 | 005-05 |
+| e2e (server + PGlite) | Venta con un otro ingreso y con golosinas (fila, descripción, grupo y evento v2); las rutas de conceptos ya no existen; "Otros ingresos" en el reporte sin los anulados; `customerName` y `lines` en la lista; informe X por rol, sin caja abierta (404) y sin eventos nuevos | CA-005-07, 09, 12, 13 |
+| Unitarias (panel) | Carrito con otro ingreso; estado, método y signo de cada fila | 005-05, 24 |
+| A mano | Caja en Chrome: otro ingreso, tabla, ingresos del día, apertura, informe X | CA-005-07, 12, 13 |
+
+**Orden:** contratos (shared) → nodo (venta con otro ingreso) → Caja (otro ingreso) → quitar
+los conceptos (primero el panel, después nodo y shared) → lista con cliente y líneas → informe
+X → tabla en la Caja → rehacer T24.
+
+**Recursos:** nada nuevo. Se quita una tabla y un módulo; el informe X se genera bajo demanda,
+como el del cierre.
 
 ### Riesgos
 
