@@ -18,6 +18,7 @@ export * from './inventory.js';
 export * from './cash.js';
 export * from './sale.js';
 export * from './settings.js';
+export * from './pause.js';
 export * from './temporary.js';
 export * from './dev-pcs.js';
 export * from './pc-map.js';

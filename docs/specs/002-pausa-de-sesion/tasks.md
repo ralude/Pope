@@ -46,11 +46,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(shared): añade los ajustes de la pausa`
   - **Decidido al implementarla:** el esquema exporta además `pauseOverrunSchema` (`resume_billing` o `close`), que usarán las reglas (T02) y el evento de vencimiento (T04). No hace falta migración: un ajuste sin fila en `settings` vale su valor por defecto. La pantalla «Ajustes del local» del panel no cambia: solo envía lo que se edita en ella.
 
-- [ ] **T02: Reglas puras de la pausa**
+- [x] **T02: Reglas puras de la pausa**
   - **Cubre:** REQ-002-11, REQ-002-20, REQ-002-21, REQ-002-22, REQ-002-23, REQ-002-24
   - **Hacer:** funciones sin efectos en `packages/shared/src/pause.ts`: pausas que quedan (sesión y día) y qué límite se alcanzó; si una sesión puede pausar y por qué no (temporal, desactivada, sin pausas en la sesión o en el día, ya en pausa), con su texto en español; hasta cuándo dura una pausa (`maxUntil`); qué pasa al vencer según `pauseOverrun`; y el día de una pausa en hora de Caracas (con `LOCAL_TIME_ZONE`).
   - **Verificar:** tests unitarios, incluido el cambio de día a medianoche de Caracas (las 04:00 UTC).
   - **Commit:** `feat(shared): añade las reglas de la pausa`
+  - **Decidido al implementarla:** `pause.ts` con `pauseLimitSchema` (`session`, `day`, `disabled`), `pauseAllowance` (pausas que quedan y el límite alcanzado), `pauseRefusal` y `PAUSE_REFUSAL_MESSAGES`, `pauseMaxUntil`, `pauseSecondsLeft`, `pauseExpired` y `pausesOnDayOf` (cuenta por `localDateInCaracas`, así el nodo no necesita zonas horarias en SQL). Lo que pasa al vencer es el propio ajuste `pauseOverrun`: no necesita función. **Decidido por el mantenedor (2026-10-03):** los textos de los rechazos que la spec no fijaba ("Las sesiones temporales no se pueden pausar", "La pausa no está disponible en este local", "Tu sesión ya está en pausa") y que, si se agotan a la vez los dos límites, manda el del día.
 
 - [ ] **T03: Contratos del canal y del mapa**
   - **Cubre:** REQ-002-01, REQ-002-02, REQ-002-06, REQ-002-10, REQ-002-14, REQ-002-22
