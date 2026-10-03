@@ -30,6 +30,17 @@ prueba a mano en el panel.
 337: falla solo `sessions/no-heartbeat.e2e.test.ts` › «si la PC nunca supo de la sesión…», el
 test inestable de la spec 001 ya anotado en `ESTADO.md` y que no toca esta spec.
 
+## T07 · Criterio de aceptación de la parte 1 (tasa de cambio manual)
+
+| CA | Requisitos | Tests | A mano |
+|---|---|---|---|
+| CA-005-06 | REQ-005-34, 36, REQ-001-13 | servidor `exchange-rates/exchange-rates.e2e.test.ts`, `exchange-rates/rate-distribution.e2e.test.ts`; panel `rate/model.test.ts`; shared `money.test.ts`, `exchange-rate.test.ts` | T07 (base nueva sin tasa, `cliente07` con 3,00 USD en la PC 01: al guardar 40,00 en el panel, el panel y el Shell pasan a mostrar el Bs al momento, y queda `exchange_rate.set` con el administrador y la fuente `manual`) |
+
+El detalle de la prueba está en las [mediciones de la spec 001](../001-cuentas-y-sesiones/mediciones.md#spec-005--t07--equivalente-en-bs-req-001-13-ca-005-06).
+T07 solo pide el CA-005-06. CA-005-04 queda fuera de la parte 1: es la consulta automática al
+BCV, y esta parte es la tasa manual. CA-005-05 (la tasa del lunes, desactualizada el miércoles)
+lo cubre `exchange-rates/exchange-rates.e2e.test.ts`.
+
 ## Pendiente
 
 - **Imprimir el PDF del encargado en papel** (T22b, REQ-005-51): se comprobó que se descarga y

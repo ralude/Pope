@@ -1,6 +1,6 @@
 # Tareas 005: Inventario y caja
 
-- **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). En pausa tras T04.
+- **Parte 1 · Tasa de cambio manual:** Aprobado (2026-10-02). T01 a T06 hechas; T07 (verificación) en revisión del mantenedor.
 - **Parte 2 · Inventario, ventas y caja:** Aprobado (2026-10-02). **Cambios del 2026-10-03** (otro ingreso, tabla de movimientos e informe X): Aprobados (mantenedor, 2026-10-03).
 - **Plan:** [plan.md](plan.md)
 
@@ -62,6 +62,7 @@ antes de seguir.
   - **Hacer:** probar CA-005-06 en Chrome (panel y Shell). Marcar REQ-001-13 como hecho en la spec 001 y anotar la verificación en `mediciones.md` de la spec 001.
   - **Verificar:** revisión del mantenedor.
   - **Commit:** `docs(specs): verifica la tasa de cambio manual`
+  - **Nota (2026-10-03):** CA-005-06 probado en Chrome con una base nueva sin tasa (`pope_t07`): el panel y el Shell pasan a mostrar el Bs al momento y queda el evento con el administrador y la fuente `manual`. REQ-001-13 marcado en la spec 001 y la prueba anotada en su `mediciones.md`; tabla en el `mediciones.md` de esta spec. Pendiente de la revisión del mantenedor, sobre todo de una diferencia de forma: el criterio escribe «3,00 USD (≈ 120,00 Bs)» en una línea y el panel lo pone debajo, sin paréntesis, como en el diseño (T05).
 
 ## Parte 2 · Inventario, ventas y caja
 

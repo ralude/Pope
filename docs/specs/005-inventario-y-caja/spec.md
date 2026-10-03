@@ -1,7 +1,7 @@
 # Spec 005: Inventario de productos y caja
 
 - **Estado:** por partes.
-  - **Parte 1 · Moneda y tasa de cambio** (REQ-005-30 a REQ-005-36): **Aprobada** (mantenedor, 2026-10-02), con su [plan](plan.md) y [tareas](tasks.md). En pausa tras T04, por decisión del mantenedor, para hacer antes la parte 2.
+  - **Parte 1 · Moneda y tasa de cambio** (REQ-005-30 a REQ-005-36): **Aprobada** (mantenedor, 2026-10-02), con su [plan](plan.md) y [tareas](tasks.md). Se pausó tras T04 para hacer antes la parte 2 (decisión del mantenedor). **Implementada** (T05 y T06, 2026-10-03); su verificación (T07, CA-005-06) está en revisión del mantenedor.
   - **Parte 2 · Inventario, ventas y caja** (REQ-005-01 a REQ-005-05, REQ-005-10 a REQ-005-25, REQ-005-40 a REQ-005-53): redactada con el mantenedor y **Aprobada** el 2026-10-02, con su plan y sus tareas (también aprobados). **Implementada y verificada** (T24, 2026-10-03). **Cambios del 2026-10-03, aprobados** (mantenedor, 2026-10-03) e implementados (T25 a T31): el «otro ingreso» sustituye a los conceptos (REQ-005-05), la lista de movimientos pasa a ser una tabla como la de SENET con los ingresos del día (REQ-005-24, REQ-005-26) y el informe X (REQ-005-46).
   - **Parte 3 · Conteo físico y pedidos desde el Shell** (REQ-005-50, REQ-005-60, REQ-005-61): borrador.
 - **Fecha:** 2026-09-25 · parte 2 redactada el 2026-10-02

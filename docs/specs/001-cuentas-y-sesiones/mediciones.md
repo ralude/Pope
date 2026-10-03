@@ -111,6 +111,38 @@ anotó la prueba.
 | CA-001-20 | REQ-001-15 | servidor `tariffs/tariffs.e2e.test.ts` | T42 (tabla del ejemplo y dos eventos) |
 | CA-001-21 | REQ-001-16 | servidor `sessions/login.e2e.test.ts` | — |
 
-Todos los criterios quedan cubiertos por al menos un test automático. **Fuera:** REQ-001-13
-(equivalente en Bs) espera a la tasa de la spec 005; el Shell y el panel ya lo muestran en
-cuanto el nodo mande una tasa, pero hoy siempre llega `null`.
+Todos los criterios quedan cubiertos por al menos un test automático. REQ-001-13 (equivalente
+en Bs) quedó fuera hasta la tasa de la spec 005: se verifica abajo, en T07 de esa spec.
+
+## Spec 005 · T07 · Equivalente en Bs (REQ-001-13, CA-005-06)
+
+Verificado el 2026-10-03 en el equipo de desarrollo, con PostgreSQL real, Chrome, el panel de
+Vite y el Shell de desarrollo (`?pc=1`, que hace de agente). Para partir de un nodo **sin
+ninguna tasa** se usó una base nueva (`pope_t07`) con un administrador de prueba, las PCs de
+ejemplo, la caja abierta y un cliente `cliente07` con 3,00 USD de saldo.
+
+1. **Sin tasa.** `cliente07` entra en la PC 01. El Shell muestra «Saldo 3,00 USD» y «Tarifa de
+   la sesión: 2,00 USD/h» sin Bs; el detalle de la PC 01 en el panel, «Saldo 3,00 USD» y
+   «Tarifa 2,00 USD/h» sin Bs; la píldora de la barra dice «Sin tasa». Tarifas, Combos y la
+   sesión temporal tampoco pintan Bs (T06).
+2. **El encargado escribe la tasa.** Desde la píldora, «Tasa del día» con 40,00 y «Guardar».
+3. **Al momento, sin recargar ninguna de las dos pestañas,** la píldora pasa a «Tasa · 1 USD =
+   40,00 Bs»; el panel muestra el saldo con «≈ 119,44 Bs» y la tarifa «≈ 80,00 Bs/h», y el
+   Shell el saldo con «≈ 119,51 Bs» y «2,00 USD/h (≈ 80,00 Bs/h)». El saldo ya no era 3,00 justo
+   porque la sesión lo iba gastando (2,99 USD redondeado; el Bs sale de los micro-USD exactos y
+   cada pantalla lo toma en su segundo). Para el importe exacto del criterio, «Recargar saldo»
+   con 3,00 muestra «≈ 120,00 Bs».
+4. **El evento.** En `events` queda `exchange_rate.set` v1 con el actor
+   `{"kind":"staff","name":"Admin T07",…}` y el payload `{"source":"manual","vesPerUsd":40000000,
+   "effectiveDate":"2026-10-03"}`.
+
+Tests que lo cubren: servidor `exchange-rates/exchange-rates.e2e.test.ts` (sin tasa no hay
+vigente; el encargado guarda una que vale al momento, con su evento) y
+`exchange-rates/rate-distribution.e2e.test.ts` (sin tasa el `state` no lleva ninguna; al
+guardarla, la PC con sesión y el panel la reciben al momento); shared `money.test.ts`
+(`formatBolivares`) y `exchange-rate.test.ts`; panel `rate/model.test.ts`.
+
+**Diferencia con el texto de la spec:** el criterio escribe «3,00 USD (≈ 120,00 Bs)» en una
+línea. En el panel, y en el saldo del Shell, el Bs va en una línea gris **debajo** del importe,
+sin paréntesis, como dibujan los lienzos de diseño (decidido en T05 de la spec 005); la tarifa
+del Shell sí va en la misma línea, con paréntesis.
