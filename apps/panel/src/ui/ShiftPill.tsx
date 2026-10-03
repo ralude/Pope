@@ -13,7 +13,7 @@ function errorMessage(failure: unknown): string {
 }
 
 export function ShiftPill() {
-  const { canCharge, shift, open, close } = useShift();
+  const { canCharge, shift, startOpen, close } = useShift();
   const [closing, setClosing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,34 +25,12 @@ export function ShiftPill() {
   if (!canCharge || shift === undefined) return null;
 
   if (!shift) {
+    // Abrir pide el fondo inicial (REQ-005-40): lo hace el diálogo "Abrir caja".
     return (
-      <>
-        <button
-          type="button"
-          className="shift-pill shift-closed"
-          disabled={busy}
-          title={error ?? undefined}
-          onClick={() => {
-            setBusy(true);
-            setError(null);
-            open()
-              .catch((failure: unknown) => {
-                setError(errorMessage(failure));
-              })
-              .finally(() => {
-                setBusy(false);
-              });
-          }}
-        >
-          <span className="status-dot" style={{ background: 'var(--amber-bar)' }} />
-          {busy ? 'Abriendo turno…' : 'Sin turno · Abrir turno'}
-        </button>
-        {error && (
-          <span role="alert" className="field-error">
-            {error}
-          </span>
-        )}
-      </>
+      <button type="button" className="shift-pill shift-closed" onClick={startOpen}>
+        <span className="status-dot" style={{ background: 'var(--amber-bar)' }} />
+        Caja cerrada · Abrir
+      </button>
     );
   }
 

@@ -34,3 +34,29 @@ export const PAYMENT_LABEL: Record<PaymentMethod, string> = {
   mobile_payment: 'Pago móvil',
   pos: 'Punto de venta',
 };
+
+/**
+ * Un importe contado, en USD o en Bs, que puede ser 0 (fondo o conteo de la caja,
+ * REQ-005-40, REQ-005-42). Admite «12500», «12.500», «12.500,50», «25,5» y «25.50»: la coma es
+ * decimal y los puntos agrupan miles, salvo un único punto con uno o dos decimales («25.50»).
+ * `null` si no es un importe.
+ */
+export function parseAmount(text: string): Micros | null {
+  const value = text.trim();
+  let units: string;
+  let decimals: string;
+  let match: RegExpExecArray | null;
+  if ((match = /^(\d{1,3}(?:\.\d{3})+)(?:,(\d{1,2}))?$/.exec(value))) {
+    units = (match[1] ?? '').replace(/\./g, '');
+    decimals = match[2] ?? '';
+  } else if ((match = /^(\d{1,10})(?:[.,](\d{1,2}))?$/.exec(value))) {
+    units = match[1] ?? '';
+    decimals = match[2] ?? '';
+  } else {
+    return null;
+  }
+  if (units.length > 10) return null;
+  return micros(
+    Number(units) * MICROS_PER_UNIT + Number(decimals.padEnd(2, '0')) * MICROS_PER_CENT,
+  );
+}

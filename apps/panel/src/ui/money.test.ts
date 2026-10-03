@@ -1,7 +1,7 @@
 import { usd } from '@pope/shared';
 import { describe, expect, it } from 'vitest';
 
-import { formatUsdInput, parseUsd } from './money.js';
+import { formatUsdInput, parseAmount, parseUsd } from './money.js';
 
 describe('parseUsd', () => {
   it('lee el importe con coma o con punto', () => {
@@ -24,5 +24,24 @@ describe('formatUsdInput', () => {
     expect(formatUsdInput(usd(5))).toBe('5,00');
     expect(formatUsdInput(usd(0.75))).toBe('0,75');
     expect(formatUsdInput(usd(12.4))).toBe('12,40');
+  });
+});
+
+describe('importes contados en la caja (REQ-005-40, REQ-005-42)', () => {
+  it('admiten 0, decimales con coma o punto y miles con punto', () => {
+    expect(parseAmount('0')).toBe(0);
+    expect(parseAmount('25')).toBe(25_000_000);
+    expect(parseAmount('25,5')).toBe(25_500_000);
+    expect(parseAmount('25.50')).toBe(25_500_000);
+    expect(parseAmount('12500')).toBe(12_500_000_000);
+    expect(parseAmount('12.500')).toBe(12_500_000_000);
+    expect(parseAmount('12.500,50')).toBe(12_500_500_000);
+    expect(parseAmount('1.234.567,8')).toBe(1_234_567_800_000);
+  });
+
+  it('rechazan lo que no es un importe', () => {
+    for (const text of ['', 'abc', '-5', '1,234.5', '12.50.0', '25,555', '1.2345']) {
+      expect(parseAmount(text)).toBeNull();
+    }
   });
 });

@@ -1,6 +1,12 @@
-// Turno de caja de quien ha entrado (REQ-001-03, T17): las recargas, las ventas en caja y
-// las sesiones temporales se cobran en él. El dueño no cobra, así que no tiene turno.
-import { type CashShift, cashShiftSchema, currentShiftResponseSchema } from '@pope/shared';
+// Caja de turno del local (REQ-001-03, REQ-005-44): las recargas, las ventas en caja y las
+// sesiones temporales se cobran en ella. El dueño no cobra, así que no la abre. Abrir pide el
+// fondo (REQ-005-40) con el diálogo "Abrir caja", que vive aquí para todas las pantallas.
+import {
+  type CashShift,
+  cashShiftSchema,
+  currentShiftResponseSchema,
+  type OpeningCash,
+} from '@pope/shared';
 import {
   createContext,
   type ReactNode,
@@ -11,6 +17,7 @@ import {
   useState,
 } from 'react';
 
+import { OpenCashDialog } from './caja/OpenCashDialog.js';
 import { useSession, useStaff } from './session.js';
 
 interface ShiftValue {
@@ -18,7 +25,8 @@ interface ShiftValue {
   canCharge: boolean;
   /** `undefined` mientras se pregunta al nodo; `null` sin turno abierto. */
   shift: CashShift | null | undefined;
-  open: () => Promise<void>;
+  /** Abre el diálogo "Abrir caja" (fondo inicial). */
+  startOpen: () => void;
   close: () => Promise<void>;
 }
 
@@ -29,6 +37,7 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
   const staff = useStaff();
   const canCharge = staff.role !== 'dueno';
   const [shift, setShift] = useState<CashShift | null | undefined>(canCharge ? undefined : null);
+  const [opening, setOpening] = useState(false);
 
   useEffect(() => {
     if (!canCharge) return;
@@ -47,17 +56,34 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
     };
   }, [api, canCharge]);
 
-  const open = useCallback(async () => {
-    setShift(await api.post('/shifts', undefined, cashShiftSchema));
-  }, [api]);
+  const open = useCallback(
+    async (fund: OpeningCash) => {
+      setShift(await api.post('/shifts', fund, cashShiftSchema));
+    },
+    [api],
+  );
+  const startOpen = useCallback(() => {
+    setOpening(true);
+  }, []);
+  const stopOpening = useCallback(() => {
+    setOpening(false);
+  }, []);
 
   const close = useCallback(async () => {
     await api.post('/shifts/current/close', undefined, cashShiftSchema);
     setShift(null);
   }, [api]);
 
-  const value = useMemo(() => ({ canCharge, shift, open, close }), [canCharge, shift, open, close]);
-  return <ShiftContext value={value}>{children}</ShiftContext>;
+  const value = useMemo(
+    () => ({ canCharge, shift, startOpen, close }),
+    [canCharge, shift, startOpen, close],
+  );
+  return (
+    <ShiftContext value={value}>
+      {children}
+      {opening && <OpenCashDialog onOpen={open} onClose={stopOpening} />}
+    </ShiftContext>
+  );
 }
 
 export function useShift(): ShiftValue {

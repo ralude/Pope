@@ -220,11 +220,18 @@ parte 1.
   - **Commit:** `feat(panel): muestra los movimientos del turno en la caja`
   - **Decidido al implementarla:** `MovementList` a la derecha de la Caja, como en el diseño: cuántos movimientos, cuatro casillas (horas de PC, golosinas, otras ventas y total en caja) y, si lo hay, lo pagado con saldo aparte; la lista (`GET /shifts/current/entries`) con hora, qué fue, quién (y «con saldo» o el motivo de una anulación), los métodos, el importe y lo cobrado en Bs. La venta anulada sale tachada «· anulada» y su anulación como otra fila. «Anular» (solo administrador, ventas sin anular) abre un diálogo con motivo obligatorio. Se refresca con `cash`. El Bs de cada fila sale de la moneda guardada, no del método: un cobro antiguo con pago móvil guardado en USD no muestra Bs (fallo visto en la prueba y corregido, con su test). El componente se llama `MovementList.tsx` porque `Movements.tsx` chocaba en Windows con `movements.ts`. Verificado en Chrome: CA-005-11 (2 Doritos en efectivo y anulados con «error de cobro»: fila de anulación de −3,00 USD con el motivo, venta tachada, golosinas a 0, stock de vuelta en 34) y una recarga de juan hecha por la API apareció sola arriba de la lista.
 
-- [ ] **T22: Abrir y cerrar la caja**
-  - **Cubre:** REQ-005-40, REQ-005-42, REQ-005-45
-  - **Hacer:** abrir turno con fondo; cerrar con lo esperado, lo contado, la diferencia, "¿Seguro que quieres cerrar la caja?" y la descarga del PDF.
-  - **Verificar:** a mano CA-005-03 y CA-005-09, con el PDF impreso en una página.
-  - **Commit:** `feat(panel): abre y cierra la caja con su reporte`
+- [x] **T22a: Abrir la caja con fondo**
+  - **Cubre:** REQ-005-40, REQ-005-44
+  - **Hacer:** diálogo "Abrir caja" del diseño (efectivo en USD y en Bs), desde la píldora de la barra superior, desde la Caja y desde los cobros que piden caja abierta; lectura de los importes contados (con miles en Bs).
+  - **Verificar:** tests de la lectura de importes; a mano, abrir la caja con fondo.
+  - **Commit:** `feat(panel): abre la caja con su fondo`
+  - **Decidido al implementarla:** `OpenCashDialog` («Abrir caja» del diseño: efectivo en USD y en Bs). Vive en `ShiftProvider`, que expone `startOpen()`: lo usan la píldora (ahora «Caja cerrada · Abrir», como en el diseño), «Abrir caja» en la cabecera de la Caja (solo quien cobra) y el aviso de los diálogos de cobro, que deja de abrir la caja sin fondo y pasa a decir «la caja» en vez de «tu turno». `parseAmount` lee lo contado y admite 0: la coma es decimal y los puntos agrupan miles («12.500,50»), salvo un único punto con uno o dos decimales («25.50»). Verificado en Chrome: tras cerrar por la API la caja de desarrollo abierta desde las 01:49 (contando lo esperado, sin diferencias), la píldora dijo «Caja cerrada · Abrir»; se abrió con 20 USD y «1.500,00» Bs, quedaron 20 000 000 µUSD y 1 500 000 000 µVES y `shift.opened` v2.
+
+- [ ] **T22b: Cerrar la caja con conteo y reporte**
+  - **Cubre:** REQ-005-42, REQ-005-45
+  - **Hacer:** "Cerrar caja" del diseño: lo esperado por método, lo contado, la diferencia, "¿Seguro que quieres cerrar la caja?" y la descarga del PDF del encargado; "Caja cerrada" al terminar.
+  - **Verificar:** tests de la diferencia; a mano CA-005-03 y CA-005-09, con el PDF impreso en una página.
+  - **Commit:** `feat(panel): cierra la caja con su conteo y su reporte`
 
 - [ ] **T23: Historial de cierres**
   - **Cubre:** REQ-005-53

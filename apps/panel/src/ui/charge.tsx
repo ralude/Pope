@@ -1,9 +1,7 @@
 // Piezas comunes de los diálogos que cobran en caja (recargas, combos y sesiones temporales):
-// el método de pago y el aviso de que hace falta un turno abierto (REQ-001-03, REQ-001-60).
+// el método de pago y el aviso de que hace falta la caja abierta (REQ-001-03, REQ-001-60).
 import { formatLocalTime, type PaymentMethod } from '@pope/shared';
-import { useState } from 'react';
 
-import { ApiError } from '../api/client.js';
 import { useShift } from '../shift.js';
 import { PAYMENT_LABEL, PAYMENT_METHODS } from './money.js';
 
@@ -41,46 +39,32 @@ export function PaymentMethodField({
 }
 
 /**
- * Sin turno abierto, en lugar del formulario: aviso y botón para abrirlo ahí mismo. Con
+ * Sin caja abierta, en lugar del formulario: aviso y botón para abrirla ahí mismo. Con
  * turno, una línea que recuerda dónde queda el cobro.
  */
 export function ShiftRequirement({ what }: { what: string }) {
-  const { shift, open } = useShift();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { shift, startOpen } = useShift();
 
   if (shift === undefined) {
-    return <span className="muted">Comprobando tu turno de caja…</span>;
+    return <span className="muted">Comprobando la caja…</span>;
   }
   if (shift) {
     return (
       <span className="field-hint">
-        Se registra en tu turno (abierto a las {formatLocalTime(new Date(shift.openedAt))}).
+        Se registra en la caja (abierta a las {formatLocalTime(new Date(shift.openedAt))}).
       </span>
     );
   }
   return (
     <div className="notice-warn">
-      <span>Abre un turno de caja para continuar. {what} quedan registradas en tu turno.</span>
-      {error && <span role="alert">{error}</span>}
+      <span>Abre la caja para continuar. {what} quedan registradas en ella.</span>
       <button
         type="button"
         className="btn btn-primary"
         style={{ alignSelf: 'flex-start' }}
-        disabled={busy}
-        onClick={() => {
-          setBusy(true);
-          setError(null);
-          open()
-            .catch((failure: unknown) => {
-              setError(failure instanceof ApiError ? failure.message : String(failure));
-            })
-            .finally(() => {
-              setBusy(false);
-            });
-        }}
+        onClick={startOpen}
       >
-        {busy ? 'Abriendo…' : 'Abrir turno de caja'}
+        Abrir caja
       </button>
     </div>
   );
