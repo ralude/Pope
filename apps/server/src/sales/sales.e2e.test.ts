@@ -2,7 +2,6 @@ import {
   type CashMovement,
   type Customer,
   type Product,
-  type SaleConcept,
   type ShiftEntriesResponse,
   usd,
 } from '@pope/shared';
@@ -10,7 +9,7 @@ import { asc, eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { NO_RATE_MESSAGE } from '../cash/cash-register.service.js';
-import { cashEntries, events, ledger } from '../db/schema.js';
+import { cashEntries, events, ledger, saleLines } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
@@ -23,7 +22,6 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
   let ana: string;
   let refresco: Product;
   let papas: Product;
-  let impresiones: SaleConcept;
 
   beforeEach(async () => {
     testApp = await createTestApp('local');
@@ -31,12 +29,6 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
     ana = await loginAsStaff(testApp, 'ana', 'encargado', 'Ana');
     refresco = await product('Refresco', usd(1), 10);
     papas = await product('Papas', usd(1.5), 10);
-    impresiones = (
-      await request('POST', '/sale-concepts', admin, {
-        name: 'Impresiones',
-        unitPriceMicros: usd(0.1),
-      })
-    ).json<SaleConcept>();
     await request('POST', '/shifts', ana, NO_OPENING_CASH);
   });
 
@@ -97,25 +89,58 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
     });
   });
 
-  it('CA-005-07: 12 impresiones a 0,10 USD en efectivo USD aparecen en la lista', async () => {
+  it('CA-005-07: un otro ingreso de 1,20 USD con "12 impresiones" en efectivo USD aparece en la lista', async () => {
     const response = await sell({
-      lines: [
-        { kind: 'concept', conceptId: impresiones.id, quantity: 12, unitPriceMicros: usd(0.1) },
-      ],
+      lines: [{ kind: 'other', usdMicros: usd(1.2), comment: '12 impresiones' }],
       payments: [{ method: 'cash_usd', usdMicros: usd(1.2) }],
     });
     expect(response.statusCode).toBe(201);
-    const [movement] = (
+    const { movements, totals } = (
       await request('GET', '/shifts/current/entries', ana)
-    ).json<ShiftEntriesResponse>().movements;
+    ).json<ShiftEntriesResponse>();
+    const [movement] = movements;
     expect(movement).toMatchObject({
       source: 'sale',
-      description: 'Impresiones × 12',
+      description: 'Otro ingreso · 12 impresiones',
       usdMicros: usd(1.2),
       payments: [{ method: 'cash_usd', currency: 'USD', amountMicros: usd(1.2) }],
       actorName: 'Ana',
     });
     expect(movement?.at).toMatch(/Z$/);
+    // REQ-005-52: los otros ingresos van a otras ventas.
+    expect(totals).toMatchObject({ other: usd(1.2), total: usd(1.2) });
+    expect(await testApp.database.db.select().from(saleLines)).toEqual([
+      expect.objectContaining({
+        kind: 'other',
+        name: 'Otro ingreso',
+        quantity: 1,
+        unitPriceMicros: usd(1.2),
+        totalMicros: usd(1.2),
+        comment: '12 impresiones',
+        productId: null,
+        conceptId: null,
+      }),
+    ]);
+    expect(await lastEvent()).toMatchObject({
+      type: 'sale.recorded',
+      version: 2,
+      payload: {
+        lines: [{ kind: 'other', comment: '12 impresiones', total: { micros: usd(1.2) } }],
+      },
+    });
+  });
+
+  it('REQ-005-05: el comentario es opcional y tiene tope', async () => {
+    const other = (comment: string | null) =>
+      sell({
+        lines: [{ kind: 'other', usdMicros: usd(0.5), comment }],
+        payments: [{ method: 'cash_usd', usdMicros: usd(0.5) }],
+      });
+    const blank = await other('  ');
+    expect(blank.statusCode).toBe(201);
+    expect(blank.json<CashMovement>().description).toBe('Otro ingreso');
+    expect(await lastEvent()).toMatchObject({ payload: { lines: [{ comment: null }] } });
+    expect((await other('a'.repeat(81))).statusCode).toBe(400);
   });
 
   it('CA-005-10: juan paga unas papas con su saldo: le quedan 3,50 USD y no suma en la caja', async () => {
@@ -144,13 +169,12 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
     await assertBalancesMatchLedger(testApp.database.db);
   });
 
-  it('una venta con golosinas e impresiones y dos pagos se reparte por grupo', async () => {
+  it('una venta con golosinas y un otro ingreso y dos pagos se reparte por grupo', async () => {
     await request('POST', '/exchange-rate', ana, { vesPerUsd: 40_000_000 });
     const response = await sell({
       lines: [
         { kind: 'product', productId: papas.id, quantity: 2 },
-        // El encargado puede cambiar el precio sugerido del concepto (REQ-005-05).
-        { kind: 'concept', conceptId: impresiones.id, quantity: 10, unitPriceMicros: usd(0.15) },
+        { kind: 'other', usdMicros: usd(1.5), comment: '10 impresiones' },
       ],
       payments: [
         { method: 'cash_usd', usdMicros: usd(2) },
@@ -159,7 +183,7 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
     });
     expect(response.statusCode).toBe(201);
     expect(response.json<CashMovement>()).toMatchObject({
-      description: 'Papas × 2, Impresiones × 10',
+      description: 'Papas × 2, Otro ingreso · 10 impresiones',
       usdMicros: usd(4.5),
     });
     const rows = await testApp.database.db.select().from(cashEntries);

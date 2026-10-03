@@ -267,11 +267,12 @@ Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artbo
   - **Commit:** `feat(shared): añade el otro ingreso a las ventas`
   - **Decidido al implementarla:** `otherSaleLineRequestSchema` (`{ kind: 'other', usdMicros, comment }`; el comentario se recorta y vacío o en blanco queda en `null`, hasta 80 caracteres) va aparte y entra en la unión de la venta en T26: si entrara ya, el nodo no compilaría sin saber venderlo. `OTHER_INCOME_NAME` y `otherIncomeLabel` ("Otro ingreso · comentario") para el nodo y el panel; `saleLineGroup` lleva `other` a otras ventas. `sale.recorded` v2 con líneas `product` u `other` (comentario o `null`, y total); los pagos y la línea de producto se comparten con la v1, que sigue válida.
 
-- [ ] **T26: Ventas con otro ingreso en el nodo**
+- [x] **T26: Ventas con otro ingreso en el nodo**
   - **Cubre:** REQ-005-05, REQ-005-51, REQ-005-52
   - **Hacer:** columna `comment` en `sale_lines` (migración), venta con líneas `other` (nombre "Otro ingreso", cantidad 1), descripción "Otro ingreso · comentario", `sale.recorded` v2, y la línea "Otros ingresos" en lo vendido por artículo.
   - **Verificar:** e2e: CA-005-07 en el nodo (fila "Otro ingreso · 12 impresiones", 1,20 USD, efectivo USD, grupo otras ventas, evento v2); una venta con golosinas y otro ingreso; el reporte con "Otros ingresos" sin los anulados; CA-005-09 con un otro ingreso.
   - **Commit:** `feat(server): vende otros ingresos con importe y comentario`
+  - **Decidido al implementarla:** la línea `other` entra en la unión de la venta. Migración `0021_sale_other_income`: `sale_lines.comment` y las restricciones (un otro ingreso no tiene producto ni concepto y lleva cantidad 1; solo él lleva comentario). Se guarda como "Otro ingreso" con su importe como precio. Toda venta emite ya `sale.recorded` v2; mientras queden conceptos (hasta T28b), su línea va en el evento como un otro ingreso con "Nombre × cantidad" de comentario, como los convertirá la migración. En lo vendido por artículo, las líneas sin producto ni concepto se juntan en "Otros ingresos · importe", con cuántas son. Verificado: e2e (CA-005-07 con la fila, la línea guardada y el evento v2; comentario en blanco a `null` y tope de 80; venta con golosinas y otro ingreso repartida por grupo; CA-005-09 y el reporte con dos otros ingresos y uno anulado), también contra PostgreSQL real.
 
 - [ ] **T27: Caja: otro ingreso**
   - **Cubre:** REQ-005-05, REQ-005-20

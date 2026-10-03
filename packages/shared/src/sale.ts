@@ -34,7 +34,7 @@ const otherCommentSchema = z
 
 /**
  * Un otro ingreso (REQ-005-05): lo que no es golosina ni horas de PC, con el importe que
- * escribe el encargado y un comentario si quiere. Entra en la venta con T26.
+ * escribe el encargado y un comentario si quiere.
  */
 export const otherSaleLineRequestSchema = z.object({
   kind: z.literal('other'),
@@ -44,11 +44,13 @@ export const otherSaleLineRequestSchema = z.object({
 export type OtherSaleLineRequest = z.infer<typeof otherSaleLineRequestSchema>;
 
 /**
- * Una línea de la venta. El precio de un producto lo pone el nodo; el de un concepto lo
- * escribe el encargado, que puede cambiar el sugerido.
+ * Una línea de la venta. El precio de un producto lo pone el nodo; el importe de un otro
+ * ingreso lo escribe el encargado. La línea `concept` se quita en T28b, cuando el panel
+ * ya no la use.
  */
 export const saleLineRequestSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('product'), productId: idSchema, quantity: lineQuantitySchema }),
+  otherSaleLineRequestSchema,
   z.object({
     kind: z.literal('concept'),
     conceptId: idSchema,
@@ -100,9 +102,7 @@ export function otherIncomeLabel(comment: string | null): string {
 }
 
 /** Grupo del reporte de cada línea (REQ-005-52): productos a golosinas; lo demás, a otras. */
-export function saleLineGroup(
-  kind: SaleLineRequest['kind'] | OtherSaleLineRequest['kind'],
-): CashGroup {
+export function saleLineGroup(kind: SaleLineRequest['kind']): CashGroup {
   return kind === 'product' ? 'snacks' : 'other';
 }
 
@@ -112,7 +112,7 @@ export function saleLineGroup(
  */
 export function saleGroupTotals(
   lines: readonly {
-    kind: SaleLineRequest['kind'] | OtherSaleLineRequest['kind'];
+    kind: SaleLineRequest['kind'];
     totalMicros: Micros;
   }[],
 ): { group: CashGroup; usdMicros: Micros }[] {

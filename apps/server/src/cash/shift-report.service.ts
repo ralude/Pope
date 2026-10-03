@@ -1,5 +1,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { type CashMovement, type ShiftSummary, type VesRate, vesRate } from '@pope/shared';
+import {
+  type CashMovement,
+  formatMoney,
+  micros,
+  type ShiftSummary,
+  type VesRate,
+  vesRate,
+} from '@pope/shared';
 import { and, asc, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
@@ -23,7 +30,7 @@ export interface SoldLine {
   name: string;
   /** Unidades vendidas, sin las ventas anuladas. */
   quantity: number;
-  /** Lo que queda en almacén al cerrar; `null` en las otras ventas, que no llevan stock. */
+  /** Lo que queda en almacén al cerrar; `null` en lo que no lleva stock. */
   inStock: number | null;
 }
 
@@ -146,8 +153,9 @@ export class ShiftReportService {
   }
 
   /**
-   * Lo vendido por artículo en la caja (REQ-005-51), como el Z-Report de SENET: golosinas y
-   * otras ventas con las unidades vendidas, sin las ventas anuladas, y lo que queda en almacén.
+   * Lo vendido por artículo en la caja (REQ-005-51), como el Z-Report de SENET: las
+   * golosinas con las unidades vendidas, sin las ventas anuladas, y lo que queda en almacén.
+   * Los otros ingresos van juntos en una línea con su importe y cuántos se cobraron.
    */
   private async sold(shiftId: string, stock: readonly StockLine[]): Promise<SoldLine[]> {
     const rows = await this.db
@@ -157,6 +165,7 @@ export class ShiftReportService {
         // El nombre copiado en la venta; si cambió entre ventas, uno cualquiera de ellos.
         name: sql<string>`max(${saleLines.name})`,
         quantity: sql<number>`sum(${saleLines.quantity})`.mapWith(Number),
+        totalMicros: sql<number>`sum(${saleLines.totalMicros})`.mapWith(Number),
       })
       .from(saleLines)
       .innerJoin(sales, eq(sales.id, saleLines.saleId))
@@ -165,7 +174,11 @@ export class ShiftReportService {
     const finalStock = new Map(stock.map((line) => [line.productId, line.final]));
     return rows
       .map((row) => ({
-        name: row.name,
+        // Los otros ingresos no tienen producto ni concepto: se juntan en un grupo.
+        name:
+          row.productId === null && row.conceptId === null
+            ? `Otros ingresos · ${formatMoney(micros(row.totalMicros))}`
+            : row.name,
         quantity: row.quantity,
         inStock: row.productId === null ? null : (finalStock.get(row.productId) ?? null),
       }))

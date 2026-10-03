@@ -13,6 +13,8 @@ import {
   type Micros,
   micros,
   newId,
+  OTHER_INCOME_NAME,
+  otherIncomeLabel,
   saleGroupTotals,
   type SaleRequest,
 } from '@pope/shared';
@@ -35,24 +37,76 @@ import { EventsService, type Transaction } from '../events/events.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
 
-/** Una línea ya resuelta: con el nombre y el precio del momento. */
-interface ResolvedLine {
-  kind: 'product' | 'concept';
-  id: string;
-  name: string;
-  quantity: number;
-  unitPriceMicros: Micros;
-  totalMicros: Micros;
+/**
+ * Una línea ya resuelta: con el nombre y el precio del momento. Un otro ingreso no tiene id
+ * y lleva su comentario (REQ-005-05).
+ */
+type ResolvedLine =
+  | {
+      kind: 'product' | 'concept';
+      id: string;
+      name: string;
+      quantity: number;
+      unitPriceMicros: Micros;
+      totalMicros: Micros;
+    }
+  | {
+      kind: 'other';
+      name: typeof OTHER_INCOME_NAME;
+      quantity: 1;
+      unitPriceMicros: Micros;
+      totalMicros: Micros;
+      comment: string | null;
+    };
+
+/**
+ * "Doritos × 2, Otro ingreso · 20 impresiones": cómo se lee una venta en la lista y en el
+ * reporte.
+ */
+export function saleDescription(
+  lines: readonly (
+    { name: string; quantity: number } | { kind: 'other'; comment: string | null }
+  )[],
+): string {
+  return lines
+    .map((line) =>
+      'comment' in line
+        ? otherIncomeLabel(line.comment)
+        : `${line.name} × ${String(line.quantity)}`,
+    )
+    .join(', ');
 }
 
-/** "Doritos × 2, Impresiones × 12": cómo se lee una venta en la lista y en el reporte. */
-export function saleDescription(lines: readonly { name: string; quantity: number }[]): string {
-  return lines.map((line) => `${line.name} × ${String(line.quantity)}`).join(', ');
+/**
+ * Una línea en `sale.recorded` v2. Un concepto (hasta que se quiten en T28b) va como un
+ * otro ingreso con su nombre y su cantidad de comentario, como los convertirá la migración.
+ */
+function recordedLine(line: ResolvedLine) {
+  const total = { micros: line.totalMicros, currency: 'USD' as const };
+  switch (line.kind) {
+    case 'product':
+      return {
+        kind: 'product' as const,
+        id: line.id,
+        name: line.name,
+        quantity: line.quantity,
+        unitPrice: { micros: line.unitPriceMicros, currency: 'USD' as const },
+        total,
+      };
+    case 'concept':
+      return {
+        kind: 'other' as const,
+        comment: `${line.name} × ${String(line.quantity)}`,
+        total,
+      };
+    case 'other':
+      return { kind: 'other' as const, comment: line.comment, total };
+  }
 }
 
 /**
  * Ventas del mostrador (spec 005, REQ-005-20 a REQ-005-22, REQ-005-25): golosinas del
- * inventario y conceptos sin inventario, pagadas con uno o varios métodos, también con el
+ * inventario y otros ingresos sin inventario, pagadas con uno o varios métodos, también con el
  * saldo de una cuenta. Todo en una transacción: la venta, sus líneas, el stock, el saldo, el
  * registro de caja y el evento.
  */
@@ -103,9 +157,10 @@ export class SalesService {
           quantity: line.quantity,
           unitPriceMicros: line.unitPriceMicros,
           totalMicros: line.totalMicros,
+          comment: line.kind === 'other' ? line.comment : null,
         })),
       );
-      const productLines = lines.filter((line) => line.kind === 'product');
+      const productLines = lines.flatMap((line) => (line.kind === 'product' ? [line] : []));
       if (productLines.length > 0) {
         await tx.insert(stockMovements).values(
           productLines.map((line) => ({
@@ -131,20 +186,13 @@ export class SalesService {
       });
       emit({
         type: 'sale.recorded',
-        version: 1,
+        version: 2,
         actor,
         payload: {
           saleId: id,
           shiftId: shift.id,
           customer,
-          lines: lines.map((line) => ({
-            kind: line.kind,
-            id: line.id,
-            name: line.name,
-            quantity: line.quantity,
-            unitPrice: { micros: line.unitPriceMicros, currency: 'USD' },
-            total: { micros: line.totalMicros, currency: 'USD' },
-          })),
+          lines: lines.map(recordedLine),
           payments: paymentsOf(pieces),
           total: { micros: micros(total), currency: 'USD' },
         },
@@ -272,6 +320,16 @@ export class SalesService {
     const conceptById = new Map(conceptRows.map((row) => [row.id, row]));
 
     const lines = input.lines.map((line): ResolvedLine => {
+      if (line.kind === 'other') {
+        return {
+          kind: 'other',
+          name: OTHER_INCOME_NAME,
+          quantity: 1,
+          unitPriceMicros: line.usdMicros,
+          totalMicros: line.usdMicros,
+          comment: line.comment,
+        };
+      }
       if (line.kind === 'product') {
         const product = productById.get(line.productId);
         if (!product) {

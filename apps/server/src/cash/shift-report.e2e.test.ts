@@ -3,7 +3,6 @@ import {
   type CurrentShiftResponse,
   type Customer,
   type Product,
-  type SaleConcept,
   usd,
 } from '@pope/shared';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -25,7 +24,6 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
   let owner: string;
   let juan: Customer;
   let papas: Product;
-  let impresiones: SaleConcept;
   let shiftId: string;
 
   beforeEach(async () => {
@@ -43,12 +41,6 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
         initialQuantity: 10,
       })
     ).json<Product>();
-    impresiones = (
-      await world.api('POST', '/sale-concepts', admin, {
-        name: 'Impresiones',
-        unitPriceMicros: usd(0.1),
-      })
-    ).json<SaleConcept>();
     shiftId =
       (await world.api('GET', '/shifts/current', ana)).json<CurrentShiftResponse>().shift?.id ?? '';
   });
@@ -64,7 +56,10 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
       customerId: null,
     });
 
-  /** CA-005-09: 10,00 en temporales, 5,00 en recargas, 3,00 en golosinas y 1,20 en impresiones. */
+  /**
+   * CA-005-09: 10,00 en temporales, 5,00 en recargas, 3,00 en golosinas y 1,20 en un otro
+   * ingreso ("12 impresiones").
+   */
   async function sellTheDay(): Promise<CashMovement> {
     await world.pc(5);
     const temporary = await world.api('POST', '/sessions/temporary', ana, {
@@ -79,10 +74,7 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
       paymentMethod: 'cash_usd',
     });
     const snacks = await sell([{ kind: 'product', productId: papas.id, quantity: 2 }], usd(3));
-    await sell(
-      [{ kind: 'concept', conceptId: impresiones.id, quantity: 12, unitPriceMicros: usd(0.1) }],
-      usd(1.2),
-    );
+    await sell([{ kind: 'other', usdMicros: usd(1.2), comment: '12 impresiones' }], usd(1.2));
     return snacks.json<CashMovement>();
   }
 
@@ -119,12 +111,24 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
     // El cuadre: con nada contado, en efectivo faltan los 19,20 USD.
     expect(texts).toContain('-19,20 USD');
     // El resumen nunca lleva la lista de movimientos (plan 005, riesgos).
-    expect(texts).not.toContain('Impresiones × 12');
+    expect(texts).not.toContain('Otro ingreso · 12 impresiones');
     // REQ-005-51: lo vendido por artículo, como el Z-Report de SENET: cantidad y en almacén
-    // (las otras ventas no llevan stock).
+    // (los otros ingresos van juntos en una línea, sin stock).
     const sold = texts.slice(texts.indexOf('Lo vendido por artículo'));
     expect(sold.slice(1, 4)).toEqual(['Artículo', 'Cantidad vendida', 'En almacén']);
-    expect(sold.slice(4, 10)).toEqual(['Impresiones', '12', '—', 'Papas', '2', '8']);
+    expect(sold.slice(4, 10)).toEqual(['Otros ingresos · 1,20 USD', '1', '—', 'Papas', '2', '8']);
+  });
+
+  it('REQ-005-51: los otros ingresos van juntos, con su importe y cuántos, sin los anulados', async () => {
+    await sell([{ kind: 'other', usdMicros: usd(1.2), comment: '12 impresiones' }], usd(1.2));
+    await sell([{ kind: 'other', usdMicros: usd(0.5), comment: null }], usd(0.5));
+    const voided = (
+      await sell([{ kind: 'other', usdMicros: usd(9), comment: 'error' }], usd(9))
+    ).json<CashMovement>();
+    await world.api('POST', `/sales/${voided.sourceId}/void`, admin, { reason: 'error de cobro' });
+    const texts = pdfTexts((await download(admin)).rawPayload);
+    const sold = texts.slice(texts.indexOf('Lo vendido por artículo'));
+    expect(sold.slice(4, 7)).toEqual(['Otros ingresos · 1,70 USD', '2', '—']);
   });
 
   it('REQ-005-53: el detallado lleva los movimientos, las anulaciones con su motivo y el stock', async () => {
@@ -134,7 +138,7 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
     expect(response.statusCode).toBe(200);
     expect(response.headers['content-disposition']).toContain('cierre-caja-detallado-2026-09-28');
     const texts = pdfTexts(response.rawPayload);
-    expect(texts).toContain('Impresiones × 12');
+    expect(texts).toContain('Otro ingreso · 12 impresiones');
     expect(texts).toContain('Sesión temporal · PC 05 · Carlos');
     expect(texts).toContain('Papas × 2 (anulada)');
     expect(texts.some((t) => t.includes('Motivo: error de cobro'))).toBe(true);
@@ -150,7 +154,7 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
       texts.indexOf('Lo vendido por artículo'),
       texts.indexOf('Movimientos de la caja'),
     );
-    expect(sold).toContain('Impresiones');
+    expect(sold).toContain('Otros ingresos · 1,20 USD');
     expect(sold).not.toContain('Papas');
   });
 
