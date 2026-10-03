@@ -19,6 +19,8 @@ const MARGIN = 40;
 const PAGE_WIDTH = 595.28; // A4 en puntos
 const PAGE_BOTTOM = 841.89 - MARGIN;
 const CONTENT_WIDTH = PAGE_WIDTH - 2 * MARGIN;
+/** Ancho de la etiqueta en las filas de dos columnas; el importe ocupa el resto. */
+const LABEL_WIDTH = 330;
 const ZONE = 'America/Caracas';
 
 const METHOD_LABEL: Record<CashMethod, string> = {
@@ -107,6 +109,10 @@ class Writer {
     let x = MARGIN;
     this.doc.font(bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(size);
     for (const cell of cells) {
+      if (cell.text === '') {
+        x += cell.width;
+        continue;
+      }
       this.doc.text(cell.text, x, this.y, {
         width: cell.width,
         align: cell.align ?? 'left',
@@ -150,28 +156,40 @@ function drawSummary(w: Writer, report: ShiftReport): void {
   ];
   for (const [label, amount] of sold) {
     w.row([
-      { text: label, width: 300 },
-      { text: formatMoney(amount), width: 150, align: 'right' },
+      { text: label, width: LABEL_WIDTH },
+      { text: formatMoney(amount), width: CONTENT_WIDTH - LABEL_WIDTH, align: 'right' },
     ]);
   }
   w.rule();
   w.row(
     [
-      { text: 'Total', width: 300 },
-      { text: formatMoney(summary.totals.total), width: 150, align: 'right' },
+      { text: 'Total', width: LABEL_WIDTH },
+      {
+        text: formatMoney(summary.totals.total),
+        width: CONTENT_WIDTH - LABEL_WIDTH,
+        align: 'right',
+      },
     ],
     true,
     11,
   );
   w.y += 4;
   w.row([
-    { text: 'Pagado con saldo (no entra en la caja)', width: 300 },
-    { text: formatMoney(summary.totals.balance), width: 150, align: 'right' },
+    { text: 'Pagado con saldo (no entra en la caja)', width: LABEL_WIDTH },
+    {
+      text: formatMoney(summary.totals.balance),
+      width: CONTENT_WIDTH - LABEL_WIDTH,
+      align: 'right',
+    },
   ]);
   if (report.rate !== null) {
     w.row([
-      { text: 'Tasa aplicada', width: 300 },
-      { text: `${formatVes(micros(report.rate))} por USD`, width: 150, align: 'right' },
+      { text: 'Tasa aplicada', width: LABEL_WIDTH },
+      {
+        text: `${formatVes(micros(report.rate))} por USD`,
+        width: CONTENT_WIDTH - LABEL_WIDTH,
+        align: 'right',
+      },
     ]);
   }
 
@@ -219,9 +237,10 @@ function paymentsText(movement: CashMovement): string {
 /** Lo que añade el detallado (REQ-005-53): movimientos, anulaciones y stock por producto. */
 function drawDetail(w: Writer, report: ShiftReport): void {
   w.heading('Movimientos de la caja');
-  const widths = [40, 190, 80, 130, 75];
+  // Entre el importe (a la derecha) y el pago va una columna vacía de separación.
+  const widths = [40, 180, 75, 12, 135, 73];
   w.row(
-    ['Hora', 'Qué', 'Importe', 'Pago', 'Quién'].map((text, i) => ({
+    ['Hora', 'Qué', 'Importe', '', 'Pago', 'Quién'].map((text, i) => ({
       text,
       width: widths[i] ?? 0,
       align: i === 2 ? 'right' : 'left',
@@ -237,8 +256,9 @@ function drawDetail(w: Writer, report: ShiftReport): void {
         width: widths[1] ?? 0,
       },
       { text: formatMoney(movement.usdMicros), width: widths[2] ?? 0, align: 'right' },
-      { text: paymentsText(movement), width: widths[3] ?? 0 },
-      { text: movement.actorName, width: widths[4] ?? 0 },
+      { text: '', width: widths[3] ?? 0 },
+      { text: paymentsText(movement), width: widths[4] ?? 0 },
+      { text: movement.actorName, width: widths[5] ?? 0 },
     ]);
   }
   if (report.movements.length === 0) {
