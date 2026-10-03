@@ -53,11 +53,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(shared): añade las reglas de la pausa`
   - **Decidido al implementarla:** `pause.ts` con `pauseLimitSchema` (`session`, `day`, `disabled`), `pauseAllowance` (pausas que quedan y el límite alcanzado), `pauseRefusal` y `PAUSE_REFUSAL_MESSAGES`, `pauseMaxUntil`, `pauseSecondsLeft`, `pauseExpired` y `pausesOnDayOf` (cuenta por `localDateInCaracas`, así el nodo no necesita zonas horarias en SQL). Lo que pasa al vencer es el propio ajuste `pauseOverrun`: no necesita función. **Decidido por el mantenedor (2026-10-03):** los textos de los rechazos que la spec no fijaba ("Las sesiones temporales no se pueden pausar", "La pausa no está disponible en este local", "Tu sesión ya está en pausa") y que, si se agotan a la vez los dos límites, manda el del día.
 
-- [ ] **T03: Contratos del canal y del mapa**
+- [x] **T03: Contratos del canal y del mapa**
   - **Cubre:** REQ-002-01, REQ-002-02, REQ-002-06, REQ-002-10, REQ-002-14, REQ-002-22
   - **Hacer:** mensajes `pause` y `resume` (con `requestId` opcional); en el `state` activo con cuenta, los campos opcionales `pause` (`{ startedAt, maxUntil, billing }` o `null`), `pausesLeft` y `pauseLimit` (pregunta 1); código de error `pause_unavailable`; motivo de cierre `pause_expired` en `sessionEndReasonSchema`; en `pcMapSessionSchema`, `pause` y las pausas usadas en la sesión y en el día. Regenerar el JSON Schema del canal para el agente en C#.
   - **Verificar:** tests de los esquemas; un `state` sin los campos nuevos sigue siendo válido (simulador y agentes antiguos).
   - **Commit:** `feat(shared): añade la pausa al canal de la PC y al mapa`
+  - **Decidido al implementarla:** la pausa (`sessionPauseSchema`) y las pausas usadas (`pausesUsedSchema`) viven en `pause.ts` y las comparten el `state` y el mapa. En el `state` los tres campos son opcionales (compatibilidad); en el mapa son obligatorios y admiten `null` (`pausesUsed` es `null` en una temporal), porque el panel y el nodo se entregan juntos: hasta T10 el nodo manda `pause: null` y 0 pausas usadas. El JSON Schema del canal se regenera al compilar shared (`dist/json-schema`, no se sube). `resume` sin pausa no es un error: responde el `state`. **Decidido por el mantenedor (2026-10-03):** el motivo de cierre `pause_expired` se llama «Se venció la pausa» (panel y simulador); el Shell sigue mostrando el mismo «Tu sesión terminó» para cualquier motivo.
 
 - [ ] **T04: Eventos de la pausa**
   - **Cubre:** REQ-002-32

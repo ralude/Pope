@@ -66,6 +66,9 @@ export function reasonText(session: TemporarySession, now: Date): string {
       return 'Se agotó el tiempo';
     case 'no_heartbeat':
       return 'Sin latidos';
+    // Las temporales no pausan (REQ-002-11), pero el motivo existe para las de cuenta.
+    case 'pause_expired':
+      return 'Se venció la pausa';
     case null:
       return '—';
   }

@@ -8,6 +8,7 @@ const END_REASONS: Record<SessionEndReason, string> = {
   staff: 'la cerró el encargado',
   exhausted: 'se agotó el tiempo o el saldo',
   no_heartbeat: 'sin latidos',
+  pause_expired: 'se venció la pausa',
 };
 
 /** Frase para un evento de la PC, o `null` si no merece una línea. */

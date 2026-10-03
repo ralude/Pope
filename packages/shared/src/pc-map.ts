@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { exchangeRateStatusSchema } from './exchange-rate.js';
 import { microsSchema } from './money.js';
+import { pausesUsedSchema, sessionPauseSchema } from './pause.js';
 import { idSchema, sessionKindSchema, utcInstantSchema } from './session.js';
 
 const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
@@ -34,6 +35,13 @@ export const pcMapSessionSchema = z.object({
   comboSeconds: nonNegativeSeconds,
   /** Quedan menos de 5 min (REQ-001-24): la raya roja del mapa. */
   ending: z.boolean(),
+  /** La pausa en curso, o `null`: la baldosa morada (REQ-002-14, CA-002-08). */
+  pause: sessionPauseSchema.nullable(),
+  /**
+   * Pausas que lleva la cuenta en la sesión y hoy, para el detalle de la PC (REQ-002-13);
+   * `null` en una temporal, que no pausa (REQ-002-11).
+   */
+  pausesUsed: pausesUsedSchema.nullable(),
 });
 export type PcMapSession = z.infer<typeof pcMapSessionSchema>;
 

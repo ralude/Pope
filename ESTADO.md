@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · T02 de la spec 002 (reglas de la pausa)
+**Última actualización:** 2026-10-03 · T03 de la spec 002 (contratos del canal y del mapa)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [002 · Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md), fase 1 (todo en TypeScript). La 005 espera la revisión de T07 |
-| **Siguiente tarea** | **T03: Contratos del canal y del mapa** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
-| **Progreso** | Spec 002: 2 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
+| **Siguiente tarea** | **T04: Eventos de la pausa** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
+| **Progreso** | Spec 002: 3 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -49,7 +49,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 68 / 68 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 2 / 19 |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 3 / 19 |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
@@ -61,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T03 (spec 002): el canal de la PC admite `pause` y `resume`; el `state` lleva la pausa, las pausas que quedan y el límite; error `pause_unavailable`, motivo de cierre `pause_expired` («Se venció la pausa», mantenedor) y la pausa en el mapa del panel.
 - **2026-10-03:** T02 (spec 002): reglas puras de la pausa (pausas que quedan y su límite, motivos de rechazo con sus textos, duración y pausas del día en Caracas). El mantenedor fija los textos que faltaban y que manda el límite del día.
 - **2026-10-03:** T01 (spec 002): los cinco ajustes de la pausa (activada, 15 min, 3 por sesión, 5 por día y volver a cobrar al vencer), con sus límites; se cambian con `PUT /settings` y emiten `setting.changed` v2.
 - **2026-10-03:** Spec 002: el mantenedor aprueba las tareas de la fase 1 y decide: `pauseLimit` en el `state` para elegir el mensaje, el botón Pausar desactivado y con mensaje si la pausa está apagada, y `pauseEnabled` como 1/0. Queda abierto si sus ajustes van al panel.
@@ -70,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T05 (spec 005): el equivalente en Bs, debajo del importe, en el detalle de la PC del mapa, Clientes, Recargar saldo y Vender combo; probado en Chrome con tasa.
 - **2026-10-03:** ADR-0016 aceptado: el servidor del local es un i3-2120 con 8 GB, casi siempre encendido (no el i5 de ADR-0011, que queda reemplazado). Se mantiene el presupuesto; las mediciones pendientes se hacen en ese PC, con una prueba larga de memoria.
 - **2026-10-03:** T24 (spec 005) aprobada por el mantenedor: la parte 2 (inventario, ventas y caja) queda verificada. Siguen T05–T07 de la parte 1.
-- **2026-10-03:** T24 (spec 005) rehecha tras los cambios del día: los 10 criterios de la parte 2 (con el CA-005-07 nuevo y los CA-005-12 y CA-005-13) tienen test automático y prueba a mano; falta la revisión del mantenedor.

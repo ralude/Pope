@@ -110,5 +110,8 @@ function summarize(
     amountMicros: micros(live ? Math.max(0, live.moneyMicros) : chargedMicros),
     comboSeconds: seconds(live ? Math.max(0, live.comboSeconds) : 0),
     ending: remaining <= ENDING_SECONDS,
+    // La pausa llega con T10 de la spec 002; hasta entonces ninguna sesión está en pausa.
+    pause: null,
+    pausesUsed: isAccount ? { inSession: 0, today: 0 } : null,
   };
 }

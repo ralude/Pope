@@ -19,7 +19,14 @@ export type SessionKind = z.infer<typeof sessionKindSchema>;
 
 /**
  * Por qué se cerró una sesión (REQ-001-31): la cerró el cliente, la cerró el encargado,
- * se agotó el saldo o el tiempo, o la PC dejó de enviar latidos (REQ-001-27).
+ * se agotó el saldo o el tiempo, la PC dejó de enviar latidos (REQ-001-27), o su pausa llegó
+ * a la duración máxima con la opción b) (REQ-002-22).
  */
-export const sessionEndReasonSchema = z.enum(['customer', 'staff', 'exhausted', 'no_heartbeat']);
+export const sessionEndReasonSchema = z.enum([
+  'customer',
+  'staff',
+  'exhausted',
+  'no_heartbeat',
+  'pause_expired',
+]);
 export type SessionEndReason = z.infer<typeof sessionEndReasonSchema>;

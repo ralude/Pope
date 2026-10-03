@@ -6,6 +6,7 @@ import {
   panelMessageSchema,
   pcMapLayoutRequestSchema,
   pcMapSchema,
+  pcMapSessionSchema,
 } from './pc-map.js';
 
 const PC = '01900000-0000-7000-8000-000000000005';
@@ -24,6 +25,8 @@ const session = {
   amountMicros: 2_950_000,
   comboSeconds: 0,
   ending: false,
+  pause: null,
+  pausesUsed: { inSession: 0, today: 0 },
 };
 
 describe('mapa de PCs del panel (REQ-001-31)', () => {
@@ -42,6 +45,25 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
       pending: 2,
     });
     expect(() => panelMessageSchema.parse({ type: 'interrupted', pending: -1 })).toThrow();
+  });
+
+  it('REQ-002-14: una sesión en pausa lleva su pausa y las pausas usadas; una temporal, null', () => {
+    const paused = {
+      ...session,
+      pause: {
+        startedAt: '2026-09-28T22:01:00.000Z',
+        maxUntil: '2026-09-28T22:16:00.000Z',
+        billing: false,
+      },
+      pausesUsed: { inSession: 1, today: 3 },
+    };
+    expect(pcMapSessionSchema.parse(paused)).toEqual(paused);
+    const temporary = { ...session, kind: 'temporary', customerId: null, pausesUsed: null };
+    expect(pcMapSessionSchema.parse(temporary)).toEqual(temporary);
+    expect(pcMapSessionSchema.safeParse({ ...session, pause: undefined }).success).toBe(false);
+    expect(
+      pcMapSessionSchema.safeParse({ ...session, pausesUsed: { inSession: -1, today: 0 } }).success,
+    ).toBe(false);
   });
 
   it('anuncia la tasa vigente, o que no hay ninguna (REQ-005-36)', () => {

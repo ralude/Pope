@@ -34,6 +34,8 @@ const session = (over: Partial<Record<keyof PcMapSession, unknown>> = {}): PcMap
     amountMicros: 250_000,
     comboSeconds: 0,
     ending: false,
+    pause: null,
+    pausesUsed: { inSession: 0, today: 0 },
     ...over,
   });
 

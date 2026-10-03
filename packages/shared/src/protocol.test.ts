@@ -78,6 +78,14 @@ describe('PC → nodo', () => {
     expect(valid({ type: 'logout', requestId: 'x'.repeat(65) })).toBe(false);
   });
 
+  it('pause y resume, con requestId opcional (REQ-002-01, REQ-002-10)', () => {
+    expect(valid({ type: 'pause' })).toBe(true);
+    expect(valid({ type: 'resume' })).toBe(true);
+    expect(valid({ type: 'pause', requestId: 'r-4' })).toBe(true);
+    expect(valid({ type: 'resume', requestId: 'r-5' })).toBe(true);
+    expect(valid({ type: 'pause', requestId: '' })).toBe(false);
+  });
+
   it('rechaza tipos desconocidos y mensajes que no son objetos', () => {
     expect(valid({ type: 'shutdown' })).toBe(false);
     expect(valid('hello')).toBe(false);
@@ -108,6 +116,50 @@ describe('nodo → PC', () => {
     ).toBe(true);
     expect(
       validOut({ type: 'state', status: 'active', session: accountSession, vesRate: 40_000_000 }),
+    ).toBe(true);
+  });
+
+  it('REQ-002-06: state con cuenta en pausa, con las pausas que quedan', () => {
+    const paused = {
+      ...accountSession,
+      pause: {
+        startedAt: '2026-09-24T22:30:00Z',
+        maxUntil: '2026-09-24T22:45:00Z',
+        billing: false,
+      },
+      pausesLeft: 2,
+      pauseLimit: null,
+    };
+    expect(validOut({ type: 'state', status: 'active', session: paused, vesRate: null })).toBe(
+      true,
+    );
+    const expired = { ...paused, pause: { ...paused.pause, billing: true } };
+    expect(validOut({ type: 'state', status: 'active', session: expired, vesRate: null })).toBe(
+      true,
+    );
+  });
+
+  it('CA-002-04, CA-002-06: sin pausas, el state dice qué límite se alcanzó', () => {
+    for (const pauseLimit of ['session', 'day', 'disabled']) {
+      const session = { ...accountSession, pause: null, pausesLeft: 0, pauseLimit };
+      expect(validOut({ type: 'state', status: 'active', session, vesRate: null })).toBe(true);
+    }
+    const bad = (over: object) =>
+      validOut({
+        type: 'state',
+        status: 'active',
+        session: { ...accountSession, ...over },
+        vesRate: null,
+      });
+    expect(bad({ pauseLimit: 'week' })).toBe(false);
+    expect(bad({ pausesLeft: -1 })).toBe(false);
+    expect(bad({ pausesLeft: 1.5 })).toBe(false);
+    expect(bad({ pause: { startedAt: '2026-09-24T22:30:00Z', billing: false } })).toBe(false);
+  });
+
+  it('un state sin los campos de la pausa sigue siendo válido (simulador y agentes antiguos)', () => {
+    expect(
+      validOut({ type: 'state', status: 'active', session: accountSession, vesRate: null }),
     ).toBe(true);
   });
 
@@ -144,7 +196,7 @@ describe('nodo → PC', () => {
   });
 
   it('sessionEnded con cada motivo de cierre (REQ-001-31)', () => {
-    for (const reason of ['customer', 'staff', 'exhausted', 'no_heartbeat']) {
+    for (const reason of ['customer', 'staff', 'exhausted', 'no_heartbeat', 'pause_expired']) {
       expect(validOut({ type: 'sessionEnded', sessionId: SESSION_ID, reason })).toBe(true);
     }
     expect(validOut({ type: 'sessionEnded', sessionId: SESSION_ID, reason: 'crash' })).toBe(false);
@@ -161,13 +213,16 @@ describe('nodo → PC', () => {
     expect(validOut({ ...error, message: '' })).toBe(false);
     expect(validOut({ ...error, requestId: 'r-1' })).toBe(true);
     expect(validOut({ ...error, code: 'unknown_pc' })).toBe(true);
+    expect(
+      validOut({ ...error, code: 'pause_unavailable', message: 'Sin pausas disponibles hoy' }),
+    ).toBe(true);
   });
 });
 
 describe('JSON Schema para el agente en C# (ADR-0002)', () => {
   it('exporta los dos sentidos del canal con todos los tipos de mensaje', () => {
     const schemas = JSON.stringify(pcProtocolJsonSchemas());
-    for (const type of ['hello', 'heartbeat', 'login', 'logout', 'buyCombo']) {
+    for (const type of ['hello', 'heartbeat', 'login', 'logout', 'buyCombo', 'pause', 'resume']) {
       expect(schemas).toContain(`"const":"${type}"`);
     }
     for (const type of ['state', 'warning', 'sessionEnded', 'error']) {

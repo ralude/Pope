@@ -8,6 +8,7 @@ import { z } from 'zod';
 
 import { moneySchema, vesRateSchema } from './money.js';
 import { warningMinutesSchema } from './exhaustion.js';
+import { pauseLimitSchema, sessionPauseSchema } from './pause.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
 
 /** Versión del protocolo. Sube cuando un cambio deja de ser compatible. */
@@ -87,6 +88,24 @@ export const listCombosMessageSchema = z.object({
   requestId: requestIdSchema.optional(),
 });
 
+/**
+ * El cliente pausa su sesión con cuenta (REQ-002-01). El nodo responde con el `state` en
+ * pausa y el mismo `requestId`, o con un `error` `pause_unavailable`.
+ */
+export const pauseMessageSchema = z.object({
+  type: z.literal('pause'),
+  requestId: requestIdSchema.optional(),
+});
+
+/**
+ * El cliente quita la pausa tras confirmar que es él (REQ-002-10). El nodo responde con el
+ * `state` sin pausa y el mismo `requestId`.
+ */
+export const resumeMessageSchema = z.object({
+  type: z.literal('resume'),
+  requestId: requestIdSchema.optional(),
+});
+
 export const pcToNodeMessageSchema = z.discriminatedUnion('type', [
   helloMessageSchema,
   heartbeatMessageSchema,
@@ -94,6 +113,8 @@ export const pcToNodeMessageSchema = z.discriminatedUnion('type', [
   logoutMessageSchema,
   buyComboMessageSchema,
   listCombosMessageSchema,
+  pauseMessageSchema,
+  resumeMessageSchema,
 ]);
 export type PcToNodeMessage = z.infer<typeof pcToNodeMessageSchema>;
 
@@ -115,6 +136,21 @@ export const accountSessionStateSchema = z.object({
   moneySeconds: nonNegativeSeconds,
   /** Tiempo total restante: combo + dinero. */
   remainingSeconds: nonNegativeSeconds,
+  /**
+   * La pausa en curso, o `null` (REQ-002-06). Este campo y los dos siguientes son
+   * opcionales: el simulador y los agentes que no conocen la pausa siguen siendo compatibles.
+   */
+  pause: sessionPauseSchema.nullable().optional(),
+  /**
+   * Pausas que quedan: el mínimo entre las de la sesión y las del día (REQ-002-02,
+   * REQ-002-21, REQ-002-24); 0 con la pausa desactivada.
+   */
+  pausesLeft: z.int().nonnegative().optional(),
+  /**
+   * Por qué no quedan pausas, para el mensaje del botón Pausar: `null` si quedan
+   * (CA-002-04, CA-002-06, REQ-002-23).
+   */
+  pauseLimit: pauseLimitSchema.nullable().optional(),
 });
 
 /** Sesión temporal sin cuenta (REQ-001-60, REQ-001-61). */
@@ -211,6 +247,11 @@ export const protocolErrorCodeSchema = z.enum([
   'no_active_session',
   /** El combo no existe o está desactivado (REQ-001-81). */
   'combo_unavailable',
+  /**
+   * No se puede pausar: sesión temporal, pausa desactivada, sin pausas o ya en pausa
+   * (REQ-002-11, REQ-002-21, REQ-002-23, REQ-002-24).
+   */
+  'pause_unavailable',
   /** Error inesperado del nodo. */
   'internal_error',
 ]);

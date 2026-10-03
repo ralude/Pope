@@ -4,9 +4,22 @@
 import { z } from 'zod';
 
 import { localDateInCaracas } from './exchange-rate.js';
-import type { SessionKind } from './session.js';
+import { type SessionKind, utcInstantSchema } from './session.js';
 import type { Settings } from './settings.js';
 import { type Seconds, seconds } from './time.js';
+
+/**
+ * La pausa en curso de una sesión, como la ven la PC (`state`) y el mapa del panel. `billing`
+ * es `true` cuando venció con la opción a) y se vuelve a cobrar aunque la PC siga en la
+ * pantalla de pausa (REQ-002-22, CA-002-05).
+ */
+export const sessionPauseSchema = z.object({
+  startedAt: utcInstantSchema,
+  /** Inicio más la duración máxima (REQ-002-20). */
+  maxUntil: utcInstantSchema,
+  billing: z.boolean(),
+});
+export type SessionPause = z.infer<typeof sessionPauseSchema>;
 
 /**
  * Por qué no quedan pausas: se agotaron las de la sesión (REQ-002-21), las del día
@@ -23,11 +36,12 @@ export type PauseSettings = Pick<
 >;
 
 /** Pausas ya usadas por la cuenta, contando la que esté en curso. */
-export interface PausesUsed {
-  inSession: number;
+export const pausesUsedSchema = z.object({
+  inSession: z.int().nonnegative(),
   /** En el día de Caracas, sumando todas sus sesiones (REQ-002-24). */
-  today: number;
-}
+  today: z.int().nonnegative(),
+});
+export type PausesUsed = z.infer<typeof pausesUsedSchema>;
 
 /** Pausas que quedan y, si no queda ninguna, por qué. */
 export interface PauseAllowance {
