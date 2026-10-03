@@ -113,17 +113,19 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
 
 ## Fase 3: Panel (`apps/panel`)
 
-- [ ] **T11: Diseño de la pausa en el panel**
+- [x] **T11: Diseño de la pausa en el panel**
   - **Cubre:** REQ-002-13, REQ-002-14, CA-002-05, CA-002-08
   - **Hacer:** en el lienzo "Panel Pope · Fase 8": la baldosa en pausa (morado, con el tiempo de pausa que queda) y con borde ámbar cuando ya cobra; la fila "En pausa" de la leyenda; el detalle de la PC en pausa con «Reanudar» y «Cerrar sesión».
   - **Verificar:** aprobación del mantenedor.
   - **Commit:** sin commit (el diseño vive en el lienzo); se anota en `ESTADO.md` con el siguiente commit.
+  - **Decidido al implementarla:** en el artboard «Mapa» (ahora «… · con PCs en pausa (spec 002 · T11)»): la PC 05 de juan en pausa con 12 min (CA-002-08) y la PC 26 de valeria con la pausa vencida que ya cobra (CA-002-05). Baldosa morada (`#8E24C9`, número blanco) con lo que queda de pausa debajo; si ya cobra, borde ámbar de 3 px y debajo el restante de la sesión. Leyenda con «En pausa» y «En pausa, ya cobra». Detalle: insignia «En pausa», «Tiempo restante · detenido», recuadro con «En pausa desde las 18:29 · quedan 12 min» y «Pausas usadas: 1 de 3 en la sesión · 2 de 5 hoy» (si ya cobra, una línea ámbar), y los botones «Reanudar», «Recargar saldo» y «Cerrar sesión» («Vender combo» no está en la PC en pausa, por espacio). **Aprobado por el mantenedor el 2026-10-03.**
 
-- [ ] **T12: La pausa en el mapa**
+- [x] **T12: La pausa en el mapa**
   - **Cubre:** REQ-002-14, CA-002-05, CA-002-08
   - **Hacer:** tipo de baldosa `paused` en `map/model.ts`, con el tiempo de pausa restante debajo en lugar del de la sesión, y borde ámbar si `billing`; la leyenda cuenta las PCs en pausa; el restante en vivo no baja durante la pausa, salvo si ya cobra.
   - **Verificar:** tests de `map/model.test.ts`; a mano en Chrome con el simulador.
   - **Commit:** `feat(panel): muestra las PCs en pausa en el mapa`
+  - **Decidido al implementarla:** en `map/model.ts`, `onHold` (pausa que no cobra), `pauseLeft`, `pauseMinutes` (minutos hacia arriba: «12 min»), `tileSub` (lo que va bajo la baldosa) e `isEnding`: en una pausa que no cobra no se marca la raya roja, porque el tiempo está detenido; si ya cobra, sí. La leyenda cuenta `paused` y aparte `pauseBilling`. La insignia del detalle ya sale morada (con borde ámbar si cobra); el contenido del detalle es T13. Verificado en Chrome con dos PCs pausadas por un script que habla el protocolo (el simulador aprende a pausar en T18): PC 02 morada con «14 min», PC 03 vencida con borde ámbar y «1:29», leyenda «En pausa 2» y «En pausa, ya cobra 1», ocupación 2/10.
 
 - [ ] **T13: Detalle de una PC en pausa**
   - **Cubre:** REQ-002-13, CA-002-08

@@ -1,8 +1,9 @@
-import { type PcMapItem, type PcMapSession, pcMapSessionSchema } from '@pope/shared';
+import { type PcMapItem, type PcMapSession, pcMapSessionSchema, seconds } from '@pope/shared';
 import { describe, expect, it } from 'vitest';
 
 import {
   cellId,
+  isEnding,
   layoutOf,
   legendOf,
   liveAccount,
@@ -12,6 +13,8 @@ import {
   moveTo,
   neighborCell,
   organizeRows,
+  pauseMinutes,
+  tileSub,
   parseCellId,
   placePcs,
   withLayout,
@@ -168,9 +171,11 @@ describe('mapa de PCs (T39)', () => {
     expect(legend).toEqual({
       account: 2,
       temporary: 1,
+      paused: 0,
       free: 1,
       ending: 1,
       offline: 1,
+      pauseBilling: 0,
       occupied: 3,
       total: 5,
     });
@@ -187,5 +192,58 @@ describe('mapa de PCs (T39)', () => {
     const at = new Date('2026-09-28T22:13:00.000Z');
     expect(liveAccount(s, true, at)).toEqual({ moneyMicros: 960_000, comboSeconds: 0 });
     expect(liveAccount(s, false, at)).toEqual({ moneyMicros: 1_000_000, comboSeconds: 60 });
+  });
+});
+
+describe('PCs en pausa en el mapa (T12, REQ-002-14, CA-002-05, CA-002-08)', () => {
+  // Pausa de las 22:05 a las 22:20; el nodo cobró hasta las 22:10 con 10 min restantes.
+  const paused = (billing = false) =>
+    session({
+      remainingSeconds: 600,
+      billedUntil: '2026-09-28T22:10:00.000Z',
+      pause: {
+        startedAt: '2026-09-28T22:05:00.000Z',
+        maxUntil: '2026-09-28T22:20:00.000Z',
+        billing,
+      },
+      pausesUsed: { inSession: 1, today: 2 },
+    });
+  const at = new Date('2026-09-28T22:08:00.000Z');
+
+  it('una PC en pausa va en morado, cobre o no', () => {
+    expect(tileKind(pc(5, { session: paused() }))).toBe('paused');
+    expect(tileKind(pc(5, { session: paused(true) }))).toBe('paused');
+  });
+
+  it('CA-002-08: bajo la baldosa va lo que queda de pausa, en minutos redondeados hacia arriba', () => {
+    expect(tileSub(pc(5, { session: paused() }), at)).toBe('12 min');
+    expect(tileSub(pc(5, { session: paused() }), new Date('2026-09-28T22:19:30.000Z'))).toBe(
+      '1 min',
+    );
+    expect(pauseMinutes(0)).toBe('0 min');
+  });
+
+  it('en pausa el tiempo y el saldo no bajan; si ya cobra, sí', () => {
+    const later = new Date('2026-09-28T22:13:00.000Z');
+    expect(liveRemaining(paused(), true, later)).toBe(600);
+    expect(liveAccount(paused(), true, later)).toEqual({ moneyMicros: 250_000, comboSeconds: 0 });
+    expect(liveRemaining(paused(true), true, later)).toBe(420);
+    // Si ya cobra, bajo la baldosa vuelve el restante de la sesión.
+    expect(tileSub(pc(5, { session: paused(true) }), later)).toBe('0:07');
+  });
+
+  it('en pausa no se marca la raya roja aunque queden menos de 5 min: el tiempo está detenido', () => {
+    const short = (billing: boolean) =>
+      pc(5, { session: { ...paused(billing), remainingSeconds: seconds(120) } });
+    expect(isEnding(short(false), at)).toBe(false);
+    expect(isEnding(short(true), at)).toBe(true);
+  });
+
+  it('la leyenda cuenta las PCs en pausa, las que ya cobran y las da por ocupadas', () => {
+    const legend = legendOf(
+      [pc(1), pc(2, { session: paused() }), pc(3, { session: paused(true) })],
+      at,
+    );
+    expect(legend).toMatchObject({ paused: 2, pauseBilling: 1, occupied: 2, total: 3 });
   });
 });

@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · T10 de la spec 002 (reanudar desde el panel); termina la fase del nodo
+**Última actualización:** 2026-10-03 · T12 de la spec 002 (las PCs en pausa en el mapa del panel)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [002 · Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md), fase 1 (todo en TypeScript). La 005 espera la revisión de T07 |
-| **Siguiente tarea** | **T11: Diseño de la pausa en el panel** (spec 002, lienzo «Panel Pope · Fase 8», aprobación del mantenedor; [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
-| **Progreso** | Spec 002: 10 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
+| **Siguiente tarea** | **T13: Detalle de una PC en pausa** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
+| **Progreso** | Spec 002: 12 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -49,7 +49,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 68 / 68 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 10 / 19 |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 12 / 19 |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
@@ -61,6 +61,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T12 (spec 002): el mapa del panel pinta las PCs en pausa en morado, con lo que queda de pausa, y con borde ámbar si ya cobra; la leyenda las cuenta. Probado en Chrome.
+- **2026-10-03:** T11 (spec 002): diseño de la pausa en el lienzo del panel (artboard «Mapa»), aprobado por el mantenedor.
 - **2026-10-03:** T10 (spec 002): el encargado reanuda una sesión en pausa desde el panel (`POST /sessions/:id/resume`) y el mapa trae la pausa y las pausas usadas. Termina la fase del nodo.
 - **2026-10-03:** T09 (spec 002): en pausa la sesión no se cierra por falta de latidos ni porque la PC se reinicie (vuelve a la pantalla de pausa); vencida con a), la gracia cuenta desde el fin de la pausa.
 - **2026-10-03:** T08 (spec 002): la pausa vence a los 15 min: con a) vuelve a cobrar desde `maxUntil` con la PC en pausa (CA-002-05), con b) cierra la sesión sin cobrar la pausa; al arrancar, el nodo aplica las vencidas. Se aplica la opción vigente al vencer (mantenedor).
@@ -69,5 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T05 (spec 002): tabla `session_pauses` (migración 0024), con una sola pausa abierta por sesión y sus índices para contar las de la sesión y las del día.
 - **2026-10-03:** T04 (spec 002): eventos `session.paused` (con su número y `maxUntil`), `session.resumed` (lo no cobrado; quién, en el actor) y `session.pause_expired`, según lo que decidió el mantenedor. Termina la fase de contratos.
 - **2026-10-03:** T03 (spec 002): el canal de la PC admite `pause` y `resume`; el `state` lleva la pausa, las pausas que quedan y el límite; error `pause_unavailable`, motivo de cierre `pause_expired` («Se venció la pausa», mantenedor) y la pausa en el mapa del panel.
-- **2026-10-03:** T02 (spec 002): reglas puras de la pausa (pausas que quedan y su límite, motivos de rechazo con sus textos, duración y pausas del día en Caracas). El mantenedor fija los textos que faltaban y que manda el límite del día.
-- **2026-10-03:** T01 (spec 002): los cinco ajustes de la pausa (activada, 15 min, 3 por sesión, 5 por día y volver a cobrar al vencer), con sus límites; se cambian con `PUT /settings` y emiten `setting.changed` v2.

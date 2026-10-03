@@ -64,6 +64,19 @@
   color: var(--bg);
 }
 
+/*
+ * En pausa (REQ-002-14; morado, mantenedor, 2026-10-02): el morado de la marca. Si la pausa
+ * venció con la opción a) y ya cobra, borde ámbar (CA-002-05; diseño aprobado, 2026-10-03).
+ */
+.tile-paused {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.tile-billing {
+  border: 3px solid var(--amber-bar);
+}
+
 .tile-free {
   background: var(--green);
   color: #ffffff;
@@ -126,6 +139,15 @@
   background: var(--amber);
 }
 
+.swatch-paused {
+  background: var(--accent);
+}
+
+.swatch-billing {
+  border: 3px solid var(--amber-bar);
+  box-sizing: border-box;
+}
+
 .swatch-free {
   background: var(--green);
 }
@@ -141,6 +163,10 @@
 
 .bar-temporary {
   background: var(--amber-bar);
+}
+
+.bar-paused {
+  background: var(--accent-text);
 }
 
 .bar-free {
@@ -193,6 +219,15 @@
 .badge-account {
   background: var(--sky);
   color: var(--sky-ink);
+}
+
+.badge-paused {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.detail-badge.badge-billing {
+  border: 2px solid var(--amber-bar);
 }
 
 .badge-temporary {

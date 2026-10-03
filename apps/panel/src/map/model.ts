@@ -7,6 +7,7 @@ import {
   type PcMapSession,
   PC_MAP_COLUMNS,
   PC_MAP_MAX_ROWS,
+  pauseSecondsLeft,
   seconds,
   startUsage,
 } from '@pope/shared';
@@ -15,17 +16,47 @@ import {
 export const MAP_COLUMNS = PC_MAP_COLUMNS;
 
 /** Estado que pinta la baldosa. */
-export type TileKind = 'account' | 'temporary' | 'free' | 'offline';
+export type TileKind = 'account' | 'temporary' | 'paused' | 'free' | 'offline';
 
 /**
  * Con sesión manda la sesión, aunque la PC esté desconectada: sigue abierta durante el tiempo
- * de gracia (REQ-001-27).
+ * de gracia (REQ-001-27). Una sesión en pausa va en morado (REQ-002-14).
  */
 export function tileKind(pc: PcMapItem): TileKind {
   if (pc.session) {
+    if (pc.session.pause) return 'paused';
     return pc.session.kind === 'account' ? 'account' : 'temporary';
   }
   return pc.connected ? 'free' : 'offline';
+}
+
+/**
+ * La sesión está en una pausa que aún no cobra: su tiempo no corre (REQ-002-03). Si venció
+ * con la opción a), ya cobra aunque la PC siga en pausa (CA-002-05).
+ */
+export function onHold(session: PcMapSession): boolean {
+  return session.pause !== null && !session.pause.billing;
+}
+
+/** Segundos de pausa que quedan ahora (REQ-002-14). */
+export function pauseLeft(session: PcMapSession, now: Date): number {
+  return session.pause ? pauseSecondsLeft(new Date(session.pause.maxUntil), now) : 0;
+}
+
+/** Minutos de pausa para la baldosa y el detalle, redondeando hacia arriba: `12 min`. */
+export function pauseMinutes(totalSeconds: number): string {
+  return `${String(Math.ceil(totalSeconds / 60))} min`;
+}
+
+/**
+ * Texto bajo la baldosa: el restante de la sesión (`1:58`); en pausa, lo que queda de pausa
+ * (`12 min`), salvo si ya cobra, que vuelve a ser el restante, porque baja.
+ */
+export function tileSub(pc: PcMapItem, now: Date): string {
+  const session = pc.session;
+  if (!session) return '';
+  if (onHold(session)) return pauseMinutes(pauseLeft(session, now));
+  return shortDuration(liveRemaining(session, pc.connected, now));
 }
 
 export interface PlacedPc {
@@ -156,7 +187,8 @@ export function neighborCell(
  * el hueco (REQ-001-27), así que tampoco se cuenta aquí.
  */
 function elapsedSince(session: PcMapSession, connected: boolean, now: Date): number {
-  if (!connected) {
+  // En una pausa que no cobra tampoco corre (REQ-002-03).
+  if (!connected || onHold(session)) {
     return 0;
   }
   return Math.max(0, Math.floor((now.getTime() - Date.parse(session.billedUntil)) / 1000));
@@ -199,9 +231,11 @@ export function shortDuration(totalSeconds: number): string {
 /** Con 5 min o menos, la raya roja (REQ-001-24). */
 export const ENDING_SECONDS = 5 * 60;
 
-/** Recuentos de la leyenda. Cada PC cuenta en un solo estado; `ending` va aparte. */
+/** Recuentos de la leyenda. Cada PC cuenta en un solo estado; `ending` y `pauseBilling` van aparte. */
 export interface Legend extends Record<TileKind, number> {
   ending: number;
+  /** En pausa que ya cobra (borde ámbar, CA-002-05); cuentan también en `paused`. */
+  pauseBilling: number;
   /** PCs con sesión, de `total`. */
   occupied: number;
   total: number;
@@ -211,9 +245,11 @@ export function legendOf(pcs: readonly PcMapItem[], now: Date): Legend {
   const legend: Legend = {
     account: 0,
     temporary: 0,
+    paused: 0,
     free: 0,
     offline: 0,
     ending: 0,
+    pauseBilling: 0,
     occupied: 0,
     total: pcs.length,
   };
@@ -221,8 +257,19 @@ export function legendOf(pcs: readonly PcMapItem[], now: Date): Legend {
     legend[tileKind(pc)] += 1;
     if (pc.session) {
       legend.occupied += 1;
-      if (liveRemaining(pc.session, pc.connected, now) <= ENDING_SECONDS) legend.ending += 1;
+      if (pc.session.pause?.billing) legend.pauseBilling += 1;
+      if (isEnding(pc, now)) legend.ending += 1;
     }
   }
   return legend;
+}
+
+/**
+ * Quedan 5 min o menos y el tiempo corre: la raya roja (REQ-001-24). En una pausa que no cobra
+ * el tiempo está detenido, así que no se marca.
+ */
+export function isEnding(pc: PcMapItem, now: Date): boolean {
+  const session = pc.session;
+  if (!session || onHold(session)) return false;
+  return liveRemaining(session, pc.connected, now) <= ENDING_SECONDS;
 }

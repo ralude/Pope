@@ -21,7 +21,7 @@ import { RechargeDialog } from '../customers/RechargeDialog.js';
 import { useNodeNow, usePcMapFeed } from '../map/channel.js';
 import {
   type Cell,
-  ENDING_SECONDS,
+  isEnding,
   type Layout,
   layoutOf,
   type Legend,
@@ -32,12 +32,15 @@ import {
   MIN_ROWS,
   movedCount,
   moveTo,
+  onHold,
   organizeRows,
+  pauseLeft,
+  pauseMinutes,
   placePcs,
-  shortDuration,
   type TileKind,
   tileKind,
   tileLabel,
+  tileSub,
   withLayout,
 } from '../map/model.js';
 import { OrganizeGrid } from '../map/OrganizeGrid.js';
@@ -51,6 +54,7 @@ import { Frame } from '../ui/Frame.js';
 const KIND_LABEL: Record<TileKind, string> = {
   account: 'Con cuenta',
   temporary: 'Temporal',
+  paused: 'En pausa',
   free: 'Libre',
   offline: 'Sin conexión',
 };
@@ -249,18 +253,24 @@ function MapGrid({
     >
       {placed.map(({ pc, row, col }) => {
         const kind = tileKind(pc);
-        const remaining = pc.session ? liveRemaining(pc.session, pc.connected, now) : null;
-        const ending = remaining !== null && remaining <= ENDING_SECONDS;
+        const session = pc.session;
+        const ending = isEnding(pc, now);
         const parts = [pc.name, KIND_LABEL[kind]];
-        if (pc.session && remaining !== null) {
-          parts.push(pc.session.who, `quedan ${formatDuration(seconds(remaining))}`);
+        if (session) {
+          if (onHold(session)) {
+            parts.push(`quedan ${pauseMinutes(pauseLeft(session, now))} de pausa`);
+          } else if (session.pause) {
+            parts.push('ya cobra');
+          }
+          const remaining = liveRemaining(session, pc.connected, now);
+          parts.push(session.who, `quedan ${formatDuration(seconds(remaining))}`);
           if (!pc.connected) parts.push('sin conexión');
         }
         return (
           <div key={pc.id} className="map-cell" style={{ gridRow: row + 1, gridColumn: col + 1 }}>
             <button
               type="button"
-              className={`tile tile-${kind}${pc.session && !pc.connected ? ' tile-unlinked' : ''}`}
+              className={`tile tile-${kind}${session?.pause?.billing ? ' tile-billing' : ''}${session && !pc.connected ? ' tile-unlinked' : ''}`}
               aria-label={parts.join(', ')}
               aria-pressed={pc.id === selectedId}
               onClick={() => {
@@ -270,7 +280,7 @@ function MapGrid({
               {tileLabel(pc.name)}
             </button>
             <div className={`tile-bar ${ending ? 'bar-ending' : `bar-${kind}`}`} />
-            <div className="tile-sub num">{remaining === null ? '' : shortDuration(remaining)}</div>
+            <div className="tile-sub num">{tileSub(pc, now)}</div>
           </div>
         );
       })}
@@ -364,6 +374,12 @@ function LegendCard({ legend }: { legend: Legend }) {
   const rows: { label: string; count: number; swatch: string; style?: object }[] = [
     { label: KIND_LABEL.account, count: legend.account, swatch: 'swatch-account' },
     { label: KIND_LABEL.temporary, count: legend.temporary, swatch: 'swatch-temporary' },
+    { label: KIND_LABEL.paused, count: legend.paused, swatch: 'swatch-paused' },
+    {
+      label: 'En pausa, ya cobra',
+      count: legend.pauseBilling,
+      swatch: 'swatch-paused swatch-billing',
+    },
     { label: KIND_LABEL.free, count: legend.free, swatch: 'swatch-free' },
     {
       label: 'Quedan menos de 5 min',
@@ -420,14 +436,16 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
   const kind = tileKind(pc);
   const session = pc.session;
   const remaining = session ? liveRemaining(session, pc.connected, now) : 0;
-  const ending = session !== null && remaining <= ENDING_SECONDS;
+  const ending = isEnding(pc, now);
   const canOperate = staff.role !== 'dueno';
 
   return (
     <>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h2 className="detail-title">{pc.name}</h2>
-        <span className={`detail-badge ${ending ? 'badge-ending' : `badge-${kind}`}`}>
+        <span
+          className={`detail-badge ${ending ? 'badge-ending' : `badge-${kind}`}${session?.pause?.billing ? ' badge-billing' : ''}`}
+        >
           {ending ? 'Quedan < 5 min' : KIND_LABEL[kind]}
         </span>
       </div>
