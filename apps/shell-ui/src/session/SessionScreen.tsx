@@ -19,6 +19,7 @@ import type { LogoutResult } from './logout.js';
 import type { BuyResult, CombosResult } from './combos.js';
 import { formatTimeLeft, warningMinutes } from './format.js';
 import { liveSession } from './live.js';
+import { useElapsed } from './use-elapsed.js';
 import { type PauseResult, pauseButton } from './pause.js';
 import { PauseDialog, PauseIcon } from './PauseDialog.js';
 import { WarningToast } from './WarningToast.js';
@@ -32,21 +33,6 @@ const CLOCK = new Intl.DateTimeFormat('es-VE', {
   hourCycle: 'h23',
   timeZone: LOCAL_TIME_ZONE,
 });
-
-/** Segundos desde `since` (`performance.now()`), refrescados cada segundo. */
-function useElapsed(since: number): number {
-  const [now, setNow] = useState(() => performance.now());
-  useEffect(() => {
-    setNow(performance.now());
-    const timer = setInterval(() => {
-      setNow(performance.now());
-    }, 1000);
-    return () => {
-      clearInterval(timer);
-    };
-  }, [since]);
-  return Math.max(0, (now - since) / 1000);
-}
 
 /** Aviso breve de confirmación ("Listo: sumaste…"), que se quita solo a los 4 s. */
 function useNotice(): { text: string | null; show: (text: string) => void } {

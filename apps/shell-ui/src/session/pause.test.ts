@@ -2,6 +2,7 @@ import { type NodeToPcMessage, nodeToPcMessageSchema } from '@pope/shared';
 import { describe, expect, it } from 'vitest';
 
 import {
+  formatPauseLeft,
   PAUSE_FAILED_MESSAGE,
   pauseButton,
   pauseMaxText,
@@ -122,5 +123,16 @@ describe('botón Pausar y confirmación (T16, REQ-002-01, REQ-002-02)', () => {
     expect(pausesLeftText(1)).toBe('Te queda 1 pausa');
     expect(pauseMaxText(900)).toBe('15 min');
     expect(pauseMaxText(3600)).toBe('60 min');
+  });
+});
+
+describe('pantalla de pausa (T17, REQ-002-06)', () => {
+  it('el tiempo de pausa va sin segundos, salvo el último minuto', () => {
+    expect(formatPauseLeft(900)).toBe('15 min');
+    expect(formatPauseLeft(661)).toBe('12 min');
+    expect(formatPauseLeft(61)).toBe('2 min');
+    expect(formatPauseLeft(60)).toBe('60 s');
+    expect(formatPauseLeft(45)).toBe('45 s');
+    expect(formatPauseLeft(0)).toBe('0 s');
   });
 });

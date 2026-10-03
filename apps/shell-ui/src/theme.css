@@ -1088,3 +1088,177 @@ input {
   align-items: center;
   gap: 10px;
 }
+
+/* Pantalla de pausa (T17; diseño aprobado en T14). */
+.pause-brand {
+  position: absolute;
+  top: 40px;
+  left: 56px;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 5px;
+}
+
+.pause-center {
+  bottom: 40px;
+}
+
+.pause-card {
+  width: 720px;
+  padding: 44px 52px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.pause-card h1 {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.pause-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+  background: rgba(142, 36, 201, 0.28);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pause-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pause-time {
+  font-size: 96px;
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pause-time.running {
+  color: #ffc46b;
+}
+
+.pause-sub {
+  font-size: 16px;
+  color: var(--soft);
+}
+
+.pause-facts {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.pause-fact {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.pause-fact-label {
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.pause-fact-value {
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pause-resume {
+  width: 320px;
+  height: 58px;
+  border-radius: 29px;
+  font-size: 19px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.pause-billing {
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: rgba(240, 167, 58, 0.16);
+  border: 1px solid #c98a2b;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-align: left;
+  color: #fff3df;
+}
+
+.pause-billing-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  background: #f0a73a;
+  color: #1a1206;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pause-billing-title {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.pause-billing-text {
+  font-size: 15px;
+  color: #f5ddb5;
+}
+
+.pause-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.dialog.resume-dialog {
+  width: 520px;
+  align-items: center;
+  text-align: center;
+}
+
+.resume-dialog h2 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.resume-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 32px;
+  font-size: 22px;
+}
+
+.resume-actions {
+  justify-content: center;
+}

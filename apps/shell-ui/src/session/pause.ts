@@ -58,3 +58,12 @@ export function pausesLeftText(left: number): string {
 export function pauseMaxText(maxSeconds: number): string {
   return `${String(Math.round(maxSeconds / 60))} min`;
 }
+
+/**
+ * Tiempo de pausa que queda, para la pantalla de pausa (REQ-002-06): sin segundos y hacia
+ * arriba («12 min»), salvo el último minuto, que cuenta en segundos («45 s»).
+ */
+export function formatPauseLeft(seconds: number): string {
+  const left = Math.max(0, Math.ceil(seconds));
+  return left > 60 ? `${String(Math.ceil(left / 60))} min` : `${String(left)} s`;
+}
