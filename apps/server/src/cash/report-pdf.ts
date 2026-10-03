@@ -235,6 +235,38 @@ function paymentsText(movement: CashMovement): string {
 }
 
 /** Lo que añade el detallado (REQ-005-53): movimientos, anulaciones y stock por producto. */
+/**
+ * Lo vendido por artículo (REQ-005-51), como el Z-Report de SENET: golosinas y otras ventas,
+ * con las unidades vendidas y lo que queda en almacén. Si no cabe, sigue en otra página.
+ */
+function drawSold(w: Writer, report: ShiftReport): void {
+  w.heading('Lo vendido por artículo');
+  const widths = [315, 100, 100];
+  w.row(
+    ['Artículo', 'Cantidad vendida', 'En almacén'].map((text, i) => ({
+      text,
+      width: widths[i] ?? 0,
+      align: i === 0 ? 'left' : 'right',
+    })),
+    true,
+  );
+  w.rule();
+  for (const line of report.sold) {
+    w.row([
+      { text: line.name, width: widths[0] ?? 0 },
+      { text: String(line.quantity), width: widths[1] ?? 0, align: 'right' },
+      {
+        text: line.inStock === null ? '—' : String(line.inStock),
+        width: widths[2] ?? 0,
+        align: 'right',
+      },
+    ]);
+  }
+  if (report.sold.length === 0) {
+    w.line('No se vendieron golosinas ni otras ventas.', 9);
+  }
+}
+
 function drawDetail(w: Writer, report: ShiftReport): void {
   w.heading('Movimientos de la caja');
   // Entre el importe (a la derecha) y el pago va una columna vacía de separación.
@@ -313,14 +345,16 @@ function drawDetail(w: Writer, report: ShiftReport): void {
 }
 
 /**
- * El PDF del cierre. El resumen (`full = false`) cabe siempre en una página: solo lleva
- * totales, nunca la lista de movimientos (plan 005, riesgos). El detallado añade lo demás.
+ * El PDF del cierre. En el del encargado (`full = false`) los totales y el cuadre caben
+ * siempre en la primera página; después va lo vendido por artículo, que puede seguir en otra,
+ * y nunca la lista de movimientos (plan 005, riesgos). El detallado añade lo demás.
  */
 export function renderShiftReport(report: ShiftReport, full: boolean): Promise<Buffer> {
   const title = full ? 'Cierre de caja detallado' : 'Cierre de caja';
   return render((doc) => {
     const w = new Writer(doc);
     drawSummary(w, report);
+    drawSold(w, report);
     if (full) {
       drawDetail(w, report);
     }

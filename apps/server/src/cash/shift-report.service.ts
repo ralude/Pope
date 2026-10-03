@@ -1,17 +1,34 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { type CashMovement, type ShiftSummary, type VesRate, vesRate } from '@pope/shared';
-import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { cashEntries, cashShifts, products, stockMovements } from '../db/schema.js';
+import {
+  cashEntries,
+  cashShifts,
+  products,
+  saleLines,
+  sales,
+  stockMovements,
+} from '../db/schema.js';
 import { actorName } from '../sessions/session-state.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { ShiftsService } from '../shifts/shifts.service.js';
 import { CashRegisterService } from './cash-register.service.js';
 
 /** Cómo se movió el stock de un producto durante la caja (REQ-005-53). */
+/** Un artículo vendido en la caja, como en el Z-Report de SENET (REQ-005-51). */
+export interface SoldLine {
+  name: string;
+  /** Unidades vendidas, sin las ventas anuladas. */
+  quantity: number;
+  /** Lo que queda en almacén al cerrar; `null` en las otras ventas, que no llevan stock. */
+  inStock: number | null;
+}
+
 export interface StockLine {
+  productId: string;
   name: string;
   initial: number;
   restocked: number;
@@ -34,6 +51,8 @@ export interface ShiftReport {
   rate: VesRate | null;
   /** Los movimientos en orden de hora, el más antiguo primero. */
   movements: CashMovement[];
+  /** Lo vendido por artículo, por nombre (REQ-005-51). */
+  sold: SoldLine[];
   stock: StockLine[];
   generatedAt: Date;
 }
@@ -70,6 +89,7 @@ export class ShiftReportService {
         .limit(1),
     ]);
     const now = this.clock.now();
+    const stock = await this.stock(row.openedAt, row.closedAt ?? now);
     return {
       localName,
       summary,
@@ -78,7 +98,8 @@ export class ShiftReportService {
       closedByName: row.closedBy ? actorName(row.closedBy) : null,
       rate: lastRate?.rate ? vesRate(lastRate.rate) : null,
       movements: [...list.movements].reverse(),
-      stock: await this.stock(row.openedAt, row.closedAt ?? now),
+      stock,
+      sold: await this.sold(id, stock),
       generatedAt: now,
     };
   }
@@ -96,6 +117,7 @@ export class ShiftReportService {
       );
     const rows = await this.db
       .select({
+        productId: products.id,
         name: products.name,
         active: products.active,
         initial: sum(sql`${stockMovements.createdAt} < ${from}`),
@@ -112,6 +134,7 @@ export class ShiftReportService {
     return rows
       .filter((row) => row.active || row.moved > 0)
       .map((row) => ({
+        productId: row.productId,
         name: row.name,
         initial: row.initial,
         restocked: row.restocked,
@@ -120,5 +143,32 @@ export class ShiftReportService {
         wasted: -row.wasted,
         final: row.initial + row.restocked + row.sold + row.adjusted + row.wasted,
       }));
+  }
+
+  /**
+   * Lo vendido por artículo en la caja (REQ-005-51), como el Z-Report de SENET: golosinas y
+   * otras ventas con las unidades vendidas, sin las ventas anuladas, y lo que queda en almacén.
+   */
+  private async sold(shiftId: string, stock: readonly StockLine[]): Promise<SoldLine[]> {
+    const rows = await this.db
+      .select({
+        productId: saleLines.productId,
+        conceptId: saleLines.conceptId,
+        // El nombre copiado en la venta; si cambió entre ventas, uno cualquiera de ellos.
+        name: sql<string>`max(${saleLines.name})`,
+        quantity: sql<number>`sum(${saleLines.quantity})`.mapWith(Number),
+      })
+      .from(saleLines)
+      .innerJoin(sales, eq(sales.id, saleLines.saleId))
+      .where(and(eq(sales.shiftId, shiftId), isNull(sales.voidedAt)))
+      .groupBy(saleLines.productId, saleLines.conceptId);
+    const finalStock = new Map(stock.map((line) => [line.productId, line.final]));
+    return rows
+      .map((row) => ({
+        name: row.name,
+        quantity: row.quantity,
+        inStock: row.productId === null ? null : (finalStock.get(row.productId) ?? null),
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'));
   }
 }

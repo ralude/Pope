@@ -120,6 +120,11 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
     expect(texts).toContain('-19,20 USD');
     // El resumen nunca lleva la lista de movimientos (plan 005, riesgos).
     expect(texts).not.toContain('Impresiones × 12');
+    // REQ-005-51: lo vendido por artículo, como el Z-Report de SENET: cantidad y en almacén
+    // (las otras ventas no llevan stock).
+    const sold = texts.slice(texts.indexOf('Lo vendido por artículo'));
+    expect(sold.slice(1, 4)).toEqual(['Artículo', 'Cantidad vendida', 'En almacén']);
+    expect(sold.slice(4, 10)).toEqual(['Impresiones', '12', '—', 'Papas', '2', '8']);
   });
 
   it('REQ-005-53: el detallado lleva los movimientos, las anulaciones con su motivo y el stock', async () => {
@@ -140,6 +145,13 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
     // Con la venta anulada, las golosinas suman 0.
     const snacksAt = texts.indexOf('Golosinas');
     expect(texts[snacksAt + 1]).toBe('0,00 USD');
+    // Y la venta anulada no cuenta en lo vendido por artículo (REQ-005-51).
+    const sold = texts.slice(
+      texts.indexOf('Lo vendido por artículo'),
+      texts.indexOf('Movimientos de la caja'),
+    );
+    expect(sold).toContain('Impresiones');
+    expect(sold).not.toContain('Papas');
   });
 
   it('el encargado descarga el resumen de sus cajas, pero no el detallado ni el de otros', async () => {

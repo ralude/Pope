@@ -74,7 +74,7 @@ hoja de papel se sigue usando de respaldo.
 - **REQ-005-45:** Antes de cerrar, el panel pide confirmación ("¿Seguro que quieres cerrar la caja?"). Al confirmar, el cierre **descarga sí o sí** el reporte del encargado en PDF (REQ-005-51).
 
 **Reportes del cierre**
-- **REQ-005-51:** **Reporte del encargado**: PDF plano de **una sola página**, para imprimir o mandar al grupo de WhatsApp. Lleva el **nombre del local** (un ajuste que cambia el administrador desde el panel; mantenedor, 2026-10-02), fecha, encargado, hora de apertura y cierre, lo vendido por grupo (**horas de PC**, **golosinas** y **otras ventas**) y el total, y por método lo esperado, lo contado y la diferencia. Lo pagado con saldo aparece aparte.
+- **REQ-005-51:** **Reporte del encargado**: PDF plano de **una página** (puede seguir en una segunda si se vendieron muchos artículos distintos), para imprimir o mandar al grupo de WhatsApp. Lleva el **nombre del local** (un ajuste que cambia el administrador desde el panel; mantenedor, 2026-10-02), fecha, encargado, hora de apertura y cierre, lo vendido por grupo (**horas de PC**, **golosinas** y **otras ventas**) y el total, y por método lo esperado, lo contado y la diferencia. Lo pagado con saldo aparece aparte. Al final, **lo vendido por artículo**, como el Z-Report de SENET: golosinas y otras ventas, cada una con la cantidad vendida en el turno (sin las ventas anuladas) y lo que queda en almacén ("—" en las otras ventas, que no llevan stock) (mantenedor, 2026-10-03).
 - **REQ-005-52:** **Horas de PC** reúne las sesiones temporales, las recargas de saldo y los combos vendidos en caja; **golosinas**, los productos del inventario; **otras ventas**, los conceptos (mantenedor, 2026-10-02).
 - **REQ-005-53:** **Reporte detallado**, para el administrador y el dueño: además de lo del reporte del encargado, cada movimiento del turno, las anulaciones con su motivo y, por producto, el stock inicial, las entradas, las ventas, los ajustes, las mermas y el stock final. Se descarga en PDF desde el historial de cierres del panel, de cualquier día.
 
@@ -160,6 +160,8 @@ hoja de papel se sigue usando de respaldo.
 - Varios turnos de caja en un mismo día (REQ-005-44).
 
 ## Preguntas abiertas
+
+- [ ] **Fondos agregados y retiradas de efectivo** (como en el Z-Report de SENET): meter o sacar efectivo de la caja a mitad de turno, con motivo, y que cuente en lo esperado del cierre. El mantenedor lo deja para más adelante (2026-10-03).
 
 - [x] ¿Cuál es la moneda base de los precios? **Resuelta: USD, con equivalente en Bs** (REQ-005-30).
 - [x] ¿La tasa se introduce a mano o se consulta? **Resuelta: automática desde el BCV, con opción manual** (REQ-005-31 a REQ-005-34).

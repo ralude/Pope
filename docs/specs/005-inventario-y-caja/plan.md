@@ -265,10 +265,12 @@ eventos ya guardados.
   con tildes y eñes). Es una dependencia nueva del servidor: se justifica porque el reporte
   debe salir igual en el local y, más adelante, desde la nube para el dueño (spec 006), y
   porque cabe holgado en el presupuesto de ADR-0011 (se genera bajo demanda y se descarta).
-- **Del encargado** (una página, A4 en vertical, sin colores): nombre del local, fecha,
-  encargado, apertura y cierre; horas de PC, golosinas, otras ventas y total; tabla por método
-  con esperado, contado y diferencia; lo pagado con saldo, aparte. Pensado para imprimir y
-  para mandar al grupo de WhatsApp.
+- **Del encargado** (A4 en vertical, sin colores): nombre del local, fecha, encargado,
+  apertura y cierre; horas de PC, golosinas, otras ventas y total; tabla por método con
+  esperado, contado y diferencia; lo pagado con saldo, aparte; y al final lo vendido por
+  artículo (nombre, cantidad vendida y en almacén), como el Z-Report de SENET. Los totales
+  caben siempre en la primera página; la tabla por artículo sigue en otra si no cabe
+  (mantenedor, 2026-10-03). Pensado para imprimir y para mandar al grupo de WhatsApp.
 - **Detallado:** lo anterior y, después, cada movimiento del turno, las anulaciones con su
   motivo y, por producto, stock inicial, entradas, ventas, ajustes, mermas y stock final. Puede
   ocupar varias páginas.
@@ -333,7 +335,7 @@ eventos ya guardados.
 - **Cambiar los cobros de la spec 001** (recargas, temporales, combos) para que escriban el
   registro de caja toca código ya verificado: sus tests e2e deben seguir pasando y se añaden
   los del registro.
-- **El PDF de una página** debe caber siempre: el del encargado solo lleva totales, nunca la
-  lista de movimientos.
+- **El PDF del encargado**: los totales y el cuadre caben siempre en la primera página; nunca
+  lleva la lista de movimientos, solo lo vendido por artículo, que puede seguir en otra.
 - **Sin tasa no hay cobro en Bs:** si nadie la escribe, solo se puede cobrar en USD. El panel
   lo dice claramente (REQ-005-34).
