@@ -104,6 +104,14 @@ export function formatBolivares(amount: Micros, rate: VesRate, suffix = ''): str
   return `≈ ${formatCents(roundToCents(usdToVes(amount, rate)))} Bs${suffix}`;
 }
 
+/**
+ * Un importe que ya está en bolívares (µVES): `1.234,56 Bs`. Para lo que se cobró o se cuenta
+ * en Bs en la caja (spec 005), que no se convierte con la tasa.
+ */
+export function formatVes(amount: Micros): string {
+  return `${formatCents(roundToCents(amount))} Bs`;
+}
+
 /** `123456` céntimos → `1.234,56`: miles con punto y decimales con coma. */
 function formatCents(cents: number): string {
   const sign = cents < 0 ? '-' : '';

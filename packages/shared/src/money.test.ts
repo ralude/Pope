@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatBolivares,
   formatMoney,
+  formatVes,
   micros,
   microsSchema,
   moneySchema,
@@ -124,5 +125,12 @@ describe('usdToVes', () => {
   it('no pierde precisión aunque el producto supere el entero seguro', () => {
     // 1 000 000 USD a 400 VES/USD: el producto intermedio es 4·10²⁰.
     expect(usdToVes(usd(1_000_000), vesRate(400_000_000))).toBe(400_000_000 * 1_000_000);
+  });
+});
+
+describe('formatVes (spec 005)', () => {
+  it('muestra un importe en Bs sin convertirlo', () => {
+    expect(formatVes(micros(1_234_560_000))).toBe('1.234,56 Bs');
+    expect(formatVes(micros(-80_000_000))).toBe('-80,00 Bs');
   });
 });
