@@ -11,15 +11,36 @@ import {
   type ProtocolErrorCode,
   seconds,
   secondsUntilExhausted,
+  type SessionPause,
   type SessionUsage,
   type TemporaryUsage,
   type VesRate,
   temporaryRemaining,
 } from '@pope/shared';
 
-import type { sessions } from '../db/schema.js';
+import type { sessionPauses, sessions } from '../db/schema.js';
 
 export type SessionRow = typeof sessions.$inferSelect;
+export type PauseRow = typeof sessionPauses.$inferSelect;
+
+/**
+ * La pausa ya cobra: venció con la opción a) y se volvió a cobrar desde `max_until`
+ * (REQ-002-22). Mientras no cobra, el tiempo de la sesión no corre (REQ-002-03).
+ */
+export function pauseBilling(pause: PauseRow): boolean {
+  return pause.billingResumedAt !== null;
+}
+
+/** La pausa tal como la ven la PC y el panel (REQ-002-06, REQ-002-14). */
+export function pauseView(pause: PauseRow | null): SessionPause | null {
+  return pause
+    ? {
+        startedAt: pause.startedAt.toISOString(),
+        maxUntil: pause.maxUntil.toISOString(),
+        billing: pauseBilling(pause),
+      }
+    : null;
+}
 
 /** Petición de la PC rechazada con un código del protocolo y un mensaje en español. */
 export class PcRequestRefused extends Error {
@@ -90,6 +111,8 @@ export function activeState(
   account: { username: string; balances: CustomerBalances } | null,
   /** Tasa vigente, para que el Shell muestre el Bs (REQ-005-36); `null` si no hay. */
   vesRate: VesRate | null,
+  /** La pausa abierta de una sesión con cuenta, o `null` (REQ-002-06). */
+  pause: PauseRow | null,
 ): NodeToPcMessage {
   const base = { sessionId: row.id, startedAt: row.startedAt.toISOString() };
   if (row.kind === 'account' && account) {
@@ -109,6 +132,7 @@ export function activeState(
         money: { micros: micros(Math.max(0, live.moneyMicros)), currency: 'USD' },
         moneySeconds,
         remainingSeconds: seconds(Math.max(0, live.comboSeconds) + moneySeconds),
+        pause: pauseView(pause),
       },
     };
   }

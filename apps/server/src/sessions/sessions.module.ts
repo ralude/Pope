@@ -10,6 +10,7 @@ import { TariffsModule } from '../tariffs/tariffs.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
 import { ComboSalesController } from './combo-sales.controller.js';
 import { PanelHub } from './panel-hub.js';
+import { PausesService } from './pauses.service.js';
 import { PcConnections } from './pc-connections.js';
 import { PcMapController } from './pc-map.controller.js';
 import { PcLayoutService } from './pc-layout.service.js';
@@ -51,6 +52,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
     PcLayoutService,
     PanelHub,
     SessionsService,
+    PausesService,
     TemporarySessionsService,
     StaleSessionsJob,
     PcProtocolService,

@@ -14,6 +14,7 @@ import { CustomerAuthService } from '../customers/customer-auth.service.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { pcs } from '../db/schema.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
+import { PausesService } from './pauses.service.js';
 import { customerInactiveMessage, PcRequestRefused } from './session-state.js';
 import { SessionsService } from './sessions.service.js';
 
@@ -27,6 +28,16 @@ export function protocolError(
   requestId?: string,
 ): NodeToPcMessage {
   return { type: 'error', code, message, ...(requestId !== undefined && { requestId }) };
+}
+
+/**
+ * El `state` que responde a una petición (`buyCombo`, `pause`, `resume`) lleva su
+ * `requestId`: así el Shell lo distingue de un `state` de latido que se cruce.
+ */
+function answering(state: NodeToPcMessage, requestId: string | undefined): NodeToPcMessage {
+  return state.type === 'state' && state.status === 'active' && requestId !== undefined
+    ? { ...state, requestId }
+    : state;
 }
 
 /** `requestId` de un mensaje aunque no cumpla el protocolo, para poder responderle. */
@@ -50,6 +61,7 @@ export class PcProtocolService {
     @Inject(DATABASE) private readonly db: Database,
     private readonly connections: PcConnections,
     private readonly sessions: SessionsService,
+    private readonly pauses: PausesService,
     private readonly customerAuth: CustomerAuthService,
     private readonly combos: CombosService,
     private readonly clock: Clock,
@@ -135,16 +147,17 @@ export class PcProtocolService {
           connection.send(await this.sessions.stateFor(pc.id));
         }
         return;
-      case 'buyCombo': {
-        const state = await this.sessions.buyCombo(pc.id, message.comboId);
-        // El `state` lleva el `requestId` para que el Shell sepa que es la respuesta a su compra.
+      case 'buyCombo':
         connection.send(
-          state.type === 'state' && state.status === 'active' && message.requestId !== undefined
-            ? { ...state, requestId: message.requestId }
-            : state,
+          answering(await this.sessions.buyCombo(pc.id, message.comboId), message.requestId),
         );
         return;
-      }
+      case 'pause':
+        connection.send(answering(await this.pauses.pause(pc.id), message.requestId));
+        return;
+      case 'resume':
+        connection.send(answering(await this.pauses.resume(pc.id), message.requestId));
+        return;
       case 'listCombos':
         connection.send({
           type: 'combos',

@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · T05 de la spec 002 (tabla de pausas)
+**Última actualización:** 2026-10-03 · T06 de la spec 002 (pausar y reanudar sin cobrar la pausa)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [002 · Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md), fase 1 (todo en TypeScript). La 005 espera la revisión de T07 |
-| **Siguiente tarea** | **T06: Pausar y reanudar desde la PC, sin cobrar la pausa** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
-| **Progreso** | Spec 002: 5 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
+| **Siguiente tarea** | **T07: Límites de pausas por sesión y por día** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
+| **Progreso** | Spec 002: 6 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -49,7 +49,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 68 / 68 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 5 / 19 |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 6 / 19 |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
@@ -61,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T06 (spec 002): la PC pausa y reanuda; mientras la pausa no cobra no se cobra nada (latido, compra, cambio de tasa, cierre) ni se avisa; las temporales no pausan. CA-002-01 y CA-002-07 con test e2e.
 - **2026-10-03:** T05 (spec 002): tabla `session_pauses` (migración 0024), con una sola pausa abierta por sesión y sus índices para contar las de la sesión y las del día.
 - **2026-10-03:** T04 (spec 002): eventos `session.paused` (con su número y `maxUntil`), `session.resumed` (lo no cobrado; quién, en el actor) y `session.pause_expired`, según lo que decidió el mantenedor. Termina la fase de contratos.
 - **2026-10-03:** T03 (spec 002): el canal de la PC admite `pause` y `resume`; el `state` lleva la pausa, las pausas que quedan y el límite; error `pause_unavailable`, motivo de cierre `pause_expired` («Se venció la pausa», mantenedor) y la pausa en el mapa del panel.
@@ -70,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** Spec 002: `tasks.md` de la fase 1 (T01–T19: contratos, nodo, panel, Shell, simulador y verificación), con cuatro preguntas para el mantenedor; pendiente de aprobar.
 - **2026-10-03:** T07 (spec 005): CA-005-06 probado en Chrome con una base nueva sin tasa: al guardar 40,00 en el panel, el panel y el Shell muestran el Bs al momento y queda `exchange_rate.set` con el administrador y la fuente `manual`; REQ-001-13 marcado en la spec 001. Falta la revisión del mantenedor.
 - **2026-10-03:** T06 (spec 005): el equivalente en Bs en Tarifas, Combos (lista y editor) y el diálogo de sesión temporal; probado en Chrome con tasa y sin tasa.
-- **2026-10-03:** T05 (spec 005): el equivalente en Bs, debajo del importe, en el detalle de la PC del mapa, Clientes, Recargar saldo y Vender combo; probado en Chrome con tasa.

@@ -35,7 +35,7 @@ import {
   InactiveAccountError,
   UnknownComboError,
 } from '../combos/combo-sales.service.js';
-import { customers, pcs, sessions } from '../db/schema.js';
+import { customers, type PauseEndReason, pcs, sessionPauses, sessions } from '../db/schema.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
@@ -46,6 +46,8 @@ import {
   activeState,
   customerInactiveMessage,
   LOCKED_STATE,
+  pauseBilling,
+  type PauseRow,
   PcRequestRefused,
   remainingSeconds,
   type SessionRow,
@@ -74,6 +76,23 @@ const ENDED_MEMORY_MS = 60_000;
 interface AccountView {
   username: string;
   balances: CustomerBalances;
+}
+
+/**
+ * La sesión está en una pausa que no cobra (REQ-002-03): su tiempo no corre, así que no se
+ * avisa ni se vigila su agotamiento hasta que se reanude o venza.
+ */
+function onHold(pause: PauseRow | null): boolean {
+  return pause !== null && !pauseBilling(pause);
+}
+
+/** La pausa abierta de una sesión, si tiene (spec 002). */
+export async function openPauseOf(sessionId: string, db: Database): Promise<PauseRow | null> {
+  const [pause] = await db
+    .select()
+    .from(sessionPauses)
+    .where(and(eq(sessionPauses.sessionId, sessionId), isNull(sessionPauses.endedAt)));
+  return pause ?? null;
 }
 
 /** Lo que la PC dice de su sesión en un `hello` o un `heartbeat`. */
@@ -117,9 +136,13 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     private readonly clock: Clock,
   ) {}
 
-  /** El `state` de una sesión activa, con la tasa vigente (REQ-005-36). */
-  private stateOf(row: SessionRow, account: Parameters<typeof activeState>[1]): NodeToPcMessage {
-    return activeState(row, account, this.rates.current()?.vesPerUsd ?? null);
+  /** El `state` de una sesión activa, con la tasa vigente (REQ-005-36) y su pausa. */
+  private stateOf(
+    row: SessionRow,
+    account: Parameters<typeof activeState>[1],
+    pause: PauseRow | null,
+  ): NodeToPcMessage {
+    return activeState(row, account, this.rates.current()?.vesPerUsd ?? null, pause);
   }
 
   /**
@@ -179,7 +202,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     if (!row) {
       return LOCKED_STATE;
     }
-    return this.stateOf(row, await this.accountOf(row, db));
+    return this.stateOf(row, await this.accountOf(row, db), await openPauseOf(row.id, db));
   }
 
   /**
@@ -265,7 +288,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       return {
         row,
         remaining,
-        state: this.stateOf(row, { username: customer.username, balances }),
+        state: this.stateOf(row, { username: customer.username, balances }, null),
       };
     });
     this.touch(pc.id);
@@ -281,7 +304,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
    * combos (REQ-001-82).
    */
   async buyCombo(pcId: string, comboId: string): Promise<NodeToPcMessage> {
-    let bought: { row: SessionRow; account: AccountView };
+    let bought: { row: SessionRow; account: AccountView; pause: PauseRow | null };
     try {
       bought = await this.events.inTransaction((tx, emit) =>
         this.buyComboIn(pcId, comboId, tx, emit),
@@ -307,9 +330,10 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     }
     const remaining = remainingSeconds(bought.row, bought.account.balances);
     // Con más tiempo, los avisos que ya se dieron pueden volver a tocar (se rearman).
-    this.sendWarning(bought.row, remaining);
-    this.watch(bought.row, remaining);
-    return this.ended.has(bought.row.id) ? LOCKED_STATE : this.stateOf(bought.row, bought.account);
+    this.attend(bought.row, remaining, bought.pause);
+    return this.ended.has(bought.row.id)
+      ? LOCKED_STATE
+      : this.stateOf(bought.row, bought.account, bought.pause);
   }
 
   /**
@@ -330,7 +354,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         .from(sessions)
         .where(and(eq(sessions.customerId, customerId), eq(sessions.status, 'active')))
         .for('update');
-      const session = locked ? (await this.checkpoint(locked, tx)).row : null;
+      const checked = locked ? await this.checkpoint(locked, tx) : null;
       const customer = await this.comboSales.purchaseIn(
         tx,
         emit,
@@ -339,15 +363,15 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         payment,
         actor,
       );
-      return { customer, session };
+      return { customer, checked };
     });
-    const { customer, session } = sold;
-    if (session && !this.ended.has(session.id)) {
+    const { customer, checked } = sold;
+    if (checked && !this.ended.has(checked.row.id)) {
+      const session = checked.row;
       const account = { username: customer.username, balances: customer.balances };
       const remaining = remainingSeconds(session, customer.balances);
-      this.connections.send(session.pcId, this.stateOf(session, account));
-      this.sendWarning(session, remaining);
-      this.watch(session, remaining);
+      this.connections.send(session.pcId, this.stateOf(session, account, checked.pause));
+      this.attend(session, remaining, checked.pause);
     }
     return customer;
   }
@@ -357,7 +381,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     comboId: string,
     tx: Transaction,
     emit: Emit,
-  ): Promise<{ row: SessionRow; account: AccountView }> {
+  ): Promise<{ row: SessionRow; account: AccountView; pause: PauseRow | null }> {
     const [locked] = await tx
       .select()
       .from(sessions)
@@ -372,7 +396,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         'Los combos son solo para clientes con cuenta',
       );
     }
-    const { row, account } = await this.checkpoint(locked, tx);
+    const { row, account, pause } = await this.checkpoint(locked, tx);
     const username = account?.username ?? '';
     const customer = await this.comboSales.purchaseIn(
       tx,
@@ -383,7 +407,11 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       { kind: 'customer', customerId: locked.customerId, username },
       row.id,
     );
-    return { row, account: { username: customer.username, balances: customer.balances } };
+    return {
+      row,
+      account: { username: customer.username, balances: customer.balances },
+      pause,
+    };
   }
 
   /**
@@ -439,7 +467,13 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     sessionId: string,
     reason: SessionEndReason,
     actor: Actor,
-    options: { billToNow?: boolean; ifNotBeatAfter?: Date; onlyIfExhausted?: boolean } = {},
+    options: {
+      billToNow?: boolean;
+      ifNotBeatAfter?: Date;
+      onlyIfExhausted?: boolean;
+      /** Cómo termina su pausa abierta, si la tiene (spec 002). */
+      pauseEndReason?: PauseEndReason;
+    } = {},
   ): Promise<SessionRow | null> {
     const billToNow = options.billToNow ?? true;
     const ended = await this.events.inTransaction(async (tx, emit) => {
@@ -479,6 +513,15 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       if (!closed) {
         throw new Error('No se pudo cerrar la sesión');
       }
+      // Una sesión que se cierra en pausa termina también su pausa (spec 002).
+      await tx
+        .update(sessionPauses)
+        .set({
+          endedAt: this.clock.now(),
+          endReason: options.pauseEndReason ?? 'session_closed',
+          endedBy: actor,
+        })
+        .where(and(eq(sessionPauses.sessionId, closed.id), isNull(sessionPauses.endedAt)));
       await this.emitEnded(closed, reason, actor, tx, emit);
       return closed;
     });
@@ -739,7 +782,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
    * sesión. Devuelve el `state` que debe ver la PC y, si la cerró por agotamiento, su id
    * (la PC ya recibió su `sessionEnded`).
    */
-  private async review(target: SQL): Promise<{ state: NodeToPcMessage; closedId: string | null }> {
+  async review(target: SQL): Promise<{ state: NodeToPcMessage; closedId: string | null }> {
     const checked = await this.events.inTransaction(async (tx) => {
       // Bloquea la fila: un cierre o una revisión simultáneos esperan a que termine esta.
       const [locked] = await tx
@@ -752,7 +795,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     if (!checked) {
       return { state: LOCKED_STATE, closedId: null };
     }
-    const { row, account } = checked;
+    const { row, account, pause } = checked;
     const remaining = remainingSeconds(row, account?.balances ?? null);
     if (remaining === 0) {
       // Ya se cobró hasta ahora: el cierre no necesita cobrar otra vez.
@@ -766,13 +809,26 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       // se revisa de nuevo con los datos al día.
       return closed ? { state: LOCKED_STATE, closedId: closed.id } : this.review(target);
     }
-    this.sendWarning(row, remaining);
-    this.watch(row, remaining);
+    this.attend(row, remaining, pause);
     // Si la cerraron mientras tanto, la PC ya recibió `sessionEnded`: no hay que desbloquearla.
     return {
-      state: this.ended.has(row.id) ? LOCKED_STATE : this.stateOf(row, account),
+      state: this.ended.has(row.id) ? LOCKED_STATE : this.stateOf(row, account, pause),
       closedId: null,
     };
+  }
+
+  /**
+   * Avisos y vigilancia de una sesión activa según lo que le queda. En una pausa que no
+   * cobra el tiempo no corre: se deja de vigilar hasta que se reanude (REQ-002-03).
+   */
+  private attend(row: SessionRow, remaining: number, pause: PauseRow | null): void {
+    if (onHold(pause)) {
+      this.timers.get(row.id)?.();
+      this.timers.delete(row.id);
+      return;
+    }
+    this.sendWarning(row, remaining);
+    this.watch(row, remaining);
   }
 
   /** Envía el aviso de 5 o 1 min si toca. Si la PC no está conectada, se reintenta luego. */
@@ -844,7 +900,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     const remaining = remainingSeconds(row, null);
     // Enviar no prueba que la PC esté viva (el socket puede estar medio cerrado): su último
     // contacto sigue siendo el que decide hasta dónde se cobra.
-    this.connections.send(row.pcId, this.stateOf(row, null));
+    this.connections.send(row.pcId, this.stateOf(row, null, null));
     this.sendWarning(row, remaining);
     this.watch(row, remaining);
   }
@@ -875,6 +931,11 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
    * se cobra en el siguiente latido y no se pierde (motor de cobro, `applyCheckpoint`).
    * Si el reloj se corrigió hacia atrás no se cobra nada y la marca no se mueve. Debe
    * llamarse con la fila de la sesión bloqueada (`for update`) dentro de la transacción.
+   *
+   * En una pausa que no cobra (REQ-002-03) no se cobra nada, la llame quien la llame (latido,
+   * temporizador, cierre, compra, cambio de tasa): la marca avanza hasta ahora sin cobrar, y
+   * como mucho hasta el fin de la pausa, desde donde se cobrará si vence con la opción a).
+   * Devuelve también la pausa abierta, si la hay.
    */
   async checkpoint(
     row: SessionRow,
@@ -882,7 +943,20 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
   ): Promise<{
     row: SessionRow;
     account: { username: string; balances: CustomerBalances } | null;
+    pause: PauseRow | null;
   }> {
+    const pause = row.kind === 'account' ? await openPauseOf(row.id, tx) : null;
+    if (onHold(pause) && pause) {
+      const held = Math.min(this.clock.now().getTime(), pause.maxUntil.getTime());
+      const lastHeartbeatAt = new Date(Math.max(row.lastHeartbeatAt.getTime(), held));
+      const [updated] = await tx
+        .update(sessions)
+        .set({ lastHeartbeatAt })
+        .where(eq(sessions.id, row.id))
+        .returning();
+      return { row: updated ?? row, account: await this.accountOf(row, tx), pause };
+    }
+
     const elapsed = seconds(
       Math.max(0, Math.floor((this.billableUntil(row) - row.lastHeartbeatAt.getTime()) / 1000)),
     );
@@ -901,7 +975,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         })
         .where(eq(sessions.id, row.id))
         .returning();
-      return { row: updated ?? row, account };
+      return { row: updated ?? row, account, pause };
     }
 
     const usage = applyTemporaryCheckpoint(temporaryUsageOf(row), elapsed);
@@ -910,7 +984,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       .set({ usedSeconds: usage.usedSeconds, lastHeartbeatAt })
       .where(eq(sessions.id, row.id))
       .returning();
-    return { row: updated ?? row, account };
+    return { row: updated ?? row, account, pause };
   }
 
   /** Usuario y saldos del cliente de una sesión con cuenta; `null` si es temporal. */
