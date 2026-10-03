@@ -134,14 +134,23 @@ class Writer {
   }
 }
 
-/** El resumen de una página (REQ-005-51): lo vendido por grupo, lo pagado con saldo y el cuadre. */
-function drawSummary(w: Writer, report: ShiftReport): void {
+/**
+ * El resumen de una página (REQ-005-51): lo vendido por grupo, lo pagado con saldo y el
+ * cuadre. En el informe X (REQ-005-46), la caja sigue abierta: dice cuándo se sacó y el
+ * cuadre solo lleva lo esperado.
+ */
+function drawSummary(w: Writer, report: ShiftReport, informeX: boolean): void {
   const { summary } = report;
   const opened = new Date(summary.openedAt);
   const closed = summary.closedAt === null ? null : new Date(summary.closedAt);
 
   w.line(report.localName, 18, true, 6);
-  w.line(`Cierre de caja · ${day.format(opened)}`, 12, false, 10);
+  if (informeX) {
+    w.line(`Informe X · caja abierta · ${day.format(opened)}`, 12, false, 4);
+    w.line(`Sacado a las ${time.format(report.generatedAt)}`, 10, false, 10);
+  } else {
+    w.line(`Cierre de caja · ${day.format(opened)}`, 12, false, 10);
+  }
   w.line(`Encargado: ${summary.staffName}`);
   w.line(
     `Apertura: ${time.format(opened)} · Cierre: ${closed ? time.format(closed) : 'caja abierta'}` +
@@ -193,10 +202,14 @@ function drawSummary(w: Writer, report: ShiftReport): void {
     ]);
   }
 
-  w.heading('Cuadre por método');
-  const widths = [125, 100, 100, 100, 90];
+  w.heading(informeX ? 'Esperado por método, hasta ahora' : 'Cuadre por método');
+  // En el informe X aún no se ha contado: sin "Contado" ni "Diferencia".
+  const columns = informeX
+    ? ['Método', 'Fondo', 'Esperado']
+    : ['Método', 'Fondo', 'Esperado', 'Contado', 'Diferencia'];
+  const widths = [125, 100, 100, 100, 90].slice(0, columns.length);
   w.row(
-    ['Método', 'Fondo', 'Esperado', 'Contado', 'Diferencia'].map((text, i) => ({
+    columns.map((text, i) => ({
       text,
       width: widths[i] ?? 0,
       align: i === 0 ? 'left' : 'right',
@@ -205,7 +218,7 @@ function drawSummary(w: Writer, report: ShiftReport): void {
   );
   w.rule();
   for (const method of paymentMethodSchema.options) {
-    w.row(methodRow(method, report, widths));
+    w.row(methodRow(method, report, widths).slice(0, columns.length));
   }
 }
 
@@ -347,13 +360,18 @@ function drawDetail(w: Writer, report: ShiftReport): void {
 /**
  * El PDF del cierre. En el del encargado (`full = false`) los totales y el cuadre caben
  * siempre en la primera página; después va lo vendido por artículo, que puede seguir en otra,
- * y nunca la lista de movimientos (plan 005, riesgos). El detallado añade lo demás.
+ * y nunca la lista de movimientos (plan 005, riesgos). El detallado añade lo demás. El
+ * informe X (REQ-005-46) es el del encargado con la caja aún abierta.
  */
-export function renderShiftReport(report: ShiftReport, full: boolean): Promise<Buffer> {
-  const title = full ? 'Cierre de caja detallado' : 'Cierre de caja';
+export function renderShiftReport(
+  report: ShiftReport,
+  full: boolean,
+  informeX = false,
+): Promise<Buffer> {
+  const title = informeX ? 'Informe X' : full ? 'Cierre de caja detallado' : 'Cierre de caja';
   return render((doc) => {
     const w = new Writer(doc);
-    drawSummary(w, report);
+    drawSummary(w, report, informeX);
     drawSold(w, report);
     if (full) {
       drawDetail(w, report);

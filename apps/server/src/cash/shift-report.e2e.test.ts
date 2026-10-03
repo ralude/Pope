@@ -7,6 +7,7 @@ import {
 } from '@pope/shared';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { events } from '../db/schema.js';
 import { devPcId } from '../pcs/dev-pcs.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
@@ -171,5 +172,46 @@ describe('reportes del cierre en PDF (e2e, REQ-005-51 a REQ-005-53)', () => {
       owner,
     );
     expect(missing.statusCode).toBe(404);
+  });
+
+  describe('informe X (REQ-005-46)', () => {
+    const informeX = (cookie: string) => world.api('GET', '/shifts/current/report.pdf', cookie);
+
+    it('CA-005-13: el PDF de la caja abierta con lo esperado, sin contado ni diferencia, y sin cerrarla', async () => {
+      await sellTheDay();
+      const eventsBefore = await world.testApp.database.db.select().from(events);
+      const response = await informeX(ana);
+      expect(response.statusCode).toBe(200);
+      expect(response.headers['content-type']).toBe('application/pdf');
+      expect(response.headers['content-disposition']).toBe(
+        'attachment; filename="informe-x-2026-09-28-1800.pdf"',
+      );
+      const texts = pdfTexts(response.rawPayload);
+      expect(texts.some((t) => t.startsWith('Informe X · caja abierta'))).toBe(true);
+      expect(texts).toContain('Sacado a las 18:00');
+      const total = texts.indexOf('Total');
+      expect(texts[total + 1]).toBe('19,20 USD');
+      // Lo esperado en efectivo USD: sin fondo, los 19,20 cobrados.
+      const cash = texts.indexOf('Efectivo USD');
+      expect(texts.slice(cash, cash + 3)).toEqual(['Efectivo USD', '0,00 USD', '19,20 USD']);
+      expect(texts).toContain('Esperado por método, hasta ahora');
+      expect(texts).not.toContain('Contado');
+      expect(texts).not.toContain('Diferencia');
+      // No cambia nada: la caja sigue abierta y no hay eventos nuevos.
+      expect(await world.testApp.database.db.select().from(events)).toHaveLength(
+        eventsBefore.length,
+      );
+      const current = (await world.api('GET', '/shifts/current', ana)).json<CurrentShiftResponse>();
+      expect(current.shift?.id).toBe(shiftId);
+    });
+
+    it('lo saca todo el personal que ve la Caja; sin caja abierta responde 404', async () => {
+      const eva = await loginAsStaff(world.testApp, 'eva', 'encargado', 'Eva');
+      for (const cookie of [ana, eva, admin, owner]) {
+        expect((await informeX(cookie)).statusCode).toBe(200);
+      }
+      await world.api('POST', '/shifts/current/close', ana, NOTHING_COUNTED);
+      expect((await informeX(admin)).statusCode).toBe(404);
+    });
   });
 });

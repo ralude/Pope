@@ -3,11 +3,13 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  NotFoundException,
   Param,
   Query,
   StreamableFile,
 } from '@nestjs/common';
 import {
+  formatLocalTime,
   idSchema,
   localDateInCaracas,
   type ShiftEntriesResponse,
@@ -42,7 +44,35 @@ export class CashController {
   }
 
   /**
-   * El PDF del cierre de una caja. El resumen de una página lo descargan quien la abrió o la
+   * El informe X (REQ-005-46): el reporte del encargado de la caja abierta, sin cerrarla, con
+   * lo esperado por método hasta ahora. Lo saca todo el personal; no cambia nada ni emite
+   * eventos. Responde 404 si no hay caja abierta.
+   */
+  @Get('current/report.pdf')
+  async informeX(): Promise<StreamableFile> {
+    const shift = await this.shifts.findOpen();
+    if (!shift) {
+      throw new NotFoundException('No hay una caja abierta');
+    }
+    const [report, closing] = await Promise.all([
+      this.reports.report(shift.id),
+      this.shifts.closing(),
+    ]);
+    const xReport = {
+      ...report,
+      summary: { ...report.summary, expected: closing.expected, counted: null, difference: null },
+    };
+    const at = report.generatedAt;
+    const hhmm = formatLocalTime(at).replace(':', '');
+    const name = `informe-x-${localDateInCaracas(at)}-${hhmm}.pdf`;
+    return new StreamableFile(await renderShiftReport(xReport, false, true), {
+      type: 'application/pdf',
+      disposition: `attachment; filename="${name}"`,
+    });
+  }
+
+  /**
+   * El PDF del cierre de una caja (el informe Z). El resumen de una página lo descargan quien la abrió o la
    * cerró, el administrador y el dueño (REQ-005-51); el detallado (`?full=1`), solo el
    * administrador y el dueño (REQ-005-53).
    */

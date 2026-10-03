@@ -302,11 +302,12 @@ Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artbo
   - **Commit:** `feat(server): añade el cliente y las líneas a los movimientos de la caja`
   - **Decidido al implementarla:** `CashMovement` gana `customerName` y `lines` (`{ kind, name, quantity, usdMicros }`; un otro ingreso se lee "Otro ingreso · comentario"). Migración `0023_cash_entry_customer`: columna `customer_name` en `cash_entries`, que `CashRegisterService.record` copia de cada cobro (recarga y combo: la cuenta; venta: quien paga con saldo; temporales: `null`) y la anulación copia de la venta; la migración la rellena en las filas anteriores desde el ledger (recargas y combos) y desde la venta. Las líneas salen de `sale_lines` al listar, en una sola consulta para toda la caja; la anulación lleva las de su venta. El fixture del panel gana los dos campos vacíos, hasta T31. Verificado: e2e con temporal, recarga, combo, una venta con saldo de juan (Papas × 2 y un otro ingreso) y su anulación, y una venta sin cuenta; la misma lista tras vaciar la columna y aplicar el relleno de la 0023. También contra PostgreSQL real.
 
-- [ ] **T30: Informe X**
+- [x] **T30: Informe X**
   - **Cubre:** REQ-005-46
   - **Hacer:** `GET /shifts/current/report.pdf` para todo el personal: el PDF del encargado de la caja abierta, con "Informe X · caja abierta", la hora en que se sacó y solo lo esperado por método.
   - **Verificar:** e2e: CA-005-13 (el texto, el total y lo esperado, sin contado ni diferencia; la caja sigue abierta y no hay eventos nuevos); los tres roles pueden; 404 sin caja abierta.
   - **Commit:** `feat(server): genera el informe X de la caja abierta`
+  - **Decidido al implementarla:** `GET /shifts/current/report.pdf` (sin `@Roles`: todo el personal) toma el reporte de la caja abierta y le pone lo esperado de `closing()`, sin contado ni diferencia; `renderShiftReport` gana `informeX`: «Informe X · caja abierta · día», «Sacado a las hh:mm» y «Esperado por método, hasta ahora» con las columnas Método, Fondo y Esperado. Lo demás (lo vendido, el saldo, la tasa y lo vendido por artículo) es igual que en el cierre. Nombre `informe-x-AAAA-MM-DD-hhmm.pdf` en hora de Caracas. Verificado: e2e de CA-005-13 (19,20 USD de total y esperados en efectivo USD, sin «Contado» ni «Diferencia», sin eventos nuevos y la caja abierta), los cuatro roles y 404 sin caja; también contra PostgreSQL real.
 
 - [ ] **T31: Caja: tabla de movimientos**
   - **Cubre:** REQ-005-24, REQ-005-26, REQ-005-45, REQ-005-46
