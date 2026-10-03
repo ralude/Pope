@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · ajustes del local en el panel (T23b de la spec 005)
+**Última actualización:** 2026-10-03 · verificación de la parte 2 de la spec 005 (T24, en revisión)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T24: Verificación de la parte 2** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Después, T05–T07 |
+| **Siguiente tarea** | **T24: Verificación de la parte 2**, en revisión del mantenedor: tabla en [mediciones.md](docs/specs/005-inventario-y-caja/mediciones.md). Después, T05–T07 |
 | **Progreso** | Spec 005: 30 / 34 tareas (parte 1: 4 / 7; parte 2: 26 / 27) |
 | **Bloqueos** | Ninguno |
 
@@ -37,10 +37,11 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **T28a:** confirmar los límites de los ajustes: gracia de latidos entre 30 s y 30 min, sesiones temporales conservadas entre 3 y 100 (la spec solo fija el 3 mínimo y el 3 min por defecto).
 - [ ] **T31:** confirmar dos criterios al abrir una sesión temporal: el tope de 24 h por cobro y que la PC deba estar conectada al nodo (si no, se cobraría por una PC que no puede desbloquearse).
-- [ ] **REQ-001-13:** el equivalente en Bs espera a la tasa BCV de la spec 005. El mantenedor decidió (2026-10-02) adelantar la **tasa manual** (REQ-005-34): falta preparar sus requisitos, plan y tareas para aprobarlos. El Shell y el panel ya muestran Bs en cuanto el nodo mande una tasa.
+- [ ] **REQ-001-13:** el equivalente en Bs: la tasa manual (spec 005, parte 1) ya funciona y el Shell la muestra; faltan las pantallas del panel (T05 y T06) y la verificación (T07).
 - [ ] **Antes de la spec 003:** decidir los ADR propuestos [0005](docs/adr/0005-shell-react-en-webview2.md), [0009](docs/adr/0009-escritorio-separado-para-bloqueo-y-pausa.md) y [0010](docs/adr/0010-lista-blanca-y-restauracion.md) (cliente Windows).
-- [ ] **Ajustes en el panel:** la spec dice que el administrador cambia desde el panel la gracia de latidos y las sesiones temporales conservadas, pero no hay tarea; se decidió dejarlo fuera de la fase 8. Hasta entonces, por la API (`PUT /settings`).
+- [ ] **Ajustes en el panel:** ya existe «Ajustes del local» (spec 005, T23b) con el nombre del local y «Permitir vender sin stock». La gracia de latidos y las sesiones temporales conservadas (spec 001) siguen sin pantalla, sin tarea; hasta entonces, por la API (`PUT /settings`).
 - [ ] **Test inestable con PostgreSQL real:** `no-heartbeat.e2e.test.ts` › «si la PC nunca supo de la sesión…» cierra la PC y abre una temporal en ella; como abrir exige la PC conectada (T31), con PostgreSQL real el nodo ya vio la desconexión y responde 409 (con PGlite pasa). Falla igual antes de la fase 8; hay que rehacer el test para que la PC pierda el `state` sin estar desconectada al abrir.
+- [ ] **Spec 005, parte 2:** imprimir en papel el PDF del encargado (se comprobó que se descarga y ocupa una página) y medir REQ-005-71 (una venta en menos de 500 ms) en el i5, con las mediciones de la spec 001. Ver [`mediciones.md`](docs/specs/005-inventario-y-caja/mediciones.md).
 - [ ] **Spec 008:** averiguar si el plan de SENET del local incluye acceso a la API y quién tiene las credenciales.
 
 ## Mapa de specs
@@ -60,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T24 (spec 005): tabla de los 8 criterios de la parte 2 en `mediciones.md`, todos con test automático y casi todos probados a mano en Chrome; falta la revisión del mantenedor, imprimir el PDF en papel y medir REQ-005-71 en el i5.
 - **2026-10-02:** T23b (spec 005): pantalla «Ajustes del local» para el administrador con el nombre del local (sale en el PDF del cierre) y «Permitir vender sin stock»; probada en Chrome.
 - **2026-10-02:** T23 (spec 005): página Cierres de caja para el administrador y el dueño, con los totales y la diferencia de cada caja y sus dos PDF; probada en Chrome.
 - **2026-10-02:** T22c (spec 005): el PDF del encargado lleva al final lo vendido por artículo con lo que queda en almacén, como el Z-Report de SENET (pedido por el mantenedor; REQ-005-51 cambia: puede seguir en una segunda página). Fondos agregados y retiradas de efectivo quedan como pregunta abierta.
@@ -69,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T20b (spec 005): cobro en la Caja con un método o «Dividir pago», el importe en Bs con la tasa y la cuenta que paga con su saldo; probado en Chrome (CA-005-07 y CA-005-10).
 - **2026-10-02:** T20a (spec 005): pantalla Caja con el catálogo (golosinas con foto y disponibles, otras ventas con cantidad y precio) y la venta nueva con su total en USD y Bs. T20 se divide en dos (T20b: el cobro, con «Dividir pago», decidido por el mantenedor).
 - **2026-10-02:** T19 (spec 005): pestaña «Otras ventas» en Inventario con los conceptos sin inventario; el administrador los da de alta y edita. Probado en Chrome con «Impresiones» a 0,10 USD.
-- **2026-10-02:** T18b (spec 005): modal «Nuevo producto» y «Editar» con la foto reducida en el navegador a WebP de 512 px; probado en Chrome (CA-005-08).
