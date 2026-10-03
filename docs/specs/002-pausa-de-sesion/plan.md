@@ -72,7 +72,7 @@ Se apoya en el checkpoint de la spec 001, que cobra `ahora − last_heartbeat_at
      cualquier otra (`exhausted`).
    - b) `close`: la sesión se cierra con motivo `pause_expired` (motivo nuevo de
      `sessionEndReasonSchema`), cobrada hasta el inicio de la pausa.
-   En los dos casos se emite `session.pause_expired` con lo que se hizo.
+   En los dos casos se emite `session.pause_expired` con lo que se hizo. Se aplica la opción vigente al vencer, no la del inicio de la pausa (mantenedor, 2026-10-03).
 
 El vencimiento lo dispara un temporizador por pausa, como los que ya avisan del fin del tiempo
 (`watch`). Si el nodo se reinicia, al arrancar revisa las pausas abiertas y aplica las que

@@ -491,6 +491,12 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       onlyIfExhausted?: boolean;
       /** Cómo termina su pausa abierta, si la tiene (spec 002). */
       pauseEndReason?: PauseEndReason;
+      /**
+       * Se llama dentro de la transacción, con la sesión ya bloqueada y antes de cerrarla:
+       * puede emitir sus propios eventos, que quedan antes de `session.ended`, o devolver
+       * `false` para no cerrar (p. ej. el vencimiento de una pausa que ya se quitó).
+       */
+      within?: (tx: Transaction, emit: Emit, locked: SessionRow) => Promise<boolean>;
     } = {},
   ): Promise<SessionRow | null> {
     const billToNow = options.billToNow ?? true;
@@ -520,6 +526,9 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         if (remainingSeconds(locked, account?.balances ?? null) > 0) {
           return null;
         }
+      }
+      if (options.within && !(await options.within(tx, emit, locked))) {
+        return null;
       }
       const { row } = billToNow ? await this.checkpoint(locked, tx) : { row: locked };
       await this.settle(row, actor, tx);

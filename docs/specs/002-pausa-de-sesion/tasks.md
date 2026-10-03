@@ -90,11 +90,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(server): limita las pausas por sesión y por día`
   - **Decidido al implementarla:** las consultas de la pausa (`openPauseOf`, `pausesUsed`) pasan a `sessions/pause-queries.ts`, que comparten `SessionsService` y `PausesService` sin dependencia circular. `SessionsService.pauseStatus` calcula la pausa abierta y las que quedan con los ajustes del momento; lo usa cada `state` de una sesión con cuenta (login, latido, compra, venta desde el panel, cambio de tasa). Al pausar se comprueba en este orden: temporal, ya en pausa, y después los límites con `pauseRefusal`. Un cambio de los límites vale al momento (test).
 
-- [ ] **T08: Vencimiento de la pausa**
+- [x] **T08: Vencimiento de la pausa**
   - **Cubre:** REQ-002-20, REQ-002-22, REQ-002-31, REQ-002-32, CA-002-05
   - **Hacer:** un temporizador por pausa abierta, a su `maxUntil`. Opción a) `resume_billing`: `billing_resumed_at` y `last_heartbeat_at` a `maxUntil`, la PC recibe el `state` con `billing: true` y la sesión vuelve a vigilarse (avisos y agotamiento) aunque siga en pausa. Opción b) `close`: cierra la sesión con motivo `pause_expired`, cobrada hasta el inicio de la pausa. Las dos emiten `session.pause_expired`. Al arrancar el nodo, aplicar con la hora de su `maxUntil` las pausas que vencieron mientras estaba apagado y programar las demás.
   - **Verificar:** e2e con el reloj de pruebas: a) cobra desde `maxUntil` y no antes, y la sesión puede agotarse en pausa; b) cierra y no cobra la pausa; reinicio del nodo con una pausa vencida y otra sin vencer.
   - **Commit:** `feat(server): aplica el límite de duración de la pausa`
+  - **Decidido al implementarla:** `PausesService.expire` aplica el vencimiento y no hace nada si la pausa ya no está abierta, ya cobra o aún no vence; lo llaman el temporizador de cada pausa, la reanudación (si la pausa venció y el temporizador aún no saltó: con b, la sesión se cierra en lugar de reanudarse) y el arranque del nodo. Con b) el cierre usa `SessionsService.close` con un gancho nuevo, `within`, que dentro de la misma transacción comprueba la pausa y emite `session.pause_expired` antes de `session.ended`. Al vencer con a), si quedan menos de 5 min, el aviso llega a la PC antes que el `state`. **Decidido por el mantenedor (2026-10-03):** se aplica la opción de `pauseOverrun` vigente al vencer, no la del inicio de la pausa. **Pendiente para T09:** sin latidos, la revisión de sesiones sin latidos aún cierra una sesión en pausa; el test del arranque hace latir a la PC, como haría el agente.
 
 - [ ] **T09: Latidos, cortes y reinicios en pausa**
   - **Cubre:** REQ-002-30, REQ-002-31
