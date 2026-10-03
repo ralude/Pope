@@ -21,7 +21,6 @@ const API = [
   // Spec 005.
   '/exchange-rate',
   '/products',
-  '/sale-concepts',
   '/sales',
 ];
 

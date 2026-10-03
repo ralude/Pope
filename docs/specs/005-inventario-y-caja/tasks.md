@@ -281,11 +281,12 @@ Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artbo
   - **Commit:** `feat(panel): cobra otros ingresos en la caja`
   - **Decidido al implementarla:** la pestaña sigue llamándose «Otras ventas», como en el diseño (es el grupo del reporte), y dentro va la tarjeta «Otro ingreso» del diseño: «Introduce la suma (USD)» grande y centrada, con su Bs debajo (o «Se cobra después con cualquier método, también en Bs»), «Comentario (opcional)» de 80 caracteres como mucho y «Añadir a la venta». En el carrito el otro ingreso se llama como su comentario (o «Otro ingreso»), como en el diseño; cada uno es su propia línea, y con «+» se repite al mandarlo al nodo, que guarda cada otro ingreso con cantidad 1. La Caja ya no pide `/sale-concepts` (la pestaña de Inventario se quita en T28a). Verificado en Chrome (CA-005-07): 1,20 USD con «12 impresiones» (≈ 48,60 Bs a 40,50) en efectivo USD dejó la fila «Otro ingreso · 12 impresiones · Efectivo USD · 1,20 USD», otras ventas a 1,20, la línea `other` guardada con su comentario y `sale.recorded` v2.
 
-- [ ] **T28a: Quitar los conceptos del panel**
+- [x] **T28a: Quitar los conceptos del panel**
   - **Cubre:** REQ-005-05
   - **Hacer:** quitar la pestaña «Otras ventas» de Inventario (`ConceptsTab`, `ConceptDialog`), lo que quede de conceptos en la Caja y `/sale-concepts` del proxy de Vite.
   - **Verificar:** `pnpm test`, `lint` y `typecheck`; a mano, Inventario sin pestañas.
   - **Commit:** `refactor(panel): quita los conceptos de venta`
+  - **Decidido al implementarla:** fuera `ConceptsTab` y `ConceptDialog`, las pestañas «Productos | Otras ventas» de Inventario (queda el buscador, como en el diseño) y `/sale-concepts` del proxy de Vite. Verificado en Chrome: Inventario sin pestañas, con «Nuevo producto» y los cuatro productos de desarrollo.
 
 - [ ] **T28b: Quitar los conceptos del nodo**
   - **Cubre:** REQ-005-05

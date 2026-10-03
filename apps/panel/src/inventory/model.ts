@@ -34,7 +34,7 @@ function normalize(text: string): string {
     .trim();
 }
 
-/** Los productos o conceptos cuyo nombre contiene lo buscado; sin búsqueda, todos. */
+/** Los productos cuyo nombre contiene lo buscado; sin búsqueda, todos. */
 export function filterByName<T extends { name: string }>(items: readonly T[], query: string): T[] {
   const wanted = normalize(query);
   return wanted === '' ? [...items] : items.filter((item) => normalize(item.name).includes(wanted));
