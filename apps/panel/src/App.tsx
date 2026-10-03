@@ -4,6 +4,7 @@ import { CombosPage } from './pages/CombosPage.js';
 import { CustomersPage } from './pages/CustomersPage.js';
 import { PanelChannelProvider } from './map/channel.js';
 import { InterruptedPage } from './pages/InterruptedPage.js';
+import { InventoryPage } from './pages/InventoryPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { MapPage } from './pages/MapPage.js';
 import { SessionProvider, useSession } from './session.js';
@@ -30,6 +31,7 @@ function Routes() {
         <Switch>
           <Route path="/" component={MapPage} />
           <Route path="/clientes" component={CustomersPage} />
+          <Route path="/inventario" component={InventoryPage} />
           <Route path="/interrumpidas" component={InterruptedPage} />
           <Route path="/combo-horas" component={CombosPage} />
           <Route path="/tarifas" component={TariffsPage} />

@@ -1,0 +1,157 @@
+/* Inventario (spec 005, T18): tabla de productos y, a la derecha, el producto elegido. */
+
+.inventory-search {
+  width: 280px;
+  border-radius: 20px;
+}
+
+.inventory-layout {
+  height: 100%;
+  display: flex;
+}
+
+.inventory-list {
+  flex-grow: 1;
+  min-width: 0;
+  padding: 16px 20px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inventory-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.inventory-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+}
+
+.inventory-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #22262d;
+}
+
+.inventory-table tbody tr {
+  cursor: pointer;
+}
+
+.inventory-table tbody tr:hover {
+  background: #20242b;
+}
+
+.inventory-table tbody tr[aria-selected='true'] {
+  background: var(--accent-soft);
+}
+
+.inventory-table .num-cell {
+  text-align: right;
+}
+
+.inventory-name {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inventory-stock {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.product-photo {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.product-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.stock-pill {
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.stock-ok {
+  background: #17271b;
+  color: #a7e0b5;
+}
+
+.stock-low {
+  background: #2a2113;
+  color: #f5d9a8;
+}
+
+.stock-out {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.stock-inactive {
+  background: var(--surface-2);
+  color: var(--soft);
+}
+
+.inventory-tile {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+}
+
+.inventory-moves {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
+
+.inventory-move {
+  padding: 8px 0;
+  border-bottom: 1px solid #22262d;
+  display: flex;
+  gap: 10px;
+}
+
+.move-qty {
+  width: 40px;
+  flex-shrink: 0;
+  font-weight: 800;
+}
+
+.move-in {
+  color: #a7e0b5;
+}
+
+.move-out {
+  color: var(--danger-text);
+}
+
+.inventory-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}

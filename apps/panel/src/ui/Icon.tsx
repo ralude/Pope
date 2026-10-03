@@ -14,6 +14,12 @@ const PATHS = {
       <path d="M3.5 17c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5" />
     </>
   ),
+  inventario: (
+    <>
+      <path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5z" />
+      <path d="M3 6.5 10 10l7-3.5M10 10v7" />
+    </>
+  ),
   temporales: (
     <>
       <circle cx="10" cy="10" r="7" />

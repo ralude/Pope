@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · la tasa en el panel (T04 de la spec 005)
+**Última actualización:** 2026-10-02 · inventario en el panel, lista y stock (T18a de la spec 005)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T18: Inventario en el panel** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T18–T24 (con T23b), T05–T07 |
-| **Progreso** | Spec 005: 19 / 30 tareas (parte 1: 4 / 7; parte 2: 15 / 23) |
+| **Siguiente tarea** | **T18b: Inventario en el panel: alta y edición con foto** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T18b–T24 (con T23b), T05–T07 |
+| **Progreso** | Spec 005: 20 / 31 tareas (parte 1: 4 / 7; parte 2: 16 / 24) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 19 / 30 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 20 / 31 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T18a (spec 005): página Inventario con buscador, estado de cada producto, detalle con sus movimientos y entrada, ajuste y merma; se refresca sola con el aviso `cash`. Probada en Chrome. T18 se divide en dos (T18b: alta y edición con foto).
 - **2026-10-02:** T04 (spec 005): píldora de la tasa en la barra superior (vigente, sin tasa o desactualizada) y diálogo «Tasa del día» para el encargado y el administrador; probado en Chrome con dos pestañas a la vez.
 - **2026-10-02:** T17 (spec 005): reportes del cierre en PDF con `pdfkit`: resumen de una página (lo vendido por grupo, lo pagado con saldo, la tasa y el cuadre por método) y detallado (movimientos, anulaciones y stock por producto). Termina la fase 2 (nodo); probada también contra PostgreSQL real.
 - **2026-10-02:** T16b (spec 005): el nombre del local es un ajuste de texto (`localName`, por defecto "Pope") que cambia el administrador; `setting.changed` pasa a la versión 2 con valores de número o de texto.
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T13c (spec 005): tabla `cash_entries` (con los cobros anteriores migrados); recargas, temporales y combos en caja escriben su fila, en Bs con la tasa si el método es de Bs (sin tasa, 409), y emiten sus eventos v2; `GET /shifts/current/entries` y aviso `cash` al panel.
 - **2026-10-02:** T13b (spec 005): versión 2 de `wallet.recharged`, `session.started`, `session.time_added` y `combo.purchased`, con el pago completo (moneda, importe, USD y tasa), por decisión del mantenedor: la auditoría y la nube tendrán lo cobrado de verdad en Bs. El registro de caja pasa a T13c.
 - **2026-10-02:** T13a (spec 005): la caja de turno pasa a ser del local: una sola abierta, en la que cobran encargados y administradores; la cierra quien la abrió o un administrador. La migración cierra las cajas abiertas de más (solo en desarrollo).
-- **2026-10-02:** T12 (spec 005): entradas (encargado y administrador), ajustes y mermas con motivo (administrador) con `POST /products/:id/stock`; el stock no baja de 0 salvo con `allowNegativeStock`; `GET /products/:id/movements` para el detalle del producto.

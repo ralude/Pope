@@ -178,11 +178,18 @@ parte 1.
 
 ### Fase 3: Panel
 
-- [ ] **T18: Inventario en el panel**
-  - **Cubre:** REQ-005-01, REQ-005-03, REQ-005-04, REQ-005-10, REQ-005-13, REQ-005-14
-  - **Hacer:** página `/inventario` según el diseño: productos con foto y buscador por nombre; modal "Nuevo producto" (nombre, foto reducida con `<canvas>` antes de subirla, precio, stock mínimo y cantidad inicial, que se guarda como entrada) y el mismo modal para editar; entrada, ajuste y merma; aviso de bajo mínimo.
-  - **Verificar:** CA-005-08 a mano en Chrome.
-  - **Commit:** `feat(panel): muestra el inventario con fotos`
+- [x] **T18a: Inventario en el panel: lista y stock**
+  - **Cubre:** REQ-005-04, REQ-005-10, REQ-005-13, REQ-005-14
+  - **Hacer:** página `/inventario` según el diseño: productos con su foto y buscador por nombre; estado (bien, bajo mínimo, agotado); detalle con los últimos movimientos; entrada (encargado y administrador), ajuste y merma (administrador); se refresca con el mensaje `cash` del canal.
+  - **Verificar:** tests de la lógica (estado, búsqueda, lectura de cantidades); a mano en Chrome, una entrada y una merma.
+  - **Commit:** `feat(panel): muestra el inventario y sus movimientos de stock`
+  - **Decidido al implementarla:** página `/inventario` (raíl: Inventario tras Clientes) con buscador sin mayúsculas ni tildes, tabla con foto o iniciales, precio con su Bs si hay tasa, stock, mínimo y estado (Desactivado, Agotado si es 0 o menos, Bajo mínimo según el nodo, Bien), y a la derecha el producto elegido con sus 50 últimos movimientos («Venta anulada» para una venta que vuelve). `StockDialog` para entrada (encargado y administrador, nota opcional), ajuste (con signo, «-2») y merma (administrador, con motivo), con «Quedará». El canal del panel lleva `cashVersion`, que sube con cada mensaje `cash`: Inventario vuelve a pedir la lista y los movimientos cuando cambia. El dueño ve todo sin botones; el encargado ve Ajuste y Merma desactivados («Solo el administrador»), como en el diseño. Verificado en Chrome: dos productos de prueba creados desde la sesión del administrador aparecieron solos en la lista; Pepito (5 de mínimo 5) sale «Bajo mínimo»; una entrada de 12 y una merma de 1 («bolsa rota») dejaron Doritos en 35 con sus tres movimientos; el buscador filtra.
+
+- [ ] **T18b: Inventario en el panel: alta y edición con foto**
+  - **Cubre:** REQ-005-01, REQ-005-03, REQ-005-04, REQ-005-10
+  - **Hacer:** modal "Nuevo producto" (nombre, foto reducida con `<canvas>` a WebP antes de subirla, precio, stock mínimo, cantidad que llegó, que se guarda como entrada, y activo) y el mismo modal para editar.
+  - **Verificar:** tests del tamaño de la foto; CA-005-08 a mano en Chrome.
+  - **Commit:** `feat(panel): da de alta y edita productos con foto`
 
 - [ ] **T19: Conceptos en el panel**
   - **Cubre:** REQ-005-05

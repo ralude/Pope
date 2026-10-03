@@ -42,6 +42,11 @@ export interface PcMapFeed {
   pendingInterrupted: number | null;
   /** Tasa vigente y si está desactualizada (REQ-005-36); `null` hasta que lo diga el nodo. */
   rate: ExchangeRateStatus | null;
+  /**
+   * Sube cada vez que el nodo avisa de que cambió la caja o el stock (`cash`, spec 005): las
+   * pantallas de Caja e Inventario vuelven a pedir lo que muestran cuando cambia.
+   */
+  cashVersion: number;
 }
 
 const PcMapFeedContext = createContext<PcMapFeed | null>(null);
@@ -69,6 +74,7 @@ function useChannel(): PcMapFeed {
     skewMs: 0,
     pendingInterrupted: null,
     rate: null,
+    cashVersion: 0,
   });
 
   useEffect(() => {
@@ -96,6 +102,8 @@ function useChannel(): PcMapFeed {
           setFeed((prev) => ({ ...prev, pendingInterrupted: message.pending }));
         } else if (message?.type === 'exchangeRate') {
           setFeed((prev) => ({ ...prev, rate: { rate: message.rate, stale: message.stale } }));
+        } else if (message?.type === 'cash') {
+          setFeed((prev) => ({ ...prev, cashVersion: prev.cashVersion + 1 }));
         }
       };
       ws.onclose = (event: CloseEvent) => {
