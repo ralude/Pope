@@ -2,7 +2,7 @@
 
 > **Estado:** medido solo en el **equipo de desarrollo**, que es mucho más potente que el
 > servidor del local. Los números cumplen con holgura, pero **no valen como aprobación**:
-> hay que repetirlas en el **i5 de 2ª generación con 8 GB** (ADR-0011). Sigue en "Pendientes
+> hay que repetirlas en el **i3-2120 con 8 GB** del local (ADR-0016). Sigue en "Pendientes
 > del mantenedor" de [`ESTADO.md`](../../../ESTADO.md).
 
 ## Equipo donde se midió
@@ -70,9 +70,10 @@ Lo que significa cada cosa:
 | 40 hashes a la vez | 261 ms en total |
 | Memoria del proceso (RSS) | 188 MB |
 
-## Pendiente: repetir en el i5 de 2ª generación
+## Pendiente: repetir en el i3-2120 del local
 
-El i5 de 2ª generación no tiene AVX2 y es varias veces más lento por núcleo, así que lo
+El i3-2120 (ADR-0016) no tiene AVX2, solo tiene 2 núcleos y es varias veces más lento por
+núcleo, así que lo
 esperable es que `hash` tarde bastante más de 13 ms y que la ráfaga se alargue. Hay que
 repetir T11 (`bench:argon2`) y T37 (los 5 pasos de arriba) **en ese equipo** y anotar aquí
 los resultados, con su CPU, RAM, sistema y versiones. Si el p95 de la fase 1 llegara a 2 s

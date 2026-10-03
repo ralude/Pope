@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · ADR-0016 propuesto (el servidor del local es un i3-2120)
+**Última actualización:** 2026-10-03 · ADR-0016 aceptado (el servidor del local es un i3-2120)
 
 ## Ahora
 
@@ -32,13 +32,12 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 - [ ] **Spec 002:** escribir su `tasks.md` (fase 1) a partir del plan aprobado, al terminar la tasa manual de la 005.
-- [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local: es un **i3-2120 con 8 GB**, no el i5 que decía ADR-0011 (ver ADR-0016). En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
+- [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local: un **i3-2120 con 8 GB** (ADR-0016), casi siempre encendido: incluir una prueba larga de memoria. En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **T28a:** confirmar los límites de los ajustes: gracia de latidos entre 30 s y 30 min, sesiones temporales conservadas entre 3 y 100 (la spec solo fija el 3 mínimo y el 3 min por defecto).
 - [ ] **T31:** confirmar dos criterios al abrir una sesión temporal: el tope de 24 h por cobro y que la PC deba estar conectada al nodo (si no, se cobraría por una PC que no puede desbloquearse).
 - [ ] **REQ-001-13:** el equivalente en Bs: la tasa manual (spec 005, parte 1) ya funciona y el Shell la muestra; faltan las pantallas del panel (T05 y T06) y la verificación (T07).
-- [ ] **ADR-0016 (propuesto):** el servidor del local es un i3-2120 con 8 GB que rara vez se apaga (dato del mantenedor, 2026-10-03). Propone mantener el presupuesto de ADR-0011, medir en ese PC e incluir una prueba larga de memoria. Aceptarlo o corregirlo; al aceptarlo, cambiar las menciones al «i5» de AGENTS.md y de las specs 001, 003 y 005.
 - [ ] **Antes de la spec 003:** decidir los ADR propuestos [0005](docs/adr/0005-shell-react-en-webview2.md), [0009](docs/adr/0009-escritorio-separado-para-bloqueo-y-pausa.md) y [0010](docs/adr/0010-lista-blanca-y-restauracion.md) (cliente Windows).
 - [ ] **Ajustes en el panel:** ya existe «Ajustes del local» (spec 005, T23b) con el nombre del local y «Permitir vender sin stock». La gracia de latidos y las sesiones temporales conservadas (spec 001) siguen sin pantalla, sin tarea; hasta entonces, por la API (`PUT /settings`).
 - [ ] **Test inestable con PostgreSQL real:** `no-heartbeat.e2e.test.ts` › «si la PC nunca supo de la sesión…» cierra la PC y abre una temporal en ella; como abrir exige la PC conectada (T31), con PostgreSQL real el nodo ya vio la desconexión y responde 409 (con PGlite pasa). Falla igual antes de la fase 8; hay que rehacer el test para que la PC pierda el `state` sin estar desconectada al abrir.
@@ -62,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** ADR-0016 aceptado: el servidor del local es un i3-2120 con 8 GB, casi siempre encendido (no el i5 de ADR-0011, que queda reemplazado). Se mantiene el presupuesto; las mediciones pendientes se hacen en ese PC, con una prueba larga de memoria.
 - **2026-10-03:** T24 (spec 005) aprobada por el mantenedor: la parte 2 (inventario, ventas y caja) queda verificada. Siguen T05–T07 de la parte 1.
 - **2026-10-03:** T24 (spec 005) rehecha tras los cambios del día: los 10 criterios de la parte 2 (con el CA-005-07 nuevo y los CA-005-12 y CA-005-13) tienen test automático y prueba a mano; falta la revisión del mantenedor.
 - **2026-10-03:** T31 (spec 005): la Caja muestra los movimientos en una tabla como la de SENET, con los ingresos del día, la apertura, el informe X y «Cerrar caja (informe Z)»; probada en Chrome (CA-005-12).
@@ -71,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T28a (spec 005): el panel deja de mostrar los conceptos (Inventario sin la pestaña «Otras ventas»).
 - **2026-10-03:** T27 (spec 005): la Caja cobra otros ingresos con importe y comentario, como en el diseño; probado en Chrome (CA-005-07).
 - **2026-10-03:** T26 (spec 005): el nodo vende otros ingresos (importe y comentario), los guarda con su comentario, emite `sale.recorded` v2 y los junta en «Otros ingresos» en el reporte.
-- **2026-10-03:** T25 (spec 005): contratos del otro ingreso (importe en USD y comentario opcional) y `sale.recorded` v2 con líneas de producto u otro ingreso.

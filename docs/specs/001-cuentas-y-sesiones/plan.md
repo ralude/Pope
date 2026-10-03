@@ -125,7 +125,7 @@ agente real (spec 003). El nodo decide; esto es solo lo que la PC dice y cuándo
 **Panel (`apps/panel`).** Diseño de referencia: el lienzo "Panel Pope · Fase 8 (estilo SENET)",
 para que al encargado le resulte familiar. Tema oscuro, raíl de iconos a la izquierda, mapa de
 PCs como baldosas con raya de estado y botones en píldora. Se diseña para la pantalla del
-servidor del local, de **1920×1080**, con la gráfica integrada del i5-2400 (HD 2000): colores
+servidor del local, de **1920×1080**, con la gráfica integrada del i3-2120 (HD 2000; ADR-0016): colores
 planos, sin desenfoques, sombras difuminadas ni animaciones; la única transparencia es la capa
 de los diálogos. El equivalente en Bs no se muestra hasta que exista una tasa (spec 005).
 
@@ -156,7 +156,7 @@ de los diálogos. El equivalente en Bs no se muestra hasta que exista una tasa (
 | `@nestjs/*` + `fastify` | server | ADR-0003 |
 | `drizzle-orm` + `pg` | server | ADR-0004; sin motor binario |
 | `ws` | server | Canal WebSocket de las PCs (ADR-0003): sin dependencias propias, más ligero que Socket.IO y compatible con `ClientWebSocket` de .NET |
-| `@node-rs/argon2` | server | Hash seguro sin compilación. **Verificar en el i5 de 2ª gen** |
+| `@node-rs/argon2` | server | Hash seguro sin compilación. **Verificar en el i3-2120 del local** (ADR-0016) |
 | `zod`, `uuid` | shared | Validación e ids v7 |
 | `react`, `react-dom`, `wouter` | panel, shell-ui | Router de ~2 KB; **sin librería de componentes** para mantener el panel ligero |
 | `@dnd-kit/core` | panel | Arrastrar las PCs al organizar el mapa (REQ-001-45). ~10 KB comprimido, sin dependencias; mueve con `transform`, que la gráfica integrada maneja bien, y funciona con teclado |

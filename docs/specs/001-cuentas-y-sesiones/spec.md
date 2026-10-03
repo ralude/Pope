@@ -104,7 +104,7 @@ cuando se apaga todo.
 
 ## Requisitos no funcionales
 
-- **REQ-001-50:** El inicio de sesión responde en < 2 s en la LAN con 40 PCs conectadas, en el hardware del ADR-0011.
+- **REQ-001-50:** El inicio de sesión responde en < 2 s en la LAN con 40 PCs conectadas, en el hardware del ADR-0016 (antes ADR-0011).
 - **REQ-001-51:** Las contraseñas se guardan con argon2id y nunca aparecen en logs.
 - **REQ-001-52:** Tras 5 intentos fallidos, la cuenta no puede iniciar sesión durante 5 minutos.
 - **REQ-001-53:** Todo funciona **sin internet**; solo requiere la LAN (ADR-0001).

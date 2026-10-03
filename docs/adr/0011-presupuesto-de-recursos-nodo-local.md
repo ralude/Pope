@@ -1,6 +1,6 @@
 # ADR-0011: Presupuesto de recursos del nodo local
 
-- **Estado:** Aceptado
+- **Estado:** Reemplazado por ADR-0016 (el PC es un i3-2120, no un i5; ADR-0016 mantiene el presupuesto y las reglas de este)
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0003, ADR-0004, ADR-0005
 

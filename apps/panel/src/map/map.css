@@ -1,7 +1,7 @@
 /*
  * Mapa de PCs (T39), a la medida de la pantalla del nodo (1920×1080): 14 columnas de
  * baldosas a la izquierda y el detalle de la PC elegida a la derecha. Colores planos, sin
- * transiciones: la gráfica integrada del i5-2400 repinta el mapa cada segundo.
+ * transiciones: la gráfica integrada del i3-2120 repinta el mapa cada segundo.
  */
 .map-layout {
   height: 100%;

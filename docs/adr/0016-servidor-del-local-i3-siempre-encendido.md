@@ -1,6 +1,6 @@
 # ADR-0016: El servidor del local es un i3-2120 con 8 GB, casi siempre encendido
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado (mantenedor, 2026-10-03)
 - **Fecha:** 2026-10-03
 - **Relacionado:** ADR-0011 (lo reemplaza), ADR-0001, ADR-0004
 

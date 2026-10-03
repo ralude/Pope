@@ -34,7 +34,7 @@ test inestable de la spec 001 ya anotado en `ESTADO.md` y que no toca esta spec.
 
 - **Imprimir el PDF del encargado en papel** (T22b, REQ-005-51): se comprobó que se descarga y
   que ocupa una página, pero no se imprimió. Lo hace el mantenedor con la impresora del local.
-- **REQ-005-71** (una venta en menos de 500 ms en el hardware del ADR-0011): sin medir. Hay que
-  repetirlo en el i5 de 2ª generación con 8 GB, junto a las mediciones de la spec 001.
+- **REQ-005-71** (una venta en menos de 500 ms en el hardware del ADR-0016): sin medir. Hay que
+  medirlo en el i3-2120 con 8 GB del local, junto a las mediciones de la spec 001.
 - **Fondos agregados y retiradas de efectivo**: pregunta abierta de la spec (el mantenedor la
   dejó para más adelante, 2026-10-03).

@@ -84,7 +84,7 @@ antes de seguir.
 - [x] **T11: Servicio de contraseñas**
   - **Cubre:** REQ-001-51
   - **Hacer:** `PasswordService` con `@node-rs/argon2` (argon2id, `m=19 MiB, t=2, p=1`) y script `bench:argon2` para medir en el hardware del local.
-  - **Verificar:** tests de hash y verificación. **Ejecutar el benchmark en el i5 de 2ª gen** y apuntar el resultado en el cuerpo del commit.
+  - **Verificar:** tests de hash y verificación. **Ejecutar el benchmark en el i3-2120 del local** (ADR-0016) y apuntar el resultado en el cuerpo del commit.
   - **Commit:** `feat(server): añade el hash de contraseñas con argon2id`
 
 - [x] **T12: Base de datos y pruebas con PGlite**
@@ -362,9 +362,9 @@ antes de seguir.
     - **Memoria:** el servidor se arranca con `POPE_MEMORY_LOG_MS=5000`. En `mediciones.md` se anota el `rss` máximo del registro durante toda la prueba y el del final de los 10 min.
     - Al terminar imprime una tabla en Markdown lista para pegar en `mediciones.md`.
     - `mediciones.md` lleva: equipo (CPU, RAM, sistema, versión de Node y de PostgreSQL, `UV_THREADPOOL_SIZE`), la tabla de T37 y un apartado de T11 (resultados de `bench:argon2`), con **dónde se midió**.
-  - **Verificar:** p95 de la fase 1 < 2 s y `rss` máximo < 384 MB. Preparación: la receta de T36a con `--count 40` y `seed --customers 40 --money 20`. Si se mide en el equipo de desarrollo, `mediciones.md` lo dice y queda pendiente medirlo **en el i5 de 2ª gen** (sigue en "Pendientes del mantenedor" de `ESTADO.md`).
+  - **Verificar:** p95 de la fase 1 < 2 s y `rss` máximo < 384 MB. Preparación: la receta de T36a con `--count 40` y `seed --customers 40 --money 20`. Si se mide en el equipo de desarrollo, `mediciones.md` lo dice y queda pendiente medirlo **en el i3-2120 del local** (ADR-0016) (sigue en "Pendientes del mantenedor" de `ESTADO.md`).
   - **Commit:** `feat(tools): mide la carga con 40 PCs simuladas`
-  - **Hecho (2026-10-01):** subcomando `load` (con `--stagger-ms`, `--hold-seconds` y `--server-log`) y `mediciones.md`. Medido en el equipo de desarrollo (cumple con holgura); **falta repetirlo en el i5 de 2ª gen**. La memoria se lee del log del servidor: el desplazamiento del archivo al empezar y al terminar las sesiones separa el pico de arranque, el de la prueba y el del final.
+  - **Hecho (2026-10-01):** subcomando `load` (con `--stagger-ms`, `--hold-seconds` y `--server-log`) y `mediciones.md`. Medido en el equipo de desarrollo (cumple con holgura); **falta repetirlo en el i3-2120 del local** (ADR-0016). La memoria se lee del log del servidor: el desplazamiento del archivo al empezar y al terminar las sesiones separa el pico de arranque, el de la prueba y el del final.
 
 ## Fase 8: Panel (`apps/panel`)
 

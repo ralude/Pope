@@ -100,7 +100,7 @@ hoja de papel se sigue usando de respaldo.
 ## Requisitos no funcionales
 
 - **REQ-005-70:** Los importes se guardan como enteros en micro-unidades (ADR-0015), con su código de moneda. Nunca como decimales flotantes.
-- **REQ-005-71:** Una venta se registra en < 500 ms en el hardware del ADR-0011.
+- **REQ-005-71:** Una venta se registra en < 500 ms en el hardware del ADR-0016 (antes ADR-0011).
 - **REQ-005-72:** Todo funciona sin internet (ADR-0001).
 - **REQ-005-73:** Las fotos de los productos no pasan de unos cientos de KB cada una, para no cargar el disco ni la red del nodo (ADR-0011).
 

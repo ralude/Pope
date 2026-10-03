@@ -89,7 +89,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 > **Dato del mantenedor (2026-10-01):** las PCs de los clientes llevan los mismos componentes
 > que el equipo de desarrollo (AMD Ryzen 5 5500) pero con **16 GB de RAM**. No es un
 > requisito: sirve para dimensionar, y el rendimiento del Shell se puede probar en el equipo
-> de desarrollo. Es distinto del servidor del local (i5 de 2ª generación, 8 GB; ADR-0011).
+> de desarrollo. Es distinto del servidor del local (i3-2120, 8 GB; ADR-0016).
 
 ## Criterios de aceptación
 

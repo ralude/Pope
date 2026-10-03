@@ -1,5 +1,5 @@
 // Mide cuánto tarda argon2id con los parámetros de Pope en esta máquina (T11, REQ-001-50).
-// Hay que ejecutarlo en el PC servidor del local (i5 de 2ª gen, 8 GB, sin AVX2):
+// Hay que ejecutarlo en el PC servidor del local (i3-2120, 8 GB, sin AVX2; ADR-0016):
 //   pnpm --filter @pope/server build && pnpm --filter @pope/server bench:argon2
 // Se compila antes porque importa los parámetros desde dist.
 import console from 'node:console';

@@ -101,7 +101,10 @@ Proceso completo: [`docs/specs/README.md`](docs/specs/README.md).
 
 ### 5. Presupuesto de recursos del nodo local
 
-El servidor del local es un **i5 de 2ª generación con 8 GB de RAM** ([ADR-0011](docs/adr/0011-presupuesto-de-recursos-nodo-local.md)):
+El servidor del local es un **i3-2120 (2 núcleos) con 8 GB de RAM**, casi siempre encendido
+([ADR-0016](docs/adr/0016-servidor-del-local-i3-siempre-encendido.md), que mantiene el presupuesto de
+[ADR-0011](docs/adr/0011-presupuesto-de-recursos-nodo-local.md)). Nada puede crecer sin límite
+con semanas sin reiniciar:
 
 - Sin Docker, Electron ni servicios pesados en el nodo local.
 - Techo de Pope: **~1 GB de RAM** en total (PostgreSQL ≤ 512 MB, Node ≤ 384 MB).
@@ -217,8 +220,8 @@ Panel (`apps/panel`, React + Vite + wouter):
   cualquier otra devuelve `index.html`. Si falta `apps/panel/dist`, el nodo arranca igual y lo
   avisa en el log.
 - Diseño de referencia: el lienzo "Panel Pope · Fase 8 (estilo SENET)", a 1920×1080. Estilos
-  en `src/theme.css`: colores planos, sin desenfoques ni animaciones (gráfica integrada del
-  i5-2400). Las llamadas al nodo pasan por `ApiClient` (`src/api/client.ts`), que valida cada
+  en `src/theme.css`: colores planos, sin desenfoques ni animaciones (gráfica integrada HD 2000
+  del i3-2120). Las llamadas al nodo pasan por `ApiClient` (`src/api/client.ts`), que valida cada
   respuesta con los esquemas de `@pope/shared`.
 - Tests solo de la lógica (`src/**/*.test.ts`); las pantallas se verifican a mano.
 

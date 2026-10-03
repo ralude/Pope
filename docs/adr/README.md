@@ -46,9 +46,9 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0008](0008-sincronizacion-por-eventos.md) | Sincronización local → nube por eventos (outbox) | Aceptado |
 | [0009](0009-escritorio-separado-para-bloqueo-y-pausa.md) | Bloqueo y pausa en un escritorio Win32 separado | Propuesto |
 | [0010](0010-lista-blanca-y-restauracion.md) | Lista blanca de aplicaciones y restauración de configuración | Propuesto |
-| [0011](0011-presupuesto-de-recursos-nodo-local.md) | Presupuesto de recursos del nodo local | Aceptado |
+| [0011](0011-presupuesto-de-recursos-nodo-local.md) | Presupuesto de recursos del nodo local | Reemplazado por ADR-0016 |
 | [0012](0012-web-del-dueno-sin-instalacion.md) | La web del dueño es solo navegador, sin instalación | Aceptado |
 | [0013](0013-spec-driven-development.md) | Desarrollo guiado por especificaciones (SDD) para agentes de IA | Aceptado |
 | [0014](0014-dos-saldos-dinero-y-horas-de-combo.md) | Dos saldos por cuenta, dinero y horas de combo | Aceptado |
 | [0015](0015-dinero-en-micro-unidades.md) | Importes en micro-unidades enteras | Aceptado |
-| [0016](0016-servidor-del-local-i3-siempre-encendido.md) | El servidor del local es un i3-2120 con 8 GB, casi siempre encendido | Propuesto (reemplazaría a 0011) |
+| [0016](0016-servidor-del-local-i3-siempre-encendido.md) | El servidor del local es un i3-2120 con 8 GB, casi siempre encendido | Aceptado |
