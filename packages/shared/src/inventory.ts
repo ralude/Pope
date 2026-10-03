@@ -69,11 +69,11 @@ export const productSchema = z.object({
 export type Product = z.infer<typeof productSchema>;
 
 /**
- * Aviso de stock bajo (REQ-005-13): el producto tiene un mínimo y su stock está por debajo.
- * Sin mínimo no hay aviso.
+ * Aviso de stock bajo (REQ-005-13): el producto tiene un mínimo y su stock lo ha alcanzado
+ * (con mínimo 5, avisa ya con 5, para reponer a tiempo). Sin mínimo no hay aviso.
  */
 export function isLowStock(stock: number, minStock: number | null): boolean {
-  return minStock !== null && stock < minStock;
+  return minStock !== null && stock <= minStock;
 }
 
 /** Ruta de la foto de un producto en el nodo, con su versión; `null` si no tiene. */

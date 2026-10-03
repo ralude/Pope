@@ -54,7 +54,7 @@ hoja de papel se sigue usando de respaldo.
 - **REQ-005-10:** El stock solo cambia mediante movimientos de tipo `entrada`, `venta`, `ajuste` o `merma`. Cada movimiento lleva cantidad, actor, hora y motivo (obligatorio en ajuste y merma). "Cuánto hay" se da de alta con una **entrada**, nunca escribiendo la cantidad.
 - **REQ-005-11:** El stock actual de un producto es la suma de sus movimientos.
 - **REQ-005-12:** Por defecto, no se puede vender por debajo de 0. El administrador puede permitirlo.
-- **REQ-005-13:** Cuando un producto baja de su stock mínimo, el panel lo avisa.
+- **REQ-005-13:** Cuando un producto llega a su stock mínimo o baja de él, el panel lo avisa (con mínimo 5, avisa ya con 5; mantenedor, 2026-10-02).
 - **REQ-005-14:** El encargado registra entradas de mercancía; el administrador, además, ajustes y mermas.
 
 **Ventas (panel del encargado)**

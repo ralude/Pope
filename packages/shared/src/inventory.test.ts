@@ -47,9 +47,10 @@ describe('productos (REQ-005-01, REQ-005-04)', () => {
 });
 
 describe('aviso de stock bajo (REQ-005-13)', () => {
-  it('avisa por debajo del mínimo, no en el mínimo ni sin mínimo', () => {
+  it('avisa al llegar al mínimo o por debajo, y nunca sin mínimo', () => {
     expect(isLowStock(4, 5)).toBe(true);
-    expect(isLowStock(5, 5)).toBe(false);
+    expect(isLowStock(5, 5)).toBe(true);
+    expect(isLowStock(6, 5)).toBe(false);
     expect(isLowStock(0, null)).toBe(false);
     expect(isLowStock(-1, 0)).toBe(true);
   });
