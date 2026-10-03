@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · tareas de la fase 1 de la spec 002 propuestas (pendientes de aprobar)
+**Última actualización:** 2026-10-03 · tareas de la fase 1 de la spec 002 aprobadas
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en verificación; parte 2 (inventario, ventas y caja) verificada |
-| **Siguiente tarea** | **T07: Verificación de la parte 1** (spec 005), en revisión del mantenedor: CA-005-06 probado en el panel y el Shell, ver [mediciones.md](docs/specs/005-inventario-y-caja/mediciones.md). Después, la spec 002: su [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md) (fase 1) está escrito y pendiente de aprobar |
-| **Progreso** | Spec 005: 41 / 42 tareas (parte 1: 6 / 7; parte 2: 35 / 35) |
+| **Spec en curso** | [002 · Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md), fase 1 (todo en TypeScript). La 005 espera la revisión de T07 |
+| **Siguiente tarea** | **T01: Ajustes de la pausa** (spec 002, [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md)) |
+| **Progreso** | Spec 002: 0 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -31,7 +31,7 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
-- [ ] **Spec 002:** revisar y aprobar su [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md) (fase 1, T01–T19), con las cuatro preguntas de «Para decidir al aprobar»: cómo sabe el Shell si el límite es de la sesión o del día, si Pausar se ve con la pausa desactivada, `pauseEnabled` como 1/0 y los ajustes de la pausa en el panel.
+- [ ] **Spec 002:** ¿los ajustes de la pausa van a «Ajustes del local» del panel? Pregunta 4 del [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md); hasta entonces, por la API.
 - [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local: un **i3-2120 con 8 GB** (ADR-0016), casi siempre encendido: incluir una prueba larga de memoria. En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
@@ -49,7 +49,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 68 / 68 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · tareas de la fase 1 en borrador | 0 / 19 |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | En curso: fase 1 (tareas aprobadas) | 0 / 19 |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
@@ -61,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** Spec 002: el mantenedor aprueba las tareas de la fase 1 y decide: `pauseLimit` en el `state` para elegir el mensaje, el botón Pausar desactivado y con mensaje si la pausa está apagada, y `pauseEnabled` como 1/0. Queda abierto si sus ajustes van al panel.
 - **2026-10-03:** Spec 002: `tasks.md` de la fase 1 (T01–T19: contratos, nodo, panel, Shell, simulador y verificación), con cuatro preguntas para el mantenedor; pendiente de aprobar.
 - **2026-10-03:** T07 (spec 005): CA-005-06 probado en Chrome con una base nueva sin tasa: al guardar 40,00 en el panel, el panel y el Shell muestran el Bs al momento y queda `exchange_rate.set` con el administrador y la fuente `manual`; REQ-001-13 marcado en la spec 001. Falta la revisión del mantenedor.
 - **2026-10-03:** T06 (spec 005): el equivalente en Bs en Tarifas, Combos (lista y editor) y el diálogo de sesión temporal; probado en Chrome con tasa y sin tasa.
@@ -70,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T24 (spec 005) rehecha tras los cambios del día: los 10 criterios de la parte 2 (con el CA-005-07 nuevo y los CA-005-12 y CA-005-13) tienen test automático y prueba a mano; falta la revisión del mantenedor.
 - **2026-10-03:** T31 (spec 005): la Caja muestra los movimientos en una tabla como la de SENET, con los ingresos del día, la apertura, el informe X y «Cerrar caja (informe Z)»; probada en Chrome (CA-005-12).
 - **2026-10-03:** T30 (spec 005): informe X, el PDF del encargado de la caja abierta con lo esperado, sin cerrarla.
-- **2026-10-03:** T29 (spec 005): cada movimiento de la caja lleva la cuenta del cliente y, las ventas, sus líneas; la migración 0023 rellena la cuenta en los cobros anteriores.

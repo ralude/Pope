@@ -47,7 +47,7 @@ el administrador con `PUT /settings` y generan su evento como los demás):
 
 | Ajuste | Por defecto | Límites | REQ |
 |---|---|---|---|
-| `pauseEnabled` | `true` | — | 002-23 |
+| `pauseEnabled` | `1` | `1` (activada) o `0`: un número, como `allowNegativeStock` de la spec 005, porque `setting.changed` solo admite números y textos (mantenedor, 2026-10-03) | 002-23 |
 | `pauseMaxSeconds` | 900 (15 min) | 1 a 60 min | 002-20 |
 | `pauseMaxPerSession` | 3 | 1 a 20 | 002-21 |
 | `pauseMaxPerDay` | 5 | 1 a 50 | 002-24 |
@@ -99,6 +99,7 @@ vencieron mientras estaba apagado, con la hora de `max_until` (REQ-002-31).
 | PC → nodo | `resume` (`requestId`?) | Responde un `state` sin pausa y su `requestId` |
 | nodo → PC | `state` activo con cuenta: campo nuevo `pause` | `{ startedAt, maxUntil, billing }` o `null`; `billing` es `true` tras vencer con la opción a) |
 | nodo → PC | `state` activo con cuenta: campo nuevo `pausesLeft` | Las que quedan: el mínimo entre las de la sesión y las del día; `0` si la pausa está desactivada (REQ-002-02, CA-002-04, CA-002-06) |
+| nodo → PC | `state` activo con cuenta: campo nuevo `pauseLimit` | Por qué no se puede pausar: `null` si quedan pausas, `'session'` o `'day'` según el límite alcanzado, `'disabled'` si la pausa está desactivada. Así el Shell elige el mensaje (CA-002-04, CA-002-06; mantenedor, 2026-10-03) |
 | nodo → PC | `error` con código nuevo `pause_unavailable` | Sesión temporal, pausa desactivada, sin pausas o ya en pausa, con su texto en español |
 
 Los campos nuevos del `state` son opcionales para que el simulador y los agentes que no los
@@ -120,7 +121,9 @@ Cerrar ya existe (`POST /sessions/:id/close`). El mapa del panel (`PcMapSession`
 
 - **Pausar:** el botón de la barra superior (hoy desactivado) se activa en sesiones con cuenta
   y con `pausesLeft` > 0. Si no quedan: desactivado con "Sin pausas disponibles" o "Sin
-  pausas disponibles hoy" (CA-002-04, CA-002-06). En temporales no aparece (CA-002-07).
+  pausas disponibles hoy" (CA-002-04, CA-002-06), según `pauseLimit`. Con la pausa
+  desactivada en el local, también desactivado y con un mensaje (mantenedor, 2026-10-03). En
+  temporales no aparece (CA-002-07).
 - **Confirmación** (REQ-002-02): "Los juegos online pueden desconectarte" y "Te quedan N
   pausas", con «Pausar» y «Seguir jugando».
 - **Pantalla de pausa** (REQ-002-06), con vidrio sobre el fondo: el tiempo de pausa que queda

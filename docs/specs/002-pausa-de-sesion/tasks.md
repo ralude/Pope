@@ -1,6 +1,6 @@
 # Tareas 002: Pausa de sesión
 
-- **Estado:** Borrador (2026-10-03), pendiente de la aprobación del mantenedor. Solo la fase 1.
+- **Estado:** Aprobado (mantenedor, 2026-10-03). Solo la fase 1.
 - **Plan:** [plan.md](plan.md)
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa. Cada
@@ -14,24 +14,25 @@ muestra la pantalla de pausa, que en el navegador aún no bloquea el teclado. La
 (escritorio separado, silencio y < 1 s: REQ-002-04, REQ-002-05, REQ-002-07, REQ-002-50 y
 CA-002-02) se añadirá aquí cuando la spec 003 tenga plan.
 
-## Para decidir al aprobar
+## Decidido al aprobar
 
-Al repasar el plan contra el código salieron cuatro huecos. Cada uno lleva una propuesta; si
-el mantenedor la acepta, se anota en el plan en el commit de la tarea que la usa.
+Al repasar el plan contra el código salieron cuatro huecos. El mantenedor decidió las tres
+primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
 
 1. **¿Cómo sabe el Shell qué mensaje poner?** El plan manda un solo número, `pausesLeft`, el
    menor entre las pausas que quedan en la sesión y en el día. Con él el Shell no distingue
    "Sin pausas disponibles" (CA-002-04) de "Sin pausas disponibles hoy" (CA-002-06).
-   **Propuesta:** el `state` lleva además `pauseLimit`: `null` si quedan pausas, `'session'` o
-   `'day'` según el límite que se alcanzó (T03).
+   **Decidido:** el `state` lleva además `pauseLimit`: `null` si quedan pausas, `'session'` o
+   `'day'` según el límite que se alcanzó, y `'disabled'` con la pausa desactivada (T03).
 2. **Con la pausa desactivada en el local (REQ-002-23), ¿el botón Pausar se ve?** El plan
-   manda `pausesLeft: 0`, que lo dejaría desactivado sin mensaje. **Propuesta:** no aparece,
-   como en las sesiones temporales (CA-002-07); `pauseLimit` vale `'disabled'` (T03, T16).
+   manda `pausesLeft: 0`, que lo dejaría desactivado sin mensaje. **Decidido:** se ve
+   desactivado y con un mensaje; `pauseLimit` vale `'disabled'` (T03, T16). El texto se
+   decide con el diseño del Shell (T14).
 3. **`pauseEnabled` como número.** El plan lo pone como booleano, pero el evento
-   `setting.changed` solo admite números y textos. **Propuesta:** `1` o `0`, como
+   `setting.changed` solo admite números y textos. **Decidido:** `1` o `0`, como
    `allowNegativeStock` de la spec 005 (T01).
 4. **Los ajustes de la pausa en el panel.** El plan los deja en la API porque no había
-   pantalla de ajustes; ahora existe «Ajustes del local» (spec 005, T23b). **Propuesta:** de
+   pantalla de ajustes; ahora existe «Ajustes del local» (spec 005, T23b). **Abierta.** Propuesta: de
    momento, por la API como dice el plan, y añadirlos a «Ajustes del local» en una tarea
    aparte cuando el mantenedor lo pida, junto a la gracia de latidos y las temporales
    conservadas de la spec 001, que tampoco tienen pantalla.
@@ -136,7 +137,7 @@ el mantenedor la acepta, se anota en el plan en el commit de la tarea que la usa
 
 - [ ] **T16: Botón Pausar y confirmación**
   - **Cubre:** REQ-002-01, REQ-002-02, REQ-002-11, REQ-002-23, CA-002-04, CA-002-06, CA-002-07
-  - **Hacer:** el botón de la barra (hoy desactivado) se activa en sesiones con cuenta con pausas; si no quedan, desactivado con "Sin pausas disponibles" o "Sin pausas disponibles hoy" según `pauseLimit`; no aparece en temporales ni con la pausa desactivada (pregunta 2). La confirmación avisa de que los juegos online pueden desconectarle y dice las pausas que quedan, con «Pausar» y «Seguir jugando»; muestra el texto del nodo si rechaza.
+  - **Hacer:** el botón de la barra (hoy desactivado) se activa en sesiones con cuenta con pausas; si no quedan, desactivado con "Sin pausas disponibles" o "Sin pausas disponibles hoy" según `pauseLimit`; con la pausa desactivada, desactivado y con su mensaje (pregunta 2); no aparece en temporales. La confirmación avisa de que los juegos online pueden desconectarle y dice las pausas que quedan, con «Pausar» y «Seguir jugando»; muestra el texto del nodo si rechaza.
   - **Verificar:** tests de la lógica del botón; a mano en Chrome (CA-002-04, CA-002-06, CA-002-07).
   - **Commit:** `feat(shell-ui): añade el botón Pausar con su confirmación`
 
