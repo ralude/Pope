@@ -2,7 +2,7 @@
 // (REQ-001-03, REQ-005-40 a REQ-005-44).
 import { z } from 'zod';
 
-import { type CashMethod, cashTotalsSchema, methodCurrency } from './cash.js';
+import { type CashMethod, cashMovementSchema, cashTotalsSchema, methodCurrency } from './cash.js';
 import { type Currency, type Micros, micros, microsSchema } from './money.js';
 import { idSchema } from './session.js';
 import { type PaymentMethod, paymentMethodSchema } from './wallet.js';
@@ -113,3 +113,19 @@ function mapMethods(value: (method: PaymentMethod) => number): CashByMethod {
     pos: micros(value('pos')),
   };
 }
+
+/**
+ * Respuesta de `GET /shifts/current/entries`: los movimientos de la caja abierta, el más
+ * reciente arriba, con los totales (REQ-005-24, REQ-005-26), y quién la abrió, cuándo y con qué fondo,
+ * para la fila de apertura y la cabecera de la Caja.
+ */
+export const shiftEntriesResponseSchema = z.object({
+  shiftId: idSchema,
+  staffId: idSchema,
+  staffName: z.string(),
+  openedAt: z.iso.datetime(),
+  opening: openingCashSchema,
+  movements: z.array(cashMovementSchema),
+  totals: cashTotalsSchema,
+});
+export type ShiftEntriesResponse = z.infer<typeof shiftEntriesResponseSchema>;

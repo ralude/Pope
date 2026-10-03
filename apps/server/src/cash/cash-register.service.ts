@@ -79,6 +79,9 @@ export function paymentsOf(pieces: readonly CashPiece[]): PaymentSummary[] {
 
 type EntryRow = typeof cashEntries.$inferSelect;
 
+/** Los movimientos de una caja con sus totales; el controlador añade quién la abrió. */
+export type CashList = Pick<ShiftEntriesResponse, 'shiftId' | 'movements' | 'totals'>;
+
 /**
  * Registro único de lo cobrado (spec 005, REQ-005-24): cada cobro en caja escribe aquí sus
  * filas en la misma transacción. De él salen la lista del turno, lo esperado al cerrar y los
@@ -180,7 +183,7 @@ export class CashRegisterService {
    * La lista de una caja (REQ-005-24): las filas de cada cobro juntas en un movimiento, el
    * más reciente arriba, con los totales por grupo (REQ-005-52).
    */
-  async list(shiftId: string): Promise<ShiftEntriesResponse> {
+  async list(shiftId: string): Promise<CashList> {
     const rows = await this.entries(shiftId);
     // Las ventas anuladas de esta caja, con su motivo (REQ-005-23).
     const voided = new Map(

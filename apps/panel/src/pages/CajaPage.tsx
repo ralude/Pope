@@ -1,6 +1,7 @@
 // Caja (spec 005, REQ-005-20): como en SENET, el catálogo a la izquierda (golosinas con su foto
-// y el otro ingreso, con su importe y su comentario) y la venta nueva al lado, con su total en USD y Bs. El
-// cobro va debajo del total (T20b) y los movimientos del turno, a la derecha (T21).
+// y el otro ingreso, con su importe y su comentario) y la venta nueva al lado, con su total en
+// USD y Bs. El cobro va debajo del total (T20b) y la tabla de movimientos de la caja abierta, a
+// la derecha (T31), también para el dueño, que solo mira.
 import '../caja/caja.css';
 
 import {
@@ -13,6 +14,8 @@ import {
   productPhotoPath,
   productSchema,
   settingsSchema,
+  type ShiftEntriesResponse,
+  shiftEntriesResponseSchema,
   type VesRate,
 } from '@pope/shared';
 import { useEffect, useState } from 'react';
@@ -56,6 +59,34 @@ export function CajaPage() {
   const [query, setQuery] = useState('');
   const [cart, setCart] = useState<CartLine[]>([]);
   const [lastSale, setLastSale] = useState<string | null>(null);
+  /** La caja abierta con sus movimientos; `null` si está cerrada, `undefined` al cargar. */
+  const [entries, setEntries] = useState<ShiftEntriesResponse | null | undefined>(undefined);
+  const [entriesError, setEntriesError] = useState<string | null>(null);
+
+  // Los movimientos de la caja abierta, al entrar y con cada aviso `cash` (cobros, anulaciones,
+  // abrir y cerrar la caja). Sin caja abierta, el nodo responde 409.
+  useEffect(() => {
+    let cancelled = false;
+    api.get('/shifts/current/entries', shiftEntriesResponseSchema).then(
+      (response) => {
+        if (cancelled) return;
+        setEntries(response);
+        setEntriesError(null);
+      },
+      (failure: unknown) => {
+        if (cancelled) return;
+        if (failure instanceof ApiError && failure.status === 409) {
+          setEntries(null);
+          setEntriesError(null);
+        } else {
+          setEntriesError(errorMessage(failure));
+        }
+      },
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [api, cashVersion, shift?.id]);
 
   // El catálogo, al entrar y con cada cambio de stock o de precios (`cash`).
   useEffect(() => {
@@ -83,25 +114,21 @@ export function CajaPage() {
       title="Caja"
       tabs={
         <span className="muted">
-          {shift
-            ? `Caja abierta desde las ${formatLocalTime(new Date(shift.openedAt))}`
-            : shift === null
+          {entries
+            ? `Turno de ${entries.staffName} · desde las ${formatLocalTime(new Date(entries.openedAt))}`
+            : entries === null
               ? 'La caja está cerrada'
               : ''}
         </span>
       }
       actions={
+        // Cerrar va junto a la tabla, como «Cerrar caja (informe Z)» (REQ-005-45).
         canCharge &&
-        shift !== undefined &&
-        (shift === null ? (
+        shift === null && (
           <button type="button" className="btn btn-primary" onClick={startOpen}>
             Abrir caja
           </button>
-        ) : (
-          <button type="button" className="btn btn-ghost" onClick={startClose}>
-            Cerrar caja
-          </button>
-        ))
+        )
       }
     >
       <div className="caja-layout">
@@ -241,9 +268,16 @@ export function CajaPage() {
           )}
         </section>
         <MovementList
-          shiftId={shift?.id ?? null}
-          cashVersion={cashVersion}
+          entries={entries}
+          error={entriesError}
           isAdmin={staff.role === 'administrador'}
+          canClose={
+            entries !== null &&
+            entries !== undefined &&
+            canCharge &&
+            (entries.staffId === staff.id || staff.role === 'administrador')
+          }
+          onClose={startClose}
         />
       </div>
     </Frame>

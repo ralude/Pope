@@ -215,11 +215,3 @@ export const cashMovementSchema = z.object({
   reason: z.string().nullable(),
 });
 export type CashMovement = z.infer<typeof cashMovementSchema>;
-
-/** Respuesta de `GET /shifts/current/entries`: el más reciente arriba, con los totales. */
-export const shiftEntriesResponseSchema = z.object({
-  shiftId: idSchema,
-  movements: z.array(cashMovementSchema),
-  totals: cashTotalsSchema,
-});
-export type ShiftEntriesResponse = z.infer<typeof shiftEntriesResponseSchema>;

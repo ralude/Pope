@@ -33,14 +33,30 @@ export class CashController {
     private readonly reports: ShiftReportService,
   ) {}
 
-  /** Movimientos de la caja abierta, el más reciente arriba. Responde 409 si no hay caja. */
+  /**
+   * Movimientos de la caja abierta, el más reciente arriba, con quién la abrió, cuándo y con
+   * qué fondo (la fila de apertura, REQ-005-24). Responde 409 si no hay caja.
+   */
   @Get('current/entries')
   async current(): Promise<ShiftEntriesResponse> {
     const shift = await this.shifts.findOpen();
     if (!shift) {
       throw new ConflictException('No hay una caja abierta');
     }
-    return this.register.list(shift.id);
+    const [list, summary] = await Promise.all([
+      this.register.list(shift.id),
+      this.shifts.summary(shift.id),
+    ]);
+    if (!summary) {
+      throw new ConflictException('No hay una caja abierta');
+    }
+    return {
+      ...list,
+      staffId: shift.staffId,
+      staffName: summary.staffName,
+      openedAt: summary.openedAt,
+      opening: summary.opening,
+    };
   }
 
   /**

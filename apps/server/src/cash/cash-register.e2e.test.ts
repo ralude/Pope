@@ -230,7 +230,14 @@ describe('registro de caja (e2e, REQ-005-22, REQ-005-24, REQ-005-41)', () => {
 
   it('el dueño también ve la lista; sin caja abierta responde 409', async () => {
     const owner = await loginAsStaff(world.testApp, 'duena', 'dueno');
-    expect((await world.api('GET', '/shifts/current/entries', owner)).statusCode).toBe(200);
+    const open = await world.api('GET', '/shifts/current/entries', owner);
+    expect(open.statusCode).toBe(200);
+    // Quién abrió, cuándo y con qué fondo: la fila de apertura de la tabla (REQ-005-24).
+    expect(open.json<ShiftEntriesResponse>()).toMatchObject({
+      staffName: 'Ana',
+      openedAt: MONDAY.replace('Z', '.000Z'),
+      opening: { cashUsdMicros: 0, cashVesMicros: 0 },
+    });
     await world.api('POST', '/shifts/current/close', ana, NOTHING_COUNTED);
     const closed = await world.api('GET', '/shifts/current/entries', owner);
     expect(closed.statusCode).toBe(409);

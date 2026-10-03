@@ -1,18 +1,13 @@
-// Movimientos del turno (REQ-005-23, REQ-005-24): todo lo cobrado en la caja abierta, el más
-// reciente arriba, con los totales por grupo y «Anular» para el administrador. Se refresca con
-// el aviso `cash` del canal, así dos pestañas ven lo mismo.
-import {
-  cashMovementSchema,
-  formatMoney,
-  type ShiftEntriesResponse,
-  shiftEntriesResponseSchema,
-} from '@pope/shared';
-import { type SyntheticEvent, useEffect, useState } from 'react';
+// Movimientos del turno (REQ-005-23, REQ-005-24, REQ-005-26): todo lo cobrado en la caja
+// abierta en una tabla como la de SENET, el más reciente arriba, con los ingresos del día y
+// «Anular» para el administrador. La Caja la pide y la refresca con el aviso `cash`.
+import { cashMovementSchema, formatMoney, type ShiftEntriesResponse } from '@pope/shared';
+import { type SyntheticEvent, useState } from 'react';
 
 import { ApiError } from '../api/client.js';
 import { useSession } from '../session.js';
 import { Dialog } from '../ui/Dialog.js';
-import { movementRow } from './movements.js';
+import { type MovementRow, movementRow, openingRow } from './movements.js';
 
 function errorMessage(failure: unknown): string {
   return failure instanceof ApiError ? failure.message : String(failure);
@@ -87,126 +82,184 @@ function VoidDialog({
   );
 }
 
-export function MovementList({
-  shiftId,
-  cashVersion,
-  isAdmin,
+/** Descarga el informe X de la caja abierta (REQ-005-46); el nombre lo pone el nodo. */
+function downloadInformeX(): void {
+  const link = document.createElement('a');
+  link.href = '/shifts/current/report.pdf';
+  link.download = '';
+  document.body.append(link);
+  link.click();
+  link.remove();
+}
+
+function MovementTableRow({
+  row,
+  open,
+  onToggle,
+  onVoid,
 }: {
-  /** La caja abierta, o `null` si está cerrada. */
-  shiftId: string | null;
-  cashVersion: number;
-  isAdmin: boolean;
+  row: MovementRow;
+  open: boolean;
+  onToggle: () => void;
+  onVoid?: () => void;
 }) {
-  const { api } = useSession();
-  const [entries, setEntries] = useState<ShiftEntriesResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <div className="caja-trow-wrap">
+      <button
+        type="button"
+        className="caja-trow"
+        aria-expanded={open}
+        data-voided={row.voided}
+        onClick={onToggle}
+      >
+        <span className="caja-col-time muted num">{row.time}</span>
+        <span className="caja-col-customer">{row.customer}</span>
+        <span className="caja-col-state">
+          <span className="caja-state" data-state={row.state}>
+            {row.state}
+          </span>
+        </span>
+        <span className="caja-col-desc">
+          <span className="muted">{open ? '▾' : '▸'}</span> {row.description}
+        </span>
+        <span className="caja-col-method">{row.methods}</span>
+        <span className="caja-col-total num" data-negative={row.negative}>
+          {row.total}
+          {row.totalBs && <span className="caja-total-bs">{row.totalBs}</span>}
+        </span>
+      </button>
+      {open && (
+        <div className="caja-tdetail">
+          {row.details.map((detail) => (
+            <div key={detail}>{detail}</div>
+          ))}
+          {onVoid && (
+            <button type="button" className="caja-void" onClick={onVoid}>
+              Anular
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * La mitad derecha de la Caja, como en SENET: «Informe X», «Cerrar caja (informe Z)», los
+ * ingresos del día en grande con sus grupos, y la tabla de movimientos con la apertura al
+ * final (REQ-005-24, REQ-005-26, REQ-005-45, REQ-005-46).
+ */
+export function MovementList({
+  entries,
+  error,
+  isAdmin,
+  canClose,
+  onClose,
+}: {
+  /** La caja abierta; `null` si está cerrada, `undefined` mientras se pregunta. */
+  entries: ShiftEntriesResponse | null | undefined;
+  error: string | null;
+  isAdmin: boolean;
+  /** Puede cerrarla: quien la abrió o un administrador (REQ-005-44). */
+  canClose: boolean;
+  onClose: () => void;
+}) {
+  const [openRow, setOpenRow] = useState<string | null>(null);
   const [voiding, setVoiding] = useState<{ saleId: string; what: string } | null>(null);
-
-  useEffect(() => {
-    if (shiftId === null) {
-      setEntries(null);
-      return;
-    }
-    let cancelled = false;
-    api.get('/shifts/current/entries', shiftEntriesResponseSchema).then(
-      (response) => {
-        if (cancelled) return;
-        setEntries(response);
-        setError(null);
-      },
-      (failure: unknown) => {
-        if (!cancelled) setError(errorMessage(failure));
-      },
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [api, shiftId, cashVersion]);
-
   const totals = entries?.totals;
-  const tiles = [
+  const groups = [
     ['Horas de PC', totals?.pc],
     ['Golosinas', totals?.snacks],
     ['Otras ventas', totals?.other],
   ] as const;
 
+  const toggle = (key: string) => {
+    setOpenRow((current) => (current === key ? null : key));
+  };
+
   return (
     <section className="card caja-moves" aria-label="Movimientos del turno">
       <div className="caja-moves-head">
-        <h2 className="detail-title" style={{ margin: 0 }}>
-          Movimientos del turno
-        </h2>
-        <span className="muted" style={{ fontSize: 12 }}>
-          {entries ? `${String(entries.movements.length)} movimientos` : ''}
-        </span>
-      </div>
-      <div className="caja-tiles">
-        {tiles.map(([label, value]) => (
-          <div key={label} className="caja-tile">
-            <span className="muted" style={{ fontSize: 11 }}>
-              {label}
-            </span>
-            <strong className="num">{value === undefined ? '—' : formatMoney(value)}</strong>
+        {entries && (
+          <>
+            <button
+              type="button"
+              className="btn btn-ghost caja-head-btn"
+              onClick={downloadInformeX}
+            >
+              Informe X
+            </button>
+            {canClose && (
+              <button type="button" className="btn caja-head-btn caja-close-z" onClick={onClose}>
+                Cerrar caja (informe Z)
+              </button>
+            )}
+          </>
+        )}
+        <div style={{ flexGrow: 1 }} />
+        <div className="caja-income">
+          <div className="muted" style={{ fontSize: 12 }}>
+            Ingresos del día
           </div>
-        ))}
-        <div className="caja-tile caja-tile-total">
-          <span style={{ fontSize: 11 }}>Total en caja</span>
-          <strong className="num">{totals ? formatMoney(totals.total) : '—'}</strong>
+          <div className="caja-income-total num">{totals ? formatMoney(totals.total) : '—'}</div>
         </div>
       </div>
-      {totals && totals.balance !== 0 && (
-        <span className="muted caja-balance-note num">
-          Pagado con saldo (no entra en la caja): {formatMoney(totals.balance)}
+      <div className="caja-groups muted num">
+        {groups.map(([label, value]) => (
+          <span key={label}>
+            {label} <strong>{value === undefined ? '—' : formatMoney(value)}</strong>
+          </span>
+        ))}
+        <span>
+          Con saldo (fuera de caja){' '}
+          <strong className="caja-groups-balance">
+            {totals ? formatMoney(totals.balance) : '—'}
+          </strong>
         </span>
-      )}
+      </div>
+      <div className="caja-thead" role="row">
+        <span className="caja-col-time">Hora</span>
+        <span className="caja-col-customer">Cliente</span>
+        <span className="caja-col-state">Estado</span>
+        <span className="caja-col-desc">Descripción</span>
+        <span className="caja-col-method">Método</span>
+        <span className="caja-col-total">Total</span>
+      </div>
       <div className="caja-move-list">
-        {shiftId === null && <p className="detail-note caja-empty">La caja está cerrada.</p>}
+        {entries === null && <p className="detail-note caja-empty">La caja está cerrada.</p>}
         {error && (
           <div role="alert" className="alert-error">
             {error}
           </div>
         )}
-        {entries?.movements.length === 0 && (
-          <p className="detail-note caja-empty">Aún no hay cobros en esta caja.</p>
-        )}
         {entries?.movements.map((movement) => {
           const row = movementRow(movement, isAdmin);
+          const key = `${movement.source}-${movement.sourceId}`;
           return (
-            <div
-              key={`${movement.source}-${movement.sourceId}`}
-              className="caja-move"
-              data-voided={row.voided}
-            >
-              <span className="muted num caja-move-time">{row.time}</span>
-              <div style={{ flexGrow: 1, minWidth: 0 }}>
-                <div className="caja-move-what">{row.what}</div>
-                <div className="muted caja-move-detail">{row.detail}</div>
-              </div>
-              <span className={`caja-pill${row.withBalance ? ' caja-pill-balance' : ''}`}>
-                {row.methods}
-              </span>
-              <div className="caja-move-amount num">
-                <div style={{ fontWeight: 700 }}>{row.amount}</div>
-                {row.amountBs && (
-                  <div className="muted" style={{ fontSize: 11 }}>
-                    {row.amountBs}
-                  </div>
-                )}
-              </div>
-              {row.canVoid && (
-                <button
-                  type="button"
-                  className="caja-void"
-                  onClick={() => {
-                    setVoiding({ saleId: movement.sourceId, what: movement.description });
-                  }}
-                >
-                  Anular
-                </button>
-              )}
-            </div>
+            <MovementTableRow
+              key={key}
+              row={row}
+              open={openRow === key}
+              onToggle={() => {
+                toggle(key);
+              }}
+              {...(row.canVoid && {
+                onVoid: () => {
+                  setVoiding({ saleId: movement.sourceId, what: movement.description });
+                },
+              })}
+            />
           );
         })}
+        {entries && (
+          <MovementTableRow
+            row={openingRow(entries.openedAt, entries.staffName, entries.opening)}
+            open={openRow === 'opening'}
+            onToggle={() => {
+              toggle('opening');
+            }}
+          />
+        )}
       </div>
       {voiding && (
         <VoidDialog
