@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-02 · alta y edición de productos con foto en el panel (T18b de la spec 005)
+**Última actualización:** 2026-10-02 · conceptos de venta en el panel (T19 de la spec 005)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T19: Conceptos en el panel** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T19–T24 (con T23b), T05–T07 |
-| **Progreso** | Spec 005: 21 / 31 tareas (parte 1: 4 / 7; parte 2: 17 / 24) |
+| **Siguiente tarea** | **T20: Caja: venta nueva** ([tasks.md](docs/specs/005-inventario-y-caja/tasks.md)). Orden: T20–T24 (con T23b), T05–T07 |
+| **Progreso** | Spec 005: 22 / 31 tareas (parte 1: 4 / 7; parte 2: 18 / 24) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -51,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Aprobada · plan aprobado · faltan sus tareas | — |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
-| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 21 / 31 |
+| [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 3 en borrador | 22 / 31 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
 | [007 Autorrecarga por pago móvil](docs/specs/007-autorrecarga-pago-movil/spec.md) | Borrador (futura) | — |
 | [008 Migración desde SENET](docs/specs/008-migracion-desde-senet/spec.md) | Borrador | — |
@@ -60,6 +60,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-02:** T19 (spec 005): pestaña «Otras ventas» en Inventario con los conceptos sin inventario; el administrador los da de alta y edita. Probado en Chrome con «Impresiones» a 0,10 USD.
 - **2026-10-02:** T18b (spec 005): modal «Nuevo producto» y «Editar» con la foto reducida en el navegador a WebP de 512 px; probado en Chrome (CA-005-08).
 - **2026-10-02:** T18a (spec 005): página Inventario con buscador, estado de cada producto, detalle con sus movimientos y entrada, ajuste y merma; se refresca sola con el aviso `cash`. Probada en Chrome. T18 se divide en dos (T18b: alta y edición con foto).
 - **2026-10-02:** T04 (spec 005): píldora de la tasa en la barra superior (vigente, sin tasa o desactualizada) y diálogo «Tasa del día» para el encargado y el administrador; probado en Chrome con dos pestañas a la vez.
@@ -69,4 +70,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T15 (spec 005): el administrador anula una venta de la caja abierta con motivo: vuelven el stock y el saldo, la caja escribe sus filas negativas con la misma tasa de la venta, y la lista marca la venta anulada.
 - **2026-10-02:** T14 (spec 005): `POST /sales` con productos y conceptos, uno o varios pagos (Bs con la tasa, saldo de la cuenta), baja del stock y registro de caja en una sola transacción; caja abierta obligatoria.
 - **2026-10-02:** T13c (spec 005): tabla `cash_entries` (con los cobros anteriores migrados); recargas, temporales y combos en caja escriben su fila, en Bs con la tasa si el método es de Bs (sin tasa, 409), y emiten sus eventos v2; `GET /shifts/current/entries` y aviso `cash` al panel.
-- **2026-10-02:** T13b (spec 005): versión 2 de `wallet.recharged`, `session.started`, `session.time_added` y `combo.purchased`, con el pago completo (moneda, importe, USD y tasa), por decisión del mantenedor: la auditoría y la nube tendrán lo cobrado de verdad en Bs. El registro de caja pasa a T13c.

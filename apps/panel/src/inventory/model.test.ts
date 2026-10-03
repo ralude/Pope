@@ -2,7 +2,7 @@ import { micros, type Product, type StockMovement } from '@pope/shared';
 import { describe, expect, it } from 'vitest';
 
 import {
-  filterProducts,
+  filterByName,
   formatQuantity,
   initials,
   movementDetail,
@@ -52,10 +52,10 @@ describe('buscador de Inventario', () => {
   const list = [product('Doritos 45 g', 24), product('Pepito', 3), product('Café con leche', 9)];
 
   it('busca sin mayúsculas ni tildes, y vacío muestra todo', () => {
-    expect(filterProducts(list, 'pep').map((p) => p.name)).toEqual(['Pepito']);
-    expect(filterProducts(list, 'CAFE').map((p) => p.name)).toEqual(['Café con leche']);
-    expect(filterProducts(list, '  ')).toHaveLength(3);
-    expect(filterProducts(list, 'zzz')).toEqual([]);
+    expect(filterByName(list, 'pep').map((p) => p.name)).toEqual(['Pepito']);
+    expect(filterByName(list, 'CAFE').map((p) => p.name)).toEqual(['Café con leche']);
+    expect(filterByName(list, '  ')).toHaveLength(3);
+    expect(filterByName(list, 'zzz')).toEqual([]);
   });
 
   it('iniciales para los productos sin foto', () => {

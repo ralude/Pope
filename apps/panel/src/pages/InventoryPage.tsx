@@ -1,6 +1,7 @@
 // Inventario (spec 005, T18): productos con su foto, precio, stock y aviso de bajo mínimo, con
 // un buscador por nombre. A la derecha, el producto elegido con sus últimos movimientos y las
-// acciones de stock. Se refresca solo cuando el nodo avisa de que algo cambió (`cash`).
+// acciones de stock. Se refresca solo cuando el nodo avisa de que algo cambió (`cash`). La
+// pestaña "Otras ventas" lleva los conceptos sin inventario (T19).
 import '../inventory/inventory.css';
 
 import {
@@ -8,6 +9,7 @@ import {
   formatMoney,
   type Product,
   productSchema,
+  type SaleConcept,
   type StockMovement,
   stockMovementSchema,
 } from '@pope/shared';
@@ -15,13 +17,14 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ApiError, listOf } from '../api/client.js';
 import {
-  filterProducts,
+  filterByName,
   formatQuantity,
   movementDetail,
   movementLabel,
   productStatus,
   STATUS_LABEL,
 } from '../inventory/model.js';
+import { ConceptsTab } from '../inventory/ConceptsTab.js';
 import { ProductDialog } from '../inventory/ProductDialog.js';
 import { ProductPhoto } from '../inventory/ProductPhoto.js';
 import { StockDialog, type StockKind } from '../inventory/StockDialog.js';
@@ -47,6 +50,9 @@ export function InventoryPage() {
   const [stockKind, setStockKind] = useState<StockKind | null>(null);
   /** El producto que se edita, o 'new' para el alta. */
   const [editing, setEditing] = useState<Product | 'new' | null>(null);
+  const [tab, setTab] = useState<'products' | 'concepts'>('products');
+  const [editingConcept, setEditingConcept] = useState<SaleConcept | 'new' | null>(null);
+  const isAdmin = staff.role === 'administrador';
 
   // Lista de productos: al entrar y cada vez que el nodo avisa de un cambio en el stock.
   useEffect(() => {
@@ -66,7 +72,7 @@ export function InventoryPage() {
     };
   }, [api, cashVersion]);
 
-  const shown = useMemo(() => filterProducts(products ?? [], query), [products, query]);
+  const shown = useMemo(() => filterByName(products ?? [], query), [products, query]);
   const selected =
     products?.find((p) => p.id === selectedId) ?? (selectedId === null ? shown[0] : undefined);
   const vesRate = rate?.rate?.vesPerUsd;
@@ -91,127 +97,162 @@ export function InventoryPage() {
     <Frame
       title="Inventario"
       tabs={
-        <input
-          type="search"
-          className="input inventory-search"
-          placeholder="Buscar por nombre"
-          aria-label="Buscar producto"
-          value={query}
-          onChange={(event) => {
-            setQuery(event.target.value);
-          }}
-        />
+        <>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {(
+              [
+                ['products', 'Productos'],
+                ['concepts', 'Otras ventas'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className="section-tab"
+                aria-pressed={tab === value}
+                onClick={() => {
+                  setTab(value);
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <input
+            type="search"
+            className="input inventory-search"
+            placeholder="Buscar por nombre"
+            aria-label="Buscar por nombre"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value);
+            }}
+          />
+        </>
       }
       actions={
-        staff.role === 'administrador' && (
+        isAdmin && (
           <button
             type="button"
             className="btn btn-primary"
             onClick={() => {
-              setEditing('new');
+              if (tab === 'products') setEditing('new');
+              else setEditingConcept('new');
             }}
           >
-            Nuevo producto
+            {tab === 'products' ? 'Nuevo producto' : 'Nuevo concepto'}
           </button>
         )
       }
     >
-      <div className="inventory-layout">
-        <div className="inventory-list">
-          {loadError && (
-            <div role="alert" className="alert-error">
-              {loadError}
-            </div>
-          )}
-          {products?.length === 0 && (
-            <p className="detail-note" style={{ margin: 0 }}>
-              Aún no hay productos.
-            </p>
-          )}
-          {products && products.length > 0 && shown.length === 0 && (
-            <p className="detail-note" style={{ margin: 0 }}>
-              Ningún producto se llama así.
-            </p>
-          )}
-          {shown.length > 0 && (
-            <table className="inventory-table">
-              <thead>
-                <tr>
-                  <th style={{ width: 52 }}>
-                    <span className="sr-only">Foto</span>
-                  </th>
-                  <th>Producto</th>
-                  <th className="num-cell">Precio</th>
-                  <th className="num-cell">Stock</th>
-                  <th className="num-cell">Mínimo</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shown.map((product) => {
-                  const status = productStatus(product);
-                  return (
-                    <tr
-                      key={product.id}
-                      aria-selected={product.id === selected?.id}
-                      onClick={() => {
-                        setSelectedId(product.id);
-                      }}
-                    >
-                      <td>
-                        <ProductPhoto product={product} size={36} />
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="inventory-name"
-                          onClick={() => {
-                            setSelectedId(product.id);
-                          }}
-                        >
-                          {product.name}
-                        </button>
-                      </td>
-                      <td className="num-cell num">
-                        <div>{formatMoney(product.priceMicros)}</div>
-                        {vesRate !== undefined && (
-                          <div className="muted" style={{ fontSize: 11 }}>
-                            {formatBolivares(product.priceMicros, vesRate)}
-                          </div>
-                        )}
-                      </td>
-                      <td className="num-cell num inventory-stock">{product.stock}</td>
-                      <td className="num-cell num muted">{product.minStock ?? '—'}</td>
-                      <td>
-                        <span className={`stock-pill stock-${status}`}>{STATUS_LABEL[status]}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+      {tab === 'concepts' ? (
+        <ConceptsTab
+          query={query}
+          isAdmin={isAdmin}
+          vesRate={vesRate}
+          editing={editingConcept}
+          onEdit={setEditingConcept}
+        />
+      ) : (
+        <div className="inventory-layout">
+          <div className="inventory-list">
+            {loadError && (
+              <div role="alert" className="alert-error">
+                {loadError}
+              </div>
+            )}
+            {products?.length === 0 && (
+              <p className="detail-note" style={{ margin: 0 }}>
+                Aún no hay productos.
+              </p>
+            )}
+            {products && products.length > 0 && shown.length === 0 && (
+              <p className="detail-note" style={{ margin: 0 }}>
+                Ningún producto se llama así.
+              </p>
+            )}
+            {shown.length > 0 && (
+              <table className="inventory-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 52 }}>
+                      <span className="sr-only">Foto</span>
+                    </th>
+                    <th>Producto</th>
+                    <th className="num-cell">Precio</th>
+                    <th className="num-cell">Stock</th>
+                    <th className="num-cell">Mínimo</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shown.map((product) => {
+                    const status = productStatus(product);
+                    return (
+                      <tr
+                        key={product.id}
+                        aria-selected={product.id === selected?.id}
+                        onClick={() => {
+                          setSelectedId(product.id);
+                        }}
+                      >
+                        <td>
+                          <ProductPhoto product={product} size={36} />
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="inventory-name"
+                            onClick={() => {
+                              setSelectedId(product.id);
+                            }}
+                          >
+                            {product.name}
+                          </button>
+                        </td>
+                        <td className="num-cell num">
+                          <div>{formatMoney(product.priceMicros)}</div>
+                          {vesRate !== undefined && (
+                            <div className="muted" style={{ fontSize: 11 }}>
+                              {formatBolivares(product.priceMicros, vesRate)}
+                            </div>
+                          )}
+                        </td>
+                        <td className="num-cell num inventory-stock">{product.stock}</td>
+                        <td className="num-cell num muted">{product.minStock ?? '—'}</td>
+                        <td>
+                          <span className={`stock-pill stock-${status}`}>
+                            {STATUS_LABEL[status]}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+          <aside className="side-panel" aria-label="Producto seleccionado">
+            {selected ? (
+              <ProductDetail
+                key={selected.id}
+                product={selected}
+                cashVersion={cashVersion}
+                vesRate={vesRate}
+                role={staff.role}
+                onStock={setStockKind}
+                onEdit={() => {
+                  setEditing(selected);
+                }}
+              />
+            ) : (
+              <p className="detail-note" style={{ margin: 0 }}>
+                Elige un producto para ver su stock y sus movimientos.
+              </p>
+            )}
+          </aside>
         </div>
-        <aside className="side-panel" aria-label="Producto seleccionado">
-          {selected ? (
-            <ProductDetail
-              key={selected.id}
-              product={selected}
-              cashVersion={cashVersion}
-              vesRate={vesRate}
-              role={staff.role}
-              onStock={setStockKind}
-              onEdit={() => {
-                setEditing(selected);
-              }}
-            />
-          ) : (
-            <p className="detail-note" style={{ margin: 0 }}>
-              Elige un producto para ver su stock y sus movimientos.
-            </p>
-          )}
-        </aside>
-      </div>
+      )}
       {editing && (
         <ProductDialog
           product={editing === 'new' ? null : editing}

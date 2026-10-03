@@ -34,10 +34,10 @@ function normalize(text: string): string {
     .trim();
 }
 
-/** Los productos cuyo nombre contiene lo buscado; sin búsqueda, todos. */
-export function filterProducts(products: readonly Product[], query: string): Product[] {
+/** Los productos o conceptos cuyo nombre contiene lo buscado; sin búsqueda, todos. */
+export function filterByName<T extends { name: string }>(items: readonly T[], query: string): T[] {
   const wanted = normalize(query);
-  return wanted === '' ? [...products] : products.filter((p) => normalize(p.name).includes(wanted));
+  return wanted === '' ? [...items] : items.filter((item) => normalize(item.name).includes(wanted));
 }
 
 /** Iniciales para cuando el producto no tiene foto: «Doritos 45 g» → «D4». */

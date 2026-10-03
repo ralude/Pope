@@ -192,11 +192,12 @@ parte 1.
   - **Commit:** `feat(panel): da de alta y edita productos con foto`
   - **Decidido al implementarla:** `ProductDialog` (alta y edición, solo administrador; el encargado ve «Editar» desactivado): foto, nombre, precio con su Bs, stock mínimo opcional («Avisa al llegar a esta cantidad»), cantidad que llegó (solo al dar de alta; vacía es 0) y «Activo». La foto se reduce en el navegador (`shrinkPhoto`: `createImageBitmap` y `<canvas>`, lado mayor de 512 px, WebP probando calidades 0,85 a 0,4 hasta caber en 512 KB) y se sube después de guardar el producto con `ApiClient.upload` (PUT con el archivo tal cual). Si la foto falla tras el alta, el modal se queda con el producto ya guardado y dice que vuelvas a guardar para reintentar solo la foto. `ProductPhoto` pasa a su propio archivo. Verificado en Chrome (CA-005-08): «Chocolate Savoy» a 1,50 USD con 24 que llegaron y una foto JPG de 1,35 MB quedó en la lista con su foto y 24 disponibles; en el nodo, WebP de 512×320 y 16 KB; «Editar» cambió el precio a 1,75 conservando la foto.
 
-- [ ] **T19: Conceptos en el panel**
+- [x] **T19: Conceptos en el panel**
   - **Cubre:** REQ-005-05
   - **Hacer:** pestaña de conceptos en Inventario (alta y edición para el administrador).
   - **Verificar:** a mano, crear "Impresiones" a 0,10 USD.
   - **Commit:** `feat(panel): gestiona los conceptos de venta`
+  - **Decidido al implementarla:** pestañas «Productos | Otras ventas» en Inventario, junto al buscador, que filtra también los conceptos (`filterByName`, antes `filterProducts`). `ConceptsTab`: tabla con nombre, precio por unidad sugerido con su Bs y Activo/Inactivo, y la nota del diseño. El diseño no dibuja el modal de los conceptos: `ConceptDialog` sigue al de productos con lo que admite el contrato (nombre y precio al crear; además «Activo» al editar). Solo el administrador ve «Nuevo concepto» y «Editar». Verificado en Chrome: «Impresiones» a 0,10 USD (≈ 4,05 Bs) quedó en la lista, activo.
 
 - [ ] **T20: Caja: venta nueva**
   - **Cubre:** REQ-005-20 a REQ-005-22, REQ-005-25
