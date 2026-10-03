@@ -615,3 +615,9 @@ a {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Equivalente en Bs debajo de un importe en USD (REQ-005-30). */
+.bolivares {
+  display: block;
+  font-weight: 400;
+}

@@ -18,6 +18,7 @@ import { type SyntheticEvent, useEffect, useState } from 'react';
 import { ApiError, listOf } from '../api/client.js';
 import { useSession } from '../session.js';
 import { useShift } from '../shift.js';
+import { Bolivares } from '../ui/Bolivares.js';
 import { PaymentMethodField, ShiftRequirement } from '../ui/charge.js';
 import { Dialog } from '../ui/Dialog.js';
 
@@ -119,8 +120,9 @@ export function ComboSaleDialog({
                     {formatMoney(c.ratePerHourMicros, { suffix: '/h' })}
                   </span>
                 </span>
-                <strong className="num" style={{ fontSize: 18 }}>
+                <strong className="num" style={{ fontSize: 18, textAlign: 'right' }}>
                   {formatMoney(c.priceMicros)}
+                  <Bolivares amount={c.priceMicros} />
                 </strong>
               </label>
             ))}
@@ -148,10 +150,17 @@ export function ComboSaleDialog({
           {via === 'balance' ? (
             <>
               <div className="summary-box">
-                <span className="muted">Saldo: {formatMoney(balances.moneyMicros)}</span>
+                <span className="muted">
+                  Saldo: {formatMoney(balances.moneyMicros)}
+                  <Bolivares amount={balances.moneyMicros} size={13} />
+                </span>
                 {combo && enough && (
                   <strong>
                     Le quedan: {formatMoney(micros(balances.moneyMicros - combo.priceMicros))}
+                    <Bolivares
+                      amount={micros(balances.moneyMicros - combo.priceMicros)}
+                      size={13}
+                    />
                   </strong>
                 )}
               </div>

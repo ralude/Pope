@@ -35,6 +35,7 @@ import {
 } from '../customers/model.js';
 import { RechargeDialog } from '../customers/RechargeDialog.js';
 import { useSession, useStaff } from '../session.js';
+import { Bolivares } from '../ui/Bolivares.js';
 import { Dialog } from '../ui/Dialog.js';
 import { Frame } from '../ui/Frame.js';
 
@@ -220,7 +221,10 @@ export function CustomersPage() {
                     <td className="num" style={{ color: 'var(--soft)' }}>
                       {customer.phone ? formatPhone(customer.phone) : '—'}
                     </td>
-                    <td className="num col-num">{formatMoney(customer.balances.moneyMicros)}</td>
+                    <td className="num col-num">
+                      {formatMoney(customer.balances.moneyMicros)}
+                      <Bolivares amount={customer.balances.moneyMicros} size={11} />
+                    </td>
                     <td className="num col-num">
                       {formatDuration(seconds(customer.balances.comboSeconds))}
                     </td>
@@ -340,6 +344,7 @@ function CustomerDetail({
         <div className="balance-card">
           <span className="detail-label">Saldo</span>
           <span className="num balance-value">{formatMoney(customer.balances.moneyMicros)}</span>
+          <Bolivares amount={customer.balances.moneyMicros} size={13} />
         </div>
         <div className="balance-card">
           <span className="detail-label">Horas de combo</span>

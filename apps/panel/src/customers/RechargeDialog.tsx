@@ -14,6 +14,7 @@ import { type SyntheticEvent, useState } from 'react';
 import { ApiError } from '../api/client.js';
 import { useSession } from '../session.js';
 import { useShift } from '../shift.js';
+import { Bolivares } from '../ui/Bolivares.js';
 import { PaymentMethodField, ShiftRequirement } from '../ui/charge.js';
 import { Dialog } from '../ui/Dialog.js';
 import { formatUsdInput, parseUsd } from '../ui/money.js';
@@ -78,8 +79,10 @@ export function RechargeDialog({
                 setText(event.target.value);
               }}
             />
-            {amount === null && (
+            {amount === null ? (
               <span className="field-error">Escribe un importe mayor que cero, p. ej. 5,00.</span>
+            ) : (
+              <Bolivares amount={amount} size={13} />
             )}
             <div className="chips">
               {QUICK_AMOUNTS.map((quick) => (
@@ -99,10 +102,16 @@ export function RechargeDialog({
           </div>
           <PaymentMethodField name="pago-recarga" value={method} onChange={setMethod} />
           <div className="summary-box">
-            <span className="muted">Saldo: {formatMoney(balances.moneyMicros)}</span>
+            <span className="muted">
+              Saldo: {formatMoney(balances.moneyMicros)}
+              <Bolivares amount={balances.moneyMicros} size={13} />
+            </span>
             <strong>
               Tras recargar:{' '}
               {amount === null ? '—' : formatMoney(micros(balances.moneyMicros + amount))}
+              {amount !== null && (
+                <Bolivares amount={micros(balances.moneyMicros + amount)} size={13} />
+              )}
             </strong>
           </div>
           <span className="field-hint">

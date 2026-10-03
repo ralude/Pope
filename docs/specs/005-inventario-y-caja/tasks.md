@@ -41,11 +41,12 @@ antes de seguir.
   - **Commit:** `feat(panel): muestra y permite cambiar la tasa de cambio`
   - **Decidido al implementarla:** píldora `RatePill` junto a la hora de la barra superior: «Tasa · 1 USD = 40,50 Bs», o en ámbar «Sin tasa» y «Tasa del lunes» (día de la semana de la fecha valor); el texto de ayuda dice la fuente, quién la guardó y cuándo, en hora de Caracas. Para el encargado y el administrador abre «Tasa del día» (la vigente, el campo «Bs por 1 USD» con vista previa y «Guardar»); para el dueño está desactivada. La lectura del valor (`parseVesRate`) admite coma o punto y hasta 6 decimales, como `parseUsd`, y no admite separador de miles. La tasa llega por el canal del panel (`usePcMapFeed().rate`) y la comparten todas las pantallas. Verificado a mano en Chrome: con dos pestañas abiertas, guardar 40,50 cambió la píldora en las dos al momento, y quedó el evento `exchange_rate.set` con el administrador como actor y fuente `manual`. Al probarlo salieron dos fallos que se arreglan en commits aparte: los diálogos de la barra superior quedaban tapados por la sección (`fix(panel)`: `z-index` en `.dialog-backdrop`) y Vite escuchaba solo en IPv6 y no reenviaba la API de la spec 005 (`fix(panel)`).
 
-- [ ] **T05: Bs en el mapa, Clientes y cobros**
+- [x] **T05: Bs en el mapa, Clientes y cobros**
   - **Cubre:** REQ-005-30, REQ-001-13
   - **Hacer:** equivalente en Bs, debajo del importe en USD, en el detalle de la PC del mapa, Clientes, Recargar saldo y Vender combo.
   - **Verificar:** a mano, con tasa y sin tasa.
   - **Commit:** `feat(panel): muestra el equivalente en Bs en el mapa y los cobros`
+  - **Decidido al implementarla:** componente `ui/Bolivares` («≈ 1.742,72 Bs», línea gris debajo del importe, como en el diseño), que toma la tasa del canal del panel y no pinta nada sin tasa. Va en el detalle de la PC del mapa (saldo, cobrado de una temporal y tarifa con «/h»), en Clientes (saldo en la tabla y en el detalle), en Recargar saldo (el importe escrito, el saldo y «Tras recargar») y en Vender combo (el precio de cada combo, el saldo y «Le quedan»). De paso se corrigió en un commit aparte el «≈» repetido del Bs del otro ingreso de la Caja (T27). Verificado en Chrome con la tasa de desarrollo (871,36 Bs por USD): Clientes, Recargar saldo a juan, Vender combo a juan y el detalle de la PC 01 con sim01 conectado por el simulador (saldo 0,96 USD ≈ 839,41 Bs y tarifa 2,00 USD/h ≈ 1.742,72 Bs/h). **Sin tasa no se pudo probar a mano**: la base de desarrollo ya tiene una y las tasas no se borran; que no se pinte nada sin tasa es la misma condición que ya usan Inventario y la Caja.
 
 - [ ] **T06: Bs en tarifas, combos y sesiones temporales**
   - **Cubre:** REQ-005-30, REQ-001-13

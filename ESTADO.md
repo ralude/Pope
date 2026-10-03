@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · ADR-0016 aceptado (el servidor del local es un i3-2120)
+**Última actualización:** 2026-10-03 · T05 de la spec 005 (Bs en el mapa, Clientes y cobros)
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) desde T05; parte 2 (inventario, ventas y caja) verificada |
-| **Siguiente tarea** | **T05: Bs en el mapa, Clientes y cobros** (parte 1 de la spec 005); después T06 y T07 |
-| **Progreso** | Spec 005: 39 / 42 tareas (parte 1: 4 / 7; parte 2: 35 / 35) |
+| **Siguiente tarea** | **T06: Bs en tarifas, combos y sesiones temporales** (parte 1 de la spec 005); después T07 |
+| **Progreso** | Spec 005: 40 / 42 tareas (parte 1: 4 / 7; parte 2: 35 / 35) |
 | **Bloqueos** | Ninguno |
 
 ## Cómo retomar
@@ -61,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** T05 (spec 005): el equivalente en Bs, debajo del importe, en el detalle de la PC del mapa, Clientes, Recargar saldo y Vender combo; probado en Chrome con tasa.
 - **2026-10-03:** ADR-0016 aceptado: el servidor del local es un i3-2120 con 8 GB, casi siempre encendido (no el i5 de ADR-0011, que queda reemplazado). Se mantiene el presupuesto; las mediciones pendientes se hacen en ese PC, con una prueba larga de memoria.
 - **2026-10-03:** T24 (spec 005) aprobada por el mantenedor: la parte 2 (inventario, ventas y caja) queda verificada. Siguen T05–T07 de la parte 1.
 - **2026-10-03:** T24 (spec 005) rehecha tras los cambios del día: los 10 criterios de la parte 2 (con el CA-005-07 nuevo y los CA-005-12 y CA-005-13) tienen test automático y prueba a mano; falta la revisión del mantenedor.
@@ -70,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T28b (spec 005): el nodo deja los conceptos; la migración 0022 convierte sus líneas en otros ingresos y borra la tabla.
 - **2026-10-03:** T28a (spec 005): el panel deja de mostrar los conceptos (Inventario sin la pestaña «Otras ventas»).
 - **2026-10-03:** T27 (spec 005): la Caja cobra otros ingresos con importe y comentario, como en el diseño; probado en Chrome (CA-005-07).
-- **2026-10-03:** T26 (spec 005): el nodo vende otros ingresos (importe y comentario), los guarda con su comentario, emite `sale.recorded` v2 y los junta en «Otros ingresos» en el reporte.

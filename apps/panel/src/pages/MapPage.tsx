@@ -44,6 +44,7 @@ import { OrganizeGrid } from '../map/OrganizeGrid.js';
 import { useSession, useStaff } from '../session.js';
 import { lossText } from '../temporary/model.js';
 import { TemporaryDialog, type TemporaryTarget } from '../temporary/TemporaryDialog.js';
+import { Bolivares } from '../ui/Bolivares.js';
 import { Dialog } from '../ui/Dialog.js';
 import { Frame } from '../ui/Frame.js';
 
@@ -443,11 +444,17 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
             {session.kind === 'account' ? (
               <AccountBalance pc={pc} now={now} />
             ) : (
-              <Field label="Cobrado">{formatMoney(session.amountMicros)}</Field>
+              <Field label="Cobrado">
+                {formatMoney(session.amountMicros)}
+                <Bolivares amount={session.amountMicros} />
+              </Field>
             )}
             <Field label="Desde">{formatLocalTime(new Date(session.startedAt))}</Field>
             <Field label="Abierta por">{session.openedBy}</Field>
-            <Field label="Tarifa">{formatMoney(session.rateMicrosPerHour, { suffix: '/h' })}</Field>
+            <Field label="Tarifa">
+              {formatMoney(session.rateMicrosPerHour, { suffix: '/h' })}
+              <Bolivares amount={session.rateMicrosPerHour} suffix="/h" />
+            </Field>
           </div>
           {!pc.connected && (
             <p className="detail-note" style={{ margin: 0 }}>
@@ -598,6 +605,7 @@ function AccountBalance({ pc, now }: { pc: PcMapItem; now: Date }) {
   return (
     <Field label="Saldo">
       {formatMoney(live.moneyMicros)}
+      <Bolivares amount={live.moneyMicros} />
       {live.comboSeconds > 0 && (
         <span className="muted" style={{ display: 'block', fontSize: 13 }}>
           + {formatDuration(live.comboSeconds)} de combo
