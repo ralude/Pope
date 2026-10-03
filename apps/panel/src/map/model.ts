@@ -3,6 +3,8 @@
 import {
   type AccountBalances,
   applyCheckpoint,
+  formatLocalTime,
+  type PausesUsed,
   type PcMapItem,
   type PcMapSession,
   PC_MAP_COLUMNS,
@@ -41,6 +43,32 @@ export function onHold(session: PcMapSession): boolean {
 /** Segundos de pausa que quedan ahora (REQ-002-14). */
 export function pauseLeft(session: PcMapSession, now: Date): number {
   return session.pause ? pauseSecondsLeft(new Date(session.pause.maxUntil), now) : 0;
+}
+
+/**
+ * La pausa en el detalle de la PC (REQ-002-13, CA-002-08): «En pausa desde las 18:29 ·
+ * quedan 12 min»; si ya cobra, «… · venció a las 18:44».
+ */
+export function pauseLine(session: PcMapSession, now: Date): string {
+  const pause = session.pause;
+  if (!pause) return '';
+  const since = `En pausa desde las ${formatLocalTime(new Date(pause.startedAt))}`;
+  return pause.billing
+    ? `${since} · venció a las ${formatLocalTime(new Date(pause.maxUntil))}`
+    : `${since} · quedan ${pauseMinutes(pauseLeft(session, now))}`;
+}
+
+/**
+ * Pausas usadas, con los límites del local si se conocen: «Pausas usadas: 1 de 3 en la
+ * sesión · 2 de 5 hoy» (REQ-002-21, REQ-002-24).
+ */
+export function pausesUsedLine(
+  used: PausesUsed,
+  limits: { perSession: number; perDay: number } | null,
+): string {
+  const of = (n: number, limit: number | undefined) =>
+    limit === undefined ? String(n) : `${String(n)} de ${String(limit)}`;
+  return `Pausas usadas: ${of(used.inSession, limits?.perSession)} en la sesión · ${of(used.today, limits?.perDay)} hoy`;
 }
 
 /** Minutos de pausa para la baldosa y el detalle, redondeando hacia arriba: `12 min`. */

@@ -11,9 +11,11 @@ import {
   formatMoney,
   type PcMap,
   type PcMapItem,
+  type PcMapSession,
   seconds,
+  settingsSchema,
 } from '@pope/shared';
-import { type ReactNode, type SyntheticEvent, useCallback, useState } from 'react';
+import { type ReactNode, type SyntheticEvent, useCallback, useEffect, useState } from 'react';
 
 import { ApiError } from '../api/client.js';
 import { ComboSaleDialog } from '../customers/ComboSaleDialog.js';
@@ -35,7 +37,9 @@ import {
   onHold,
   organizeRows,
   pauseLeft,
+  pauseLine,
   pauseMinutes,
+  pausesUsedLine,
   placePcs,
   type TileKind,
   tileKind,
@@ -455,7 +459,7 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
           <Field label={session.kind === 'account' ? 'Cliente' : 'Sesión temporal'}>
             <span style={{ fontSize: 18, fontWeight: 700 }}>{session.who}</span>
           </Field>
-          <Field label="Tiempo restante">
+          <Field label={onHold(session) ? 'Tiempo restante · detenido' : 'Tiempo restante'}>
             <span className="detail-time">{formatDuration(seconds(remaining))}</span>
           </Field>
           <div className="detail-grid">
@@ -474,6 +478,7 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
               <Bolivares amount={session.rateMicrosPerHour} suffix="/h" />
             </Field>
           </div>
+          {session.pause && <PauseBox session={session} now={now} />}
           {!pc.connected && (
             <p className="detail-note" style={{ margin: 0 }}>
               La PC no está conectada al nodo. La sesión sigue abierta y el tiempo no corre mientras
@@ -497,8 +502,10 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
       {canOperate && <PcControls />}
 
       <div style={{ flexGrow: 1 }} />
+      {session?.pause && canOperate && <ResumeButton sessionId={session.sessionId} />}
       {session?.customerId && canOperate && (
         <AccountCharges
+          paused={session.pause !== null}
           customerId={session.customerId}
           username={session.who}
           balances={liveAccount(session, pc.connected, now)}
@@ -572,6 +579,7 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
  * REQ-001-84, REQ-001-85). El saldo que se muestra es el de la sesión en vivo.
  */
 function AccountCharges({
+  paused,
   customerId,
   username,
   balances,
@@ -579,6 +587,8 @@ function AccountCharges({
   onStart,
   onDone,
 }: {
+  /** En pausa, «Reanudar» es el botón principal y no se ofrece vender combos (diseño, T11). */
+  paused: boolean;
   customerId: string;
   username: string;
   balances: CustomerBalances;
@@ -591,28 +601,114 @@ function AccountCharges({
     <>
       <button
         type="button"
-        className="btn btn-primary btn-lg"
+        className={`btn ${paused ? 'btn-ghost' : 'btn-primary'} btn-lg`}
         onClick={() => {
           onStart('recharge');
         }}
       >
         Recargar saldo
       </button>
-      <button
-        type="button"
-        className="btn btn-ghost btn-lg"
-        onClick={() => {
-          onStart('combo');
-        }}
-      >
-        Vender combo
-      </button>
+      {!paused && (
+        <button
+          type="button"
+          className="btn btn-ghost btn-lg"
+          onClick={() => {
+            onStart('combo');
+          }}
+        >
+          Vender combo
+        </button>
+      )}
       {what === 'recharge' && (
         <RechargeDialog customer={customer} balances={balances} onClose={onDone} onDone={onDone} />
       )}
       {what === 'combo' && (
         <ComboSaleDialog customer={customer} balances={balances} onClose={onDone} onDone={onDone} />
       )}
+    </>
+  );
+}
+
+/**
+ * La pausa de la sesión (REQ-002-13, CA-002-08): desde cuándo, cuánto queda y las pausas
+ * usadas, con los límites del local. Si ya cobra, lo dice en ámbar (CA-002-05).
+ */
+function PauseBox({ session, now }: { session: PcMapSession; now: Date }) {
+  const { api } = useSession();
+  const [limits, setLimits] = useState<{ perSession: number; perDay: number } | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    // Sin los ajustes, la línea sale sin «de N»: no hace falta avisar.
+    api.get('/settings', settingsSchema).then(
+      (loaded) => {
+        if (!cancelled) {
+          setLimits({ perSession: loaded.pauseMaxPerSession, perDay: loaded.pauseMaxPerDay });
+        }
+      },
+      () => undefined,
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [api]);
+  return (
+    <div className={`pause-box${session.pause?.billing ? ' pause-box-billing' : ''}`}>
+      <strong className="num pause-line">{pauseLine(session, now)}</strong>
+      {session.pausesUsed && (
+        <span className="num" style={{ color: 'var(--soft)', fontSize: 13 }}>
+          {pausesUsedLine(session.pausesUsed, limits)}
+        </span>
+      )}
+      {session.pause?.billing && (
+        <span className="pause-billing-note">
+          Ya cobra: el tiempo corre aunque la PC siga en pausa.
+        </span>
+      )}
+    </div>
+  );
+}
+
+/** Quita la pausa desde el panel (REQ-002-13): la sesión vuelve a cobrar y la PC sale de la pausa. */
+function ResumeButton({ sessionId }: { sessionId: string }) {
+  const { api } = useSession();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const resume = () => {
+    setBusy(true);
+    setError(null);
+    api.send('POST', `/sessions/${sessionId}/resume`).then(
+      () => {
+        setBusy(false);
+      },
+      (failure: unknown) => {
+        setBusy(false);
+        setError(failure instanceof ApiError ? failure.message : String(failure));
+      },
+    );
+  };
+  return (
+    <>
+      {error && (
+        <div role="alert" className="alert-error">
+          {error}
+        </div>
+      )}
+      <button type="button" className="btn btn-primary btn-lg" disabled={busy} onClick={resume}>
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 20 20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M6 4.5v11l9-5.5z" />
+        </svg>
+        {busy ? 'Reanudando…' : 'Reanudar'}
+      </button>
     </>
   );
 }

@@ -272,3 +272,29 @@
 .pc-controls-grid .btn:last-child {
   grid-column: 1 / -1;
 }
+
+/* La pausa en el detalle de la PC (T13; diseño aprobado, T11). */
+.pause-box {
+  padding: 12px 14px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pause-box-billing {
+  border-color: var(--amber-bar);
+}
+
+.pause-line {
+  font-size: 15px;
+  color: #ebd5ff;
+}
+
+.pause-billing-note {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--amber-bar);
+}

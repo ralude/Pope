@@ -127,11 +127,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
   - **Commit:** `feat(panel): muestra las PCs en pausa en el mapa`
   - **Decidido al implementarla:** en `map/model.ts`, `onHold` (pausa que no cobra), `pauseLeft`, `pauseMinutes` (minutos hacia arriba: «12 min»), `tileSub` (lo que va bajo la baldosa) e `isEnding`: en una pausa que no cobra no se marca la raya roja, porque el tiempo está detenido; si ya cobra, sí. La leyenda cuenta `paused` y aparte `pauseBilling`. La insignia del detalle ya sale morada (con borde ámbar si cobra); el contenido del detalle es T13. Verificado en Chrome con dos PCs pausadas por un script que habla el protocolo (el simulador aprende a pausar en T18): PC 02 morada con «14 min», PC 03 vencida con borde ámbar y «1:29», leyenda «En pausa 2» y «En pausa, ya cobra 1», ocupación 2/10.
 
-- [ ] **T13: Detalle de una PC en pausa**
+- [x] **T13: Detalle de una PC en pausa**
   - **Cubre:** REQ-002-13, CA-002-08
   - **Hacer:** en el detalle de la PC: "En pausa desde 18:05 · quedan 12 min", las pausas usadas en la sesión y hoy, y los botones «Reanudar» (`POST /sessions/:id/resume`) y «Cerrar sesión».
   - **Verificar:** CA-002-08 a mano en Chrome: la PC en pausa en morado con su tiempo, reanudarla desde el detalle y cerrar otra.
   - **Commit:** `feat(panel): reanuda o cierra una sesión en pausa`
+  - **Decidido al implementarla:** como en el lienzo: «Tiempo restante · detenido», el recuadro de la pausa (`pauseLine`, `pausesUsedLine` en `map/model.ts`, con test) y, si ya cobra, la línea ámbar. Los límites («de 3», «de 5») salen de `GET /settings`; si falla, la línea queda sin ellos. «Reanudar» es el botón principal; «Recargar saldo» pasa a secundario y no se ofrece «Vender combo». En una ventana de 772 px de alto el detalle necesita desplazarse; en la pantalla de 1920×1080 del servidor cabe. Verificado en Chrome (CA-002-08) con dos PCs pausadas por script: el recuadro con «… · quedan 11 min» y «Pausas usadas: 1 de 3 en la sesión · 1 de 5 hoy»; la vencida con «venció a las 12:43» y la línea ámbar; «Reanudar» devolvió la PC 02 a «Con cuenta» y a la PC le llegó el `state` sin pausa (`staff_resumed`, con el administrador como actor), y «Cerrar sesión» liberó la PC 03 (su pausa terminó como `session_closed`).
 
 ## Fase 4: Shell (`apps/shell-ui`)
 

@@ -13,7 +13,9 @@ import {
   moveTo,
   neighborCell,
   organizeRows,
+  pauseLine,
   pauseMinutes,
+  pausesUsedLine,
   tileSub,
   parseCellId,
   placePcs,
@@ -245,5 +247,38 @@ describe('PCs en pausa en el mapa (T12, REQ-002-14, CA-002-05, CA-002-08)', () =
       at,
     );
     expect(legend).toMatchObject({ paused: 2, pauseBilling: 1, occupied: 2, total: 3 });
+  });
+});
+
+describe('detalle de una PC en pausa (T13, REQ-002-13, CA-002-08)', () => {
+  const pausedSession = (billing: boolean) =>
+    session({
+      pause: {
+        // 18:29 en Caracas; la pausa dura hasta las 18:44.
+        startedAt: '2026-09-28T22:29:00.000Z',
+        maxUntil: '2026-09-28T22:44:00.000Z',
+        billing,
+      },
+    });
+
+  it('dice desde cuándo está en pausa y cuánto le queda, en hora del local', () => {
+    expect(pauseLine(pausedSession(false), new Date('2026-09-28T22:32:00.000Z'))).toBe(
+      'En pausa desde las 18:29 · quedan 12 min',
+    );
+  });
+
+  it('si ya cobra, dice a qué hora venció', () => {
+    expect(pauseLine(pausedSession(true), new Date('2026-09-28T22:50:00.000Z'))).toBe(
+      'En pausa desde las 18:29 · venció a las 18:44',
+    );
+    expect(pauseLine(session(), new Date())).toBe('');
+  });
+
+  it('las pausas usadas, con los límites del local si se conocen', () => {
+    const used = { inSession: 1, today: 2 };
+    expect(pausesUsedLine(used, { perSession: 3, perDay: 5 })).toBe(
+      'Pausas usadas: 1 de 3 en la sesión · 2 de 5 hoy',
+    );
+    expect(pausesUsedLine(used, null)).toBe('Pausas usadas: 1 en la sesión · 2 hoy');
   });
 });
