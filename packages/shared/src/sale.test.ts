@@ -15,7 +15,7 @@ import {
 const id = (n: number) => `0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a${n.toString(16).padStart(2, '0')}`;
 
 const DORITOS = { kind: 'product', productId: id(1), quantity: 2 };
-const IMPRESIONES = { kind: 'concept', conceptId: id(2), quantity: 12, unitPriceMicros: usd(0.1) };
+const IMPRESIONES = { kind: 'other', usdMicros: usd(1.2), comment: '12 impresiones' };
 const CASH = { method: 'cash_usd', usdMicros: usd(4.2) };
 
 describe('venta (REQ-005-20, REQ-005-21)', () => {
@@ -23,7 +23,7 @@ describe('venta (REQ-005-20, REQ-005-21)', () => {
     saleRequestSchema.safeParse({ lines: [DORITOS], payments: [CASH], customerId: null, ...body })
       .success;
 
-  it('lleva productos y conceptos, y uno o varios pagos', () => {
+  it('lleva productos y otros ingresos, y uno o varios pagos', () => {
     expect(valid({ lines: [DORITOS, IMPRESIONES] })).toBe(true);
     expect(
       valid({
@@ -40,11 +40,15 @@ describe('venta (REQ-005-20, REQ-005-21)', () => {
     expect(valid({ payments: [] })).toBe(false);
   });
 
-  it('cantidades enteras y positivas; el concepto lleva su precio por unidad', () => {
+  it('cantidades enteras y positivas; ya no admite conceptos (REQ-005-05)', () => {
     expect(valid({ lines: [{ ...DORITOS, quantity: 0 }] })).toBe(false);
     expect(valid({ lines: [{ ...DORITOS, quantity: 1.5 }] })).toBe(false);
-    expect(valid({ lines: [{ ...IMPRESIONES, unitPriceMicros: 0 }] })).toBe(false);
-    expect(valid({ lines: [{ kind: 'concept', conceptId: id(2), quantity: 12 }] })).toBe(false);
+    expect(valid({ lines: [{ ...IMPRESIONES, usdMicros: 0 }] })).toBe(false);
+    expect(
+      valid({
+        lines: [{ kind: 'concept', conceptId: id(2), quantity: 12, unitPriceMicros: usd(0.1) }],
+      }),
+    ).toBe(false);
   });
 
   it('cada método va una sola vez', () => {
@@ -68,16 +72,15 @@ describe('importes y grupos de la venta (REQ-005-52)', () => {
     expect(lineTotal(12, usd(0.1))).toBe(usd(1.2));
   });
 
-  it('productos a golosinas; conceptos y otros ingresos a otras ventas', () => {
+  it('productos a golosinas y otros ingresos a otras ventas', () => {
     expect(saleLineGroup('product')).toBe('snacks');
-    expect(saleLineGroup('concept')).toBe('other');
     expect(saleLineGroup('other')).toBe('other');
   });
 
   it('suma por grupo en el orden de las líneas', () => {
     expect(
       saleGroupTotals([
-        { kind: 'concept', totalMicros: usd(1.2) },
+        { kind: 'other', totalMicros: usd(1.2) },
         { kind: 'product', totalMicros: usd(1.5) },
         { kind: 'product', totalMicros: usd(1.5) },
       ]),

@@ -161,7 +161,6 @@ export class ShiftReportService {
     const rows = await this.db
       .select({
         productId: saleLines.productId,
-        conceptId: saleLines.conceptId,
         // El nombre copiado en la venta; si cambió entre ventas, uno cualquiera de ellos.
         name: sql<string>`max(${saleLines.name})`,
         quantity: sql<number>`sum(${saleLines.quantity})`.mapWith(Number),
@@ -170,13 +169,13 @@ export class ShiftReportService {
       .from(saleLines)
       .innerJoin(sales, eq(sales.id, saleLines.saleId))
       .where(and(eq(sales.shiftId, shiftId), isNull(sales.voidedAt)))
-      .groupBy(saleLines.productId, saleLines.conceptId);
+      .groupBy(saleLines.productId);
     const finalStock = new Map(stock.map((line) => [line.productId, line.final]));
     return rows
       .map((row) => ({
-        // Los otros ingresos no tienen producto ni concepto: se juntan en un grupo.
+        // Los otros ingresos no tienen producto: se juntan en un grupo.
         name:
-          row.productId === null && row.conceptId === null
+          row.productId === null
             ? `Otros ingresos · ${formatMoney(micros(row.totalMicros))}`
             : row.name,
         quantity: row.quantity,

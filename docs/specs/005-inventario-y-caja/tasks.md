@@ -288,11 +288,12 @@ Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artbo
   - **Commit:** `refactor(panel): quita los conceptos de venta`
   - **Decidido al implementarla:** fuera `ConceptsTab` y `ConceptDialog`, las pestañas «Productos | Otras ventas» de Inventario (queda el buscador, como en el diseño) y `/sale-concepts` del proxy de Vite. Verificado en Chrome: Inventario sin pestañas, con «Nuevo producto» y los cuatro productos de desarrollo.
 
-- [ ] **T28b: Quitar los conceptos del nodo**
+- [x] **T28b: Quitar los conceptos del nodo**
   - **Cubre:** REQ-005-05
   - **Hacer:** quitar el módulo de conceptos y sus rutas, la línea `concept` de la petición de venta (shared) y, con una migración, pasar las líneas `concept` a `other` y borrar `concept_id` y `sale_concepts`. Los eventos `sale_concept.*` y `sale.recorded` v1 se quedan en shared para leer los guardados.
   - **Verificar:** e2e: `/sale-concepts` responde 404 y una venta con `concept` se rechaza; la migración convierte una línea de concepto; `test:pg`.
   - **Commit:** `refactor(server): quita los conceptos de venta`
+  - **Decidido al implementarla:** fuera el módulo de conceptos (`/sale-concepts` responde 404), la línea `concept` de la venta (400) y sus esquemas de petición y respuesta en shared; `sale_concept.created/updated` y `sale.recorded` v1 se quedan para leer los eventos guardados, y el canal del panel deja de esperarlos. Migración `0022_drop_sale_concepts` (escrita a mano sobre la generada): primero pasa las líneas `concept` a otros ingresos («Impresiones × 12» de comentario, cantidad 1 y el total como importe), después borra `concept_id` y `sale_concepts`. Lo vendido por artículo agrupa solo por producto. Verificado: test de la migración (aplica hasta la 0021 en PGlite, guarda una línea de concepto y comprueba que la 0022 la convierte y borra la tabla) y e2e; contra PostgreSQL real, 333 de 334 (falla solo `no-heartbeat`, el inestable ya anotado).
 
 - [ ] **T29: Lista de movimientos con cliente y líneas**
   - **Cubre:** REQ-005-24

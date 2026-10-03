@@ -28,7 +28,6 @@ import {
   customers,
   ledger,
   products,
-  saleConcepts,
   saleLines,
   sales,
   stockMovements,
@@ -43,7 +42,7 @@ import { InsufficientBalanceError, WalletService } from '../wallet/wallet.servic
  */
 type ResolvedLine =
   | {
-      kind: 'product' | 'concept';
+      kind: 'product';
       id: string;
       name: string;
       quantity: number;
@@ -77,31 +76,19 @@ export function saleDescription(
     .join(', ');
 }
 
-/**
- * Una línea en `sale.recorded` v2. Un concepto (hasta que se quiten en T28b) va como un
- * otro ingreso con su nombre y su cantidad de comentario, como los convertirá la migración.
- */
+/** Una línea en `sale.recorded` v2. */
 function recordedLine(line: ResolvedLine) {
   const total = { micros: line.totalMicros, currency: 'USD' as const };
-  switch (line.kind) {
-    case 'product':
-      return {
+  return line.kind === 'product'
+    ? {
         kind: 'product' as const,
         id: line.id,
         name: line.name,
         quantity: line.quantity,
         unitPrice: { micros: line.unitPriceMicros, currency: 'USD' as const },
         total,
-      };
-    case 'concept':
-      return {
-        kind: 'other' as const,
-        comment: `${line.name} × ${String(line.quantity)}`,
-        total,
-      };
-    case 'other':
-      return { kind: 'other' as const, comment: line.comment, total };
-  }
+      }
+    : { kind: 'other' as const, comment: line.comment, total };
 }
 
 /**
@@ -123,8 +110,8 @@ export class SalesService {
 
   /**
    * Registra una venta en la caja abierta y emite `sale.recorded`. Responde 409 si falta
-   * stock (salvo que el administrador lo permita, REQ-005-12), si un producto o concepto ya
-   * no está a la venta, si el saldo no alcanza o si hay que cobrar en Bs sin tasa.
+   * stock (salvo que el administrador lo permita, REQ-005-12), si un producto ya no está a
+   * la venta, si el saldo no alcanza o si hay que cobrar en Bs sin tasa.
    */
   async record(input: SaleRequest, shift: CashShift, actor: Actor): Promise<CashMovement> {
     const allowNegative = (await this.settings.get()).allowNegativeStock === 1;
@@ -152,7 +139,6 @@ export class SalesService {
           position,
           kind: line.kind,
           productId: line.kind === 'product' ? line.id : null,
-          conceptId: line.kind === 'concept' ? line.id : null,
           name: line.name,
           quantity: line.quantity,
           unitPriceMicros: line.unitPriceMicros,
@@ -300,9 +286,6 @@ export class SalesService {
     const productIds = [
       ...new Set(input.lines.flatMap((l) => (l.kind === 'product' ? [l.productId] : []))),
     ];
-    const conceptIds = [
-      ...new Set(input.lines.flatMap((l) => (l.kind === 'concept' ? [l.conceptId] : []))),
-    ];
     const productRows =
       productIds.length === 0
         ? []
@@ -312,12 +295,7 @@ export class SalesService {
             .where(inArray(products.id, productIds))
             .orderBy(asc(products.id))
             .for('update');
-    const conceptRows =
-      conceptIds.length === 0
-        ? []
-        : await tx.select().from(saleConcepts).where(inArray(saleConcepts.id, conceptIds));
     const productById = new Map(productRows.map((row) => [row.id, row]));
-    const conceptById = new Map(conceptRows.map((row) => [row.id, row]));
 
     const lines = input.lines.map((line): ResolvedLine => {
       if (line.kind === 'other') {
@@ -330,38 +308,21 @@ export class SalesService {
           comment: line.comment,
         };
       }
-      if (line.kind === 'product') {
-        const product = productById.get(line.productId);
-        if (!product) {
-          throw new NotFoundException('No existe ese producto');
-        }
-        if (!product.active) {
-          throw new ConflictException(`${product.name} ya no está a la venta`);
-        }
-        const unitPriceMicros = micros(product.priceMicros);
-        return {
-          kind: 'product',
-          id: product.id,
-          name: product.name,
-          quantity: line.quantity,
-          unitPriceMicros,
-          totalMicros: lineTotal(line.quantity, unitPriceMicros),
-        };
+      const product = productById.get(line.productId);
+      if (!product) {
+        throw new NotFoundException('No existe ese producto');
       }
-      const concept = conceptById.get(line.conceptId);
-      if (!concept) {
-        throw new NotFoundException('No existe ese concepto');
+      if (!product.active) {
+        throw new ConflictException(`${product.name} ya no está a la venta`);
       }
-      if (!concept.active) {
-        throw new ConflictException(`${concept.name} ya no está a la venta`);
-      }
+      const unitPriceMicros = micros(product.priceMicros);
       return {
-        kind: 'concept',
-        id: concept.id,
-        name: concept.name,
+        kind: 'product',
+        id: product.id,
+        name: product.name,
         quantity: line.quantity,
-        unitPriceMicros: line.unitPriceMicros,
-        totalMicros: lineTotal(line.quantity, line.unitPriceMicros),
+        unitPriceMicros,
+        totalMicros: lineTotal(line.quantity, unitPriceMicros),
       };
     });
 

@@ -1,5 +1,4 @@
-// Inventario (spec 005, parte 2): productos con foto, conceptos que se venden sin inventario
-// ("Impresiones") y movimientos de stock. El stock nunca se escribe: es la suma de sus
+// Inventario (spec 005, parte 2): productos con foto y movimientos de stock. El stock nunca se escribe: es la suma de sus
 // movimientos (REQ-005-10, REQ-005-11).
 import { z } from 'zod';
 
@@ -133,29 +132,3 @@ export const stockMovementSchema = z.object({
   createdAt: utcInstantSchema,
 });
 export type StockMovement = z.infer<typeof stockMovementSchema>;
-
-// ─── Conceptos de venta sin inventario (REQ-005-05) ─────────────────────────────────────
-
-const conceptNameSchema = z.string().trim().min(1, 'Pon un nombre al concepto').max(100);
-
-/** Cuerpo de `POST /sale-concepts`: nombre y precio por unidad sugerido en µUSD. */
-export const saleConceptCreateRequestSchema = z.object({
-  name: conceptNameSchema,
-  unitPriceMicros: priceSchema,
-});
-export type SaleConceptCreateRequest = z.infer<typeof saleConceptCreateRequestSchema>;
-
-/** Cuerpo de `PATCH /sale-concepts/:id`: edición o desactivación. */
-export const saleConceptUpdateRequestSchema = z
-  .object({ name: conceptNameSchema, unitPriceMicros: priceSchema, active: z.boolean() })
-  .partial()
-  .refine((body) => Object.keys(body).length > 0, 'No hay nada que cambiar');
-export type SaleConceptUpdateRequest = z.infer<typeof saleConceptUpdateRequestSchema>;
-
-export const saleConceptSchema = z.object({
-  id: idSchema,
-  name: z.string(),
-  unitPriceMicros: microsSchema,
-  active: z.boolean(),
-});
-export type SaleConcept = z.infer<typeof saleConceptSchema>;

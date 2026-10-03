@@ -6,8 +6,6 @@ import {
   productCreateRequestSchema,
   productPhotoPath,
   productUpdateRequestSchema,
-  saleConceptCreateRequestSchema,
-  saleConceptUpdateRequestSchema,
   stockDelta,
   stockMoveRequestSchema,
 } from './inventory.js';
@@ -104,21 +102,5 @@ describe('movimientos de stock (REQ-005-10, REQ-005-14)', () => {
     ];
     expect(moves.map(stockDelta)).toEqual([10, -1, -3]);
     expect(moves.reduce((stock, move) => stock + stockDelta(move), 0)).toBe(6);
-  });
-});
-
-describe('conceptos de venta (REQ-005-05)', () => {
-  it('"Impresiones" a 0,10 USD por unidad', () => {
-    expect(
-      saleConceptCreateRequestSchema.parse({ name: 'Impresiones', unitPriceMicros: usd(0.1) }),
-    ).toEqual({ name: 'Impresiones', unitPriceMicros: 100_000 });
-    expect(
-      saleConceptCreateRequestSchema.safeParse({ name: 'Impresiones', unitPriceMicros: 0 }).success,
-    ).toBe(false);
-  });
-
-  it('se editan o desactivan, pero algo tiene que cambiar', () => {
-    expect(saleConceptUpdateRequestSchema.safeParse({ active: false }).success).toBe(true);
-    expect(saleConceptUpdateRequestSchema.safeParse({}).success).toBe(false);
   });
 });

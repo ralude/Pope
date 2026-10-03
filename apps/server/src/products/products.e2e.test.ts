@@ -1,4 +1,4 @@
-import { type Product, type SaleConcept, usd } from '@pope/shared';
+import { type Product, usd } from '@pope/shared';
 import { asc } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -6,7 +6,7 @@ import { events } from '../db/schema.js';
 import { createTestApp, type TestApp } from '../testing/app.js';
 import { loginAsStaff } from '../testing/auth.js';
 
-describe('productos y conceptos (e2e, REQ-005-01 a REQ-005-05)', () => {
+describe('productos (e2e, REQ-005-01 a REQ-005-05)', () => {
   let testApp: TestApp;
   let admin: string;
   let ana: string;
@@ -135,46 +135,9 @@ describe('productos y conceptos (e2e, REQ-005-01 a REQ-005-05)', () => {
     });
   });
 
-  describe('conceptos', () => {
-    it('REQ-005-05: "Impresiones" a 0,10 USD por unidad, con su evento', async () => {
-      const response = await request('POST', '/sale-concepts', admin, {
-        name: 'Impresiones',
-        unitPriceMicros: usd(0.1),
-      });
-      expect(response.statusCode).toBe(201);
-      const concept = response.json<SaleConcept>();
-      expect(concept).toMatchObject({
-        name: 'Impresiones',
-        unitPriceMicros: usd(0.1),
-        active: true,
-      });
-      expect((await allEvents()).at(-1)).toMatchObject({
-        type: 'sale_concept.created',
-        payload: { conceptId: concept.id, concept: { unitPrice: { micros: usd(0.1) } } },
-      });
-      expect((await request('GET', '/sale-concepts', ana)).json<SaleConcept[]>()).toEqual([
-        concept,
-      ]);
-    });
-
-    it('se editan con los valores anteriores y los nuevos', async () => {
-      const concept = (
-        await request('POST', '/sale-concepts', admin, {
-          name: 'Impresiones',
-          unitPriceMicros: usd(0.1),
-        })
-      ).json<SaleConcept>();
-      await request('PATCH', `/sale-concepts/${concept.id}`, admin, { active: false });
-      expect((await allEvents()).at(-1)).toMatchObject({
-        type: 'sale_concept.updated',
-        payload: { conceptId: concept.id, before: { active: true }, after: { active: false } },
-      });
-    });
-
-    it('solo el administrador los crea', async () => {
-      const body = { name: 'Copias', unitPriceMicros: usd(0.05) };
-      expect((await request('POST', '/sale-concepts', ana, body)).statusCode).toBe(403);
-      expect((await request('GET', '/sale-concepts', dueno)).statusCode).toBe(200);
-    });
+  it('REQ-005-05: los conceptos ya no existen: el otro ingreso los sustituyó', async () => {
+    const body = { name: 'Impresiones', unitPriceMicros: usd(0.1) };
+    expect((await request('POST', '/sale-concepts', admin, body)).statusCode).toBe(404);
+    expect((await request('GET', '/sale-concepts', admin)).statusCode).toBe(404);
   });
 });

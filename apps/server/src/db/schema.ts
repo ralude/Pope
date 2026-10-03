@@ -492,23 +492,6 @@ export const stockMovements = pgTable(
 );
 
 /**
- * Conceptos que se venden sin inventario, como "Impresiones" (REQ-005-05). No se borran,
- * solo se desactivan: las ventas guardan su propia copia del nombre y del precio.
- */
-export const saleConcepts = pgTable(
-  'sale_concepts',
-  {
-    id: uuid('id').primaryKey(),
-    name: text('name').notNull(),
-    /** Precio por unidad sugerido en µUSD; el encargado puede cambiarlo al vender. */
-    unitPriceMicros: bigint('unit_price_micros', { mode: 'number' }).notNull(),
-    active: boolean('active').notNull().default(true),
-    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
-  },
-  (t) => [check('sale_concepts_price_positive', sql`${t.unitPriceMicros} > 0`)],
-);
-
-/**
  * Registro único de lo cobrado (spec 005, REQ-005-24): una fila por pago y grupo del
  * reporte. Lo escriben las ventas, las recargas, las sesiones temporales y los combos
  * cobrados en caja, en la misma transacción que el cobro. Solo se insertan: una anulación
@@ -598,8 +581,8 @@ export const sales = pgTable(
 /**
  * Líneas de una venta: un producto o un otro ingreso, con la copia del nombre y del precio
  * del momento (como los combos, ADR-0014). Un otro ingreso se llama "Otro ingreso", lleva
- * cantidad 1, su importe como precio y el comentario (REQ-005-05). Las líneas `concept` se
- * convierten en otros ingresos en T28b.
+ * cantidad 1, su importe como precio y el comentario (REQ-005-05); la migración 0022 convirtió
+ * así las líneas de los conceptos, que ya no existen.
  */
 export const saleLines = pgTable(
   'sale_lines',
@@ -610,9 +593,8 @@ export const saleLines = pgTable(
       .references(() => sales.id),
     /** Orden de la línea dentro de la venta. */
     position: integer('position').notNull(),
-    kind: text('kind').$type<'product' | 'concept' | 'other'>().notNull(),
+    kind: text('kind').$type<'product' | 'other'>().notNull(),
     productId: uuid('product_id').references(() => products.id),
-    conceptId: uuid('concept_id').references(() => saleConcepts.id),
     name: text('name').notNull(),
     quantity: integer('quantity').notNull(),
     unitPriceMicros: bigint('unit_price_micros', { mode: 'number' }).notNull(),
@@ -624,9 +606,8 @@ export const saleLines = pgTable(
     uniqueIndex('sale_lines_sale_position_idx').on(t.saleId, t.position),
     check(
       'sale_lines_kind_fields',
-      sql`(${t.kind} = 'product' and ${t.productId} is not null and ${t.conceptId} is null)
-        or (${t.kind} = 'concept' and ${t.conceptId} is not null and ${t.productId} is null)
-        or (${t.kind} = 'other' and ${t.productId} is null and ${t.conceptId} is null and ${t.quantity} = 1)`,
+      sql`(${t.kind} = 'product' and ${t.productId} is not null)
+        or (${t.kind} = 'other' and ${t.productId} is null and ${t.quantity} = 1)`,
     ),
     check('sale_lines_comment', sql`${t.comment} is null or ${t.kind} = 'other'`),
     check('sale_lines_quantity_positive', sql`${t.quantity} > 0`),

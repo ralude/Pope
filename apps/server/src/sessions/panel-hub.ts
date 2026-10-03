@@ -35,7 +35,7 @@ export const PANEL_INTERRUPTED_CHECK_MS = 60_000;
 
 /**
  * Eventos que cambian lo que muestran la Caja o el Inventario: cobros, ventas, stock,
- * productos, conceptos y la caja misma. Tras ellos se avisa al panel con `cash` (REQ-005-24).
+ * productos y la caja misma. Tras ellos se avisa al panel con `cash` (REQ-005-24).
  */
 export const CASH_EVENT_TYPES: ReadonlySet<DomainEventType> = new Set<DomainEventType>([
   'wallet.recharged',
@@ -48,8 +48,6 @@ export const CASH_EVENT_TYPES: ReadonlySet<DomainEventType> = new Set<DomainEven
   'product.created',
   'product.updated',
   'product.photo_set',
-  'sale_concept.created',
-  'sale_concept.updated',
   'shift.opened',
   'shift.closed',
 ]);

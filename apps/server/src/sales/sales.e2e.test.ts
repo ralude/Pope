@@ -118,7 +118,6 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
         totalMicros: usd(1.2),
         comment: '12 impresiones',
         productId: null,
-        conceptId: null,
       }),
     ]);
     expect(await lastEvent()).toMatchObject({
@@ -128,6 +127,14 @@ describe('ventas del mostrador (e2e, REQ-005-20 a REQ-005-22, REQ-005-25, REQ-00
         lines: [{ kind: 'other', comment: '12 impresiones', total: { micros: usd(1.2) } }],
       },
     });
+  });
+
+  it('REQ-005-05: ya no se venden conceptos', async () => {
+    const response = await sell({
+      lines: [{ kind: 'concept', conceptId: refresco.id, quantity: 12, unitPriceMicros: usd(0.1) }],
+      payments: [{ method: 'cash_usd', usdMicros: usd(1.2) }],
+    });
+    expect(response.statusCode).toBe(400);
   });
 
   it('REQ-005-05: el comentario es opcional y tiene tope', async () => {

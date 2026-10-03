@@ -45,18 +45,11 @@ export type OtherSaleLineRequest = z.infer<typeof otherSaleLineRequestSchema>;
 
 /**
  * Una línea de la venta. El precio de un producto lo pone el nodo; el importe de un otro
- * ingreso lo escribe el encargado. La línea `concept` se quita en T28b, cuando el panel
- * ya no la use.
+ * ingreso lo escribe el encargado.
  */
 export const saleLineRequestSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('product'), productId: idSchema, quantity: lineQuantitySchema }),
   otherSaleLineRequestSchema,
-  z.object({
-    kind: z.literal('concept'),
-    conceptId: idSchema,
-    quantity: lineQuantitySchema,
-    unitPriceMicros: positiveMicrosSchema,
-  }),
 ]);
 export type SaleLineRequest = z.infer<typeof saleLineRequestSchema>;
 

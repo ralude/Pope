@@ -598,14 +598,17 @@ const saleConceptDataSchema = z.strictObject({
   active: z.boolean(),
 });
 
-/** Alta de un concepto que se vende sin inventario, como "Impresiones" (REQ-005-05). */
+/**
+ * Alta de un concepto que se vendía sin inventario, como "Impresiones". Ya no se emite: el
+ * otro ingreso sustituyó a los conceptos (REQ-005-05); se queda para leer los guardados.
+ */
 export const saleConceptCreatedEventSchema = event(
   'sale_concept.created',
   1,
   z.strictObject({ conceptId: idSchema, concept: saleConceptDataSchema }),
 );
 
-/** Edición o desactivación de un concepto, con los valores anteriores y los nuevos. */
+/** Edición o desactivación de un concepto, con lo anterior y lo nuevo. Ya no se emite. */
 export const saleConceptUpdatedEventSchema = event(
   'sale_concept.updated',
   1,
