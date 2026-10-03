@@ -25,7 +25,7 @@ import {
   temporaryRemaining,
   type WarningMinutes,
 } from '@pope/shared';
-import { and, eq, isNull, lte, type SQL } from 'drizzle-orm';
+import { and, eq, isNull, lte, notExists, type SQL } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
@@ -678,6 +678,9 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
    * queda en "Sesiones interrumpidas". Si la PC nunca llegó a conocerla (se perdió el `state`
    * que la abría), sigue abierta y la PC la recibe ahora con su `state`. Si dice tener una
    * sesión ya cerrada, se le avisa con `sessionEnded`.
+   *
+   * Una sesión en pausa no se cierra aunque la PC se haya reiniciado (corte de luz): recibe
+   * su `state` con la pausa y vuelve a la pantalla de pausa (REQ-002-30, REQ-002-31).
    */
   async reconcile(pcId: string, claim: SessionClaim): Promise<void> {
     const claimedId = claim.sessionId;
@@ -685,7 +688,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     await this.confirm(pcId, claimedId);
     const active = await this.activeOnPc(pcId);
     if (active && claimedId === null) {
-      if (active.pcConfirmedAt) {
+      if (active.pcConfirmedAt && !(await openPauseOf(active.id, this.db))) {
         await this.close(active.id, 'no_heartbeat', { kind: 'system' }, { billToNow: false });
       }
     } else if (claimedId !== null && claimedId !== active?.id) {
@@ -786,12 +789,33 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
    * Cierra como `no_heartbeat` las sesiones activas sin latidos desde `lastBeatBefore` (el
    * tiempo de gracia ya vencido), cobrando solo hasta su último latido (REQ-001-27,
    * CA-001-03). Lo usan el proceso periódico y la revisión al arrancar el nodo.
+   *
+   * Una sesión en una pausa que no cobra no se cierra: no hay nada que cobrar y debe seguir
+   * en pausa (REQ-002-30). Si la pausa venció con la opción a), su marca quedó en
+   * `max_until`, así que la gracia cuenta desde ahí.
    */
   async closeStale(lastBeatBefore: Date): Promise<void> {
     const stale = await this.db
       .select({ id: sessions.id })
       .from(sessions)
-      .where(and(eq(sessions.status, 'active'), lte(sessions.lastHeartbeatAt, lastBeatBefore)));
+      .where(
+        and(
+          eq(sessions.status, 'active'),
+          lte(sessions.lastHeartbeatAt, lastBeatBefore),
+          notExists(
+            this.db
+              .select({ id: sessionPauses.id })
+              .from(sessionPauses)
+              .where(
+                and(
+                  eq(sessionPauses.sessionId, sessions.id),
+                  isNull(sessionPauses.endedAt),
+                  isNull(sessionPauses.billingResumedAt),
+                ),
+              ),
+          ),
+        ),
+      );
     for (const { id } of stale) {
       await this.close(
         id,

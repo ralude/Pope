@@ -169,10 +169,8 @@ describe('vencimiento de la pausa (e2e, REQ-002-20, REQ-002-22)', () => {
       { sessionId: ana.sessionId, billingResumedAt: null },
     ]);
 
-    // La de ana vence a su hora, las 22:25. Su PC vuelve a latir tras el arranque, como la de
-    // un agente real (sin latidos, la sesión se cerraría antes: eso lo trata T09).
-    await heartbeat(ana.pc);
-    await world.run(6, 6 * MINUTE);
+    // La de ana vence a su hora, las 22:25, aunque su PC no lata: en pausa no se cierra.
+    await world.clock.tick(6 * MINUTE);
     expect((await eventsOf('session.pause_expired')).map((e) => e.payload)).toMatchObject([
       { sessionId: juan.sessionId },
       { sessionId: ana.sessionId },
