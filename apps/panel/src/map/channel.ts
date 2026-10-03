@@ -2,6 +2,7 @@
 // algo cambia. Si se corta, se reconecta solo; con 4401 la sesión del personal ya no vale.
 // Hay una sola conexión por sesión del personal, compartida por todas las pantallas.
 import {
+  type ExchangeRateStatus,
   PANEL_CHANNEL_PATH,
   PANEL_UNAUTHORIZED_CLOSE,
   type PanelMessage,
@@ -39,6 +40,8 @@ export interface PcMapFeed {
   skewMs: number;
   /** Interrumpidas pendientes de restaurar (T45); `null` hasta que lo diga el nodo. */
   pendingInterrupted: number | null;
+  /** Tasa vigente y si está desactualizada (REQ-005-36); `null` hasta que lo diga el nodo. */
+  rate: ExchangeRateStatus | null;
 }
 
 const PcMapFeedContext = createContext<PcMapFeed | null>(null);
@@ -65,6 +68,7 @@ function useChannel(): PcMapFeed {
     live: false,
     skewMs: 0,
     pendingInterrupted: null,
+    rate: null,
   });
 
   useEffect(() => {
@@ -90,6 +94,8 @@ function useChannel(): PcMapFeed {
           }));
         } else if (message?.type === 'interrupted') {
           setFeed((prev) => ({ ...prev, pendingInterrupted: message.pending }));
+        } else if (message?.type === 'exchangeRate') {
+          setFeed((prev) => ({ ...prev, rate: { rate: message.rate, stale: message.stale } }));
         }
       };
       ws.onclose = (event: CloseEvent) => {

@@ -556,6 +556,33 @@ a {
   color: #f5d9a8;
 }
 
+/* Tasa de cambio en la barra superior (spec 005). */
+.rate-pill {
+  height: 30px;
+  padding: 0 14px;
+  border: 1px solid var(--line-2);
+  border-radius: 15px;
+  background: transparent;
+  color: var(--soft);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rate-pill:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.rate-warn {
+  border-color: #8a5a12;
+  background: #2a2113;
+  color: #f5d9a8;
+}
+
 /* Solo para lectores de pantalla. */
 .sr-only {
   position: absolute;

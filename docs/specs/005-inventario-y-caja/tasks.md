@@ -34,11 +34,12 @@ antes de seguir.
   - **Commit:** `feat(server): reparte la tasa de cambio a las PCs y al panel`
   - **Decidido al implementarla:** `ExchangeRatesService` avisa a quien se suscriba al guardar una tasa. `SessionsService` pone la vigente en todo `state` activo (`stateOf`) y, al cambiar, reenvía a cada PC conectada con sesión su `state` cobrado hasta ahora, como en un latido, para que el Shell no dé un salto atrás. `PanelHub` manda `exchangeRate` al conectar, al cambiar la tasa y en la revisión de cada minuto si cambió (así detecta el paso de día). Antes, `refactor(server)`: el cliente de prueba del canal del panel pasa a `testing/`. Verificado: 5 tests e2e nuevos (sesión con cuenta y temporal, reenvío, panel al conectar y al cambiar, desactualizada al pasar los días), también contra PostgreSQL real.
 
-- [ ] **T04: La tasa en el panel**
+- [x] **T04: La tasa en el panel**
   - **Cubre:** REQ-005-34, REQ-005-35, REQ-005-36
   - **Hacer:** píldora de la tasa en la barra superior (vigente, sin tasa o desactualizada) y diálogo "Tasa del día" para el encargado y el administrador. Lectura del valor escrito a µVES.
   - **Verificar:** tests de la lectura del valor; a mano, guardar una tasa y verla en dos pestañas del panel a la vez.
   - **Commit:** `feat(panel): muestra y permite cambiar la tasa de cambio`
+  - **Decidido al implementarla:** píldora `RatePill` junto a la hora de la barra superior: «Tasa · 1 USD = 40,50 Bs», o en ámbar «Sin tasa» y «Tasa del lunes» (día de la semana de la fecha valor); el texto de ayuda dice la fuente, quién la guardó y cuándo, en hora de Caracas. Para el encargado y el administrador abre «Tasa del día» (la vigente, el campo «Bs por 1 USD» con vista previa y «Guardar»); para el dueño está desactivada. La lectura del valor (`parseVesRate`) admite coma o punto y hasta 6 decimales, como `parseUsd`, y no admite separador de miles. La tasa llega por el canal del panel (`usePcMapFeed().rate`) y la comparten todas las pantallas. Verificado a mano en Chrome: con dos pestañas abiertas, guardar 40,50 cambió la píldora en las dos al momento, y quedó el evento `exchange_rate.set` con el administrador como actor y fuente `manual`. Al probarlo salieron dos fallos que se arreglan en commits aparte: los diálogos de la barra superior quedaban tapados por la sección (`fix(panel)`: `z-index` en `.dialog-backdrop`) y Vite escuchaba solo en IPv6 y no reenviaba la API de la spec 005 (`fix(panel)`).
 
 - [ ] **T05: Bs en el mapa, Clientes y cobros**
   - **Cubre:** REQ-005-30, REQ-001-13

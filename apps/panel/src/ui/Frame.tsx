@@ -7,6 +7,7 @@ import { Link, useLocation } from 'wouter';
 import { usePcMapFeed } from '../map/channel.js';
 import { useSession, useStaff } from '../session.js';
 import { Icon, type IconName } from './Icon.js';
+import { RatePill } from './RatePill.js';
 import { ShiftPill } from './ShiftPill.js';
 
 /** Secciones del raíl. Cada tarea de la fase 8 añade la suya; `roles` limita quién la ve. */
@@ -70,6 +71,7 @@ function TopBar() {
           {timeFormat.format(now)}
         </span>
       </div>
+      <RatePill />
       <div style={{ flexGrow: 1 }} />
       <ShiftPill />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
