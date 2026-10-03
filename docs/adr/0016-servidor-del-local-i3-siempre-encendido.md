@@ -1,4 +1,4 @@
-# ADR-0016: El servidor del local es un i3-2310 con 8 GB, casi siempre encendido
+# ADR-0016: El servidor del local es un i3-2120 con 8 GB, casi siempre encendido
 
 - **Estado:** Propuesto
 - **Fecha:** 2026-10-03
@@ -8,22 +8,24 @@
 
 ADR-0011 fijó el presupuesto de recursos del nodo local suponiendo un **Intel Core i5 de 2ª
 generación** con 8 GB. El mantenedor corrige el dato (2026-10-03): el PC que alojará el nodo es
-un **Intel Core i3 2310 con 8 GB de RAM**, que **rara vez se apaga o se reinicia** y que él
-describe como **extremadamente lento**.
+un **Intel Core i3-2120 con 8 GB de RAM**, de sobremesa (primero dijo i3 2310 y lo corrigió el
+mismo día), que **rara vez se apaga o se reinicia** y que él describe como **extremadamente
+lento**.
 
 Lo que cambia frente a ADR-0011:
 
 - **CPU:** también de 2ª generación (Sandy Bridge, 2011), pero de gama más baja: **2 núcleos y
-  4 hilos**, sin Turbo Boost, en vez de los 4 núcleos que se suponían. Mantiene AVX y tampoco
-  tiene AVX2. PostgreSQL, el servidor Node y el navegador del panel (si el encargado lo usa en
-  ese mismo PC) se reparten esos dos núcleos.
+  4 hilos** a 3,3 GHz, sin Turbo Boost, en vez de los 4 núcleos que se suponían. Mantiene AVX
+  y tampoco tiene AVX2. La gráfica integrada es la misma HD 2000 que se suponía para el panel.
+  PostgreSQL, el servidor Node y el navegador del panel (si el encargado lo usa en ese mismo
+  PC) se reparten esos dos núcleos.
 - **RAM:** igual, 8 GB.
 - **Uso:** casi siempre encendido. Pope tiene que aguantar **semanas sin reiniciar** sin que
   crezca la memoria ni se llene el disco.
 
 ## Decisión
 
-- El hardware de referencia del nodo local pasa a ser el **i3 2310 con 8 GB**. Todas las
+- El hardware de referencia del nodo local pasa a ser el **i3-2120 con 8 GB**. Todas las
   mediciones que hasta ahora decían "en el i5" (T11 y T37 de la spec 001, REQ-005-71 de la
   spec 005) se hacen en este PC.
 - Se mantienen **sin cambios** el presupuesto y las reglas de ADR-0011: ~1 GB de RAM para Pope
@@ -55,8 +57,5 @@ Lo que cambia frente a ADR-0011:
 
 ## Preguntas abiertas
 
-- ¿Es un **i3-2310M** (de portátil, 2,1 GHz)? No existe un i3-2310 de sobremesa, así que
-  probablemente lo sea. Si es un portátil, ¿cómo va la batería y la refrigeración con el
-  equipo siempre encendido?
 - Siguen abiertas las de ADR-0011: sistema operativo, disco SSD o mecánico, si lo usa también
   el encargado y cuántas PCs cliente hay.

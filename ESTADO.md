@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · ADR-0016 propuesto (el servidor del local es un i3 2310)
+**Última actualización:** 2026-10-03 · ADR-0016 propuesto (el servidor del local es un i3-2120)
 
 ## Ahora
 
@@ -32,17 +32,17 @@ Para pedírselo a un agente basta con: **"Lee ESTADO.md y continúa con la sigui
 Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 - [ ] **Spec 002:** escribir su `tasks.md` (fase 1) a partir del plan aprobado, al terminar la tasa manual de la 005.
-- [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local: es un **i3 2310 con 8 GB**, no el i5 que decía ADR-0011 (ver ADR-0016). En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
+- [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local: es un **i3-2120 con 8 GB**, no el i5 que decía ADR-0011 (ver ADR-0016). En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
 - [ ] **T28a:** confirmar los límites de los ajustes: gracia de latidos entre 30 s y 30 min, sesiones temporales conservadas entre 3 y 100 (la spec solo fija el 3 mínimo y el 3 min por defecto).
 - [ ] **T31:** confirmar dos criterios al abrir una sesión temporal: el tope de 24 h por cobro y que la PC deba estar conectada al nodo (si no, se cobraría por una PC que no puede desbloquearse).
 - [ ] **REQ-001-13:** el equivalente en Bs: la tasa manual (spec 005, parte 1) ya funciona y el Shell la muestra; faltan las pantallas del panel (T05 y T06) y la verificación (T07).
-- [ ] **ADR-0016 (propuesto):** el servidor del local es un i3 2310 con 8 GB que rara vez se apaga (dato del mantenedor, 2026-10-03). Propone mantener el presupuesto de ADR-0011, medir en ese PC e incluir una prueba larga de memoria. Aceptarlo o corregirlo; al aceptarlo, cambiar las menciones al «i5» de AGENTS.md y de las specs 001, 003 y 005.
+- [ ] **ADR-0016 (propuesto):** el servidor del local es un i3-2120 con 8 GB que rara vez se apaga (dato del mantenedor, 2026-10-03). Propone mantener el presupuesto de ADR-0011, medir en ese PC e incluir una prueba larga de memoria. Aceptarlo o corregirlo; al aceptarlo, cambiar las menciones al «i5» de AGENTS.md y de las specs 001, 003 y 005.
 - [ ] **Antes de la spec 003:** decidir los ADR propuestos [0005](docs/adr/0005-shell-react-en-webview2.md), [0009](docs/adr/0009-escritorio-separado-para-bloqueo-y-pausa.md) y [0010](docs/adr/0010-lista-blanca-y-restauracion.md) (cliente Windows).
 - [ ] **Ajustes en el panel:** ya existe «Ajustes del local» (spec 005, T23b) con el nombre del local y «Permitir vender sin stock». La gracia de latidos y las sesiones temporales conservadas (spec 001) siguen sin pantalla, sin tarea; hasta entonces, por la API (`PUT /settings`).
 - [ ] **Test inestable con PostgreSQL real:** `no-heartbeat.e2e.test.ts` › «si la PC nunca supo de la sesión…» cierra la PC y abre una temporal en ella; como abrir exige la PC conectada (T31), con PostgreSQL real el nodo ya vio la desconexión y responde 409 (con PGlite pasa). Falla igual antes de la fase 8; hay que rehacer el test para que la PC pierda el `state` sin estar desconectada al abrir.
-- [ ] **Spec 005, parte 2:** imprimir en papel el PDF del encargado (se comprobó que se descarga y ocupa una página) y medir REQ-005-71 (una venta en menos de 500 ms) en el i3 2310 del local, con las mediciones de la spec 001. Ver [`mediciones.md`](docs/specs/005-inventario-y-caja/mediciones.md).
+- [ ] **Spec 005, parte 2:** imprimir en papel el PDF del encargado (se comprobó que se descarga y ocupa una página) y medir REQ-005-71 (una venta en menos de 500 ms) en el i3-2120 del local, con las mediciones de la spec 001. Ver [`mediciones.md`](docs/specs/005-inventario-y-caja/mediciones.md).
 - [ ] **Spec 008:** averiguar si el plan de SENET del local incluye acceso a la API y quién tiene las credenciales.
 
 ## Mapa de specs

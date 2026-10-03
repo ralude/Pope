@@ -51,4 +51,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0013](0013-spec-driven-development.md) | Desarrollo guiado por especificaciones (SDD) para agentes de IA | Aceptado |
 | [0014](0014-dos-saldos-dinero-y-horas-de-combo.md) | Dos saldos por cuenta, dinero y horas de combo | Aceptado |
 | [0015](0015-dinero-en-micro-unidades.md) | Importes en micro-unidades enteras | Aceptado |
-| [0016](0016-servidor-del-local-i3-siempre-encendido.md) | El servidor del local es un i3-2310 con 8 GB, casi siempre encendido | Propuesto (reemplazaría a 0011) |
+| [0016](0016-servidor-del-local-i3-siempre-encendido.md) | El servidor del local es un i3-2120 con 8 GB, casi siempre encendido | Propuesto (reemplazaría a 0011) |
