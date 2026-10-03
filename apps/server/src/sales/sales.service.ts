@@ -166,6 +166,7 @@ export class SalesService {
         source: 'sale',
         sourceId: id,
         description: saleDescription(lines),
+        customerName: customer?.username ?? null,
         groups: saleGroupTotals(lines),
         payments: input.payments,
         actor,

@@ -8,6 +8,8 @@ const SALE: CashMovement = {
   sourceId: '0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a0a',
   at: '2026-09-28T22:32:00.000Z',
   description: 'Impresiones × 12',
+  customerName: null,
+  lines: [],
   usdMicros: usd(1.2),
   payments: [{ method: 'cash_usd', currency: 'USD', amountMicros: usd(1.2), vesRate: null }],
   actorName: 'Ana',

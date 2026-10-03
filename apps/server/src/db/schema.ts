@@ -519,6 +519,8 @@ export const cashEntries = pgTable(
     vesRate: bigint('ves_rate', { mode: 'number' }),
     /** Qué fue, copiado al cobrar: "Recarga · juan", "Impresiones × 12". */
     description: text('description').notNull(),
+    /** La cuenta del cobro, copiada al cobrar (REQ-005-24); `null` si no la hay. */
+    customerName: text('customer_name'),
     actor: jsonb('actor').$type<Actor>().notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
   },

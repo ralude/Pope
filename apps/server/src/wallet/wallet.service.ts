@@ -118,6 +118,7 @@ export class WalletService {
         source: 'recharge',
         sourceId: ledgerId,
         description: `Recarga · ${customer.username}`,
+        customerName: customer.username,
         groups: [{ group: 'pc', usdMicros: input.amountMicros }],
         payments: [{ method: input.paymentMethod, usdMicros: input.amountMicros }],
         actor,

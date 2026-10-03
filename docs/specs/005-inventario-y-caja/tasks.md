@@ -295,11 +295,12 @@ Plan: "Cambios del 2026-10-03". El diseño ya está aprobado en el lienzo (artbo
   - **Commit:** `refactor(server): quita los conceptos de venta`
   - **Decidido al implementarla:** fuera el módulo de conceptos (`/sale-concepts` responde 404), la línea `concept` de la venta (400) y sus esquemas de petición y respuesta en shared; `sale_concept.created/updated` y `sale.recorded` v1 se quedan para leer los eventos guardados, y el canal del panel deja de esperarlos. Migración `0022_drop_sale_concepts` (escrita a mano sobre la generada): primero pasa las líneas `concept` a otros ingresos («Impresiones × 12» de comentario, cantidad 1 y el total como importe), después borra `concept_id` y `sale_concepts`. Lo vendido por artículo agrupa solo por producto. Verificado: test de la migración (aplica hasta la 0021 en PGlite, guarda una línea de concepto y comprueba que la 0022 la convierte y borra la tabla) y e2e; contra PostgreSQL real, 333 de 334 (falla solo `no-heartbeat`, el inestable ya anotado).
 
-- [ ] **T29: Lista de movimientos con cliente y líneas**
+- [x] **T29: Lista de movimientos con cliente y líneas**
   - **Cubre:** REQ-005-24
   - **Hacer:** `CashMovement` gana `customerName` y `lines` (shared); columna `customer_name` en `cash_entries`, que rellenan las ventas, recargas, combos y anulaciones, y la migración en las filas anteriores.
   - **Verificar:** e2e: recarga, combo, venta con saldo y su anulación con el cliente; temporal y venta sin cuenta con `null`; las líneas de una venta.
   - **Commit:** `feat(server): añade el cliente y las líneas a los movimientos de la caja`
+  - **Decidido al implementarla:** `CashMovement` gana `customerName` y `lines` (`{ kind, name, quantity, usdMicros }`; un otro ingreso se lee "Otro ingreso · comentario"). Migración `0023_cash_entry_customer`: columna `customer_name` en `cash_entries`, que `CashRegisterService.record` copia de cada cobro (recarga y combo: la cuenta; venta: quien paga con saldo; temporales: `null`) y la anulación copia de la venta; la migración la rellena en las filas anteriores desde el ledger (recargas y combos) y desde la venta. Las líneas salen de `sale_lines` al listar, en una sola consulta para toda la caja; la anulación lleva las de su venta. El fixture del panel gana los dos campos vacíos, hasta T31. Verificado: e2e con temporal, recarga, combo, una venta con saldo de juan (Papas × 2 y un otro ingreso) y su anulación, y una venta sin cuenta; la misma lista tras vaciar la columna y aplicar el relleno de la 0023. También contra PostgreSQL real.
 
 - [ ] **T30: Informe X**
   - **Cubre:** REQ-005-46

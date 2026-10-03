@@ -176,6 +176,18 @@ export const cashMovementPaymentSchema = z.object({
 export type CashMovementPayment = z.infer<typeof cashMovementPaymentSchema>;
 
 /**
+ * Una línea de una venta en la lista del turno, para el detalle de su fila (REQ-005-24). Un
+ * otro ingreso se lee "Otro ingreso · comentario", con cantidad 1.
+ */
+export const cashMovementLineSchema = z.object({
+  kind: z.enum(['product', 'other']),
+  name: z.string(),
+  quantity: z.int().positive(),
+  usdMicros: microsSchema,
+});
+export type CashMovementLine = z.infer<typeof cashMovementLineSchema>;
+
+/**
  * Una fila de la lista del turno (REQ-005-24): las filas del registro de un mismo cobro,
  * juntas. Las anulaciones llevan importes negativos y el motivo.
  */
@@ -184,8 +196,15 @@ export const cashMovementSchema = z.object({
   /** La venta, recarga, sesión o compra de combo; en una anulación, la venta anulada. */
   sourceId: idSchema,
   at: utcInstantSchema,
-  /** Qué fue, como se lee en la lista y en el reporte: "Impresiones × 12", "Recarga · juan". */
+  /** Qué fue, como se lee en la lista y en el reporte: "Doritos × 2", "Recarga · juan". */
   description: z.string(),
+  /**
+   * La cuenta del cobro: quien recarga, compra el combo o paga con su saldo; `null` en las
+   * sesiones temporales y en las ventas sin cuenta.
+   */
+  customerName: z.string().nullable(),
+  /** Las líneas de una venta o de su anulación (con importes positivos); vacío en lo demás. */
+  lines: z.array(cashMovementLineSchema),
   usdMicros: microsSchema,
   payments: z.array(cashMovementPaymentSchema).min(1),
   /** Quién lo cobró (o anuló). */

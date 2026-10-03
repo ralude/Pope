@@ -1,7 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { type Combo, type Customer, hours, type ShiftEntriesResponse, usd } from '@pope/shared';
+import {
+  type CashMovement,
+  type Combo,
+  type Customer,
+  hours,
+  type Product,
+  type ShiftEntriesResponse,
+  usd,
+} from '@pope/shared';
 import { asc, sql } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -55,6 +63,8 @@ describe('registro de caja (e2e, REQ-005-22, REQ-005-24, REQ-005-41)', () => {
         sourceId: expect.any(String) as string,
         at: MONDAY.replace('Z', '.000Z'),
         description: 'Recarga · juan',
+        customerName: 'juan',
+        lines: [],
         usdMicros: usd(3),
         payments: [{ method: 'cash_usd', currency: 'USD', amountMicros: usd(3), vesRate: null }],
         actorName: 'Ana',
@@ -147,6 +157,75 @@ describe('registro de caja (e2e, REQ-005-22, REQ-005-24, REQ-005-41)', () => {
       version: 2,
       payload: { payment: { via: 'cash_desk', payment: { method: 'cash_usd' } } },
     });
+  });
+
+  it('REQ-005-24: cada movimiento lleva su cliente y, las ventas, sus líneas; la migración rellena el cliente', async () => {
+    await world.openTemporary(ana, 5, 60, 'Carlos');
+    await recharge('cash_usd', usd(5));
+    const combo = (
+      await world.api('POST', '/combos', admin, {
+        name: 'Combo 5 horas',
+        priceMicros: usd(6),
+        seconds: hours(5),
+      })
+    ).json<Combo>();
+    await world.api('POST', `/customers/${juan.id}/combo-purchases`, ana, {
+      comboId: combo.id,
+      payment: { via: 'cash_desk', paymentMethod: 'cash_usd' },
+    });
+    const papas = (
+      await world.api('POST', '/products', admin, {
+        name: 'Papas',
+        priceMicros: usd(1.5),
+        minStock: null,
+        initialQuantity: 10,
+      })
+    ).json<Product>();
+    const withBalance = (
+      await world.api('POST', '/sales', ana, {
+        lines: [
+          { kind: 'product', productId: papas.id, quantity: 2 },
+          { kind: 'other', usdMicros: usd(0.5), comment: '2 copias' },
+        ],
+        payments: [{ method: 'balance', usdMicros: usd(3.5) }],
+        customerId: juan.id,
+      })
+    ).json<CashMovement>();
+    await world.api('POST', `/sales/${withBalance.sourceId}/void`, admin, {
+      reason: 'error de cobro',
+    });
+    await world.api('POST', '/sales', ana, {
+      lines: [{ kind: 'other', usdMicros: usd(1.2), comment: null }],
+      payments: [{ method: 'cash_usd', usdMicros: usd(1.2) }],
+      customerId: null,
+    });
+
+    const saleLines = [
+      { kind: 'product', name: 'Papas', quantity: 2, usdMicros: usd(3) },
+      { kind: 'other', name: 'Otro ingreso · 2 copias', quantity: 1, usdMicros: usd(0.5) },
+    ];
+    const expected = [
+      ['sale', null, [{ kind: 'other', name: 'Otro ingreso', quantity: 1, usdMicros: usd(1.2) }]],
+      ['void', 'juan', saleLines],
+      ['sale', 'juan', saleLines],
+      ['combo', 'juan', []],
+      ['recharge', 'juan', []],
+      ['temporary', null, []],
+    ];
+    const shown = async () =>
+      (await entries()).movements.map((m) => [m.source, m.customerName, m.lines]);
+    expect(await shown()).toEqual(expected);
+
+    // Las filas de antes de la columna: la migración 0023 pone la cuenta desde el origen.
+    await world.testApp.database.db.update(cashEntries).set({ customerName: null });
+    const migration = readFileSync(join(MIGRATIONS_FOLDER, '0023_cash_entry_customer.sql'), 'utf8');
+    for (const statement of migration.split('--> statement-breakpoint')) {
+      const body = statement.replace(/^--.*$/gm, '').trim();
+      if (body.startsWith('UPDATE')) {
+        await world.testApp.database.db.execute(sql.raw(body));
+      }
+    }
+    expect(await shown()).toEqual(expected);
   });
 
   it('el dueño también ve la lista; sin caja abierta responde 409', async () => {

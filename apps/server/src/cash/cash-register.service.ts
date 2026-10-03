@@ -4,6 +4,7 @@ import {
   type CashGroup,
   type CashMethod,
   type CashMovement,
+  type CashMovementLine,
   type CashPiece,
   type CashSource,
   cashTotals,
@@ -12,17 +13,18 @@ import {
   methodCurrency,
   micros,
   newId,
+  otherIncomeLabel,
   type PaymentMethod,
   type ShiftEntriesResponse,
   splitPayments,
   type VesRate,
   vesRate,
 } from '@pope/shared';
-import { and, desc, eq, isNotNull } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNotNull } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { cashEntries, sales } from '../db/schema.js';
+import { cashEntries, saleLines, sales } from '../db/schema.js';
 import type { Transaction } from '../events/events.service.js';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
 import { actorName } from '../sessions/session-state.js';
@@ -38,6 +40,8 @@ export interface CashCharge {
   sourceId: string;
   /** Qué fue, como se leerá en la lista y en el reporte. */
   description: string;
+  /** La cuenta del cobro, si la hay (REQ-005-24). */
+  customerName: string | null;
   /** Lo que se cobra en cada grupo del reporte, en µUSD. */
   groups: readonly { group: CashGroup; usdMicros: Micros }[];
   /** Cómo se paga, en µUSD por método; deben sumar lo mismo que los grupos. */
@@ -114,6 +118,7 @@ export class CashRegisterService {
         usdMicros: piece.usdMicros,
         vesRate: piece.vesRate,
         description: charge.description,
+        customerName: charge.customerName,
         actor: charge.actor,
         createdAt: now,
       })),
@@ -154,6 +159,7 @@ export class CashRegisterService {
         usdMicros: -row.usdMicros,
         vesRate: row.vesRate,
         description: `Anulación · ${first.description}`,
+        customerName: row.customerName,
         actor,
         createdAt: now,
       })),
@@ -185,6 +191,33 @@ export class CashRegisterService {
           .where(and(eq(sales.shiftId, shiftId), isNotNull(sales.voidedAt)))
       ).map((sale) => [sale.id, sale.reason]),
     );
+    // Las líneas de las ventas de esta caja, para el detalle de cada fila (REQ-005-24).
+    const saleIds = [
+      ...new Set(
+        rows.flatMap((row) =>
+          row.source === 'sale' || row.source === 'void' ? [row.sourceId] : [],
+        ),
+      ),
+    ];
+    const lineRows =
+      saleIds.length === 0
+        ? []
+        : await this.db
+            .select()
+            .from(saleLines)
+            .where(inArray(saleLines.saleId, saleIds))
+            .orderBy(asc(saleLines.position));
+    const linesBySale = new Map<string, CashMovementLine[]>();
+    for (const line of lineRows) {
+      const list = linesBySale.get(line.saleId) ?? [];
+      list.push({
+        kind: line.kind,
+        name: line.kind === 'other' ? otherIncomeLabel(line.comment) : line.name,
+        quantity: line.quantity,
+        usdMicros: micros(line.totalMicros),
+      });
+      linesBySale.set(line.saleId, list);
+    }
     const movements = new Map<string, { first: EntryRow; rows: EntryRow[] }>();
     for (const row of rows) {
       const key = `${row.source}:${row.sourceId}`;
@@ -201,6 +234,7 @@ export class CashRegisterService {
         toMovement(first, own, {
           voided: first.source === 'sale' && voided.has(first.sourceId),
           reason: first.source === 'void' ? (voided.get(first.sourceId) ?? null) : null,
+          lines: linesBySale.get(first.sourceId) ?? [],
         }),
       ),
       totals: cashTotals(
@@ -217,7 +251,7 @@ export class CashRegisterService {
 function toMovement(
   first: EntryRow,
   rows: readonly EntryRow[],
-  state: { voided: boolean; reason: string | null },
+  state: { voided: boolean; reason: string | null; lines: CashMovementLine[] },
 ): CashMovement {
   const payments = paymentsOf(
     rows.map((row) => ({
@@ -234,6 +268,7 @@ function toMovement(
     sourceId: first.sourceId,
     at: first.createdAt.toISOString(),
     description: first.description,
+    customerName: first.customerName,
     usdMicros: micros(rows.reduce((sum, row) => sum + row.usdMicros, 0)),
     payments: payments.map((p) => ({
       method: p.method,

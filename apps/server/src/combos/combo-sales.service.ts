@@ -156,6 +156,7 @@ export class ComboSalesService {
             source: 'combo',
             sourceId: ledgerId,
             description: `${combo.name} · ${customer.username}`,
+            customerName: customer.username,
             groups: [{ group: 'pc', usdMicros: snapshot.priceMicros }],
             payments: [{ method: payment.paymentMethod, usdMicros: snapshot.priceMicros }],
             actor,
