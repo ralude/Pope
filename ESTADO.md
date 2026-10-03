@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · verificación de la parte 2 de la spec 005 (T24, en revisión)
+**Última actualización:** 2026-10-03 · cambios de la parte 2 de la spec 005 aprobados (otro ingreso, tabla de movimientos, informe X)
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T03; parte 2 (inventario, ventas y caja) en curso |
-| **Siguiente tarea** | **T24: Verificación de la parte 2**, en revisión del mantenedor: tabla en [mediciones.md](docs/specs/005-inventario-y-caja/mediciones.md). Después, T05–T07 |
+| **Spec en curso** | [005 · Inventario y caja](docs/specs/005-inventario-y-caja/spec.md): parte 1 (tasa) en pausa tras T04; parte 2 (inventario, ventas y caja) en curso |
+| **Siguiente tarea** | **Plan y tareas de los cambios del 2026-10-03** (otro ingreso en lugar de los conceptos, tabla de movimientos con los ingresos del día, informe X), para aprobar. Después, implementarlos y rehacer **T24** (la verificación de la parte 2, con el CA-005-07 nuevo y los CA-005-12 y 13). Luego, T05–T07 |
 | **Progreso** | Spec 005: 30 / 34 tareas (parte 1: 4 / 7; parte 2: 26 / 27) |
 | **Bloqueos** | Ninguno |
 
@@ -61,6 +61,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-03:** Spec 005, parte 2: el mantenedor aprueba tres cambios tomados de SENET. El «otro ingreso» (importe y comentario) sustituye a los conceptos; la lista de movimientos pasa a ser una tabla con los ingresos del día en grande y la apertura al final; y se añade el informe X (el reporte de la caja abierta, sin cerrarla). T24 queda pendiente de rehacer.
 - **2026-10-03:** T24 (spec 005): tabla de los 8 criterios de la parte 2 en `mediciones.md`, todos con test automático y casi todos probados a mano en Chrome; falta la revisión del mantenedor, imprimir el PDF en papel y medir REQ-005-71 en el i5.
 - **2026-10-02:** T23b (spec 005): pantalla «Ajustes del local» para el administrador con el nombre del local (sale en el PDF del cierre) y «Permitir vender sin stock»; probada en Chrome.
 - **2026-10-02:** T23 (spec 005): página Cierres de caja para el administrador y el dueño, con los totales y la diferencia de cada caja y sus dos PDF; probada en Chrome.
@@ -70,4 +71,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-02:** T21 (spec 005): lista de movimientos de la caja con los totales por grupo, en vivo, y «Anular» con motivo para el administrador; probada en Chrome (CA-005-11).
 - **2026-10-02:** T20b (spec 005): cobro en la Caja con un método o «Dividir pago», el importe en Bs con la tasa y la cuenta que paga con su saldo; probado en Chrome (CA-005-07 y CA-005-10).
 - **2026-10-02:** T20a (spec 005): pantalla Caja con el catálogo (golosinas con foto y disponibles, otras ventas con cantidad y precio) y la venta nueva con su total en USD y Bs. T20 se divide en dos (T20b: el cobro, con «Dividir pago», decidido por el mantenedor).
-- **2026-10-02:** T19 (spec 005): pestaña «Otras ventas» en Inventario con los conceptos sin inventario; el administrador los da de alta y edita. Probado en Chrome con «Impresiones» a 0,10 USD.
