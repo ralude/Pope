@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-03 · T17 de la spec 002 (pantalla de pausa); termina la fase del Shell
+**Última actualización:** 2026-10-04 · lectura predeterminada de AGENTS.md y ESTADO.md en Codex; sigue pendiente T18 de la spec 002
 
 ## Ahora
 
@@ -17,7 +17,8 @@
 
 ## Cómo retomar
 
-1. Lee [`AGENTS.md`](AGENTS.md): son las reglas del proyecto.
+1. Lee completos [`AGENTS.md`](AGENTS.md) y este archivo al iniciar un chat o una tarea,
+   y al retomar tras una compactación, sin esperar a que el usuario lo pida.
 2. Mira la tabla **Ahora** de arriba.
 3. Abre el `tasks.md` de la spec en curso y haz **solo** la siguiente tarea sin marcar.
 4. En el **mismo commit**:
@@ -62,6 +63,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-04:** configuración de Codex del proyecto para leer AGENTS.md y ESTADO.md por defecto al iniciar un chat o tarea y al retomar tras una compactación. La siguiente tarea sigue siendo T18 de la spec 002.
 - **2026-10-03:** T17 (spec 002): el Shell muestra la pantalla de pausa (y su variante vencida) y reanuda con «¿Eres juan?»; probado en Chrome (CA-002-03). Termina la fase del Shell.
 - **2026-10-03:** T16 (spec 002): el Shell tiene el botón Pausar (apagado con su motivo si no quedan pausas) y la confirmación del diseño; probado en Chrome.
 - **2026-10-03:** Spec 002: el `state` de la PC lleva también la duración máxima de la pausa, para la confirmación del Shell (decisión del mantenedor antes de T16).
@@ -71,4 +73,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** T13 (spec 002): el detalle de una PC en pausa muestra desde cuándo, cuánto queda y las pausas usadas, con «Reanudar» y «Cerrar sesión»; probado en Chrome (CA-002-08). Termina la fase del panel.
 - **2026-10-03:** T12 (spec 002): el mapa del panel pinta las PCs en pausa en morado, con lo que queda de pausa, y con borde ámbar si ya cobra; la leyenda las cuenta. Probado en Chrome.
 - **2026-10-03:** T11 (spec 002): diseño de la pausa en el lienzo del panel (artboard «Mapa»), aprobado por el mantenedor.
-- **2026-10-03:** T10 (spec 002): el encargado reanuda una sesión en pausa desde el panel (`POST /sessions/:id/resume`) y el mapa trae la pausa y las pausas usadas. Termina la fase del nodo.

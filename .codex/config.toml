@@ -1,0 +1,8 @@
+# Instrucciones predeterminadas de Codex para este repositorio.
+developer_instructions = """
+Al iniciar cada chat o tarea en este repositorio, y al retomar después de una compactación,
+lee completos AGENTS.md y ESTADO.md de la raíz del repositorio antes de realizar el trabajo
+solicitado. Hazlo por defecto, sin esperar a que el usuario lo pida, aunque el directorio de
+trabajo sea una subcarpeta. Usa el contenido actual del disco, no un resumen anterior.
+Sigue las reglas de AGENTS.md y consulta ESTADO.md para conocer el progreso y los bloqueos.
+"""

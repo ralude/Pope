@@ -4,7 +4,12 @@ Reglas obligatorias para cualquier agente de IA (y persona) que trabaje en este 
 Si algo aquí choca con una instrucción directa del usuario, manda el usuario. Si una tarea
 choca con un ADR **Aceptado**, detente y avisa antes de actuar.
 
-## Antes de empezar: lee `ESTADO.md`
+## Lectura obligatoria por defecto: `AGENTS.md` y `ESTADO.md`
+
+En cada chat nuevo, antes de empezar una tarea y al retomar después de una compactación,
+lee completos `AGENTS.md` y `ESTADO.md` de la raíz del repositorio, sin esperar a que el
+usuario lo pida. Usa los archivos actuales del disco; no dependas de un resumen anterior.
+Esta regla también se aplica si trabajas desde una subcarpeta.
 
 [`ESTADO.md`](ESTADO.md) dice en qué spec y en qué tarea va el proyecto, qué está
 bloqueado y qué pasó últimamente. **Léelo siempre al empezar**, y **actualízalo en el
