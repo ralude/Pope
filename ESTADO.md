@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-04 · preparación de tasks 003 por petición del mantenedor
+**Última actualización:** 2026-10-04 · tasks 003 redactadas según la plantilla
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md), spec, [plan](docs/specs/003-bloqueo-de-pc/plan.md) y [tasks en redacción](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador; incluye fase 2 de pausa. La 005 espera T07 |
-| **Siguiente tarea** | Terminar tasks 003 (fondo, instalador, emergencia y verificación); revisar spec/plan/tasks/ADRs y decisiones pendientes antes de implementar. Los avisos de 5 y 1 min siguen pendientes |
-| **Progreso** | Spec 003: 42 tareas redactadas (contratos, nativo, pausa y control), lista parcial sin implementación aprobada. Spec 002: 19 / 19 tareas (fase 1). Spec 005: 41 / 42 |
-| **Bloqueos** | Para cerrar el plan: versiones/ediciones exactas de Windows, congelador y decisiones abiertas; hay PC de pruebas y VM. No se implementa sobre propuestas sin aprobar |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md), spec, [plan](docs/specs/003-bloqueo-de-pc/plan.md) y [tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador; incluye fase 2 de pausa. La 005 espera T07 |
+| **Siguiente tarea** | Revisar y aprobar spec/plan/tasks 003 y ADR-0017/0018; resolver decisiones pendientes y recuperación de emergencia antes de implementar T01. Los avisos de 5 y 1 min siguen pendientes |
+| **Progreso** | Spec 003: 59 tareas propuestas, 0 implementadas, documentación en Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Bloqueos** | Aprobaciones SDD/ADRs, cobro y recuperación de revocación, acceso de emergencia, entrada técnica local, Pausar durante juego y mensajes. Inventario Windows/congelador/juegos/monitores por verificar antes de las tareas dependientes |
 
 ## Cómo retomar
 
@@ -53,7 +53,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Spec en Borrador; plan inicial solicitado, preguntas en curso | — |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Spec, plan y tasks en Borrador; decisiones y aprobación pendientes | 0 / 59 propuestas |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -64,6 +64,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-04:** tasks 003 completadas como Borrador solicitado: 59 tareas con Cubre/Hacer/Verificar/Commit. Cubren los 33 REQ y 11 CA de la 003, más fase 2 de pausa de la 002. Fondo, instalador reversible, diseño de emergencia condicionado y verificación VM/PC real/LAN; emergencia y otras decisiones pendientes no se asumen. Formato, lint, tipos, tests y build TS en verde (caché); ninguna tarea implementada.
 - **2026-10-04:** primera parte de tasks 003 según plantilla: T01–T42, con Cubre/Hacer/Verificar/Commit, prototipos previos y separación de UI/efectos/conciliación de mantenimiento. Incluye pausa nativa; faltan fondo, instalador, emergencia y verificación. Sin código, aprobaciones ni tareas implementadas.
 - **2026-10-04:** plan 003 alineado para redactar tasks: conserva sesión tras revocación (cobro pendiente), confirmación/salida antes de apagar en mantenimiento y recuperación de emergencia por diseñar. La fase 2 nativa de pausa se enumerará una sola vez en tasks 003, ligada a REQ de la 002; fase 1 intacta.
 - **2026-10-04:** el mantenedor aclara que pide `tasks.md` a partir del plan 003. Revocación: conservar sesión y bloquear al recibirla; cobro/recuperación pendientes. Reiniciar/apagar en mantenimiento: confirmar, terminarlo y ejecutar. Solicita diseñar acceso de emergencia sin nodo, con reglas aún abiertas. Documentación en Borrador; sin implementación.
@@ -73,4 +74,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** T51a (spec 001), autorizada por el mantenedor: corregido el test que abría una temporal con la PC desconectada; ahora descarta el estado inicial con la PC conectada. Los 10 tests de `no-heartbeat` pasan con ambos motores; batería completa sin caché en verde. Se retira el pendiente de ese test.
 - **2026-10-04:** T18 (spec 002): `pausa N`, `reanuda N` y pausa en `estado` del simulador, con la cuenta detenida hasta que el nodo indique cobro; probado con tres PCs en el mapa y un corte de red. Queda T19; el mantenedor autoriza corregir antes el test previo de `no-heartbeat` en un commit aparte.
 - **2026-10-04:** configuración de Codex del proyecto para leer AGENTS.md y ESTADO.md por defecto al iniciar un chat o tarea y al retomar tras una compactación. La siguiente tarea sigue siendo T18 de la spec 002.
-- **2026-10-03:** T17 (spec 002): el Shell muestra la pantalla de pausa (y su variante vencida) y reanuda con «¿Eres juan?»; probado en Chrome (CA-002-03). Termina la fase del Shell.

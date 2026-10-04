@@ -282,4 +282,120 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Verificar:** dueño sin generación, caducidad de 10 min y una alerta por bloqueo; prueba manual de pantallas y validación de respuestas.
   - **Commit:** `feat(panel): registra PCs y avisa de bloqueos técnicos`.
 
-El resto del borrador (fondo, instalación, emergencia y verificación) continúa en redacción. No implementar esta lista parcial.
+### Fondo global
+
+- [ ] **T43: Almacenamiento y endpoints del fondo**
+  - **Cubre:** REQ-003-70, REQ-003-71, REQ-003-72, REQ-003-75, REQ-003-76.
+  - **Hacer:** subir WebP binario, validar contenido/dimensiones/límite, guardar por hash y emitir cambio; servir descarga autenticada y metadatos al conectar, con archivos/streaming acotados.
+  - **Verificar:** roles, archivo falso/corrupto, hash, cambio/eliminación transaccionales y rollback sin evento huérfano; no duplicar parser WebP ni ampliar límite de 512 KB de productos.
+  - **Commit:** `feat(server): distribuye el fondo global de bloqueo`.
+
+- [ ] **T44: Editor de fondo en el panel**
+  - **Cubre:** REQ-003-70, REQ-003-76.
+  - **Hacer:** crear `/fondo-de-bloqueo`, aceptar JPG/PNG/WebP hasta 10 MB, reducir sin deformar a 1920×1080 y WebP hasta 2 MB; vista previa y volver al fondo por defecto.
+  - **Verificar:** administrador únicamente, formatos/límites, imágenes verticales/grandes y error de compresión; no procesar imágenes en el nodo.
+  - **Commit:** `feat(panel): configura el fondo global de bloqueo`.
+
+- [ ] **T45: Descarga y caché nativa del fondo**
+  - **Cubre:** REQ-003-72, REQ-003-73, REQ-003-74, REQ-003-75.
+  - **Hacer:** descargar con credencial del agente, progreso y reintentos acotados; comprobar SHA-256, guardar temporal y sustituir atómicamente, distinguiendo revisión descargada/aplicada.
+  - **Verificar:** corte, hash erróneo, disco lleno, nueva revisión durante descarga y reinicio; conservar copia anterior y funcionamiento offline.
+  - **Commit:** `feat(native): descarga y conserva el fondo de bloqueo`.
+
+- [ ] **T46: Fondo y progreso en el Shell**
+  - **Cubre:** REQ-003-73, REQ-003-74, REQ-003-75; CA-003-04, CA-003-05.
+  - **Hacer:** mostrar fondo local y progreso por el puente; mantener imagen durante uso y aplicar revisión al volver al bloqueo; retirada restaura el fondo por defecto.
+  - **Verificar:** login disponible durante descarga, sesión sin interrupción, eliminación y nodo ausente; comprobación manual en WebView2.
+  - **Commit:** `feat(shell-ui): aplica el fondo local sin interrumpir sesiones`.
+
+- [ ] **T47: Simulación de control y fallos del protocolo**
+  - **Cubre:** REQ-003-20, REQ-003-41, REQ-003-44, REQ-003-72.
+  - **Hacer:** extender simulador/tests con acuses, fallos, mantenimiento y cambios de fondo para verificar el nodo; identificar resultados simulados como tales.
+  - **Verificar:** ACK duplicado, perdido, tardío, desconexión y reconexión; la simulación no se presenta como prueba de bloqueo/audio/energía de Windows.
+  - **Commit:** `test(tools): simula órdenes y fallos del cliente Windows`.
+
+### Instalación y recuperación
+
+- [ ] **T48: Paquete Windows con runtime offline**
+  - **Cubre:** REQ-003-50, REQ-003-62.
+  - **Hacer:** empaquetar artefactos precompilados, Shell y runtime Evergreen completo offline; fijar herramienta del instalador y detección de versión conforme al plan/ADR aprobados.
+  - **Verificar:** instalación sin internet, runtime ausente/presente y plataforma no compatible; nada se compila ni se instala como dependencia de cliente en el nodo.
+  - **Commit:** `build(native): empaqueta el cliente Windows sin conexión`.
+
+- [ ] **T49: Usuario restringido y manifiesto de instalación**
+  - **Cubre:** REQ-003-01, REQ-003-50, REQ-003-51.
+  - **Hacer:** crear la cuenta cliente limitada y manifiesto de cambios/valores previos; detectar instalación existente y conflicto de cuenta sin reutilizar privilegios administrativos.
+  - **Verificar:** permisos, reejecución, interrupción y conflicto; conservar la cuenta administradora existente y sus datos.
+  - **Commit:** `feat(native): prepara la cuenta restringida de Pope`.
+
+- [ ] **T50: Servicio, shell, autologin y directivas**
+  - **Cubre:** REQ-003-01, REQ-003-02, REQ-003-03, REQ-003-31, REQ-003-50.
+  - **Hacer:** aplicar solo cambios aprobados del instalador: servicio antes de login, shell Pope, autologin protegido y opciones de Ctrl+Alt+Supr recortadas por usuario.
+  - **Verificar:** arranque frío sin Explorer, usuario técnico sin restricciones del cliente y opciones reales de Ctrl+Alt+Supr; registrar/restaurar valores previos por etapa.
+  - **Commit:** `feat(native): configura el arranque bloqueado de Windows`.
+
+- [ ] **T51: Asistente de registro y configuración local**
+  - **Cubre:** REQ-003-10, REQ-003-22, REQ-003-50, REQ-003-63.
+  - **Hacer:** configurar nodo fijo/certificado, código, NIC/MAC y cuenta Windows existente en instalación local; entregar secretos solo al servicio con protección acordada.
+  - **Verificar:** código caducado/consumido, respuesta perdida, varias NIC, certificado falso y cambio externo de contraseña; no solicitar credenciales por chat ni enviarlas al nodo.
+  - **Commit:** `feat(native): configura y registra la PC durante la instalación`.
+
+- [ ] **T52: Desinstalación y rollback por etapas**
+  - **Cubre:** REQ-003-51.
+  - **Hacer:** restaurar shell/autologin/directivas previos, retirar recursos creados por Pope y resolver instalación parcial desde el manifiesto; preservar datos/cuenta administrativa preexistentes.
+  - **Verificar:** instalación interrumpida en cada etapa, desinstalación repetida y Windows recuperado sin residuos de políticas; probar únicamente en VM/PC desechable.
+  - **Commit:** `feat(native): restaura Windows al desinstalar Pope`.
+
+- [ ] **T53: Diseño aprobado del acceso de emergencia**
+  - **Cubre:** acuerdo del mantenedor sobre recuperación sin nodo; requisito nuevo pendiente en las preguntas de la spec 003.
+  - **Hacer:** tras responder las preguntas, redactar únicamente el ADR de recuperación con autenticación, alcance, presencia física y auditoría; dejar identificada la alineación documental posterior necesaria.
+  - **Verificar:** revisión del mantenedor, amenaza de congelador/clonación y ruta independiente del servicio muerto; no equiparar emergencia con login técnico offline ordinario.
+  - **Commit:** `docs(adr): propone la recuperación de emergencia de Pope`.
+
+- [ ] **T54: Acceso de emergencia según el ADR aceptado**
+  - **Cubre:** requisito de emergencia que se apruebe en T53; REQ-003-03, REQ-003-51 en la vuelta al bloqueo/restauración.
+  - **Hacer:** implementar únicamente el mecanismo aprobado tras alinear spec/plan en tareas documentales separadas; ajustar/dividir esta reserva tras cerrar T53, sin inventar credenciales offline.
+  - **Verificar:** sin nodo y servicio incapaz de arrancar, autorización rechazada, salida/reparación y auditoría durable; WebView2 no se eleva ni se abre entrada de cliente.
+  - **Commit:** `feat(native): permite la recuperación de emergencia autorizada`.
+
+### Verificación y revisión del mantenedor
+
+- [ ] **T55: Verificación integrada en VM**
+  - **Cubre:** REQ-003-01, REQ-003-02, REQ-003-03, REQ-003-04, REQ-003-31, REQ-003-32, REQ-003-50, REQ-003-51; REQ-002-31; CA-003-01, CA-003-02.
+  - **Hacer:** ejecutar instalación, arranque, muerte del host/servicio, falta de nodo, recuperación y rollback sobre snapshots; iniciar `mediciones.md` con versiones y evidencia por caso.
+  - **Verificar:** ausencia de Explorer, < 3 s de recuperación del host y restauración reversible; no usar la VM para aprobar juego exclusivo, audio o anticheat.
+  - **Commit:** `docs(specs): registra la verificación del cliente Windows en VM`.
+
+- [ ] **T56: Juegos, pausa, audio y cierre en PC real**
+  - **Cubre:** REQ-003-30, REQ-003-32, REQ-003-33, REQ-003-34; REQ-002-04, REQ-002-05, REQ-002-07, REQ-002-30, REQ-002-50; CA-002-02, CA-003-08.
+  - **Hacer:** probar los ocho juegos del inventario con versión, anticheat, modo de pantalla, monitores/audio; registrar bloqueo, pausa/reanudación, LAN cortada y cierre sin reinicio.
+  - **Verificar:** ninguna tecla/clic al juego pausado, audio restaurado, procesos intactos en pausa y cerrados al finalizar; máximo y distribución de latencia < 1 s, no solo promedio.
+  - **Commit:** `docs(specs): verifica el bloqueo y la pausa con juegos reales`.
+
+- [ ] **T57: Recursos y latencia de la LAN del local**
+  - **Cubre:** REQ-003-60, REQ-003-61; ADR-0011, ADR-0016.
+  - **Hacer:** medir agente < 50 MB y total de instancias del host < 60 MB excluyendo WebView2, registrar Chromium aparte; probar 13 PCs/reintentos y ejecución prolongada en el i3-2120.
+  - **Verificar:** llegada de comando < 1 s desde confirmación del panel, Node ≤ 384 MB y Pope ~1 GB; buffers/journals/temporizadores sin crecimiento ilimitado y batería PG real verde.
+  - **Commit:** `docs(specs): mide los recursos del cliente Windows y nodo local`.
+
+- [ ] **T58: Operación del panel, mantenimiento y fondo en LAN real**
+  - **Cubre:** REQ-003-10, REQ-003-11, REQ-003-20, REQ-003-21, REQ-003-22, REQ-003-40, REQ-003-41, REQ-003-42, REQ-003-43, REQ-003-44, REQ-003-45, REQ-003-70, REQ-003-71, REQ-003-72, REQ-003-73, REQ-003-74, REQ-003-75, REQ-003-76; CA-003-03, CA-003-04, CA-003-05, CA-003-06, CA-003-07, CA-003-09, CA-003-10, CA-003-11.
+  - **Hacer:** comprobar roles/códigos, revocación, mantenimiento con cuenta existente/corte de LAN, aviso técnico, Wake-on-LAN y fondo en 10 conectadas/2 apagadas; incluir la PC técnica.
+  - **Verificar:** salida offline una sola vez, técnico rojo con actor y sin tiempo, WOL a 120 s, actualización tardía y login durante descarga; registrar fallos sin declarar criterios cumplidos.
+  - **Commit:** `docs(specs): verifica la operación del cliente Windows en el local`.
+
+- [ ] **T59: Revisión y cierre de la spec 003 y pausa nativa**
+  - **Cubre:** CA-003-01, CA-003-02, CA-003-03, CA-003-04, CA-003-05, CA-003-06, CA-003-07, CA-003-08, CA-003-09, CA-003-10, CA-003-11; CA-002-02.
+  - **Hacer:** entregar informe trazable y límites al mantenedor; tras aprobación explícita, cerrar 003 y fase 2 de pausa y actualizar `ESTADO.md` sin declarar lista blanca/perfiles 004 completos.
+  - **Verificar:** revisión del mantenedor, todos los criterios demostrados y requisitos de emergencia aprobados/probados; checks TS/nativos y PG real en verde antes de entrega al local.
+  - **Commit:** `docs(specs): cierra el cliente Windows tras la revisión del mantenedor`.
+
+## Decisiones pendientes antes de ejecutar
+
+- **T01/T02/T08:** contratos finales, versión, SDK, framework del host/tests y política de soporte del Windows real; cerrar en plan/ADR antes de introducir dependencias.
+- **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
+- **T12:** resolver recuperación ante respuesta de registro perdida en el plan, sin reutilizar código ni crear una PC duplicada.
+- **T34:** cobro, permisos de revocación/revinculación y recuperación del encargado, sin cierre accidental por latidos.
+- **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
+- **T53/T54:** acceso de emergencia: autenticación, alcance, presencia física y auditoría; no hay mecanismo aprobado.
+- **T48–T58:** inventario Windows/congelador/NIC/monitores/juegos. No asumir datos tentativos ni modificar el Windows cotidiano para probar.
