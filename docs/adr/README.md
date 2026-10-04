@@ -52,3 +52,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0014](0014-dos-saldos-dinero-y-horas-de-combo.md) | Dos saldos por cuenta, dinero y horas de combo | Aceptado |
 | [0015](0015-dinero-en-micro-unidades.md) | Importes en micro-unidades enteras | Aceptado |
 | [0016](0016-servidor-del-local-i3-siempre-encendido.md) | El servidor del local es un i3-2120 con 8 GB, casi siempre encendido | Aceptado |
+| [0017](0017-comunicacion-segura-del-cliente-windows.md) | Comunicación segura entre nodo, agente y Shell de Windows | Propuesto |
