@@ -1,11 +1,11 @@
 # Plan 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Borrador inicial (2026-10-04); pendiente de resolver preguntas y aprobar la spec.
-- **Spec:** [spec.md](spec.md), todavía en Borrador.
+- **Estado:** Aprobado parcialmente: Contratos y datos (T01–T07), mantenedor 2026-10-04. El resto sigue en Borrador.
+- **Spec:** [spec.md](spec.md), aprobada para este bloque; resto pendiente.
 - **ADRs que aplican:** ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008,
   ADR-0009, ADR-0015 y ADR-0016. ADR-0010 sigue Propuesto y pertenece a la spec 004.
 - **ADRs nuevos que propone:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md),
-  comunicación segura, y [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md),
+  comunicación segura, aceptado el 2026-10-04, y [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md),
   mantenimiento con una cuenta Windows existente. La instalación se documentará en
   ADR antes de construirla si requiere decisiones nuevas.
 
@@ -107,6 +107,50 @@ IDs procesados en un registro acotado y comprueba su vigencia y resultado.
 La admisión actual por `pcId` no cumple 003-63. Cambiarla exige adaptar tests y simulador
 y definir la transición de versión del protocolo; no mantener un acceso sin credencial
 en producción para conservar compatibilidad con el canal provisional.
+
+### T01: registro y autenticación confirmados (2026-10-04)
+
+El mantenedor autoriza comenzar **Contratos y datos (T01–T07)** y confirma ADR-0017,
+canal v2 y recuperación de registro. No cierra decisiones de mantenimiento, emergencia
+o cobro tras revocación; esas decisiones se consultan antes de la tarea que las necesite.
+
+**Base confirmada:** TLS, identidad derivada de una credencial aleatoria exclusiva de
+la PC y `Authorization: Bearer <credential>` antes del upgrade WebSocket. La credencial
+solo se entrega en la respuesta de registro destinada al instalador/agente; no viaja
+en `hello`, URLs, eventos, datos ordinarios de PC o JavaScript del Shell. El nodo guarda
+SHA-256, con la custodia y el puente local del ADR-0017.
+
+| Contrato propuesto | Campos y límites |
+|---|---|
+| `pcInstallationCodeSchema` | 16 bytes aleatorios representados como 22 caracteres base64url sin padding; se copia desde el panel, sensible a mayúsculas |
+| `pcCredentialSchema` | 32 bytes aleatorios representados como 43 caracteres base64url sin padding; diferente del código de instalación |
+| MAC | `pcMacAddressInputSchema` admite MAC Ethernet unicast no nula con `:`/`-` y minúsculas; `pcMacAddressSchema` exige `AA:BB:CC:DD:EE:FF`. Normalización explícita tras validar, sin transformación oculta en JSON Schema; no autentica |
+| `pcInstallationCodeRequestSchema` | `{ pcId?: UUIDv7 }`; vacío para alta nueva, PC existente para recuperación solo libre/sin mantenimiento |
+| `pcInstallationCodeResponseSchema` | `{ id, code, expiresAt }`; UUIDv7 y fecha UTC; 600 s desde emisión, generado por encargado/administrador |
+| `pcRegistrationRequestSchema` | `{ installationCode, macAddress }`; identidad/nombre los asigna el nodo; no aceptar `pcId`, rol o estado impuestos por el instalador |
+| `pcRegistrationResponseSchema` | `{ pc: { id, name, macAddress }, credential, protocolVersion }`; respuesta excepcional con secreto, nunca una ficha ordinaria |
+| `registeredPcSchema` | `{ id, name, macAddress }`; objeto estricto que rechaza credenciales/hashes adicionales |
+| `pcRegistrationErrorSchema` | `{ code, message }`; `invalid_installation_code`, `installation_code_expired`, `installation_code_used`, `invalid_registration`, `unknown_pc`, `pc_unavailable`, `internal_error` |
+| `pcAuthenticationErrorSchema` | `{ code, message }`; `missing_pc_credential`, `invalid_pc_credential`, `pc_credential_revoked`, `pc_identity_mismatch`, `unsupported_protocol_version` |
+
+Los esquemas nuevos serán estrictos, compartirán `idSchema`/`utcInstantSchema` y se
+exportarán desde `packages/shared/src/index.ts`. Probar validez/canonicalización de
+base64url, errores y rechazo de secretos fuera de la respuesta de registro. Un esquema
+no demuestra autorización, caducidad real o unicidad: esos efectos se prueban en T12/T13.
+No se añade una dependencia para estos contratos.
+
+**Versionado confirmado:** reservar versión **2** para el agente autenticado. T01 añade
+la constante y contratos de registro sin modificar el canal v1 activo, de modo que el
+repo siga funcionando durante la implementación por commits. T02/T07 preparan los
+mensajes/esquemas v2; T13 cambia la admisión del nodo y T14 el simulador. Desde esa
+admisión no se aceptará v1 ni conexiones anónimas en producción. Los mensajes de
+sesión/pausa conservan sus campos y significado, y no se vuelve a decidir el cobro.
+
+**Respuesta de registro perdida (confirmado):** el código permanece consumido y no se
+recupera el secreto desde un hash. Encargado/administrador emite otro código con `pcId`
+ligado a la misma PC, solo libre y fuera de mantenimiento; al consumirlo reemplaza la
+credencial sin crear otra PC. Se comprueba disponibilidad al emitir y consumir; un
+código nuevo sin consumir no invalida todavía una credencial vigente.
 
 ## Flujo principal
 
