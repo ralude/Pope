@@ -45,11 +45,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(shared): define el mantenimiento y su auditoría`.
   - **Implementada (2026-10-04):** login, estado confirmado, salida local sin actor impuesto y reconocimiento por ID; eventos de entrada/salida/bloqueo técnico en el validador de auditoría existente. El mecanismo Windows y la conciliación siguen en sus tareas futuras.
 
-- [ ] **T02b: Contratos de órdenes y acuses**
+- [x] **T02b: Contratos de órdenes y acuses**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-43.
   - **Hacer:** solicitudes tipadas, contexto esperado, vigencia, estados y efectos; mensajes según presentación y alcance confirmados.
   - **Verificar:** comandos sin rutas libres, confirmación previa, idempotencia y distinción entre reinicio aceptado y efecto comprobado.
   - **Commit:** `feat(shared): define las órdenes y sus acuses`.
+  - **Implementada (2026-10-04):** seis acciones nativas cerradas, solicitudes sin actor impuesto, confirmación con ocupación, contexto/revisión y 30 s de vigencia; acuses sin resultado «aplicado» para reinicio/apagado. Journal y coordinación efectiva quedan en T28/T30.
 
 - [ ] **T02c: Canal v2 de control**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-40, REQ-003-44, REQ-003-63.

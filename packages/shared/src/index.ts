@@ -24,3 +24,4 @@ export * from './dev-pcs.js';
 export * from './pc-map.js';
 export * from './pc-registration.js';
 export * from './pc-maintenance.js';
+export * from './pc-control.js';

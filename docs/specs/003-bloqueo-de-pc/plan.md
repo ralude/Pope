@@ -184,6 +184,30 @@ Se liga al contexto destinatario y no se entrega si ha cambiado antes de mostrar
 El alcance y la presentación son constantes del producto, no parámetros arbitrarios
 que el emisor pueda variar en la orden.
 
+**T02b (vigencia confirmada 2026-10-04):** una orden no aceptada vence a los 30 s y
+requiere conservar su contexto. `expected` identifica `free`/`session`/`maintenance`,
+su UUIDv7 de revisión y el ID de sesión o mantenimiento. La revisión cambia al cambiar
+de ocupación o pausa, no por descontar segundos en un latido. El panel devuelve ese
+contexto; no impone actor. Reiniciar/apagar en sesión o mantenimiento exige
+`confirmed: true`; el nodo cierra/termina antes de emitir el efecto nativo correspondiente.
+Abrir/cerrar sesión reutiliza sus contratos existentes; Wake-on-LAN lo ejecuta el nodo,
+no se envía como orden a una PC apagada.
+La orden al agente lleva UUIDv7, PC, actor autorizado, contexto, emisión/caducidad UTC
+y acción cerrada: `lock`, `restart`, `powerOff`, `showMessage`, `startMaintenance` o
+`endMaintenance`. Nunca contiene ejecutables, rutas, scripts o credenciales Windows.
+Mensaje de texto plano, máximo técnico 1 000 caracteres para conservar el frame de 16 KiB;
+sus 5 s/sonido/sin foco son constantes. Inicio y fin usan IDs de mantenimiento/salida.
+El acuse lleva ID de orden y resultado `accepted`/`applied`/`failed`. `applied` solo
+admite bloqueo, mensaje o mantenimiento; reinicio/apagado solo admite aceptación de
+Windows o fallo. Un acuse no impone actor ni demuestra apagado físico. El nodo contrasta
+tipo/IDs con la orden original, serializa acuses y guarda su resultado de forma idempotente.
+El agente no reejecuta IDs ya aceptados y rechaza contexto distinto o caducidad; T28 y
+T30 prueban ese almacenamiento. El contrato no implementa el journal ni la entrega.
+Los errores HTTP distinguen PC desconocida/desconectada/ocupada, contexto antiguo,
+confirmación ausente, reutilización incompatible del ID, petición inválida y fallo interno.
+Las comparaciones temporales usan UTC del nodo; el agente lo avanza con reloj monotónico
+desde `controlState.serverTime`, evitando ampliar vigencia al cambiar el reloj de Windows.
+
 ### Arranque, sesión y recuperación
 
 1. El instalador comprueba versión/edición y runtime, guarda la configuración previa,
