@@ -1,9 +1,9 @@
 # Spec 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Borrador
+- **Estado:** Aprobada parcialmente: Contratos y datos (T01–T07), mantenedor 2026-10-04. El resto sigue en Borrador.
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0005, ADR-0006, ADR-0007, ADR-0009, ADR-0010
-- **Propuesta de seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), pendiente de revisión.
+- **Seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), aceptado por el mantenedor el 2026-10-04.
 - **Propuesta de mantenimiento:** [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md), con cuenta Windows existente elegida por el mantenedor; mecanismo pendiente de revisión.
 - **Specs relacionadas:** 001, 002, 004
 
@@ -170,6 +170,8 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 
 ## Preguntas abiertas
 
+- [x] **Inicio de Contratos y datos (2026-10-04).** El mantenedor autoriza T01–T07 y acepta ADR-0017; confirma canal v2 y retirada del provisional v1 al cambiar admisión. Solo este bloque queda aprobado para implementar; mecanismos Windows y preguntas de negocio ajenas siguen abiertos.
+- [x] **Registro consumido con respuesta perdida.** **Resuelta (mantenedor, 2026-10-04): encargado/administrador genera otro código ligado a la misma PC, solo libre y sin mantenimiento**. Reemplaza la credencial sin duplicar PC ni reutilizar el código anterior; el hash SHA-256 no permite recuperar el secreto previo.
 - [ ] ¿Qué versiones y ediciones de Windows tienen las PCs del local? **Inventario tentativo del mantenedor (2026-10-04): probablemente Windows 10 22H2 y una PC con Windows 11**; falta comprobar versión y edición exactas. REQ-003-62 mantiene el objetivo Pro hasta revisar ese dato.
 - [x] ¿Cuántas PCs hay? **Resuelta (mantenedor, 2026-10-04): 13 equipos, normalmente 12 disponibles para clientes**, porque uno lo usa el encargado en modo técnico.
 - [ ] ¿Tienen congelador de disco (Deep Freeze o similar)? **Dato del mantenedor (2026-10-04): no lo sabe todavía**; debe comprobarse antes de configurar actualizaciones, credenciales y datos persistentes.
