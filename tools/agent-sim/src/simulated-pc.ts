@@ -7,6 +7,7 @@ import {
   type NodeToPcMessage,
   nodeToPcMessageSchema,
   PROTOCOL_VERSION,
+  type SessionPause,
 } from '@pope/shared';
 
 /**
@@ -70,6 +71,8 @@ export interface PcSnapshot {
   /** Quién usa la PC: el usuario o el nombre de la sesión temporal. */
   who: string | null;
   localRemainingSeconds: number | null;
+  /** Última pausa confirmada por el nodo; se conserva al perder la red. */
+  pause: SessionPause | null;
 }
 
 interface PendingLogin {
@@ -101,6 +104,7 @@ export class SimulatedPc {
   /** Restante que dijo el nodo y cuándo lo dijo: el local se calcula restando el tiempo pasado. */
   private remainingBase: number | null = null;
   private remainingSyncedAt = 0;
+  private pauseState: SessionPause | null = null;
 
   private attempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -130,6 +134,7 @@ export class SimulatedPc {
       sessionId: this.sessionId,
       who: this.who,
       localRemainingSeconds: this.localRemaining,
+      pause: this.pauseState,
     };
   }
 
@@ -162,6 +167,16 @@ export class SimulatedPc {
   /** El cliente cierra su sesión; el nodo contesta con `sessionEnded`. */
   logout(): void {
     this.send({ type: 'logout' });
+  }
+
+  /** Pide la pausa; la cuenta solo se detiene cuando el nodo la confirma. */
+  pause(): void {
+    this.send({ type: 'pause' });
+  }
+
+  /** Pide reanudar; conserva la pausa hasta recibir el nuevo `state` del nodo. */
+  resume(): void {
+    this.send({ type: 'resume' });
   }
 
   /**
@@ -357,6 +372,8 @@ export class SimulatedPc {
           this.sessionId = message.session.sessionId;
           this.remainingBase = message.session.remainingSeconds;
           this.remainingSyncedAt = Date.now();
+          this.pauseState =
+            message.session.kind === 'account' ? (message.session.pause ?? null) : null;
           this.who =
             message.session.kind === 'account' ? message.session.username : message.session.name;
           this.resolveLogin({ message, ok: true });
@@ -400,12 +417,17 @@ export class SimulatedPc {
     this.sessionId = null;
     this.who = null;
     this.remainingBase = null;
+    this.pauseState = null;
   }
 
   /** Tiempo restante según la PC: lo que dijo el nodo menos los segundos que han pasado. */
   private get localRemaining(): number | null {
     if (this.remainingBase === null) {
       return null;
+    }
+    // El vencimiento y el cobro los decide el nodo, también durante un corte de red.
+    if (this.pauseState && !this.pauseState.billing) {
+      return this.remainingBase;
     }
     return Math.max(
       0,

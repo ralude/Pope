@@ -22,7 +22,7 @@ Uso: pnpm --filter @pope/agent-sim start -- <subcomando> [opciones]
   run --url ws://127.0.0.1:3000/pc --pcs 1-5 [--login] [--duration SEGUNDOS]
       Enciende esas PCs. Con --login, la PC N entra como simNN.
   interactive --url ws://127.0.0.1:3000/pc --pcs 1-10
-      Consola para controlar las PCs a mano (login, red, reinicio, apagon, luz, estado).
+      Consola para controlar las PCs a mano (login, pausa, reanuda, red, reinicio, apagon, luz, estado).
   load --url ws://127.0.0.1:3000/pc --pcs 1-40 [--stagger-ms 1500] [--hold-seconds 600]
        [--server-log ARCHIVO]
       Prueba de carga (T37): logins escalonados con las PCs conectadas, sesiones mantenidas y

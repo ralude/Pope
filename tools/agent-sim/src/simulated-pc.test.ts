@@ -57,6 +57,21 @@ const activeState = (remainingSeconds = 7200) => {
   return message;
 };
 const LOCKED = { type: 'state', status: 'locked' };
+const pausedState = (billing = false, remainingSeconds = 3600) => {
+  const active = activeState(remainingSeconds);
+  return {
+    ...active,
+    session: {
+      ...active.session,
+      pause: {
+        startedAt: '2026-10-04T12:00:00.000Z',
+        maxUntil: '2026-10-04T12:15:00.000Z',
+        secondsLeft: billing ? 0 : 900,
+        billing,
+      },
+    },
+  };
+};
 
 describe('PC simulada (plan 001, comportamiento del agente)', () => {
   let sockets: FakeSocket[];
@@ -293,6 +308,71 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
     expect(socket.sent.at(-1)).toEqual({ type: 'logout' });
     socket.receive({ type: 'sessionEnded', sessionId: SESSION_ID, reason: 'customer' });
     expect(pc.snapshot().sessionId).toBeNull();
+  });
+
+  it('REQ-002-03: pide pausa y reanudar, pero solo el state del nodo cambia la cuenta', () => {
+    const socket = boot();
+    socket.receive(activeState(3600));
+    pc.pause();
+    expect(socket.sent.at(-1)).toEqual({ type: 'pause' });
+    advance(10_000);
+    expect(pc.snapshot().localRemainingSeconds).toBe(3590);
+    socket.receive(pausedState());
+    advance(600_000);
+    expect(pc.snapshot()).toMatchObject({ localRemainingSeconds: 3600, pause: { billing: false } });
+    expect(socket.sent.at(-1)).toMatchObject({ type: 'heartbeat', localRemainingSeconds: 3600 });
+    pc.resume();
+    expect(socket.sent.at(-1)).toEqual({ type: 'resume' });
+    advance(10_000);
+    expect(pc.snapshot().localRemainingSeconds).toBe(3600);
+    socket.receive(activeState(3600));
+    advance(10_000);
+    expect(pc.snapshot()).toMatchObject({ pause: null, localRemainingSeconds: 3590 });
+  });
+
+  it('REQ-002-30: sin red conserva la pausa y reconecta con el restante detenido', () => {
+    const socket = boot();
+    socket.receive(pausedState());
+    pc.networkCut(1200);
+    pc.resume();
+    expect(socket.sent.at(-1)).not.toEqual({ type: 'resume' });
+    advance(1_200_000);
+    expect(pc.snapshot()).toMatchObject({ pause: { billing: false }, localRemainingSeconds: 3600 });
+    last().open();
+    expect(last().sent[0]).toMatchObject({ sessionId: SESSION_ID, localRemainingSeconds: 3600 });
+    // Superar maxUntil y los mensajes de la conexión vieja no cambian la pausa.
+    socket.receive(activeState(3600));
+    expect(pc.snapshot().pause).not.toBeNull();
+  });
+
+  it('REQ-002-22: una pausa vencida vuelve a contar cuando el nodo comunica billing', () => {
+    const socket = boot();
+    socket.receive(pausedState());
+    socket.receive(pausedState(true));
+    advance(10_000);
+    expect(pc.snapshot()).toMatchObject({ pause: { billing: true }, localRemainingSeconds: 3590 });
+    pc.networkCut(20);
+    advance(20_000);
+    expect(pc.snapshot().localRemainingSeconds).toBe(3570);
+  });
+
+  it('REQ-002-03: un rechazo del nodo no pausa y el cierre limpia la pausa', () => {
+    const socket = boot();
+    socket.receive(activeState(3600));
+    pc.pause();
+    socket.receive({ type: 'error', code: 'pause_unavailable', message: 'Sin pausas disponibles' });
+    advance(10_000);
+    expect(pc.snapshot()).toMatchObject({ pause: null, localRemainingSeconds: 3590 });
+    socket.receive(pausedState());
+    socket.receive({ type: 'sessionEnded', sessionId: SESSION_ID, reason: 'pause_expired' });
+    expect(pc.snapshot()).toMatchObject({
+      pause: null,
+      sessionId: null,
+      localRemainingSeconds: null,
+    });
+    socket.receive(pausedState());
+    socket.receive(LOCKED);
+    expect(pc.snapshot().pause).toBeNull();
   });
 
   it('stop cancela todos los temporizadores', () => {

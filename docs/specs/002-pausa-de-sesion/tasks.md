@@ -166,11 +166,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
 
 ## Fase 5: Simulador (`tools/agent-sim`)
 
-- [ ] **T18: Pausar y reanudar en el simulador**
+- [x] **T18: Pausar y reanudar en el simulador**
   - **Cubre:** REQ-002-03, REQ-002-30
   - **Hacer:** órdenes `pausa N` y `reanuda N` en la consola, con su ayuda; la PC simulada deja de contar en local durante la pausa y la muestra en `estado`.
   - **Verificar:** tests de `commands.test.ts` y `simulated-pc.test.ts`; a mano, varias PCs en pausa en el mapa.
   - **Commit:** `feat(tools): pausa y reanuda las PCs simuladas`
+  - **Verificado (2026-10-04):** `pausa N` y `reanuda N` envían la petición, y solo el `state` del nodo cambia la cuenta local. `estado` muestra la pausa, incluso sin red, y si ya cobra tras vencer. Tests del simulador: 48 en verde (REQ-002-03, REQ-002-30 y el vencimiento REQ-002-22); formato, lint, tipos, batería del monorepo y compilación en verde. A mano en el navegador de Codex, con PostgreSQL temporal y la consola real: PCs 01, 02 y 03 pausadas, moradas y leyenda «En pausa · 3»; PC 01 conservó 1:29:30 durante un corte de red de 20 s y volvió a contar tras `reanuda 1`.
 
 ## Cierre de la fase 1
 

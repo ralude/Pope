@@ -5,6 +5,7 @@ import {
   type ControlledPc,
   describeSnapshot,
   executeCommand,
+  HELP,
   parseCommand,
 } from './commands.js';
 import type { LoginResult, PcSnapshot } from './simulated-pc.js';
@@ -67,6 +68,7 @@ class FakePc implements ControlledPc {
       sessionId: null,
       who: null,
       localRemainingSeconds: null,
+      pause: null,
       ...overrides,
     };
   }
@@ -84,6 +86,12 @@ class FakePc implements ControlledPc {
   }
   logout(): void {
     this.calls.push('logout');
+  }
+  pause(): void {
+    this.calls.push('pausa');
+  }
+  resume(): void {
+    this.calls.push('reanuda');
   }
   networkCut(seconds: number): void {
     this.calls.push(`red ${String(seconds)}`);
@@ -134,6 +142,41 @@ describe('ejecución de órdenes', () => {
       'apagon',
       'luz',
     ]);
+  });
+
+  it('REQ-002-03: pausa y reanuda llegan a la PC indicada y aparecen en la ayuda', async () => {
+    const ctx = setup();
+    expect(parseCommand('PAUSA 3')).toEqual(ok({ name: 'pausa', pc: 3 }));
+    expect(parseCommand('reanuda 3')).toEqual(ok({ name: 'reanuda', pc: 3 }));
+    for (const line of ['pausa', 'pausa 0', 'reanuda abc', 'reanuda 100']) {
+      expect(parseCommand(line)).toMatchObject({ ok: false });
+    }
+    await run('pausa 3', ctx);
+    await run('reanuda 3', ctx);
+    expect(ctx.pc3.calls).toEqual(['pausa', 'reanuda']);
+    expect(HELP).toContain('pausa N');
+    expect(HELP).toContain('reanuda N');
+  });
+
+  it('REQ-002-03, REQ-002-30: estado muestra la pausa, incluso sin red y tras vencer', () => {
+    const state = {
+      ...new FakePc(5).state,
+      sessionId: 's',
+      who: 'sim05',
+      localRemainingSeconds: 3600,
+      pause: {
+        startedAt: '2026-10-04T12:00:00.000Z',
+        maxUntil: '2026-10-04T12:15:00.000Z',
+        billing: false,
+      },
+    };
+    expect(describeSnapshot(state)).toBe(
+      'PC 05 · en pausa de sim05 · tiempo detenido · restante local 1:00:00',
+    );
+    expect(describeSnapshot({ ...state, connected: false })).toContain('desconectada · en pausa');
+    expect(describeSnapshot({ ...state, pause: { ...state.pause, billing: true } })).toContain(
+      'cobrando tras vencer la pausa',
+    );
   });
 
   it('salir devuelve false y una PC que no está en la consola no cierra nada', async () => {

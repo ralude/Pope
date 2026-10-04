@@ -5,14 +5,16 @@ import type { LoginResult, PcSnapshot } from './simulated-pc.js';
 
 export type Command =
   | { name: 'login'; pc: number; username: string; password: string }
-  | { name: 'logout' | 'reinicio' | 'apagon' | 'luz'; pc: number }
+  | { name: 'logout' | 'pausa' | 'reanuda' | 'reinicio' | 'apagon' | 'luz'; pc: number }
   | { name: 'red'; pc: number; seconds: number }
   | { name: 'estado' | 'ayuda' | 'salir' };
 
 export const HELP = `Órdenes:
   login N usuario contraseña   La PC N inicia sesión.
   logout N                     El cliente de la PC N cierra su sesión.
-  red N segundos               Corte de red de la PC N: sigue contando en local y reconecta.
+  pausa N                      Pide al nodo pausar la sesión de la PC N.
+  reanuda N                    Pide al nodo reanudar la sesión de la PC N.
+  red N segundos               Corte de red: conserva la pausa o sigue contando y reconecta.
   reinicio N                   La PC N se reinicia: pierde la sesión y vuelve a conectar.
   apagon N                     Se va la luz de la PC N: deja de latir sin cerrar la conexión.
   luz N                        Vuelve la luz de la PC N: arranca como tras un reinicio.
@@ -45,6 +47,8 @@ export function parseCommand(line: string): Parsed | null {
     case 'salir':
       return { ok: true, command: { name: name.toLowerCase() as 'estado' | 'ayuda' | 'salir' } };
     case 'logout':
+    case 'pausa':
+    case 'reanuda':
     case 'reinicio':
     case 'apagon':
     case 'luz': {
@@ -86,6 +90,8 @@ export interface ControlledPc {
   snapshot(): PcSnapshot;
   login(username: string, password: string): Promise<LoginResult>;
   logout(): void;
+  pause(): void;
+  resume(): void;
   networkCut(seconds: number): void;
   reboot(): void;
   powerCut(): void;
@@ -96,6 +102,11 @@ export interface ControlledPc {
 export function describeSnapshot(s: PcSnapshot): string {
   if (s.poweredOff) {
     return `${s.name} · sin luz`;
+  }
+  if (s.pause) {
+    const connection = s.connected ? '' : 'desconectada · ';
+    const billing = s.pause.billing ? ' · cobrando tras vencer la pausa' : ' · tiempo detenido';
+    return `${s.name} · ${connection}en pausa de ${s.who ?? '?'}${billing} · restante local ${restante(s)}`;
   }
   if (!s.connected) {
     return s.sessionId === null
@@ -152,6 +163,12 @@ export async function executeCommand(
       break;
     case 'logout':
       pc.logout();
+      break;
+    case 'pausa':
+      pc.pause();
+      break;
+    case 'reanuda':
+      pc.resume();
       break;
     case 'red':
       pc.networkCut(command.seconds);
