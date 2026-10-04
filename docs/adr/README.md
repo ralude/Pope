@@ -53,3 +53,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0015](0015-dinero-en-micro-unidades.md) | Importes en micro-unidades enteras | Aceptado |
 | [0016](0016-servidor-del-local-i3-siempre-encendido.md) | El servidor del local es un i3-2120 con 8 GB, casi siempre encendido | Aceptado |
 | [0017](0017-comunicacion-segura-del-cliente-windows.md) | Comunicación segura entre nodo, agente y Shell de Windows | Propuesto |
+| [0018](0018-mantenimiento-con-cuenta-windows-existente.md) | Mantenimiento con una cuenta administradora Windows existente | Propuesto |
