@@ -144,7 +144,8 @@ en producción para conservar compatibilidad con el canal provisional.
 ### Mantenimiento y órdenes
 
 - El nodo autoriza mantenimiento local de encargado/administrador o la orden remota
-  ya permitida; exige que no haya sesión de cliente, también si está pausada.
+  ya permitida. La entrada remota exige que no haya sesión de cliente, también si está
+  pausada; falta confirmar la misma regla para la entrada desde la propia PC.
 - El acceso técnico aplica 10 fallos por cuenta → bloqueo de 1 min y aviso al panel
   (003-45). El contador no vive en la PC: cambiar de equipo no elude el bloqueo.
   Son fallos consecutivos; un login correcto o el fin del bloqueo reinician el contador.
@@ -162,8 +163,13 @@ en producción para conservar compatibilidad con el canal provisional.
 - Reinicio/apagado con sesión activa o pausada: confirmar, cerrar con las reglas
   existentes y ejecutar después. El panel advierte la pérdida de tiempo de una temporal.
   Registrar resultado real, no solo envío; no emitir apagados repetidos al reconectar.
-- Concretar mensaje del encargado y reinicio/apagado durante mantenimiento; no asumir
-  que toda orden se puede ejecutar en cualquier estado.
+- Reinicio/apagado durante mantenimiento: pedir confirmación, terminar el mantenimiento,
+  registrar la salida y después ejecutar la orden (mantenedor, 2026-10-04).
+- Revocación: conservar la sesión y bloquear el acceso cuando la PC recibe la revocación,
+  hasta intervención del encargado. Falta decidir el cobro y la recuperación. La ausencia
+  de latidos o una reconciliación no deben cerrar por accidente la sesión conservada.
+- Concretar la presentación y los estados admisibles del mensaje del encargado, así como
+  cómo acceder a Pausar desde un juego exclusivo; quedan en las preguntas de la spec.
 
 ### Alternativas de mantenimiento (identidad elegida; mecanismo en revisión)
 
@@ -208,7 +214,8 @@ la propuesta anterior de multipart no es un contrato vigente.
 | PC reiniciada en pausa | Bloqueo al arrancar y recuperación de la pausa desde el nodo (002-31) |
 | Host muerto o UI colgada | Detectar desde el agente, relanzar y conservar estado; medir 003-32 |
 | Agente reiniciado sin estado verificable | Propuesta: permanecer bloqueada hasta obtener estado válido; concretar recuperación en la spec |
-| Credencial revocada o nodo no verificado | Rechazar conexión; falta decidir cuándo y cómo se bloquea una sesión ya activa |
+| Credencial revocada | Rechazar conexión; conservar sesión y bloquear al recibir revocación. Cobro/recuperación pendientes; sin red solo se conoce al reconectar |
+| Nodo no verificado | No enviar credenciales; no confundir fallo de certificado con una revocación confirmada |
 | Pipe o mensaje falsificado | Rechazar antes de una acción nativa; no registrar contraseñas ni secretos |
 | Mantenimiento solicitado con sesión | Rechazar y exigir cierre previo; no cerrar automáticamente (003-43) |
 | Red perdida en mantenimiento | Seguir en modo técnico; salida local y registro idempotente al reconectar (003-44) |
@@ -272,8 +279,9 @@ directivas del equipo cotidiano para preparar el documento.
 compatibilidad → prototipo nativo aislado → registro y conexión segura → host/servicio
 con bloqueo y pausa → controles/mantenimiento → fondo e instalador → verificación.
 Si el prototipo no cumple, se revisa el ADR y el plan antes de ampliar la implementación.
-Las tareas de pausa se añadirán a la spec 002 coordinadas con la 003, sin darla por
-implementada hasta verificar los requisitos nativos.
+Las tareas nativas de pausa se enumeran en el `tasks.md` de la 003, con referencias a
+los requisitos de la 002, para mantener una sola lista de implementación. La fase 1
+aprobada de la 002 conserva sus 19 tareas; la fase 2 sigue pendiente hasta verificarse.
 
 ## Riesgos
 
@@ -292,7 +300,8 @@ implementada hasta verificar los requisitos nativos.
 - **Ctrl+Alt+Supr:** pertenece a Windows y no se intercepta con el hook; verificar las
   opciones recortadas por directiva (003-31), sin confundirlo con una ventana del Shell.
 - **Recuperación:** un servicio caído o una desinstalación fallida no equivalen a que
-  muera el host. Acordar acceso de reparación sin abrir una puerta de cliente.
+  muera el host. El mantenedor solicita diseñar acceso de emergencia de Pope sin nodo;
+  autenticación, alcance y auditoría siguen abiertos y requieren un ADR antes de construir.
 - **Edición, congelador y anticheat:** falta inventario; validar con juegos reales antes
   de afirmar compatibilidad o recuperación de pantalla exclusiva.
 - **Preguntas abiertas:** quedan en `spec.md`; todas las opciones señaladas como

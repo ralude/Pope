@@ -12,7 +12,7 @@
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md), spec y [plan inicial](docs/specs/003-bloqueo-de-pc/plan.md) en Borrador; incluye la fase 2 de la pausa. La 005 espera la revisión de T07 |
 | **Siguiente tarea** | Redactar tasks 003 según la plantilla y el plan existente; revisar spec/plan/ADRs y decisiones pendientes antes de implementar. Los avisos de 5 y 1 min siguen pendientes |
-| **Progreso** | Spec 003: documentación inicial, sin tareas de implementación aprobadas. Spec 002: 19 / 19 tareas (fase 1). Spec 005: 41 / 42 |
+| **Progreso** | Spec 003: spec y plan alineados con los últimos acuerdos; tasks en redacción, sin implementación aprobada. Spec 002: 19 / 19 tareas (fase 1). Spec 005: 41 / 42 |
 | **Bloqueos** | Para cerrar el plan: versiones/ediciones exactas de Windows, congelador y decisiones abiertas; hay PC de pruebas y VM. No se implementa sobre propuestas sin aprobar |
 
 ## Cómo retomar
@@ -64,6 +64,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-04:** plan 003 alineado para redactar tasks: conserva sesión tras revocación (cobro pendiente), confirmación/salida antes de apagar en mantenimiento y recuperación de emergencia por diseñar. La fase 2 nativa de pausa se enumerará una sola vez en tasks 003, ligada a REQ de la 002; fase 1 intacta.
 - **2026-10-04:** el mantenedor aclara que pide `tasks.md` a partir del plan 003. Revocación: conservar sesión y bloquear al recibirla; cobro/recuperación pendientes. Reiniciar/apagar en mantenimiento: confirmar, terminarlo y ejecutar. Solicita diseñar acceso de emergencia sin nodo, con reglas aún abiertas. Documentación en Borrador; sin implementación.
 - **2026-10-04:** plan 003 iniciado según la plantilla: C#/WebView2, escritorio separado y fase 2 de pausa; acuerdos de cierre, roles, Evergreen, 13 PCs, nodo fijo y mantenimiento sin red. Cuenta Windows existente elegida; ADR-0017/0018 propuestos. Login técnico: 10 fallos consecutivos/1 min/un aviso; códigos encargado/admin de 10 min; fondo 10 MB → WebP 2 MB/1920×1080. Windows/congelador/monitores y mecanismos técnicos pendientes; spec/plan en Borrador, sin código.
 - **2026-10-04:** el mantenedor aprueba T19 y el cierre de la fase 1 de la spec 002: 19/19 tareas terminadas. Informe y límites en `mediciones.md`; fase 2 pendiente de la spec 003. Siguiente paso: definir los avisos de 5 y 1 min ya pedidos.
@@ -73,4 +74,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** configuración de Codex del proyecto para leer AGENTS.md y ESTADO.md por defecto al iniciar un chat o tarea y al retomar tras una compactación. La siguiente tarea sigue siendo T18 de la spec 002.
 - **2026-10-03:** T17 (spec 002): el Shell muestra la pantalla de pausa (y su variante vencida) y reanuda con «¿Eres juan?»; probado en Chrome (CA-002-03). Termina la fase del Shell.
 - **2026-10-03:** T16 (spec 002): el Shell tiene el botón Pausar (apagado con su motivo si no quedan pausas) y la confirmación del diseño; probado en Chrome.
-- **2026-10-03:** Spec 002: el `state` de la PC lleva también la duración máxima de la pausa, para la confirmación del Shell (decisión del mantenedor antes de T16).
