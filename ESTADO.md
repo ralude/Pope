@@ -10,7 +10,7 @@
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md), preparación del plan con preguntas al mantenedor; incluye la fase 2 de la pausa. La 005 espera la revisión de T07 |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md), spec y [plan inicial](docs/specs/003-bloqueo-de-pc/plan.md) en Borrador; incluye la fase 2 de la pausa. La 005 espera la revisión de T07 |
 | **Siguiente tarea** | Resolver las preguntas de la spec 003, revisar la propuesta de seguridad y aprobar la spec antes de aprobar el plan. Los avisos de 5 y 1 min quedan conservados como pendiente |
 | **Progreso** | Spec 003: documentación inicial, sin tareas de implementación aprobadas. Spec 002: 19 / 19 tareas (fase 1). Spec 005: 41 / 42 |
 | **Bloqueos** | Para cerrar el plan: versiones/ediciones exactas de Windows, congelador y decisiones abiertas; hay PC de pruebas y VM. No se implementa sobre propuestas sin aprobar |
@@ -41,6 +41,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 - [ ] **T31:** confirmar dos criterios al abrir una sesión temporal: el tope de 24 h por cobro y que la PC deba estar conectada al nodo (si no, se cobraría por una PC que no puede desbloquearse).
 - [ ] **T07 (spec 005):** revisar la verificación de la tasa manual (CA-005-06, REQ-001-13) y la forma del Bs: el criterio escribe «3,00 USD (≈ 120,00 Bs)» en una línea, y el panel lo pone debajo del importe, sin paréntesis, como en el diseño.
 - [ ] **Cliente Windows:** decidir el ADR [0010](docs/adr/0010-lista-blanca-y-restauracion.md) para la spec 004. ADR-0005 (WebView2) y ADR-0009 (escritorio separado) aceptados por el mantenedor el 2026-10-04; no siguen bloqueando la planificación de la 003.
+- [ ] **Plan 003:** revisar [ADR-0017](docs/adr/0017-comunicacion-segura-del-cliente-windows.md), propuesto a petición del mantenedor, y las alternativas de mantenimiento de [`plan.md`](docs/specs/003-bloqueo-de-pc/plan.md). No se ha elegido ni creado una cuenta administradora de Windows.
 - [ ] **Ajustes en el panel:** ya existe «Ajustes del local» (spec 005, T23b) con el nombre del local y «Permitir vender sin stock». La gracia de latidos y las sesiones temporales conservadas (spec 001) siguen sin pantalla, sin tarea; hasta entonces, por la API (`PUT /settings`).
 - [ ] **Spec 005, parte 2:** imprimir en papel el PDF del encargado (se comprobó que se descarga y ocupa una página) y medir REQ-005-71 (una venta en menos de 500 ms) en el i3-2120 del local, con las mediciones de la spec 001. Ver [`mediciones.md`](docs/specs/005-inventario-y-caja/mediciones.md).
 - [ ] **Spec 008:** averiguar si el plan de SENET del local incluye acceso a la API y quién tiene las credenciales.
@@ -63,7 +64,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
-- **2026-10-04:** el mantenedor prioriza el plan 003 con C#/WebView2, escritorio separado y fase 2 de pausa. Define cierre de procesos sin reinicio, roles y sesión cerrada antes de mantenimiento, Evergreen offline, 13 PCs y entorno de prueba. Nodo fijo; mantenimiento continúa sin red y sale/bloquea localmente. Pide revisar las alternativas de cuenta Windows antes de decidir. Windows/congelador pendientes; acuerdos y preguntas documentados, sin aprobar toda la spec ni escribir código.
+- **2026-10-04:** el mantenedor prioriza el plan 003 con C#/WebView2, escritorio separado y fase 2 de pausa. Acuerdos de cierre, roles, Evergreen, 13 PCs, entorno de pruebas, nodo fijo y mantenimiento sin red en la spec. `plan.md` creado según la plantilla y ADR-0017 propuesto; se comparan cuentas Windows sin elegir una. Windows/congelador y otras preguntas pendientes; spec/plan en Borrador, sin código ni tareas de implementación.
 - **2026-10-04:** el mantenedor aprueba T19 y el cierre de la fase 1 de la spec 002: 19/19 tareas terminadas. Informe y límites en `mediciones.md`; fase 2 pendiente de la spec 003. Siguiente paso: definir los avisos de 5 y 1 min ya pedidos.
 - **2026-10-04:** T19 (spec 002) preparada para revisión: criterios en `mediciones.md`; 852 tests sin caché y 372 con PostgreSQL real en verde. Pruebas del Shell y del panel con pausa, confirmación, vencimiento, reanudación y cierre. La fase 2 queda pendiente; T19 no se marca hasta la revisión del mantenedor.
 - **2026-10-04:** T51a (spec 001), autorizada por el mantenedor: corregido el test que abría una temporal con la PC desconectada; ahora descarta el estado inicial con la PC conectada. Los 10 tests de `no-heartbeat` pasan con ambos motores; batería completa sin caché en verde. Se retira el pendiente de ese test.
