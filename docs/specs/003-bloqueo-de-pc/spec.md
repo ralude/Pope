@@ -4,6 +4,7 @@
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0005, ADR-0006, ADR-0007, ADR-0009, ADR-0010
 - **Propuesta de seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), pendiente de revisión.
+- **Propuesta de mantenimiento:** [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md), con cuenta Windows existente elegida por el mantenedor; mecanismo pendiente de revisión.
 - **Specs relacionadas:** 001, 002, 004
 
 **Confirmado por el mantenedor (2026-10-04):** C# para el servicio y el control nativo de
@@ -174,9 +175,12 @@ Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La
 - [ ] **Fondo de bloqueo (REQ-003-70).** Decidir tamaño máximo de la imagen (propuesta: 10 MB antes de comprimir), resolución de los monitores y formato de subida. El requisito ya define un fondo global y subida solo por administrador; no se añade un fondo por PC o permisos de encargado sin cambiar antes la spec.
 - [x] **Dirección del nodo.** **Resuelta (mantenedor, 2026-10-04): IP fija o reserva DHCP para el nodo**, configurada durante la instalación junto con su identidad de certificado. No se añade descubrimiento automático.
 - [x] **Bloquear con una sesión abierta (REQ-003-20).** **Resuelta (mantenedor, 2026-10-04): cerrar la sesión y bloquear la PC**, con las reglas de cierre existentes. No es una pausa.
-- [ ] **Límite de intentos del login técnico.** Decidir si adopta el bloqueo de 5 intentos fallidos durante 5 min propuesto, y cómo se combina con la autenticación del personal existente.
+- [ ] **Límite de intentos del login técnico.** Propuesta preguntada al mantenedor el 2026-10-04: 5 intentos fallidos y bloqueo de esa cuenta durante 5 min. Falta decisión y concretar cómo se combina con la autenticación del personal existente.
+- [ ] **Reiniciar/apagar con sesión (REQ-003-20).** Decidir si se confirma y cierra antes de ejecutar, si se exige cierre separado, o si se ejecuta y luego concilia como pérdida de conexión. Preguntado al mantenedor el 2026-10-04; también afecta a sesiones pausadas y temporales.
+- [ ] **Plazo de Wake-on-LAN (REQ-003-22).** Propuesta preguntada al mantenedor el 2026-10-04: avisar si la PC no conecta en 2 min y quitar el aviso si conecta después. No afirmar que está averiada solo porque expire ese plazo.
 - [x] **Cierre de sesión y aplicaciones abiertas.** **Resuelta (mantenedor, 2026-10-04): cerrar los juegos y procesos del cliente sin reiniciar Windows** (REQ-003-34). La pausa los conserva. La limpieza de perfiles, credenciales guardadas y configuración sigue requiriendo coordinación con la spec 004.
-- [ ] **Mantenimiento y permisos de Windows.** El mantenedor pide revisar alternativas antes de elegir una cuenta separada gestionada por Pope o reutilizar una administradora existente. La comparación está en `plan.md`, «Alternativas de mantenimiento». No elevar al usuario del cliente ni a WebView2; falta concretar token, perfil, escritorio y cierre de procesos administrativos. Una contraseña del personal de Pope no es una credencial de Windows.
+- [x] **Identidad Windows para mantenimiento.** **Resuelta (mantenedor, 2026-10-04): cuenta administradora Windows existente**, tras revisar las alternativas del plan. No se crea una cuenta nueva ni se eleva la del cliente. La propuesta técnica se documenta en ADR-0018.
+- [ ] **Mecanismo de mantenimiento elevado.** Revisar ADR-0018 y concretar custodia/recuperación de credenciales, token con UAC, perfil, escritorio o sesión Windows independiente, y cierre exclusivo de los procesos de ese mantenimiento. Una contraseña del personal de Pope no es una credencial de Windows. La elección de la cuenta no demuestra todavía que ese mecanismo funcione.
 - [x] **Mantenimiento sin nodo.** **Resuelta (mantenedor, 2026-10-04): mantener el modo técnico, permitir terminar y bloquear sin red, y registrar la salida al reconectar** (REQ-003-44). No autoriza entrada offline.
 - [ ] **Fallo completo del agente y recuperación.** Concretar el bloqueo durante el reinicio del servicio, la reparación si tampoco arranca y el acceso de recuperación del técnico sin nodo. La vigilancia del host y el reinicio del servicio son fallos distintos; no asumir acceso administrativo offline.
 - [x] **Entorno de validación.** **Resuelta (mantenedor, 2026-10-04): hay PC de pruebas y VM**; juegos anotados en el inventario preliminar. La VM sirve para instalación/recuperación; juego exclusivo, audio y anticheat se validan en la PC real. No modificar el Windows cotidiano para redactar el plan.
