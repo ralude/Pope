@@ -12,7 +12,9 @@ Estas tareas son la **fase 1** del plan, toda en TypeScript: el nodo pausa, rean
 cobrar y aplica los límites; el panel ve las PCs en pausa; el Shell ofrece **Pausar** y
 muestra la pantalla de pausa, que en el navegador aún no bloquea el teclado. La **fase 2**
 (escritorio separado, silencio y < 1 s: REQ-002-04, REQ-002-05, REQ-002-07, REQ-002-50 y
-CA-002-02) se añadirá aquí cuando la spec 003 tenga plan.
+CA-002-02) se enumera una sola vez en [tasks de la spec 003](../003-bloqueo-de-pc/tasks.md):
+T23–T25 y verificación T56, con las regresiones allí señaladas. Esa lista sigue en
+Borrador; la fase 2 no está implementada ni modifica la aprobación de las 19 tareas de fase 1.
 
 ## Decidido al aprobar
 
