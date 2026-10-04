@@ -3,7 +3,13 @@
 - **Estado:** Borrador
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0005, ADR-0006, ADR-0007, ADR-0009, ADR-0010
+- **Propuesta de seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), pendiente de revisión.
 - **Specs relacionadas:** 001, 002, 004
+
+**Confirmado por el mantenedor (2026-10-04):** C# para el servicio y el control nativo de
+Windows, WebView2 para alojar el Shell React y escritorio Win32 separado para bloqueo y
+pausa. El plan incluirá la fase 2 de la spec 002. Esta confirmación no aprueba todavía
+toda la spec ni sus decisiones pendientes.
 
 ## Problema
 
@@ -37,7 +43,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-11:** El nodo rechaza agentes no registrados o con credencial revocada.
 
 **Control remoto desde el panel**
-- **REQ-003-20:** Comandos: bloquear, abrir sesión, cerrar sesión, enviar mensaje, reiniciar, apagar, encender (REQ-003-22) e iniciar como administrador (REQ-003-43). Los usan el encargado y el administrador; el dueño solo mira (decisión del mantenedor, 2026-10-02).
+- **REQ-003-20:** Comandos: bloquear, abrir sesión, cerrar sesión, enviar mensaje, reiniciar, apagar, encender (REQ-003-22) e iniciar como administrador (REQ-003-43). Los usan el encargado y el administrador; el dueño solo mira (decisión del mantenedor, 2026-10-02). «Bloquear» cierra la sesión existente y bloquea la PC; no pausa ni mantiene el cobro tras el cierre (mantenedor, 2026-10-04). Se aplican las reglas de cierre vigentes, también a las temporales (REQ-001-69).
 - **REQ-003-21:** El panel muestra en vivo el estado de cada PC con estos colores: apagada o sin conexión en **gris**, libre en **verde**, en uso con cuenta en **celeste**, sesión temporal en **ámbar** y en mantenimiento (modo administrador) en **rojo**. En pausa, en **morado** (REQ-002-14). (Colores del mantenedor, 2026-10-02; los de los estados que ya existen se aplicaron en el panel antes de esta spec.)
 - **REQ-003-22:** **Encender por red (Wake-on-LAN).** Desde el panel se enciende una PC apagada: el nodo envía el "paquete mágico" por la LAN a la dirección MAC de su tarjeta de red, que el agente registra al instalarse (REQ-003-50). Requiere tener Wake-on-LAN activado en la BIOS y en la tarjeta de red (PCIe). Si la PC no se conecta al nodo en unos minutos, el panel lo indica.
 
@@ -46,12 +52,14 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-31:** Las directivas desactivan en Ctrl+Alt+Supr: Administrador de tareas, cambiar de usuario, cerrar sesión y cambiar contraseña.
 - **REQ-003-32:** Si `Pope.ShellHost` se cierra o se cuelga, el agente lo relanza en < 3 s y la PC vuelve a quedar bloqueada si no había sesión.
 - **REQ-003-33:** El estado bloqueado usa el escritorio separado (ADR-0009).
+- **REQ-003-34:** Al cerrar o agotar una sesión, el agente cierra los juegos y procesos del cliente, sin reiniciar Windows; conserva Pope y los procesos necesarios del sistema. Durante la pausa las aplicaciones siguen abiertas (REQ-002-05). (Mantenedor, 2026-10-04.)
 
 **Mantenimiento**
-- **REQ-003-40:** Un técnico puede entrar en **modo mantenimiento** desde la pantalla de bloqueo ("Usuario técnico") **solo con su usuario y contraseña del personal**, sin código adicional. Así accede al escritorio de Windows con permisos de administrador. (Cambiado el 2026-10-02 por el mantenedor: antes pedía además un código temporal generado en el panel.)
+- **REQ-003-40:** Un técnico puede entrar en **modo mantenimiento** desde la pantalla de bloqueo ("Usuario técnico") **solo con su usuario y contraseña del personal**, sin código adicional. Así accede al escritorio de Windows con permisos de administrador. Solo se admiten los roles encargado y administrador, validados por el nodo; el dueño no puede entrar. (Código adicional retirado por el mantenedor el 2026-10-02; roles y validación por el nodo confirmados el 2026-10-04.)
 - **REQ-003-41:** Entrar y salir del modo mantenimiento genera eventos con actor y duración, visibles para el dueño.
-- **REQ-003-43:** **Iniciar como administrador desde el panel.** El encargado o el administrador pone una PC en modo mantenimiento sin escribir nada en ella: la PC muestra el escritorio de Windows con permisos de administrador, como en REQ-003-40. Queda registrado igual (REQ-003-41, con quién lo inició desde el panel) y el mapa la pinta en rojo. Termina con "Terminar y bloquear" en la PC o desde el panel. (Decisión del mantenedor, 2026-10-02.)
+- **REQ-003-43:** **Iniciar como administrador desde el panel.** El encargado o el administrador pone una PC en modo mantenimiento sin escribir nada en ella: la PC muestra el escritorio de Windows con permisos de administrador, como en REQ-003-40. Queda registrado igual (REQ-003-41, con quién lo inició desde el panel) y el mapa la pinta en rojo. Termina con "Terminar y bloquear" en la PC o desde el panel. Solo se permite con la PC libre: si hay una sesión activa o pausada, se debe cerrar antes mediante el flujo de cierre existente. (Decisión inicial del mantenedor, 2026-10-02; restricción de sesión confirmada el 2026-10-04.)
 - **REQ-003-42:** Durante el mantenimiento, Pope **no le muestra al técnico el tiempo que lleva**: solo una **pestaña plegada arriba en el centro** ("Técnico", pequeña, para no tapar las barras de título ni los menús) que al pasar el ratón se despliega con la PC, quién entró y el botón "Terminar y bloquear". La duración se sigue registrando en el evento de salida (REQ-003-41). (Pestaña plegada: decisión del mantenedor, 2026-10-03; antes era una barra fija siempre desplegada.)
+- **REQ-003-44:** Si se pierde la conexión con el nodo durante un mantenimiento ya autorizado, el modo técnico continúa y permite «Terminar y bloquear» sin red. La PC conserva la salida pendiente y la comunica al reconectar para registrarla una sola vez con su actor y duración. La pérdida de conexión no permite iniciar un nuevo mantenimiento sin validación del nodo. (Mantenedor, 2026-10-04.)
 
 **Instalación**
 - **REQ-003-50:** Un instalador crea el usuario restringido, configura el inicio de sesión automático, aplica las directivas, instala el servicio y registra la PC (REQ-003-10).
@@ -91,6 +99,14 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 > requisito: sirve para dimensionar, y el rendimiento del Shell se puede probar en el equipo
 > de desarrollo. Es distinto del servidor del local (i3-2120, 8 GB; ADR-0016).
 
+> **Inventario preliminar (mantenedor, 2026-10-04):** 13 equipos; normalmente 12 utilizables
+> por clientes porque el encargado usa uno con Windows completo en modo técnico. Windows
+> 10 22H2 es probable en la mayoría y hay una PC indicada con Windows 11; falta verificar
+> versiones y ediciones. Se dispone de una PC de pruebas y una VM. Juegos principales:
+> Valorant, Counter-Strike 2, Call of Duty, Delta Force, League of Legends, Minecraft,
+> Roblox y Blood Strike, además de juegos ocasionales pedidos por clientes; el catálogo
+> y la revisión de esas excepciones pertenecen a la spec 004.
+
 ## Criterios de aceptación
 
 - **CA-003-01** (REQ-003-01, REQ-003-03)
@@ -121,6 +137,14 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
   - **Dado** una PC con una sesión abierta
   - **Cuando** se sube un fondo nuevo
   - **Entonces** la sesión sigue sin cambios y el fondo nuevo aparece al cerrarla.
+- **CA-003-08** (REQ-003-34, REQ-003-03)
+  - **Dado** una PC en sesión con juegos y procesos del cliente abiertos
+  - **Cuando** la sesión se cierra o agota
+  - **Entonces** se muestra el bloqueo y esos procesos se cierran sin reiniciar Windows, manteniendo Pope y los procesos necesarios del sistema.
+- **CA-003-09** (REQ-003-44, REQ-003-41)
+  - **Dado** una PC en modo técnico autorizado
+  - **Cuando** pierde conexión con el nodo y el técnico pulsa «Terminar y bloquear»
+  - **Entonces** vuelve al bloqueo sin esperar la red y, al reconectar, la salida se registra una sola vez con actor y duración.
 
 ## Fuera de alcance
 
@@ -130,12 +154,13 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 
 ## Preguntas abiertas
 
-- [ ] ¿Qué versión y edición de Windows tienen las PCs del local?
-- [ ] ¿Cuántas PCs hay, y tienen congelador de disco (Deep Freeze o similar)?
+- [ ] ¿Qué versiones y ediciones de Windows tienen las PCs del local? **Inventario tentativo del mantenedor (2026-10-04): probablemente Windows 10 22H2 y una PC con Windows 11**; falta comprobar versión y edición exactas. REQ-003-62 mantiene el objetivo Pro hasta revisar ese dato.
+- [x] ¿Cuántas PCs hay? **Resuelta (mantenedor, 2026-10-04): 13 equipos, normalmente 12 disponibles para clientes**, porque uno lo usa el encargado en modo técnico.
+- [ ] ¿Tienen congelador de disco (Deep Freeze o similar)? **Dato del mantenedor (2026-10-04): no lo sabe todavía**; debe comprobarse antes de configurar actualizaciones, credenciales y datos persistentes.
 - [x] ¿Wake-on-LAN para encender las PCs desde el panel? **Resuelta (mantenedor, 2026-10-02): sí** (REQ-003-22). Falta comprobar en el local que las placas y tarjetas de red lo admiten y activarlo en la BIOS.
-- [ ] **Modo administrador remoto con una sesión abierta (REQ-003-43).** ¿Qué pasa si la PC tiene un cliente dentro? Propuesta: solo se permite con la PC libre; con sesión, el panel pide cerrarla antes (y en una temporal se pierde el tiempo, REQ-001-69).
+- [x] **Modo administrador remoto con una sesión abierta (REQ-003-43).** **Resuelta (mantenedor, 2026-10-04): exigir cerrar la sesión antes**, también si está pausada. Se usa el cierre existente; en una temporal se pierde el tiempo restante (REQ-001-69).
 - [ ] **Placeholders en el panel.** Hasta esta spec, el detalle de la PC muestra "Encender", "Reiniciar", "Apagar" e "Iniciar como administrador" desactivados ("Próximamente"), por decisión del mantenedor (2026-10-02).
-- [ ] **WebView2 en Windows 10 (ADR-0005).** No viene de serie en Windows 10: llegó después por Windows Update y puede faltar (PCs sin actualizar, LTSC, WSUS, congelador de disco). Propuesta: el instalador (REQ-003-50) comprueba si está y, si no, lo instala con el instalador completo sin conexión de Microsoft (~150 MB). Decidir también si se usa la versión "Evergreen" (se actualiza sola) o una versión fija empaquetada con Pope, y confirmar hasta cuándo da Microsoft soporte a WebView2 en Windows 10. Depende de la pregunta anterior sobre la versión y edición de Windows de las PCs.
+- [x] **Distribución de WebView2 (ADR-0005).** **Resuelta (mantenedor, 2026-10-04): Evergreen con instalador completo sin conexión.** El instalador comprueba el runtime y lo instala si falta, sin depender de internet. Falta verificar Windows y congelador para preparar su política de actualización y persistencia; no se asume que toda PC con Windows 10 ya lo tenga.
 
 Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La cadena prevista es: `shell-ui` ⇄ puente de WebView2 ⇄ `Pope.ShellHost` ⇄ named pipe ⇄ `Pope.Agent` ⇄ WebSocket ⇄ nodo, con los mensajes de `packages/shared` (T08 de la spec 001) reenviados sin cambios.
 
@@ -145,6 +170,14 @@ Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La
 - [ ] **Origen de la interfaz del Shell.** Si WebView2 cargara `shell-ui` desde el nodo, sin nodo no habría pantalla y no se cumpliría REQ-003-04. Propuesta: empaquetarla junto al host (`SetVirtualHostNameToFolderMapping`). Enlaza con las actualizaciones de los clientes (fuera de alcance).
 - [ ] **Quién aplica el bloqueo al recibir `state`.** Según ADR-0009 cambia de escritorio el host, pero si el host muere el agente debe garantizar el bloqueo (REQ-003-32) y seguir la cuenta atrás sin red (ADR-0007). Ambos tendrán que entender `state`, `sessionEnded` y el tiempo restante; conviene acotar exactamente qué hace cada uno.
 - [ ] **Validar el protocolo en C# (ADR-0002).** .NET no trae un validador de JSON Schema (solo exporta). Hará falta un paquete en el proyecto de tests (JsonSchema.Net o NJsonSchema), justificado en el plan, o generar las clases C# a partir del schema.
-- [ ] **Quién puede entrar en mantenimiento (REQ-003-40).** Sin el código del panel, cualquiera que conozca una contraseña del personal tendría el escritorio con permisos de administrador. Propuesta: solo el rol **administrador** (o un rol nuevo "técnico"), nunca el encargado ni el dueño, con el mismo bloqueo tras 5 intentos fallidos durante 5 min que los clientes (REQ-001-52).
-- [ ] **Fondo de bloqueo (REQ-003-70).** ¿Tamaño máximo de la imagen (propuesta: 10 MB antes de comprimir)? ¿Qué resolución tienen los monitores del local? ¿Hace falta un fondo distinto por PC o por zona? (Por ahora, uno para todas.) ¿Lo sube solo el administrador o también el encargado?
-- [ ] **Dirección del nodo.** ¿Cómo encuentra el agente al nodo? Propuesta: IP fija del nodo configurada por el instalador (REQ-003-50).
+- [x] **Quién puede entrar en mantenimiento (REQ-003-40).** **Resuelta (mantenedor, 2026-10-04): encargado y administrador, validados por el nodo**. No se crea un rol técnico ni se admite al dueño. El límite de intentos del login técnico sigue pendiente de concretar; no se considera aprobada la propuesta previa de 5 intentos y 5 min.
+- [ ] **Fondo de bloqueo (REQ-003-70).** Decidir tamaño máximo de la imagen (propuesta: 10 MB antes de comprimir), resolución de los monitores y formato de subida. El requisito ya define un fondo global y subida solo por administrador; no se añade un fondo por PC o permisos de encargado sin cambiar antes la spec.
+- [x] **Dirección del nodo.** **Resuelta (mantenedor, 2026-10-04): IP fija o reserva DHCP para el nodo**, configurada durante la instalación junto con su identidad de certificado. No se añade descubrimiento automático.
+- [x] **Bloquear con una sesión abierta (REQ-003-20).** **Resuelta (mantenedor, 2026-10-04): cerrar la sesión y bloquear la PC**, con las reglas de cierre existentes. No es una pausa.
+- [ ] **Límite de intentos del login técnico.** Decidir si adopta el bloqueo de 5 intentos fallidos durante 5 min propuesto, y cómo se combina con la autenticación del personal existente.
+- [x] **Cierre de sesión y aplicaciones abiertas.** **Resuelta (mantenedor, 2026-10-04): cerrar los juegos y procesos del cliente sin reiniciar Windows** (REQ-003-34). La pausa los conserva. La limpieza de perfiles, credenciales guardadas y configuración sigue requiriendo coordinación con la spec 004.
+- [ ] **Mantenimiento y permisos de Windows.** El mantenedor pide revisar alternativas antes de elegir una cuenta separada gestionada por Pope o reutilizar una administradora existente. La comparación está en `plan.md`, «Alternativas de mantenimiento». No elevar al usuario del cliente ni a WebView2; falta concretar token, perfil, escritorio y cierre de procesos administrativos. Una contraseña del personal de Pope no es una credencial de Windows.
+- [x] **Mantenimiento sin nodo.** **Resuelta (mantenedor, 2026-10-04): mantener el modo técnico, permitir terminar y bloquear sin red, y registrar la salida al reconectar** (REQ-003-44). No autoriza entrada offline.
+- [ ] **Fallo completo del agente y recuperación.** Concretar el bloqueo durante el reinicio del servicio, la reparación si tampoco arranca y el acceso de recuperación del técnico sin nodo. La vigilancia del host y el reinicio del servicio son fallos distintos; no asumir acceso administrativo offline.
+- [x] **Entorno de validación.** **Resuelta (mantenedor, 2026-10-04): hay PC de pruebas y VM**; juegos anotados en el inventario preliminar. La VM sirve para instalación/recuperación; juego exclusivo, audio y anticheat se validan en la PC real. No modificar el Windows cotidiano para redactar el plan.
+- [ ] **Detalle de las pruebas del local.** Confirmar resolución y número de monitores, versiones/ediciones de juegos (especialmente Call of Duty y Minecraft), MAC/Wake-on-LAN y versiones exactas de Windows antes de ejecutar la verificación final.
