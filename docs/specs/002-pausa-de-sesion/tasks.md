@@ -175,12 +175,12 @@ primeras el 2026-10-03 (anotadas ya en el plan); la cuarta sigue abierta.
 
 ## Cierre de la fase 1
 
-- [ ] **T19: Verificación de la fase 1**
+- [x] **T19: Verificación de la fase 1**
   - **Cubre:** CA-002-01, CA-002-03 a CA-002-08
   - **Hacer:** `mediciones.md` de la spec 002 con cada criterio y su test o prueba a mano, como en las specs 001 y 005; la batería con `pnpm test` y `test:pg`. CA-002-02, REQ-002-04, REQ-002-05, REQ-002-07 y REQ-002-50 quedan para la fase 2.
   - **Verificar:** revisión del mantenedor.
   - **Commit:** `docs(specs): verifica la fase 1 de la pausa`
-  - **Verificación preparada (2026-10-04), pendiente de revisión del mantenedor:** [`mediciones.md`](mediciones.md) relaciona cada criterio con sus tests y las pruebas de interfaz. Batería completa sin caché: 852 tests en verde; servidor con PostgreSQL real y dos procesos: 372 de 372. Formato, lint, tipos y compilación en verde. Repetidos la confirmación de reanudación, el vencimiento a los 15 min y reanudar/cerrar desde el panel. Se mantiene sin marcar hasta que el mantenedor revise el informe. El test previo de `no-heartbeat` se corrigió antes en T51a de la spec 001, en un commit aparte autorizado.
+  - **Verificado y aprobado por el mantenedor (2026-10-04):** [`mediciones.md`](mediciones.md) relaciona cada criterio con sus tests y las pruebas de interfaz. Batería completa sin caché: 852 tests en verde; servidor con PostgreSQL real y dos procesos: 372 de 372. Formato, lint, tipos y compilación en verde. Repetidos la confirmación de reanudación, el vencimiento a los 15 min y reanudar/cerrar desde el panel. El mantenedor aprueba T19 y el cierre de la fase 1; la fase 2 sigue pendiente de la spec 003. El test previo de `no-heartbeat` se corrigió antes en T51a de la spec 001, en un commit aparte autorizado.
 
 **Orden:** el de arriba. Las fases 3 y 4 empiezan por su diseño (T11, T14), que necesita la
 aprobación del mantenedor antes de programar las pantallas.

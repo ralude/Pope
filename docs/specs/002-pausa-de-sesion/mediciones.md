@@ -66,9 +66,10 @@ La verificación final de PostgreSQL se realizó con dos procesos y `fsync=off` 
 la instancia desechable. Comprueba comportamiento, SQL y transacciones; no demuestra
 durabilidad ante cortes de luz ni rendimiento del servidor del local.
 
-## Pendiente de revisión y fase 2
+## Aprobación y fase 2
 
-- **Revisión del mantenedor:** aprobar esta verificación para cerrar T19 y la fase 1.
+- **Revisión del mantenedor (2026-10-04):** T19 y el cierre de la fase 1 aprobados
+  expresamente. La aprobación cubre esta verificación; la fase 2 sigue pendiente.
 - **CA-002-02, REQ-002-04 y REQ-002-05:** escritorio separado que impide que teclas y clics
   lleguen a las aplicaciones, que siguen abiertas. Dependen de la spec 003 y ADR-0009.
 - **REQ-002-07:** silenciar el audio y restaurarlo al reanudar, en el cliente Windows.

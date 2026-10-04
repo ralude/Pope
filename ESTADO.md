@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-04 · T19 de la spec 002 preparada para revisión; baterías en verde
+**Última actualización:** 2026-10-04 · T19 aprobada; fase 1 de la spec 002 cerrada
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [002 · Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md), fase 1 implementada; verificación en revisión. La 005 espera la revisión de T07 |
-| **Siguiente tarea** | **Revisión del mantenedor de T19** (spec 002, [`mediciones.md`](docs/specs/002-pausa-de-sesion/mediciones.md)). Después de cerrar la fase 1, definir la tarea de los avisos de 5 y 1 min ya pedidos |
-| **Progreso** | Spec 002: 18 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
-| **Bloqueos** | Ninguno técnico: T19 espera la revisión del mantenedor exigida por `tasks.md` |
+| **Spec en curso** | [002 · Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md), fase 1 cerrada y aprobada; fase 2 pendiente de la spec 003. La 005 espera la revisión de T07 |
+| **Siguiente tarea** | **Definir la tarea de los avisos de 5 y 1 min** ya pedidos (spec 001): actualizar la spec, el diseño del Shell y las tareas antes de implementar |
+| **Progreso** | Spec 002: 19 / 19 tareas (fase 1). Spec 005: 41 / 42 (falta la revisión de T07) |
+| **Bloqueos** | Ninguno técnico |
 
 ## Cómo retomar
 
@@ -34,7 +34,6 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 - [ ] **Avisos de 5 y 1 min (spec 001, cambio del mantenedor, 2026-10-03), para después de la fase 1 de la 002:** pasan a ser una ventana centrada con sonido, sin botones, que se quita sola a los 5 s y no bloquea el juego (los clics y las teclas siguen llegando). Hay que anotarlo en la spec 001 (REQ-001-24 y el diseño de T48), rehacer el artboard «Aviso» del lienzo del Shell y añadir su tarea.
 - [ ] **Spec 002:** ¿los ajustes de la pausa van a «Ajustes del local» del panel? Pregunta 4 del [`tasks.md`](docs/specs/002-pausa-de-sesion/tasks.md); hasta entonces, por la API.
-- [ ] **T19 (spec 002):** revisar [`mediciones.md`](docs/specs/002-pausa-de-sesion/mediciones.md) para cerrar la fase 1; 852 tests del monorepo sin caché y 372 del servidor con PostgreSQL real en verde. No incluye el bloqueo Win32, audio ni latencia de la fase 2.
 - [ ] **T11 y T37:** repetir las mediciones en el PC servidor del local: un **i3-2120 con 8 GB** (ADR-0016), casi siempre encendido: incluir una prueba larga de memoria. En el equipo de desarrollo ya cumplen (p95 del login 69 ms, `rss` 222 MB; ver [`mediciones.md`](docs/specs/001-cuentas-y-sesiones/mediciones.md)), pero no valen como aprobación.
 - [ ] **Spec 003:** revisar las preguntas abiertas sobre la conexión PC ↔ nodo (cifrado, credencial, pipe, interfaz local, validación en C#).
 - [ ] **REQ-001-24:** confirmar el criterio de T07: si una sesión empieza con menos de 1 min, solo se envía el aviso de 1 min (anotado en las preguntas resueltas de la spec 001).
@@ -52,7 +51,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 | Spec | Estado | Progreso |
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
-| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada; verificación en revisión (T19). Fase 2 pendiente de la spec 003 | 18 / 19 |
+| [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
 | [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Borrador | — |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
@@ -64,6 +63,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-04:** el mantenedor aprueba T19 y el cierre de la fase 1 de la spec 002: 19/19 tareas terminadas. Informe y límites en `mediciones.md`; fase 2 pendiente de la spec 003. Siguiente paso: definir los avisos de 5 y 1 min ya pedidos.
 - **2026-10-04:** T19 (spec 002) preparada para revisión: criterios en `mediciones.md`; 852 tests sin caché y 372 con PostgreSQL real en verde. Pruebas del Shell y del panel con pausa, confirmación, vencimiento, reanudación y cierre. La fase 2 queda pendiente; T19 no se marca hasta la revisión del mantenedor.
 - **2026-10-04:** T51a (spec 001), autorizada por el mantenedor: corregido el test que abría una temporal con la PC desconectada; ahora descarta el estado inicial con la PC conectada. Los 10 tests de `no-heartbeat` pasan con ambos motores; batería completa sin caché en verde. Se retira el pendiente de ese test.
 - **2026-10-04:** T18 (spec 002): `pausa N`, `reanuda N` y pausa en `estado` del simulador, con la cuenta detenida hasta que el nodo indique cobro; probado con tres PCs en el mapa y un corte de red. Queda T19; el mantenedor autoriza corregir antes el test previo de `no-heartbeat` en un commit aparte.
@@ -73,4 +73,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-03:** Spec 002: el `state` de la PC lleva también la duración máxima de la pausa, para la confirmación del Shell (decisión del mantenedor antes de T16).
 - **2026-10-03:** T15 (spec 002): el Shell pausa y reanuda por el canal y, en una pausa que no cobra, su tiempo no baja; la pausa cuenta hacia atrás desde lo que dice el nodo.
 - **2026-10-03:** Spec 002: el `state` de la PC lleva los segundos de pausa que quedan, calculados por el nodo, para la cuenta atrás del Shell (decisión del mantenedor antes de T15).
-- **2026-10-03:** T14 (spec 002): diseño de la pausa en el lienzo del Shell (botón, confirmación, pantalla de pausa, vencida y «¿Eres juan?»), aprobado. Además, el mantenedor decide la pestaña plegada para el modo técnico (REQ-003-42, ya en el lienzo) y cambiar los avisos de 5 y 1 min tras la fase 1.
