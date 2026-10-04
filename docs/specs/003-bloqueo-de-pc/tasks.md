@@ -1,15 +1,15 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Borrador (2026-10-04), solicitado por el mantenedor a partir del plan existente.
-- **Plan:** [plan.md](plan.md), en Borrador.
+- **Estado:** En curso: Contratos y datos (T01–T07), autorizado por el mantenedor 2026-10-04. T08–T59 siguen en Borrador.
+- **Plan:** [plan.md](plan.md), aprobado para este bloque; resto pendiente.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
 actualiza `ESTADO.md`. Cada commit deja el repo compilando y con los tests en verde;
 el cuerpo y los tests citan los REQ. Si excede unas 400 líneas, dividir antes de ejecutar.
 
-**Este borrador no autoriza implementar.** Primero aprobar spec, plan y tareas; aceptar
-ADR-0017/0018 antes de construir sobre ellos. La redacción anticipada responde a la
-petición del mantenedor; ninguna tarea está terminada ni hay cuentas de Windows modificadas.
+**Autorizado:** implementar T01–T07, una tarea por commit; ADR-0017 aceptado, canal v2 y
+recuperación de registro confirmados. T08–T59 requieren cerrar sus decisiones y aprobación
+antes de implementar; ADR-0018 sigue Propuesto. No se modifica Windows en este bloque.
 
 **Dependencias:** ejecutar en orden, una tarea a la vez. T09/T10 deben demostrar el
 mecanismo nativo antes de integrarlo; si fallan, revisar ADR/plan y detener las tareas
@@ -392,9 +392,9 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 ## Decisiones pendientes antes de ejecutar
 
-- **T01/T02/T08:** contratos finales, versión, SDK, framework del host/tests y política de soporte del Windows real; cerrar en plan/ADR antes de introducir dependencias.
+- **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** SDK/framework y soporte del Windows real pendientes.
 - **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
-- **T12:** resolver recuperación ante respuesta de registro perdida en el plan, sin reutilizar código ni crear una PC duplicada.
+- **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
 - **T34:** cobro, permisos de revocación/revinculación y recuperación del encargado, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
 - **T53/T54:** acceso de emergencia: autenticación, alcance, presencia física y auditoría; no hay mecanismo aprobado.

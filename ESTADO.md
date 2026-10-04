@@ -10,9 +10,9 @@
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md), spec, [plan](docs/specs/003-bloqueo-de-pc/plan.md) y [tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador; incluye fase 2 de pausa. La 005 espera T07 |
-| **Siguiente tarea** | Registrar aprobación parcial de Contratos y datos e implementar T01; ADR-0017 aceptado, canal v2 y recuperación de registro confirmados. Después avanzar T02–T07; resto pendiente |
-| **Progreso** | Spec 003: 59 tareas propuestas, 0 implementadas, documentación en Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T07 aprobado/en curso; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
+| **Siguiente tarea** | Implementar T01 con contratos de registro/autenticación, canal v2 preparado y recuperación confirmada. Después avanzar T02–T07 de forma autónoma; preguntar si una regla necesaria sigue abierta |
+| **Progreso** | Spec 003: 0 / 59; T01–T07 aprobadas, T01 en preparación; resto en Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | T01 ya tiene base confirmada. T02–T07 deben detenerse si faltan contratos o reglas; cobro/recuperación de revocación, emergencia, entrada técnica local y mensajes siguen pendientes. Inventario antes de tareas nativas dependientes |
 
 ## Cómo retomar
@@ -53,7 +53,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Spec, plan y tasks en Borrador; decisiones y aprobación pendientes | 0 / 59 propuestas |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Contratos y datos aprobado/en curso; resto Borrador | 0 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
