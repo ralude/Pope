@@ -67,6 +67,44 @@ function event<const Type extends string, Payload extends z.ZodType>(
   });
 }
 
+// ─── Mantenimiento (REQ-003-41, REQ-003-44, REQ-003-45) ────────────────────────────────────
+
+export const pcMaintenanceStartedEventSchema = event(
+  'pc.maintenance_started',
+  1,
+  z.strictObject({
+    maintenanceId: idSchema,
+    pc: pcRefSchema,
+    source: z.enum(['local', 'panel']),
+    startedAt: utcInstantSchema,
+  }),
+).extend({ actor: actorSchema.options[1] });
+
+export const pcMaintenanceEndedEventSchema = event(
+  'pc.maintenance_ended',
+  1,
+  z.strictObject({
+    maintenanceId: idSchema,
+    exitId: idSchema,
+    pc: pcRefSchema,
+    source: z.enum(['local', 'panel']),
+    startedAt: utcInstantSchema,
+    endedAt: utcInstantSchema,
+    durationSeconds: nonNegativeSeconds,
+  }),
+).extend({ actor: actorSchema.options[1] });
+
+export const staffTechnicalLoginLockedEventSchema = event(
+  'staff.technical_login_locked',
+  1,
+  z.strictObject({
+    staffId: idSchema,
+    username: z.string().min(1),
+    pc: pcRefSchema,
+    lockedUntil: utcInstantSchema,
+  }),
+).extend({ actor: z.strictObject({ kind: z.literal('system') }) });
+
 // ─── Cuentas y saldo ────────────────────────────────────────────────────────────────────
 
 export const customerCreatedEventSchema = event(
@@ -760,6 +798,9 @@ export const saleVoidedEventSchema = event(
 // ─── Unión de todos los eventos ─────────────────────────────────────────────────────────
 
 export const domainEventSchema = z.discriminatedUnion('type', [
+  pcMaintenanceStartedEventSchema,
+  pcMaintenanceEndedEventSchema,
+  staffTechnicalLoginLockedEventSchema,
   customerCreatedEventSchema,
   customerStatusChangedEventSchema,
   customerLoginLockedEventSchema,

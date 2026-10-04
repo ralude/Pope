@@ -24,8 +24,34 @@ function envelope(type: string, payload: object, actor: object = ANA) {
 
 const valid = (event: unknown) => domainEventSchema.safeParse(event).success;
 
-/** Un ejemplo válido de cada tipo de evento del plan 001. */
+/** Un ejemplo válido de cada tipo de evento de las specs implementadas. */
 const examples = {
+  // Spec 003: REQ-003-41, REQ-003-44, REQ-003-45.
+  'pc.maintenance_started': envelope('pc.maintenance_started', {
+    maintenanceId: id(20),
+    pc: PC05,
+    source: 'panel',
+    startedAt: '2026-09-25T22:30:00Z',
+  }),
+  'pc.maintenance_ended': envelope('pc.maintenance_ended', {
+    maintenanceId: id(20),
+    exitId: id(21),
+    pc: PC05,
+    source: 'local',
+    startedAt: '2026-09-25T22:30:00Z',
+    endedAt: '2026-09-25T22:31:00Z',
+    durationSeconds: 60,
+  }),
+  'staff.technical_login_locked': envelope(
+    'staff.technical_login_locked',
+    {
+      staffId: ANA.staffId,
+      username: 'ana',
+      pc: PC05,
+      lockedUntil: '2026-09-25T22:31:00Z',
+    },
+    { kind: 'system' },
+  ),
   'customer.created': envelope('customer.created', { customer: JUAN, name: null, phone: null }),
   'customer.status_changed': envelope('customer.status_changed', {
     customer: JUAN,
@@ -237,7 +263,7 @@ describe('eventos de auditoría (REQ-001-30, ADR-0008)', () => {
     expect(domainEventSchema.parse(event)).toEqual(event);
   });
 
-  it('cubre todos los eventos del plan 001', () => {
+  it('cubre todos los eventos de las specs implementadas', () => {
     expect(Object.keys(examples)).toHaveLength(domainEventSchema.options.length);
   });
 

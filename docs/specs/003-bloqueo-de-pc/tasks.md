@@ -36,6 +36,26 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** definir solicitudes, actor, IDs, estados, acuses, errores, mantenimiento y salida offline en `shared`; separar estado de sesión, orden solicitada y efecto confirmado.
   - **Verificar:** validación de cada variante, duplicados, ausencia de comandos/rutas libres y distinción entre aceptar reinicio y demostrar que se completó.
   - **Commit:** `feat(shared): define órdenes y mantenimiento de PCs`.
+  - **División previa:** tres subtareas para no exceder 400 líneas por commit; T02 se marca únicamente cuando estén completas:
+
+- [x] **T02a: Contratos de mantenimiento y auditoría**
+  - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43, REQ-003-44, REQ-003-45.
+  - **Hacer:** login técnico, mantenimiento confirmado, salida offline sin actor impuesto, reconocimiento y eventos estrictos; constantes de bloqueo por cuenta.
+  - **Verificar:** entradas válidas/inválidas, secretos solo en login, duración entera, ID estable de salida y actor del personal en auditoría.
+  - **Commit:** `feat(shared): define el mantenimiento y su auditoría`.
+  - **Implementada (2026-10-04):** login, estado confirmado, salida local sin actor impuesto y reconocimiento por ID; eventos de entrada/salida/bloqueo técnico en el validador de auditoría existente. El mecanismo Windows y la conciliación siguen en sus tareas futuras.
+
+- [ ] **T02b: Contratos de órdenes y acuses**
+  - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-43.
+  - **Hacer:** solicitudes tipadas, contexto esperado, vigencia, estados y efectos; mensajes según presentación y alcance confirmados.
+  - **Verificar:** comandos sin rutas libres, confirmación previa, idempotencia y distinción entre reinicio aceptado y efecto comprobado.
+  - **Commit:** `feat(shared): define las órdenes y sus acuses`.
+
+- [ ] **T02c: Canal v2 de control**
+  - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-40, REQ-003-44, REQ-003-63.
+  - **Hacer:** integrar mensajes nuevos y conservar campos de sesión/pausa; hello v2 autenticado sin secretos y estado de control independiente.
+  - **Verificar:** ambas direcciones, rechazo de variantes desconocidas y v1 operativo hasta T13.
+  - **Commit:** `feat(shared): prepara el canal v2 de control`.
 
 - [ ] **T03: Contratos del fondo global**
   - **Cubre:** REQ-003-70, REQ-003-71, REQ-003-72, REQ-003-73, REQ-003-74, REQ-003-75, REQ-003-76.

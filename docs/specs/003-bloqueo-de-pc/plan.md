@@ -17,10 +17,9 @@ El bloqueo y la pausa usan un escritorio Win32 separado, con las aplicaciones de
 cliente en el escritorio de uso. El nodo conserva toda decisión de sesión y cobro.
 
 El mantenedor confirmó C#, WebView2, el escritorio separado y la inclusión de la
-**fase 2 de la spec 002** el 2026-10-04. Este documento inicia el diseño solicitado;
-no aprueba la spec, los ADR-0017/0018, las propuestas técnicas pendientes ni la implementación.
-Después de cerrar las preguntas, se aprueba primero la spec, después el plan y por
-último se redactan y aprueban las tareas, siguiendo ADR-0013.
+**fase 2 de la spec 002** el 2026-10-04. Después autorizó Contratos y datos (T01–T07)
+y aceptó ADR-0017. Esa aprobación parcial permite preparar contratos y migraciones;
+el resto del diseño y ADR-0018 siguen pendientes, con aprobación siguiendo ADR-0013.
 
 **Decidido:** «Bloquear» cierra la sesión; mantenimiento
 remoto solo con la PC libre; login técnico local para encargado y administrador,
@@ -154,6 +153,37 @@ código nuevo sin consumir no invalida todavía una credencial vigente.
 
 ## Flujo principal
 
+### T02: contratos de mantenimiento y órdenes
+
+T02 se divide antes de implementar para mantener commits revisables: T02a define
+mantenimiento y auditoría; T02b órdenes/acuses; T02c el canal v2 que los integra.
+Cada subtask tiene su propio commit y verificación. El total sigue contando los 59
+grupos originales; T02 solo se marca al terminar sus tres subtareas.
+
+**T02a:** login técnico estricto con UUIDv7 de petición y usuario/contraseña del
+personal, sin credenciales Windows ni de PC. El nodo deriva rol y actor; solo
+encargado/administrador, con PC libre tanto local como remota (confirmado 2026-10-04).
+Constantes de 10 fallos consecutivos y 60 s, sin cambiar el login del panel.
+Un mantenimiento confirmado lleva UUIDv7, PC/nombre, actor del personal, origen
+`local`/`panel` e inicio UTC. `maintenanceState` comunica la entrada vigente o `null`,
+separadamente del estado de sesión y de una orden solicitada.
+La salida local durable lleva UUIDv7 propio, ID del mantenimiento, fin UTC y duración
+monotónica en segundos enteros; no permite imponer actor. El nodo lo recupera del
+mantenimiento autorizado y reconoce ese ID una sola vez. La salida remota conserva
+el actor autorizado del panel. La PC no confirma entrada antes del efecto Windows.
+Eventos `pc.maintenance_started`, `pc.maintenance_ended` y `staff.technical_login_locked`
+usan el sobre de auditoría existente y objetos estrictos; jamás contienen contraseñas.
+La salida incluye inicio/fin/duración y origen `local`/`panel`, junto al ID de salida.
+Los esquemas validan estructura; autenticidad, idempotencia y plausibilidad temporal
+se verificarán en la conciliación T40, y las transacciones en T28/T35–T40.
+Sin nuevas dependencias ni construcción sobre el mecanismo elevado de ADR-0018.
+
+**Mensaje confirmado (2026-10-04):** ventana centrada con sonido, duración 5 s, sin
+foco ni bloqueo de entrada; PC libre, sesión activa o pausada, nunca mantenimiento.
+Se liga al contexto destinatario y no se entrega si ha cambiado antes de mostrarse.
+El alcance y la presentación son constantes del producto, no parámetros arbitrarios
+que el emisor pueda variar en la orden.
+
 ### Arranque, sesión y recuperación
 
 1. El instalador comprueba versión/edición y runtime, guarda la configuración previa,
@@ -188,8 +218,8 @@ código nuevo sin consumir no invalida todavía una credencial vigente.
 ### Mantenimiento y órdenes
 
 - El nodo autoriza mantenimiento local de encargado/administrador o la orden remota
-  ya permitida. La entrada remota exige que no haya sesión de cliente, también si está
-  pausada; falta confirmar la misma regla para la entrada desde la propia PC.
+  ya permitida. Ambas entradas exigen que no haya sesión de cliente, también si está
+  pausada; la entrada local quedó confirmada el 2026-10-04.
 - El acceso técnico aplica 10 fallos por cuenta → bloqueo de 1 min y aviso al panel
   (003-45). El contador no vive en la PC: cambiar de equipo no elude el bloqueo.
   Son fallos consecutivos; un login correcto o el fin del bloqueo reinician el contador.

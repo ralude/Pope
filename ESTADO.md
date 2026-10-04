@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-04 · T01 de contratos y datos 003
+**Última actualización:** 2026-10-04 · T02a de contratos y datos 003
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T07 aprobado/en curso; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
-| **Siguiente tarea** | T02: contratos de órdenes y mantenimiento; concretar únicamente reglas aprobadas y preguntar si un campo necesita decisiones pendientes. Continuar T03–T07 una tarea por commit |
-| **Progreso** | Spec 003: 1 / 59; T01 terminada, T02–T07 autorizadas; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | T01 ya tiene base confirmada. T02–T07 deben detenerse si faltan contratos o reglas; cobro/recuperación de revocación, emergencia, entrada técnica local y mensajes siguen pendientes. Inventario antes de tareas nativas dependientes |
+| **Siguiente tarea** | T02b: órdenes/acuses, pendiente de confirmar vigencia de órdenes; después T02c canal v2. Continuar T03–T07 una tarea por commit |
+| **Progreso** | Spec 003: 1 / 59 grupos, T02a terminada (1/3 de T02); T02–T07 autorizadas; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Bloqueos** | Entrada técnica local solo con PC libre y mensajes de 5 s sin foco confirmados. Cobro/recuperación de revocación y emergencia siguen pendientes para tareas posteriores; inventario antes de tareas nativas dependientes |
 
 ## Cómo retomar
 
@@ -64,6 +64,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-04:** T02a: contratos de mantenimiento confirmado, login técnico, salida durable y reconocimiento por ID; auditoría de entrada/salida/bloqueo técnico sin secretos. Confirmados cierre previo también local y mensajes de 5 s con sonido/sin foco, fuera de mantenimiento. T02 dividida en tres subtareas antes de implementar; 1/59 grupos completos. 871 tests (289 shared), formato, lint, tipos y build en verde. Sin mecanismo elevado ni mutaciones de Windows.
 - **2026-10-04:** T01 implementada: registro/auth de PCs en shared, campos estrictos y separación de secretos, MAC validada/normalizada, recuperación con otro código de la misma PC y constante v2 sin cambiar el canal actual. 862 tests del monorepo (280 shared), formato, lint, tipos y build pasan. La primera ejecución tuvo `spawn EPERM` del sandbox; con procesos permitidos funciona. Siguiente T02; sin registrar PCs reales ni modificar Windows.
 - **2026-10-04:** el mantenedor autoriza Contratos y datos (T01–T07) y acepta ADR-0017. Confirma canal autenticado v2 con retirada de v1 al cambiar admisión y recuperación de registro con código nuevo ligado a la misma PC libre/sin mantenimiento. T01 en preparación; resto de mecanismos Windows y preguntas de negocio sin aprobar.
 - **2026-10-04:** enlace de fase 2 actualizado en tasks 002 hacia la lista única de tasks 003 (T23–T25, verificación T56). Las 19 tareas y la aprobación de fase 1 no cambian; tasks 003 permanece Borrador, 0/59 implementadas.
@@ -73,4 +74,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** el mantenedor aclara que pide `tasks.md` a partir del plan 003. Revocación: conservar sesión y bloquear al recibirla; cobro/recuperación pendientes. Reiniciar/apagar en mantenimiento: confirmar, terminarlo y ejecutar. Solicita diseñar acceso de emergencia sin nodo, con reglas aún abiertas. Documentación en Borrador; sin implementación.
 - **2026-10-04:** plan 003 iniciado según la plantilla: C#/WebView2, escritorio separado y fase 2 de pausa; acuerdos de cierre, roles, Evergreen, 13 PCs, nodo fijo y mantenimiento sin red. Cuenta Windows existente elegida; ADR-0017/0018 propuestos. Login técnico: 10 fallos consecutivos/1 min/un aviso; códigos encargado/admin de 10 min; fondo 10 MB → WebP 2 MB/1920×1080. Windows/congelador/monitores y mecanismos técnicos pendientes; spec/plan en Borrador, sin código.
 - **2026-10-04:** el mantenedor aprueba T19 y el cierre de la fase 1 de la spec 002: 19/19 tareas terminadas. Informe y límites en `mediciones.md`; fase 2 pendiente de la spec 003. Siguiente paso: definir los avisos de 5 y 1 min ya pedidos.
-- **2026-10-04:** T19 (spec 002) preparada para revisión: criterios en `mediciones.md`; 852 tests sin caché y 372 con PostgreSQL real en verde. Pruebas del Shell y del panel con pausa, confirmación, vencimiento, reanudación y cierre. La fase 2 queda pendiente; T19 no se marca hasta la revisión del mantenedor.
