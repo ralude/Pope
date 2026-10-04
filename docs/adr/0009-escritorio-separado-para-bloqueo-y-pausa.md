@@ -1,6 +1,6 @@
 # ADR-0009: Bloqueo y pausa en un escritorio Win32 separado
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado (mantenedor, 2026-10-04)
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0005, ADR-0006, spec 002, spec 003
 

@@ -40,11 +40,11 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0002](0002-monorepo-typescript.md) | Monorepo con pnpm y Turborepo | Aceptado |
 | [0003](0003-backend-nestjs-fastify.md) | Backend con NestJS sobre Fastify, un código en dos modos | Aceptado |
 | [0004](0004-postgresql-local-y-nube.md) | PostgreSQL en el nodo local y en la nube, con Drizzle ORM | Aceptado |
-| [0005](0005-shell-react-en-webview2.md) | Interfaz del Shell en React dentro de WebView2 | Propuesto |
+| [0005](0005-shell-react-en-webview2.md) | Interfaz del Shell en React dentro de WebView2 | Aceptado |
 | [0006](0006-agente-nativo-en-csharp.md) | Agente y host nativos en C# (.NET), reducidos al mínimo | Aceptado |
 | [0007](0007-nodo-local-fuente-de-verdad.md) | El nodo local es la fuente de verdad del tiempo y el saldo | Aceptado |
 | [0008](0008-sincronizacion-por-eventos.md) | Sincronización local → nube por eventos (outbox) | Aceptado |
-| [0009](0009-escritorio-separado-para-bloqueo-y-pausa.md) | Bloqueo y pausa en un escritorio Win32 separado | Propuesto |
+| [0009](0009-escritorio-separado-para-bloqueo-y-pausa.md) | Bloqueo y pausa en un escritorio Win32 separado | Aceptado |
 | [0010](0010-lista-blanca-y-restauracion.md) | Lista blanca de aplicaciones y restauración de configuración | Propuesto |
 | [0011](0011-presupuesto-de-recursos-nodo-local.md) | Presupuesto de recursos del nodo local | Reemplazado por ADR-0016 |
 | [0012](0012-web-del-dueno-sin-instalacion.md) | La web del dueño es solo navegador, sin instalación | Aceptado |

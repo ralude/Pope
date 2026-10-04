@@ -1,6 +1,6 @@
 # ADR-0005: Interfaz del Shell en React dentro de WebView2
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado (mantenedor, 2026-10-04)
 - **Fecha:** 2026-09-25
 - **Relacionado:** ADR-0006, ADR-0009, spec 003
 
