@@ -5,8 +5,9 @@
 - **ADRs que aplican:** ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008,
   ADR-0009, ADR-0015 y ADR-0016. ADR-0010 sigue Propuesto y pertenece a la spec 004.
 - **ADRs nuevos que propone:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md),
-  comunicación segura. El mecanismo de mantenimiento elevado y la instalación se
-  documentarán en ADR antes de construirlos si requieren decisiones nuevas.
+  comunicación segura, y [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md),
+  mantenimiento con una cuenta Windows existente. La instalación se documentará en
+  ADR antes de construirla si requiere decisiones nuevas.
 
 ## Resumen
 
@@ -17,7 +18,7 @@ cliente en el escritorio de uso. El nodo conserva toda decisión de sesión y co
 
 El mantenedor confirmó C#, WebView2, el escritorio separado y la inclusión de la
 **fase 2 de la spec 002** el 2026-10-04. Este documento inicia el diseño solicitado;
-no aprueba la spec, el ADR-0017, las propuestas técnicas pendientes ni la implementación.
+no aprueba la spec, los ADR-0017/0018, las propuestas técnicas pendientes ni la implementación.
 Después de cerrar las preguntas, se aprueba primero la spec, después el plan y por
 último se redactan y aprueban las tareas, siguiendo ADR-0013.
 
@@ -31,7 +32,8 @@ congelador y las preguntas indicadas en la spec.
 
 El nodo tendrá IP fija o reserva DHCP, configurada en la instalación. Un mantenimiento
 ya autorizado continúa sin red y permite terminar/bloquear localmente; se registra la
-salida al reconectar. La identidad administradora de Windows sigue sin elegir.
+salida al reconectar. El mantenedor eligió reutilizar una cuenta administradora Windows
+existente; falta revisar y verificar el mecanismo propuesto en ADR-0018.
 
 ## Componentes afectados
 
@@ -150,11 +152,15 @@ en producción para conservar compatibilidad con el canal provisional.
   permitir salir/bloquear; guardar esa salida de forma durable y acotada hasta el
   reconocimiento idempotente del nodo (003-44). Definir recuperación tras reinicio.
 - Encender usa UDP desde el nodo con la MAC registrada (no una orden a una PC apagada).
-  El mapa solo confirma el arranque cuando la PC se conecta; falta fijar el plazo.
-- Reinicio/apagado y mensaje requieren resultados y comportamiento explícito si había
-  sesión, pausa o mantenimiento; no asumir que toda orden se puede ejecutar en cualquier estado.
+  El mapa solo confirma el arranque cuando la PC se conecta. Si pasan 2 min, avisar
+  sin diagnosticar avería; quitar el aviso si conecta después (003-22).
+- Reinicio/apagado con sesión activa o pausada: confirmar, cerrar con las reglas
+  existentes y ejecutar después. El panel advierte la pérdida de tiempo de una temporal.
+  Registrar resultado real, no solo envío; no emitir apagados repetidos al reconectar.
+- Concretar mensaje del encargado y reinicio/apagado durante mantenimiento; no asumir
+  que toda orden se puede ejecutar en cualquier estado.
 
-### Alternativas de mantenimiento (pendientes de decidir)
+### Alternativas de mantenimiento (identidad elegida; mecanismo en revisión)
 
 La cuenta del personal de Pope autoriza la operación; el token y los permisos de
 Windows proceden de otra identidad local. Ninguna opción convierte la cuenta del
@@ -166,12 +172,14 @@ cliente en administradora ni ejecuta el escritorio o WebView2 como LocalSystem.
 | B. Cuenta administradora Windows existente | El técnico configura una cuenta local ya creada y autoriza su uso al servicio; Pope no crea otra | Reutiliza el perfil y herramientas instaladas. Pope dependería de su contraseña y permisos; cambios externos pueden romper el acceso y esa cuenta puede contener datos ajenos a Pope |
 | C. Inicio administrativo manual de Windows | Pope autoriza el mantenimiento, pero una persona introduce además las credenciales de Windows en la PC | El servicio no guarda ese secreto. Cambia 003-40 y no cumple la entrada remota sin escribir en la PC de 003-43; requiere revisar esos requisitos |
 
-**Recomendación para revisar:** A, por separación de cuentas y control de instalación.
-Es una propuesta, no una decisión del mantenedor. Antes de aprobarla hay que prototipar
+**Elección del mantenedor (2026-10-04): B**, cuenta Windows existente. La opción A fue
+la recomendación inicial y se conserva solo como alternativa comparada. ADR-0018
+desarrolla B como propuesta técnica aún sin aprobar. Hay que prototipar
 obtención de token elevado con UAC, aislamiento del escritorio/perfil, compatibilidad
 con las directivas del cliente y cierre de todos los procesos administrativos al salir.
 No basta con lanzar `explorer.exe` desde el usuario restringido ni con añadirlo
-temporalmente al grupo Administradores. La opción elegida tendrá su ADR específico.
+temporalmente al grupo Administradores. La desinstalación conservará la cuenta y sus
+datos, y un cambio externo de contraseña necesitará reconfigurar su custodia en el agente.
 
 ### Fondo
 
