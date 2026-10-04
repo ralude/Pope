@@ -31,7 +31,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(shared): define el registro autenticado de PCs`.
   - **Implementada (2026-10-04):** `pc-registration.ts`: objetos estrictos, base64url canónico, código 128 bits/600 s, credencial 256 bits/Bearer, MAC de entrada y normalización explícita, recuperación con `pcId` y errores sin secretos. `NATIVE_PC_PROTOCOL_VERSION = 2` no cambia todavía v1. Diez tests nuevos; 280 de shared en verde. Registro real/roles/caducidad efectiva quedan en T12/T13.
 
-- [ ] **T02: Contratos de órdenes y mantenimiento**
+- [x] **T02: Contratos de órdenes y mantenimiento**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-40, REQ-003-41, REQ-003-43, REQ-003-44, REQ-003-45.
   - **Hacer:** definir solicitudes, actor, IDs, estados, acuses, errores, mantenimiento y salida offline en `shared`; separar estado de sesión, orden solicitada y efecto confirmado.
   - **Verificar:** validación de cada variante, duplicados, ausencia de comandos/rutas libres y distinción entre aceptar reinicio y demostrar que se completó.
@@ -52,11 +52,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(shared): define las órdenes y sus acuses`.
   - **Implementada (2026-10-04):** seis acciones nativas cerradas, solicitudes sin actor impuesto, confirmación con ocupación, contexto/revisión y 30 s de vigencia; acuses sin resultado «aplicado» para reinicio/apagado. Journal y coordinación efectiva quedan en T28/T30.
 
-- [ ] **T02c: Canal v2 de control**
+- [x] **T02c: Canal v2 de control**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-40, REQ-003-44, REQ-003-63.
   - **Hacer:** integrar mensajes nuevos y conservar campos de sesión/pausa; hello v2 autenticado sin secretos y estado de control independiente.
   - **Verificar:** ambas direcciones, rechazo de variantes desconocidas y v1 operativo hasta T13.
   - **Commit:** `feat(shared): prepara el canal v2 de control`.
+  - **Implementada (2026-10-04):** esquemas estrictos v2 y frontera React separada, control UTC/contexto, estado de mantenimiento y reconocimiento de salida. V1 y los consumidores actuales siguen operativos hasta T13/T14; C# y la conciliación siguen pendientes.
 
 - [ ] **T03: Contratos del fondo global**
   - **Cubre:** REQ-003-70, REQ-003-71, REQ-003-72, REQ-003-73, REQ-003-74, REQ-003-75, REQ-003-76.

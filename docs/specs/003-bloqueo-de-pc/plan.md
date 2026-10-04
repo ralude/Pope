@@ -208,6 +208,24 @@ confirmación ausente, reutilización incompatible del ID, petición inválida y
 Las comparaciones temporales usan UTC del nodo; el agente lo avanza con reloj monotónico
 desde `controlState.serverTime`, evitando ampliar vigencia al cambiar el reloj de Windows.
 
+**T02c:** `native-protocol.ts` prepara los dos sentidos v2 sin cambiar la admisión v1.
+Reutiliza los campos y significado de sesión/pausa, con objetos estrictos también en
+sesiones, dinero y combos. `hello` v2 conserva `pcId` para contrastarlo con la identidad
+autenticada; añade `recoveryState`, `controlContext` y `pendingMaintenanceExitId`.
+`unknown` exige copia de sesión/contexto desconocida (`null`), sin inventar un cierre;
+`known` comunica la copia persistida. La conciliación permanece en T17/T40. El latido
+añade el último contexto conocido, que no sustituye al acuse del efecto Windows.
+`controlState` lleva contexto y UTC del nodo, separado de `state`, `maintenanceState`
+y `command`. Las salidas offline se envían individualmente con su ID y se reconocen
+sin obligar a abrir un mantenimiento nuevo. Errores de autenticación distinguen la
+revocación de un fallo de transporte, sin fijar todavía el cobro durante ese bloqueo.
+La solicitud de puente `endMaintenance` identifica el mantenimiento y la petición;
+el servicio produce la salida durable incluso sin red. `nativeShellRequestSchema`
+solo admite acciones del cliente y login/salida técnica: React no fabrica hello,
+latidos, acuses, credenciales ni órdenes nativas. El validador de notificaciones del
+Shell excluye las órdenes, que consume C# por el canal confiable. T07 exporta estas
+fronteras separadas para C#, con fixtures que prueban ese aislamiento.
+
 ### Arranque, sesión y recuperación
 
 1. El instalador comprueba versión/edición y runtime, guarda la configuración previa,
