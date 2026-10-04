@@ -283,13 +283,11 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     expect(await storedSession(5)).toMatchObject({ status: 'active' });
   });
 
-  it('si la PC nunca supo de la sesión (se perdió su state), reconectar sin sesión no la cierra', async () => {
+  it('REQ-001-27, REQ-001-66: si la PC perdió el state inicial, reconectar sin sesión no la cierra', async () => {
     world = await PcWorld.start(MONDAY);
     const ana = await world.cashier();
     const pc = await world.pc(5);
-    // El encargado abre una temporal, pero la PC se cae antes de recibir el state.
-    pc.close();
-    await pc.closed;
+    // Abrir exige la PC conectada. Pierde el state sin aplicarlo ni reconocer la sesión.
     const opened = await world.api('POST', '/sessions/temporary', ana, {
       pcId: devPcId(5),
       paymentMethod: 'cash_usd',
@@ -297,6 +295,9 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
     });
     expect(opened.statusCode).toBe(201);
     const { id } = opened.json<{ id: string }>();
+    expect(activeSession(await pc.next()).sessionId).toBe(id);
+    pc.close();
+    await pc.closed;
 
     // Vuelve diciendo que no tiene sesión: el nodo le manda la sesión en vez de cerrarla.
     const { pc: back, state } = await PcTestClient.hello(world.url, devPcId(5), null);

@@ -513,6 +513,14 @@ antes de seguir.
 
 ## Cierre
 
+- [x] **T51a: Corregir la simulación de pérdida del estado inicial de una temporal**
+  - **Estado:** Aprobada por el mantenedor (2026-10-04), antes de verificar T19 de la spec 002.
+  - **Cubre:** REQ-001-27, REQ-001-66.
+  - **Hacer:** en `no-heartbeat.e2e.test.ts`, mantener la PC conectada al abrir la temporal (como exige T31), descartar el `state` sin reconocer la sesión en un latido y reconectar sin sesión. Comprobar que el nodo conserva la sesión antes del primer reconocimiento y la cierra por reinicio después de él.
+  - **Verificar:** el test con PGlite y PostgreSQL real; después, la batería completa en T19 (spec 002).
+  - **Commit:** `test(server): corrige la pérdida del estado inicial de una temporal`
+  - **Verificado (2026-10-04):** se abre conectada, se descarta el estado sin reconocer la sesión y se cierra la conexión; reconectar sin sesión la conserva hasta el primer latido que la reconoce. Los 10 tests de `no-heartbeat` pasan con PGlite y PostgreSQL real. Formato, lint, tipos y batería completa sin caché en verde (372 tests del servidor).
+
 - [x] **T51: Verificación de aceptación**
   - **Cubre:** todos los CA-001-*
   - **Hacer:** tabla en `mediciones.md` con cada CA y el test o la prueba manual que lo cubre. Marcar la spec como **Implementada** (salvo REQ-001-13, pendiente de la spec 005).
