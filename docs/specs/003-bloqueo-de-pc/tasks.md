@@ -59,11 +59,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(shared): prepara el canal v2 de control`.
   - **Implementada (2026-10-04):** esquemas estrictos v2 y frontera React separada, control UTC/contexto, estado de mantenimiento y reconocimiento de salida. V1 y los consumidores actuales siguen operativos hasta T13/T14; C# y la conciliación siguen pendientes.
 
-- [ ] **T03: Contratos del fondo global**
+- [x] **T03: Contratos del fondo global**
   - **Cubre:** REQ-003-70, REQ-003-71, REQ-003-72, REQ-003-73, REQ-003-74, REQ-003-75, REQ-003-76.
   - **Hacer:** definir metadatos, fondo por defecto, mensaje de cambio, respuestas HTTP, SHA-256, tamaños y progreso; fijar en el plan aprobado las unidades exactas de los límites.
   - **Verificar:** hash/tamaño/dimensiones inválidos, eliminación y reconexión; no incluir bytes de imagen en eventos ni en WebSocket.
   - **Commit:** `feat(shared): define el fondo global de bloqueo`.
+  - **Implementada (2026-10-04):** metadatos y snapshot global, revisión/actor, aviso v2 sin bytes, progreso solo local y evento estricto. Límites decimales y máximo original de 40 millones de píxeles confirmados; validación/decodificación del archivo y distribución quedan en T43–T46.
 
 - [ ] **T04: Migración de registro y credenciales**
   - **Cubre:** REQ-003-10, REQ-003-11, REQ-003-22, REQ-003-63.

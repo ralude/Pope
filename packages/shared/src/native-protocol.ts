@@ -1,5 +1,9 @@
 // V2 para el agente autenticado; v1 sigue operativo hasta T13 (spec 003, T02c).
 import { z } from 'zod';
+import {
+  lockBackgroundMessageSchema,
+  lockBackgroundProgressMessageSchema,
+} from './lock-background.js';
 
 import {
   pcCommandAckMessageSchema,
@@ -105,6 +109,7 @@ export const nativeAuthenticationErrorMessageSchema = pcAuthenticationErrorSchem
   type: z.literal('pcAuthenticationError'),
 });
 const shellNotifications = [
+  lockBackgroundMessageSchema,
   nativeStateMessageSchema,
   nativeControlStateMessageSchema,
   maintenanceStateMessageSchema,
@@ -118,7 +123,10 @@ const shellNotifications = [
   nativeAuthenticationErrorMessageSchema,
 ] as const;
 /** Las órdenes nativas se consumen en C#, no se reenvían al JavaScript del Shell. */
-export const nativeShellNotificationSchema = z.union(shellNotifications);
+export const nativeShellNotificationSchema = z.union([
+  ...shellNotifications,
+  lockBackgroundProgressMessageSchema,
+]);
 export type NativeShellNotification = z.infer<typeof nativeShellNotificationSchema>;
 export const nativeNodeToPcMessageSchema = z.union([
   ...shellNotifications,

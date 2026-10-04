@@ -13,6 +13,7 @@ import { z } from 'zod';
 import { cashMethodSchema } from './cash.js';
 import { customerStatusSchema } from './customer.js';
 import { exchangeRateSourceSchema, localDateSchema } from './exchange-rate.js';
+import { lockBackgroundImageSchema } from './lock-background-image.js';
 import { currencySchema, microsSchema, vesRateSchema } from './money.js';
 import { idSchema, sessionEndReasonSchema, utcInstantSchema } from './session.js';
 import { pauseOverrunSchema, settingKeySchema } from './settings.js';
@@ -68,6 +69,15 @@ function event<const Type extends string, Payload extends z.ZodType>(
 }
 
 // ─── Mantenimiento (REQ-003-41, REQ-003-44, REQ-003-45) ────────────────────────────────────
+
+export const lockBackgroundChangedEventSchema = event(
+  'lock_screen.background_changed',
+  1,
+  z.strictObject({
+    revision: z.int().positive(),
+    background: lockBackgroundImageSchema.nullable(),
+  }),
+).extend({ actor: actorSchema.options[1] });
 
 export const pcMaintenanceStartedEventSchema = event(
   'pc.maintenance_started',
@@ -798,6 +808,7 @@ export const saleVoidedEventSchema = event(
 // ─── Unión de todos los eventos ─────────────────────────────────────────────────────────
 
 export const domainEventSchema = z.discriminatedUnion('type', [
+  lockBackgroundChangedEventSchema,
   pcMaintenanceStartedEventSchema,
   pcMaintenanceEndedEventSchema,
   staffTechnicalLoginLockedEventSchema,

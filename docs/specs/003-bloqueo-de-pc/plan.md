@@ -153,6 +153,29 @@ código nuevo sin consumir no invalida todavía una credencial vigente.
 
 ## Flujo principal
 
+### T03: fondo global
+
+Límites exactos: original **10 000 000 bytes** y **40 000 000 píxeles** (confirmados
+2026-10-04), WebP enviado **2 000 000 bytes**, ancho ≤ 1920 y alto ≤ 1080.
+Los encabezados se comprobarán antes de decodificar en el panel (T45); estos contratos
+no decodifican imágenes ni comprueban bytes reales. JPG/PNG/WebP originales, solo WebP
+en el nodo. Sin multipart ni nuevas dependencias; T43 conservará el límite de 512 KB
+de fotos de productos al preparar el parser del fondo.
+`lockBackgroundImageSchema` contiene SHA-256 hexadecimal minúsculo, tamaño en bytes,
+`image/webp` y dimensiones enteras. Sin URLs, rutas ni bytes. `lockBackgroundSnapshotSchema`
+es revisión 0/fondo por defecto/sin actor inicialmente, o revisión positiva con fondo
+opcional, cambio UTC y actor del personal; quitar conserva la revisión y autoría del
+cambio. El nodo incrementa la revisión del único registro en la misma transacción que
+`lock_screen.background_changed`, cuyo payload lleva revisión e imagen o `null`.
+GET/PUT/DELETE `/lock-screen/background` devuelven ese snapshot; PUT usa cuerpo binario
+`image/webp`, DELETE sin cuerpo, descarga por SHA-256 y autenticación PC/personal según
+ADR-0017. Validar contenido y hash al guardar/descargar queda en T43/T46, no en Zod.
+`lockBackground` anuncia revisión e imagen o `null` en vivo y después de cada hello;
+no transmite actor, imagen ni ruta. Progreso local `backgroundProgress` distingue
+descarga (porcentaje entero 0–100), verificación, listo y fallo sin bloquear login.
+Solo el puente local lo emite; no es un mensaje del nodo. Descargar/verificar no implica
+aplicar durante una sesión: T46 conserva la copia anterior y aplica al volver al bloqueo.
+
 ### T02: contratos de mantenimiento y órdenes
 
 T02 se divide antes de implementar para mantener commits revisables: T02a define

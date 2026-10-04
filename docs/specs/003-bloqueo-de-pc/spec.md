@@ -75,7 +75,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-73:** Cada PC descarga la imagen del nodo, comprueba la huella, la guarda en local y solo entonces la pone de fondo. Mientras descarga, la pantalla de bloqueo muestra un indicador de actualización con el progreso, **sin impedir iniciar sesión**. Si la descarga falla o la huella no coincide, conserva el fondo anterior y reintenta.
 - **REQ-003-74:** Si llega un fondo nuevo con una sesión abierta, la PC lo descarga en segundo plano y lo aplica al volver a la pantalla de bloqueo, sin interrumpir al cliente.
 - **REQ-003-75:** El fondo funciona sin internet: viaja solo por la LAN, y cada PC conserva su copia aunque el nodo no responda (REQ-003-04).
-- **REQ-003-76:** El panel acepta imágenes JPG, PNG o WebP de hasta **10 MB** y las reduce, conservando la proporción, a un máximo de **1920×1080**. Envía al nodo una imagen WebP de hasta **2 MB**; el nodo valida el archivo y no procesa imágenes grandes. (Mantenedor, 2026-10-04.)
+- **REQ-003-76:** El panel acepta imágenes JPG, PNG o WebP de hasta **10 MB (10 000 000 bytes)** y **40 millones de píxeles**; comprueba los encabezados antes de decodificar y muestra el motivo si exceden los límites. Las reduce, conservando la proporción, a un máximo de **1920×1080**. Envía al nodo una imagen WebP de hasta **2 MB (2 000 000 bytes)**; el nodo valida el archivo y no procesa imágenes grandes. (Límites y protección del navegador confirmados por el mantenedor, 2026-10-04.)
 
 > **Propuesta para el plan (2026-10-02, a confirmar):** endpoints del nodo para el fondo.
 >

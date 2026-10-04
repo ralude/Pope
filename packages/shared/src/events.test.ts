@@ -26,6 +26,11 @@ const valid = (event: unknown) => domainEventSchema.safeParse(event).success;
 
 /** Un ejemplo válido de cada tipo de evento de las specs implementadas. */
 const examples = {
+  // Spec 003: REQ-003-71, vuelta al fondo por defecto.
+  'lock_screen.background_changed': envelope('lock_screen.background_changed', {
+    revision: 1,
+    background: null,
+  }),
   // Spec 003: REQ-003-41, REQ-003-44, REQ-003-45.
   'pc.maintenance_started': envelope('pc.maintenance_started', {
     maintenanceId: id(20),
