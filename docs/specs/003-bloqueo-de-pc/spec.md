@@ -40,13 +40,13 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-04:** Si el nodo local no responde, la pantalla lo indica ("Sin conexión con el servidor") y reintenta sola. No se puede iniciar sesión sin nodo.
 
 **Registro de PCs**
-- **REQ-003-10:** Una PC nueva se registra con un **código de instalación** de un solo uso generado en el panel. El nodo le asigna un nombre (PC 01…).
+- **REQ-003-10:** Una PC nueva se registra con un **código de instalación** de un solo uso generado en el panel por encargado o administrador, con caducidad de **10 min**. El nodo le asigna un nombre (PC 01…). (Roles y plazo confirmados por el mantenedor, 2026-10-04.)
 - **REQ-003-11:** El nodo rechaza agentes no registrados o con credencial revocada.
 
 **Control remoto desde el panel**
-- **REQ-003-20:** Comandos: bloquear, abrir sesión, cerrar sesión, enviar mensaje, reiniciar, apagar, encender (REQ-003-22) e iniciar como administrador (REQ-003-43). Los usan el encargado y el administrador; el dueño solo mira (decisión del mantenedor, 2026-10-02). «Bloquear» cierra la sesión existente y bloquea la PC; no pausa ni mantiene el cobro tras el cierre (mantenedor, 2026-10-04). Se aplican las reglas de cierre vigentes, también a las temporales (REQ-001-69).
+- **REQ-003-20:** Comandos: bloquear, abrir sesión, cerrar sesión, enviar mensaje, reiniciar, apagar, encender (REQ-003-22) e iniciar como administrador (REQ-003-43). Los usan el encargado y el administrador; el dueño solo mira (decisión del mantenedor, 2026-10-02). «Bloquear» cierra la sesión existente y bloquea la PC; no pausa ni mantiene el cobro tras el cierre. Reiniciar y apagar con una sesión activa o pausada requieren confirmación, cierre de la sesión y después ejecución de la orden. Se aplican las reglas de cierre vigentes, también a las temporales (REQ-001-69). (Comportamientos de bloqueo/reinicio/apagado confirmados por el mantenedor, 2026-10-04.)
 - **REQ-003-21:** El panel muestra en vivo el estado de cada PC con estos colores: apagada o sin conexión en **gris**, libre en **verde**, en uso con cuenta en **celeste**, sesión temporal en **ámbar** y en mantenimiento (modo administrador) en **rojo**. En pausa, en **morado** (REQ-002-14). (Colores del mantenedor, 2026-10-02; los de los estados que ya existen se aplicaron en el panel antes de esta spec.)
-- **REQ-003-22:** **Encender por red (Wake-on-LAN).** Desde el panel se enciende una PC apagada: el nodo envía el "paquete mágico" por la LAN a la dirección MAC de su tarjeta de red, que el agente registra al instalarse (REQ-003-50). Requiere tener Wake-on-LAN activado en la BIOS y en la tarjeta de red (PCIe). Si la PC no se conecta al nodo en unos minutos, el panel lo indica.
+- **REQ-003-22:** **Encender por red (Wake-on-LAN).** Desde el panel se enciende una PC apagada: el nodo envía el "paquete mágico" por la LAN a la dirección MAC de su tarjeta de red, que el agente registra al instalarse (REQ-003-50). Requiere tener Wake-on-LAN activado en la BIOS y en la tarjeta de red (PCIe). Si la PC no se conecta al nodo en **2 min**, el panel lo indica sin afirmar que esté averiada; el aviso desaparece si luego se conecta. (Plazo confirmado por el mantenedor, 2026-10-04.)
 
 **Protección**
 - **REQ-003-30:** Mientras Pope esté en primer plano o bloqueado, se inhiben la tecla Windows, Alt+Tab, Ctrl+Esc y Alt+F4.
@@ -61,6 +61,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-43:** **Iniciar como administrador desde el panel.** El encargado o el administrador pone una PC en modo mantenimiento sin escribir nada en ella: la PC muestra el escritorio de Windows con permisos de administrador, como en REQ-003-40. Queda registrado igual (REQ-003-41, con quién lo inició desde el panel) y el mapa la pinta en rojo. Termina con "Terminar y bloquear" en la PC o desde el panel. Solo se permite con la PC libre: si hay una sesión activa o pausada, se debe cerrar antes mediante el flujo de cierre existente. (Decisión inicial del mantenedor, 2026-10-02; restricción de sesión confirmada el 2026-10-04.)
 - **REQ-003-42:** Durante el mantenimiento, Pope **no le muestra al técnico el tiempo que lleva**: solo una **pestaña plegada arriba en el centro** ("Técnico", pequeña, para no tapar las barras de título ni los menús) que al pasar el ratón se despliega con la PC, quién entró y el botón "Terminar y bloquear". La duración se sigue registrando en el evento de salida (REQ-003-41). (Pestaña plegada: decisión del mantenedor, 2026-10-03; antes era una barra fija siempre desplegada.)
 - **REQ-003-44:** Si se pierde la conexión con el nodo durante un mantenimiento ya autorizado, el modo técnico continúa y permite «Terminar y bloquear» sin red. La PC conserva la salida pendiente y la comunica al reconectar para registrarla una sola vez con su actor y duración. La pérdida de conexión no permite iniciar un nuevo mantenimiento sin validación del nodo. (Mantenedor, 2026-10-04.)
+- **REQ-003-45:** El login técnico se bloquea por cuenta durante **1 min** al alcanzar **10 intentos fallidos consecutivos**, y el panel recibe un aviso por bloqueo. Un login correcto reinicia el contador y, al terminar el bloqueo, vuelve a cero; cambiar de PC no permite eludirlo. Este límite no cambia el login del personal en el panel. (Límite, contador y aviso confirmados por el mantenedor, 2026-10-04.)
 
 **Instalación**
 - **REQ-003-50:** Un instalador crea el usuario restringido, configura el inicio de sesión automático, aplica las directivas, instala el servicio y registra la PC (REQ-003-10).
@@ -73,6 +74,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-73:** Cada PC descarga la imagen del nodo, comprueba la huella, la guarda en local y solo entonces la pone de fondo. Mientras descarga, la pantalla de bloqueo muestra un indicador de actualización con el progreso, **sin impedir iniciar sesión**. Si la descarga falla o la huella no coincide, conserva el fondo anterior y reintenta.
 - **REQ-003-74:** Si llega un fondo nuevo con una sesión abierta, la PC lo descarga en segundo plano y lo aplica al volver a la pantalla de bloqueo, sin interrumpir al cliente.
 - **REQ-003-75:** El fondo funciona sin internet: viaja solo por la LAN, y cada PC conserva su copia aunque el nodo no responda (REQ-003-04).
+- **REQ-003-76:** El panel acepta imágenes JPG, PNG o WebP de hasta **10 MB** y las reduce, conservando la proporción, a un máximo de **1920×1080**. Envía al nodo una imagen WebP de hasta **2 MB**; el nodo valida el archivo y no procesa imágenes grandes. (Mantenedor, 2026-10-04.)
 
 > **Propuesta para el plan (2026-10-02, a confirmar):** endpoints del nodo para el fondo.
 >
@@ -87,6 +89,11 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 > - El panel redimensiona y comprime la imagen en el navegador (a 1920×1080, con `<canvas>`) antes de subirla. Así el nodo no procesa imágenes ni necesita `sharp` (ADR-0011).
 > - Dependencia nueva del servidor: `@fastify/multipart`, que hay que justificar en el plan (ADR-0011).
 > - En el panel, la pantalla iría en `/fondo-de-bloqueo`, que no choca con `/lock-screen` en el proxy de Vite.
+
+**Actualización al preparar el plan (2026-10-04):** REQ-003-76 confirma compresión en
+el panel y subida WebP de 2 MB como máximo. El plan propone cuerpo binario `image/webp`,
+como las fotos de productos, en lugar de multipart; ese cambio técnico se revisará con
+el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobado.
 
 ## Requisitos no funcionales
 
@@ -146,6 +153,14 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
   - **Dado** una PC en modo técnico autorizado
   - **Cuando** pierde conexión con el nodo y el técnico pulsa «Terminar y bloquear»
   - **Entonces** vuelve al bloqueo sin esperar la red y, al reconectar, la salida se registra una sola vez con actor y duración.
+- **CA-003-10** (REQ-003-45)
+  - **Dado** una cuenta de encargado o administrador con diez fallos consecutivos de login técnico, aunque procedan de distintas PCs
+  - **Cuando** alcanza el décimo fallo
+  - **Entonces** no admite nuevos intentos técnicos durante 1 min, avisa una sola vez al panel y reinicia el contador al terminar el bloqueo; un login correcto anterior al décimo fallo también lo reinicia.
+- **CA-003-11** (REQ-003-10, REQ-003-11)
+  - **Dado** un código de instalación generado por encargado o administrador
+  - **Cuando** se consume para registrar una PC
+  - **Entonces** no puede reutilizarse; si pasan 10 min sin consumirlo se rechaza por caducidad, y el dueño no puede generar códigos.
 
 ## Fuera de alcance
 
@@ -172,12 +187,14 @@ Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La
 - [ ] **Quién aplica el bloqueo al recibir `state`.** Según ADR-0009 cambia de escritorio el host, pero si el host muere el agente debe garantizar el bloqueo (REQ-003-32) y seguir la cuenta atrás sin red (ADR-0007). Ambos tendrán que entender `state`, `sessionEnded` y el tiempo restante; conviene acotar exactamente qué hace cada uno.
 - [ ] **Validar el protocolo en C# (ADR-0002).** .NET no trae un validador de JSON Schema (solo exporta). Hará falta un paquete en el proyecto de tests (JsonSchema.Net o NJsonSchema), justificado en el plan, o generar las clases C# a partir del schema.
 - [x] **Quién puede entrar en mantenimiento (REQ-003-40).** **Resuelta (mantenedor, 2026-10-04): encargado y administrador, validados por el nodo**. No se crea un rol técnico ni se admite al dueño. El límite de intentos del login técnico sigue pendiente de concretar; no se considera aprobada la propuesta previa de 5 intentos y 5 min.
-- [ ] **Fondo de bloqueo (REQ-003-70).** Decidir tamaño máximo de la imagen (propuesta: 10 MB antes de comprimir), resolución de los monitores y formato de subida. El requisito ya define un fondo global y subida solo por administrador; no se añade un fondo por PC o permisos de encargado sin cambiar antes la spec.
+- [x] **Límites del fondo (REQ-003-70, REQ-003-76).** **Resuelta (mantenedor, 2026-10-04): entrada JPG/PNG/WebP hasta 10 MB, reducción sin deformar a máximo 1920×1080 y subida WebP hasta 2 MB**. Un fondo global y subida solo por administrador ya están en REQ-003-70. Falta verificar los monitores reales y cerrar los contratos técnicos del plan.
 - [x] **Dirección del nodo.** **Resuelta (mantenedor, 2026-10-04): IP fija o reserva DHCP para el nodo**, configurada durante la instalación junto con su identidad de certificado. No se añade descubrimiento automático.
 - [x] **Bloquear con una sesión abierta (REQ-003-20).** **Resuelta (mantenedor, 2026-10-04): cerrar la sesión y bloquear la PC**, con las reglas de cierre existentes. No es una pausa.
-- [ ] **Límite de intentos del login técnico.** Propuesta preguntada al mantenedor el 2026-10-04: 5 intentos fallidos y bloqueo de esa cuenta durante 5 min. Falta decisión y concretar cómo se combina con la autenticación del personal existente.
-- [ ] **Reiniciar/apagar con sesión (REQ-003-20).** Decidir si se confirma y cierra antes de ejecutar, si se exige cierre separado, o si se ejecuta y luego concilia como pérdida de conexión. Preguntado al mantenedor el 2026-10-04; también afecta a sesiones pausadas y temporales.
-- [ ] **Plazo de Wake-on-LAN (REQ-003-22).** Propuesta preguntada al mantenedor el 2026-10-04: avisar si la PC no conecta en 2 min y quitar el aviso si conecta después. No afirmar que está averiada solo porque expire ese plazo.
+- [x] **Contador del login técnico.** **Resuelta (mantenedor, 2026-10-04): 10 fallos consecutivos por cuenta, bloqueo de 1 min y un aviso al panel por bloqueo** (REQ-003-45). El login correcto y el final del bloqueo reinician el contador; no cambia el login del panel.
+- [ ] **Revocación o fallo de autenticación con sesión abierta.** Definir la reacción de bloqueo/cierre de sesión cuando la PC conoce una revocación y el comportamiento mientras está sin red; mantener la coherencia con ADR-0007 y no prometer una orden a una PC desconectada.
+- [x] **Reiniciar/apagar con sesión (REQ-003-20).** **Resuelta (mantenedor, 2026-10-04): pedir confirmación, cerrar la sesión y ejecutar la orden**, también si está pausada; el cierre de temporales conserva la regla REQ-001-69.
+- [x] **Plazo de Wake-on-LAN (REQ-003-22).** **Resuelta (mantenedor, 2026-10-04): avisar si la PC no conecta en 2 min y quitar el aviso si conecta después**. No se considera diagnóstico de avería.
+- [x] **Códigos de instalación (REQ-003-10).** **Resuelta (mantenedor, 2026-10-04): encargado y administrador pueden generarlos; un uso y caducidad de 10 min**.
 - [x] **Cierre de sesión y aplicaciones abiertas.** **Resuelta (mantenedor, 2026-10-04): cerrar los juegos y procesos del cliente sin reiniciar Windows** (REQ-003-34). La pausa los conserva. La limpieza de perfiles, credenciales guardadas y configuración sigue requiriendo coordinación con la spec 004.
 - [x] **Identidad Windows para mantenimiento.** **Resuelta (mantenedor, 2026-10-04): cuenta administradora Windows existente**, tras revisar las alternativas del plan. No se crea una cuenta nueva ni se eleva la del cliente. La propuesta técnica se documenta en ADR-0018.
 - [ ] **Mecanismo de mantenimiento elevado.** Revisar ADR-0018 y concretar custodia/recuperación de credenciales, token con UAC, perfil, escritorio o sesión Windows independiente, y cierre exclusivo de los procesos de ese mantenimiento. Una contraseña del personal de Pope no es una credencial de Windows. La elección de la cuenta no demuestra todavía que ese mecanismo funcione.
