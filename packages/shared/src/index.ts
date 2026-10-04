@@ -22,3 +22,4 @@ export * from './pause.js';
 export * from './temporary.js';
 export * from './dev-pcs.js';
 export * from './pc-map.js';
+export * from './pc-registration.js';

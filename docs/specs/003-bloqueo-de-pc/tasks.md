@@ -24,11 +24,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 ### Contratos y datos
 
-- [ ] **T01: Contratos de registro y autenticación de PCs**
-  - **Cubre:** REQ-003-10, REQ-003-11, REQ-003-63.
+- [x] **T01: Contratos de registro y autenticación de PCs**
+  - **Cubre:** REQ-003-10, REQ-003-11, REQ-003-22, REQ-003-63.
   - **Hacer:** añadir esquemas zod en `packages/shared` para códigos, registro, credencial, MAC y errores; fijar versión y transición desde el canal provisional según el plan aprobado.
   - **Verificar:** datos válidos/inválidos, caducidad expresada en UTC, rechazo de campos secretos en respuestas ordinarias y compatibilidad de mensajes existentes.
   - **Commit:** `feat(shared): define el registro autenticado de PCs`.
+  - **Implementada (2026-10-04):** `pc-registration.ts`: objetos estrictos, base64url canónico, código 128 bits/600 s, credencial 256 bits/Bearer, MAC de entrada y normalización explícita, recuperación con `pcId` y errores sin secretos. `NATIVE_PC_PROTOCOL_VERSION = 2` no cambia todavía v1. Diez tests nuevos; 280 de shared en verde. Registro real/roles/caducidad efectiva quedan en T12/T13.
 
 - [ ] **T02: Contratos de órdenes y mantenimiento**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-40, REQ-003-41, REQ-003-43, REQ-003-44, REQ-003-45.
