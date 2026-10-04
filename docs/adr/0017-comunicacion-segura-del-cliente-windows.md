@@ -1,6 +1,6 @@
 # ADR-0017: Comunicación segura entre nodo, agente y Shell de Windows
 
-- **Estado:** Propuesto
+- **Estado:** Aceptado (mantenedor, 2026-10-04)
 - **Fecha:** 2026-10-04
 - **Relacionado:** ADR-0002, ADR-0005, ADR-0006, ADR-0007, spec 003
 

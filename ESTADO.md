@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-04 · tasks 003 redactadas según la plantilla
+**Última actualización:** 2026-10-04 · inicio autorizado de Contratos y datos 003
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md), spec, [plan](docs/specs/003-bloqueo-de-pc/plan.md) y [tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador; incluye fase 2 de pausa. La 005 espera T07 |
-| **Siguiente tarea** | Revisar y aprobar spec/plan/tasks 003 y ADR-0017/0018; resolver decisiones pendientes y recuperación de emergencia antes de implementar T01. Los avisos de 5 y 1 min siguen pendientes |
+| **Siguiente tarea** | Registrar aprobación parcial de Contratos y datos e implementar T01; ADR-0017 aceptado, canal v2 y recuperación de registro confirmados. Después avanzar T02–T07; resto pendiente |
 | **Progreso** | Spec 003: 59 tareas propuestas, 0 implementadas, documentación en Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Aprobaciones SDD/ADRs, cobro y recuperación de revocación, acceso de emergencia, entrada técnica local, Pausar durante juego y mensajes. Inventario Windows/congelador/juegos/monitores por verificar antes de las tareas dependientes |
+| **Bloqueos** | T01 ya tiene base confirmada. T02–T07 deben detenerse si faltan contratos o reglas; cobro/recuperación de revocación, emergencia, entrada técnica local y mensajes siguen pendientes. Inventario antes de tareas nativas dependientes |
 
 ## Cómo retomar
 
@@ -64,6 +64,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-04:** el mantenedor autoriza Contratos y datos (T01–T07) y acepta ADR-0017. Confirma canal autenticado v2 con retirada de v1 al cambiar admisión y recuperación de registro con código nuevo ligado a la misma PC libre/sin mantenimiento. T01 en preparación; resto de mecanismos Windows y preguntas de negocio sin aprobar.
 - **2026-10-04:** enlace de fase 2 actualizado en tasks 002 hacia la lista única de tasks 003 (T23–T25, verificación T56). Las 19 tareas y la aprobación de fase 1 no cambian; tasks 003 permanece Borrador, 0/59 implementadas.
 - **2026-10-04:** tasks 003 completadas como Borrador solicitado: 59 tareas con Cubre/Hacer/Verificar/Commit. Cubren los 33 REQ y 11 CA de la 003, más fase 2 de pausa de la 002. Fondo, instalador reversible, diseño de emergencia condicionado y verificación VM/PC real/LAN; emergencia y otras decisiones pendientes no se asumen. Formato, lint, tipos, tests y build TS en verde (caché); ninguna tarea implementada.
 - **2026-10-04:** primera parte de tasks 003 según plantilla: T01–T42, con Cubre/Hacer/Verificar/Commit, prototipos previos y separación de UI/efectos/conciliación de mantenimiento. Incluye pausa nativa; faltan fondo, instalador, emergencia y verificación. Sin código, aprobaciones ni tareas implementadas.
@@ -73,4 +74,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** el mantenedor aprueba T19 y el cierre de la fase 1 de la spec 002: 19/19 tareas terminadas. Informe y límites en `mediciones.md`; fase 2 pendiente de la spec 003. Siguiente paso: definir los avisos de 5 y 1 min ya pedidos.
 - **2026-10-04:** T19 (spec 002) preparada para revisión: criterios en `mediciones.md`; 852 tests sin caché y 372 con PostgreSQL real en verde. Pruebas del Shell y del panel con pausa, confirmación, vencimiento, reanudación y cierre. La fase 2 queda pendiente; T19 no se marca hasta la revisión del mantenedor.
 - **2026-10-04:** T51a (spec 001), autorizada por el mantenedor: corregido el test que abría una temporal con la PC desconectada; ahora descarta el estado inicial con la PC conectada. Los 10 tests de `no-heartbeat` pasan con ambos motores; batería completa sin caché en verde. Se retira el pendiente de ese test.
-- **2026-10-04:** T18 (spec 002): `pausa N`, `reanuda N` y pausa en `estado` del simulador, con la cuenta detenida hasta que el nodo indique cobro; probado con tres PCs en el mapa y un corte de red. Queda T19; el mantenedor autoriza corregir antes el test previo de `no-heartbeat` en un commit aparte.
