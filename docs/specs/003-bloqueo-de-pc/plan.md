@@ -62,10 +62,11 @@ sin duplicar cuentas, saldo, sesiones, pausas ni las cookies del personal.
 | Datos | Diseño propuesto |
 |---|---|
 | `pcs` | Conservar identidad, nombre y posición; añadir MAC e información necesaria de instalación (003-22, 50) |
-| Códigos de instalación | Hash, actor, creación, caducidad y consumo atómico de un solo uso; plazo y formato pendientes |
+| Códigos de instalación | Hash, actor, creación, caducidad de 10 min y consumo atómico de un solo uso; encargado/administrador generan, formato pendiente |
 | Credenciales de PC | Hash, PC asociada, creación y revocación; el secreto solo se entrega al registro y lo guarda el agente |
 | Órdenes de PC | UUIDv7, PC, tipo, actor, datos, resultado y tiempos; transición y evento en la misma transacción |
 | Mantenimiento | PC, actor que lo autorizó, inicio, fin y duración; una entrada abierta por PC |
+| Intentos técnicos | Contador de fallos consecutivos y bloqueo por cuenta, independientes del login del panel; 10 fallos → 1 min y un aviso; reset tras login válido o fin del bloqueo |
 | Fondo del local | Metadatos y huella del archivo actual en disco bajo `POPE_DATA_DIR`; histórico mediante eventos |
 
 Índices por credencial y código; unicidad de código consumido y mantenimiento abierto.
@@ -144,6 +145,10 @@ en producción para conservar compatibilidad con el canal provisional.
 
 - El nodo autoriza mantenimiento local de encargado/administrador o la orden remota
   ya permitida; exige que no haya sesión de cliente, también si está pausada.
+- El acceso técnico aplica 10 fallos por cuenta → bloqueo de 1 min y aviso al panel
+  (003-45). El contador no vive en la PC: cambiar de equipo no elude el bloqueo.
+  Son fallos consecutivos; un login correcto o el fin del bloqueo reinician el contador.
+  Se emite un aviso por bloqueo; no afecta al login del personal del panel.
 - Mantener el usuario cliente sin privilegios. La cuenta Windows, obtención del token
   elevado, separación de sesiones y recuperación al salir requieren una decisión
   técnica específica antes de construir este flujo; no elevar WebView2.
@@ -183,11 +188,15 @@ datos, y un cambio externo de contraseña necesitará reconfigurar su custodia e
 
 ### Fondo
 
-Verificar archivo y límite aprobado; transmitir solo por LAN con autenticación.
+El panel acepta JPG/PNG/WebP hasta 10 MB, reduce sin deformar a máximo 1920×1080 y
+envía WebP hasta 2 MB (003-76). El plan propone cuerpo binario `image/webp` como las fotos
+de productos para evitar multipart y otra dependencia. Verificar archivo y límite;
+transmitir solo por LAN con autenticación.
 Descargar a un archivo temporal, comprobar SHA-256 y sustituir la copia de forma atómica.
 Conservar el anterior ante un fallo; con sesión activa, aplicar el nuevo al volver al
 bloqueo. El tratamiento de imagen se hace en el panel, sin procesador pesado en el nodo.
-Formato de subida y límites siguen pendientes: la propuesta multipart no está aprobada.
+El formato binario y los cuerpos/respuestas exactos se revisan al aprobar el plan;
+la propuesta anterior de multipart no es un contrato vigente.
 
 ## Casos límite y errores
 
@@ -225,8 +234,9 @@ retención explícita, sin crecer con semanas de cortes de red.
 - **Tests C#:** justificar framework de tests y validador JSON Schema (p. ej.
   JsonSchema.Net, solo en tests) antes de añadir paquetes; exportación draft 2020-12.
 - **Servidor:** reutilizar TLS y UDP de Node, `ws`, Fastify y el almacenamiento existente.
-  `@fastify/multipart` solo si se aprueba ese formato de fondo; alternativa: cuerpo binario
-  como las fotos de productos, sin nueva dependencia.
+  Proponer fondo binario como las fotos de productos, sin `@fastify/multipart` ni `sharp`;
+  parser de WebP y máximo de 2 MB. Limitar dimensiones/píxeles antes de decodificar en
+  el panel; concretar ese límite técnico al cerrar los contratos.
 
 Medir agente < 50 MB y host < 60 MB excluyendo WebView2 (003-60), y registrar también el
 consumo completo con sus procesos Chromium para conocer el coste real. Windows 10 22H2
@@ -238,13 +248,14 @@ y congelador condicionan actualizaciones; no depender de internet para instalar 
 |---|---|---|
 | Shared y compatibilidad C# | JSON Schema de ambos sentidos, mensajes válidos/inválidos, límites y versión | 003-63; ADR-0002 |
 | Servidor PGlite y PostgreSQL | Código de un uso, autenticación/revocación, suplantación, roles, órdenes, eventos y mantenimiento con sesión rechazada | 003-10, 11, 20, 40, 41, 43; CA-003-03, 07 |
+| Login técnico en varias PCs | Diez fallos consecutivos, bloqueo por cuenta durante 1 min, un aviso al panel y reset tras login válido o fin del bloqueo | 003-45; CA-003-10 |
 | Mantenimiento con corte de LAN | No termina por perder red; salida bloquea localmente, sobrevive al reinicio del servicio y se registra sin duplicados al reconectar | 003-44, 41; CA-003-09 |
 | C# con efectos simulados | Cuenta monotónica, estados del nodo, reconexión, pipe falsificado, vigilancia y ausencia de datos sensibles en logs | 003-04, 32, 63; 002-30, 31 |
 | Prototipo Windows aislado | Renderizar WebView2 en escritorio alterno, transición, atajos, permisos, fallo del host y juego exclusivo | 003-30 a 33; CA-003-02; CA-002-02 |
 | PC o VM desechable | Arranque sin Explorer, usuario restringido, directivas, instalación interrumpida y desinstalación reversible | 003-01 a 03, 31, 50, 51, 62; CA-003-01 |
 | PC real con juegos | Cierre de procesos de cliente sin reinicio, preservando Pope y sistema; cierre/agotamiento/bloqueo/temporal | 003-34; CA-003-08 |
 | PC real del local | Juego exclusivo, teclas/clics bloqueados, silencio/restauración, RAM, < 1 s y recuperación < 3 s | 003-32, 60, 61; 002-04, 05, 07, 50 |
-| Panel, Shell y simulador | Mantenimiento rojo, controles por rol, pestaña técnica, orden fallida, fondo actualizado y conservación durante sesión | CA-003-03 a 07 |
+| Panel, Shell y simulador | Mantenimiento rojo, controles por rol, pestaña técnica, orden fallida, fondo actualizado y conservación durante sesión; límites de archivo, reducción y huella | CA-003-03 a 07; 003-76 |
 | LAN real | Wake-on-LAN con BIOS/NIC configuradas, MAC correcta y reconexión | 003-22; CA-003-06 |
 
 Juegos del inventario de prueba: Valorant, Counter-Strike 2, Call of Duty, Delta Force,
