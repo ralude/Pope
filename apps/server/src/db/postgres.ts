@@ -16,11 +16,15 @@ const POOL_MAX = 10;
  * (pregunta resuelta de la spec 001: se migra al arrancar el servidor). Así, actualizar el
  * nodo local es copiar el build nuevo y reiniciar el servicio.
  */
-export async function openPostgresDatabase(url: string): Promise<DatabaseHandle> {
+export async function openPostgresDatabase(
+  url: string,
+  migrationsFolder = MIGRATIONS_FOLDER,
+): Promise<DatabaseHandle> {
   const pool = new pg.Pool({ connectionString: url, max: POOL_MAX });
   try {
     const db = drizzle({ client: pool, schema });
-    await migrate(db, { migrationsFolder: MIGRATIONS_FOLDER });
+    // Los tests de actualización pueden abrir con las migraciones previas; producción usa todas.
+    await migrate(db, { migrationsFolder });
     return { db, close: () => pool.end() };
   } catch (error) {
     await pool.end();

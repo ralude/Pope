@@ -66,11 +66,13 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(shared): define el fondo global de bloqueo`.
   - **Implementada (2026-10-04):** metadatos y snapshot global, revisión/actor, aviso v2 sin bytes, progreso solo local y evento estricto. Límites decimales y máximo original de 40 millones de píxeles confirmados; validación/decodificación del archivo y distribución quedan en T43–T46.
 
-- [ ] **T04: Migración de registro y credenciales**
+- [x] **T04: Migración de registro y credenciales**
   - **Cubre:** REQ-003-10, REQ-003-11, REQ-003-22, REQ-003-63.
   - **Hacer:** extender `pcs` y crear códigos/credenciales en `apps/server` con hashes, consumo, revocación e índices; generar una migración nueva con Drizzle.
   - **Verificar:** migración sobre base existente, unicidad y consumo concurrente con PGlite y PostgreSQL real; ninguna credencial de respaldo pública para PCs antiguas.
   - **Commit:** `feat(server): guarda el registro seguro de PCs`.
+  - **Implementada (2026-10-04):** migración 0025: MAC nullable para PCs existentes, códigos con hash/600 s/consumo y credenciales con revocación. FK código/PC y unicidad de credencial vigente; seis tests de upgrade, restricciones y consumo concurrente pasan en PGlite y PostgreSQL. No activa todavía registro ni autenticación del canal.
+  - **Verificación cerrada (2026-10-05):** 896 tests del monorepo, 378 del servidor en ambos motores; formato, lint, tipos y build pasan. Paralelismo del ejecutor reducido, sin modificar los tests existentes.
 
 - [ ] **T05: Migración de control y mantenimiento**
   - **Cubre:** REQ-003-20, REQ-003-41, REQ-003-43, REQ-003-44, REQ-003-45.

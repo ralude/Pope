@@ -28,6 +28,7 @@ import {
   bigint,
   boolean,
   check,
+  foreignKey,
   date,
   index,
   integer,
@@ -35,6 +36,7 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
@@ -279,8 +281,8 @@ export const combos = pgTable(
 );
 
 /**
- * PCs del local. **Mínima**: la spec 003 añade el registro con código de instalación y las
- * credenciales. En desarrollo se crean con `pnpm --filter @pope/server dev:seed-pcs`.
+ * PCs del local. Las previas conservan identidad/mapa sin credencial de respaldo (003-11).
+ * En desarrollo se crean con `pnpm --filter @pope/server dev:seed-pcs`.
  */
 export const pcs = pgTable(
   'pcs',
@@ -292,12 +294,88 @@ export const pcs = pgTable(
     /** Casilla en el mapa del panel (REQ-001-45). Sin ella, la PC va al final del mapa. */
     mapRow: integer('map_row'),
     mapCol: integer('map_col'),
+    /** Inventario/Wake-on-LAN, no autenticación; null antes de registrar (REQ-003-22). */
+    macAddress: text('mac_address'),
   },
   (t) => [
     uniqueIndex('pcs_name_lower_idx').on(sql`lower(${t.name})`),
     // Una PC por casilla. PostgreSQL no compara los NULL, así que las PCs sin posición no chocan.
     uniqueIndex('pcs_map_cell_idx').on(t.mapRow, t.mapCol),
     check('pcs_map_cell_check', sql`(${t.mapRow} is null) = (${t.mapCol} is null)`),
+    check(
+      'pcs_mac_address_check',
+      sql`${t.macAddress} is null or
+      (${t.macAddress} ~ '^[0-9A-F][02468ACE](:[0-9A-F]{2}){5}$'
+        and ${t.macAddress} <> '00:00:00:00:00:00')`,
+    ),
+  ],
+);
+
+/** Código de instalación de un uso; nunca se guarda el código en claro (REQ-003-10). */
+export const pcInstallationCodes = pgTable(
+  'pc_installation_codes',
+  {
+    id: uuid('id').primaryKey(),
+    codeHash: text('code_hash').notNull().unique(),
+    createdByStaffId: uuid('created_by_staff_id')
+      .notNull()
+      .references(() => staff.id),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    targetPcId: uuid('target_pc_id').references(() => pcs.id),
+    consumedAt: timestamp('consumed_at', { withTimezone: true }),
+    consumedPcId: uuid('consumed_pc_id').references(() => pcs.id),
+  },
+  (t) => [
+    unique('pc_installation_codes_consumed_pc_unique').on(t.id, t.consumedPcId),
+    index('pc_installation_codes_expiration_idx')
+      .on(t.expiresAt)
+      .where(sql`${t.consumedAt} is null`),
+    check('pc_installation_codes_hash_check', sql`${t.codeHash} ~ '^[0-9a-f]{64}$'`),
+    check(
+      'pc_installation_codes_ttl_check',
+      sql`${t.expiresAt} = ${t.createdAt} + interval '600 seconds'`,
+    ),
+    check(
+      'pc_installation_codes_consumption_check',
+      sql`
+    (${t.consumedAt} is null and ${t.consumedPcId} is null) or
+    (${t.consumedAt} is not null and ${t.consumedPcId} is not null
+      and ${t.consumedAt} >= ${t.createdAt} and ${t.consumedAt} < ${t.expiresAt}
+      and (${t.targetPcId} is null or ${t.targetPcId} = ${t.consumedPcId}))`,
+    ),
+  ],
+);
+
+/** Hash de credencial de alta entropía, una vigente por PC (REQ-003-11, ADR-0017). */
+export const pcCredentials = pgTable(
+  'pc_credentials',
+  {
+    id: uuid('id').primaryKey(),
+    pcId: uuid('pc_id')
+      .notNull()
+      .references(() => pcs.id),
+    installationCodeId: uuid('installation_code_id').notNull().unique(),
+    credentialHash: text('credential_hash').notNull().unique(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    revokedByStaffId: uuid('revoked_by_staff_id').references(() => staff.id),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.installationCodeId, t.pcId],
+      foreignColumns: [pcInstallationCodes.id, pcInstallationCodes.consumedPcId],
+    }),
+    uniqueIndex('pc_credentials_active_pc_idx')
+      .on(t.pcId)
+      .where(sql`${t.revokedAt} is null`),
+    check('pc_credentials_hash_check', sql`${t.credentialHash} ~ '^[0-9a-f]{64}$'`),
+    check(
+      'pc_credentials_revocation_check',
+      sql`
+    (${t.revokedAt} is null or ${t.revokedAt} >= ${t.createdAt})
+    and (${t.revokedByStaffId} is null or ${t.revokedAt} is not null)`,
+    ),
   ],
 );
 

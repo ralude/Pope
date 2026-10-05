@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-04 · T03 de contratos y datos 003
+**Última actualización:** 2026-10-05 · T04 completada de contratos y datos 003
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T07 aprobado/en curso; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
-| **Siguiente tarea** | T04: migración de registro y credenciales, verificando base existente y restricciones en PGlite/PostgreSQL; después T05–T07 una tarea por commit |
-| **Progreso** | Spec 003: 3 / 59 grupos; T01–T03 completas, incluidas T02a/b/c; T04–T07 autorizadas; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Siguiente tarea** | T05: migración de control y mantenimiento. Después T06–T07, autorizadas |
+| **Progreso** | Spec 003: 4 / 59 grupos; T01–T04 completas, incluidas T02a/b/c; T05–T07 autorizadas; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Reglas de entrada/mensajes y vigencia de órdenes confirmadas. Fondo: límite original adicional de 40 millones de píxeles confirmado. Cobro/recuperación de revocación y emergencia pendientes para tareas posteriores; inventario antes de tareas nativas dependientes |
 
 ## Cómo retomar
@@ -53,7 +53,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Contratos y datos aprobado/en curso; resto Borrador | 3 / 59 |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Contratos y datos aprobado/en curso; resto Borrador | 4 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -64,6 +64,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-05:** T04 completada: migración 0025 y seis tests de registro/upgrade/concurrencia. 896 tests del monorepo pasan, incluidos 378 del servidor en PGlite; los 378 también pasan en PostgreSQL temporal real. Formato, lint, tipos y build pasan. Se redujo el paralelismo del ejecutor a dos workers sin cambiar límites de tests ni requisitos. Registro/auth efectivos quedan en T12/T13; siguiente T05.
 - **2026-10-04:** T03: fondo global con SHA-256, WebP/bytes/dimensiones, revisión y actor; aviso v2 sin imagen ni rutas y progreso solo local. Entrada 10 000 000 bytes/40 millones de píxeles y salida 2 000 000 bytes/1920×1080 confirmados. 890 tests (308 shared), formato, lint, tipos y build pasan; no se decodifican/suben imágenes ni se implementan endpoints aún. Siguiente T04.
 - **2026-10-04:** T02c completa T02: canal v2 preparado sin activar la admisión, estado/copia de recuperación, sesión y mantenimiento separados; React no produce hello/latidos/acuses/órdenes nativas. 883 tests (301 shared), formato, lint, tipos y build pasan. La salida offline lleva ID propio y solo el servicio genera su registro. Siguiente T03; sin cambios de cuentas ni Windows.
 - **2026-10-04:** T02b: solicitudes/órdenes/acuses tipados, confirmación al reiniciar/apagar con ocupación y contexto con revisión para no alcanzar al siguiente cliente. Vigencia 30 s confirmada; aceptación Windows no es apagado físico. Mensajes de 5 s/1 000 caracteres, sin foco. 877 tests (295 shared), formato, lint, tipos y build pasan. T02c pendiente; sin ejecución nativa ni journal aún.
@@ -73,4 +74,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** enlace de fase 2 actualizado en tasks 002 hacia la lista única de tasks 003 (T23–T25, verificación T56). Las 19 tareas y la aprobación de fase 1 no cambian; tasks 003 permanece Borrador, 0/59 implementadas.
 - **2026-10-04:** tasks 003 completadas como Borrador solicitado: 59 tareas con Cubre/Hacer/Verificar/Commit. Cubren los 33 REQ y 11 CA de la 003, más fase 2 de pausa de la 002. Fondo, instalador reversible, diseño de emergencia condicionado y verificación VM/PC real/LAN; emergencia y otras decisiones pendientes no se asumen. Formato, lint, tipos, tests y build TS en verde (caché); ninguna tarea implementada.
 - **2026-10-04:** primera parte de tasks 003 según plantilla: T01–T42, con Cubre/Hacer/Verificar/Commit, prototipos previos y separación de UI/efectos/conciliación de mantenimiento. Incluye pausa nativa; faltan fondo, instalador, emergencia y verificación. Sin código, aprobaciones ni tareas implementadas.
-- **2026-10-04:** plan 003 alineado para redactar tasks: conserva sesión tras revocación (cobro pendiente), confirmación/salida antes de apagar en mantenimiento y recuperación de emergencia por diseñar. La fase 2 nativa de pausa se enumerará una sola vez en tasks 003, ligada a REQ de la 002; fase 1 intacta.

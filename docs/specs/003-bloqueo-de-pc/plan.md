@@ -79,6 +79,21 @@ el actor del personal al registrar el resultado.
 
 ## Contratos
 
+### T04: persistencia del registro
+
+`pcs.mac_address` nullable preserva PCs previas sin darles autenticación; MAC canónica
+unicast no nula, sin unicidad porque no es identidad. Códigos: UUIDv7, SHA-256 único,
+personal emisor, UTC de emisión/fin (exactamente 600 s), PC objetivo opcional y pareja
+consumo UTC/PC. Consumo antes de caducar, posterior a emisión y ligado al objetivo
+si existe. Credenciales: UUIDv7, PC, código consumido único, SHA-256 único, creación
+y revocación UTC con personal revocador opcional (el reemplazo también puede revocar).
+Una sola credencial vigente por PC; FK compuesta código/PC impide emitirla desde un
+código sin consumir o consumido para otra PC. Ningún secreto en claro ni credencial
+de respaldo para registros antiguos. Disponibilidad, roles y eventos quedan en T12/T13.
+La nueva migración se prueba sobre datos anteriores y con consumo concurrente en
+PGlite/PostgreSQL. Un helper de tests permite migrar hasta el estado previo y después
+aplicar pendientes en el mismo motor; no modifica migraciones ya subidas.
+
 ### Existentes que se reutilizan
 
 `packages/shared/src/protocol.ts` ya define `hello`, latidos, login, cierre, compra,
