@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-05 · T04 completada de contratos y datos 003
+**Última actualización:** 2026-10-06 · README adaptado a la presentación del proyecto; avance de specs sin cambios
 
 ## Ahora
 
@@ -64,6 +64,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-06:** README reescrito tomando Cullen como referencia de presentación: problema del local, operación, decisiones técnicas, arquitectura, evidencia, arranque y documentación. Distingue capacidades implementadas de Windows/nube pendientes y conserva los límites de las mediciones. Sin cambios de código ni avance de specs; siguiente T05 de la 003.
 - **2026-10-05:** T04 completada: migración 0025 y seis tests de registro/upgrade/concurrencia. 896 tests del monorepo pasan, incluidos 378 del servidor en PGlite; los 378 también pasan en PostgreSQL temporal real. Formato, lint, tipos y build pasan. Se redujo el paralelismo del ejecutor a dos workers sin cambiar límites de tests ni requisitos. Registro/auth efectivos quedan en T12/T13; siguiente T05.
 - **2026-10-04:** T03: fondo global con SHA-256, WebP/bytes/dimensiones, revisión y actor; aviso v2 sin imagen ni rutas y progreso solo local. Entrada 10 000 000 bytes/40 millones de píxeles y salida 2 000 000 bytes/1920×1080 confirmados. 890 tests (308 shared), formato, lint, tipos y build pasan; no se decodifican/suben imágenes ni se implementan endpoints aún. Siguiente T04.
 - **2026-10-04:** T02c completa T02: canal v2 preparado sin activar la admisión, estado/copia de recuperación, sesión y mantenimiento separados; React no produce hello/latidos/acuses/órdenes nativas. 883 tests (301 shared), formato, lint, tipos y build pasan. La salida offline lleva ID propio y solo el servicio genera su registro. Siguiente T03; sin cambios de cuentas ni Windows.
@@ -73,4 +74,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** el mantenedor autoriza Contratos y datos (T01–T07) y acepta ADR-0017. Confirma canal autenticado v2 con retirada de v1 al cambiar admisión y recuperación de registro con código nuevo ligado a la misma PC libre/sin mantenimiento. T01 en preparación; resto de mecanismos Windows y preguntas de negocio sin aprobar.
 - **2026-10-04:** enlace de fase 2 actualizado en tasks 002 hacia la lista única de tasks 003 (T23–T25, verificación T56). Las 19 tareas y la aprobación de fase 1 no cambian; tasks 003 permanece Borrador, 0/59 implementadas.
 - **2026-10-04:** tasks 003 completadas como Borrador solicitado: 59 tareas con Cubre/Hacer/Verificar/Commit. Cubren los 33 REQ y 11 CA de la 003, más fase 2 de pausa de la 002. Fondo, instalador reversible, diseño de emergencia condicionado y verificación VM/PC real/LAN; emergencia y otras decisiones pendientes no se asumen. Formato, lint, tipos, tests y build TS en verde (caché); ninguna tarea implementada.
-- **2026-10-04:** primera parte de tasks 003 según plantilla: T01–T42, con Cubre/Hacer/Verificar/Commit, prototipos previos y separación de UI/efectos/conciliación de mantenimiento. Incluye pausa nativa; faltan fondo, instalador, emergencia y verificación. Sin código, aprobaciones ni tareas implementadas.
