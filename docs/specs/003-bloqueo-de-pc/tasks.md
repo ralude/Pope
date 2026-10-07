@@ -1,6 +1,6 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Contratos y datos T01–T06 completos; contrato de T07 confirmado (opción A, mantenedor 2026-10-07), implementación pendiente. T08–T59 siguen en Borrador.
+- **Estado:** Contratos y datos T01–T06 completos; T07a/b1 completas, T07b2 pendiente. T08–T59 siguen en Borrador.
 - **Plan:** [plan.md](plan.md), aprobado para este bloque; resto pendiente.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
@@ -13,7 +13,7 @@ antes de implementar; ADR-0018 sigue Propuesto. No se modifica Windows en este b
 **Decisión posterior (2026-10-07):** tras dejar T07 pendiente de revisar el contrato,
 el mantenedor confirma la opción A: conservar el recorte exterior del usuario y exportar
 sus reglas exactas para C#, con fixtures compartidos y sin modificar contraseñas.
-El bloqueo de contrato de T07 queda resuelto; la tarea sigue sin implementar.
+El bloqueo de contrato de T07 queda resuelto; el progreso se registra en sus subtareas.
 
 **Dependencias:** ejecutar en orden, una tarea a la vez. T09/T10 deben demostrar el
 mecanismo nativo antes de integrarlo; si fallan, revisar ADR/plan y detener las tareas
@@ -116,6 +116,9 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **División de implementación (2026-10-07):** dos commits dentro del bloque autorizado, para separar la infraestructura de exportación de los casos de compatibilidad.
   - [x] **T07a:** exportación reproducible/versionada de v1, v2 y puente; reglas de normalización y comprobación del contrato con JSON Schema. Implementados 19 contratos, guard de diferencias en build/tests y conjunto exacto de 25 caracteres de recorte; sin modificar el login ni contraseñas. T07b pendiente.
   - [ ] **T07b:** fixtures compartidos válidos/inválidos, casos Unicode y fronteras de confianza; completar el grupo T07 tras verificarlos.
+    - **División antes de verificar/entregar (2026-10-07):** T07b1 cubre los 19 contratos y fronteras de confianza; T07b2 añade la matriz Unicode/contraseña. Se separan para mantener commits de unas 400 líneas no generadas.
+    - [x] **T07b1:** casos compartidos de los 19 contratos, con resultados esperados explícitos y comprobación Zod/JSON Schema. Incluye órdenes separadas de React, salida durable solo del agente, secretos, recuperación, pausa y fondos; matriz Unicode/límites adicionales en T07b2.
+    - [ ] **T07b2:** casos Unicode de usuario y contraseña, límites y diferencias entre v1/v2; cierre de T07.
 
 ### Base nativa y conexión
 

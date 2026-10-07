@@ -5,6 +5,7 @@ import * as native from './native-protocol.js';
 import * as control from './pc-control.js';
 import * as registration from './pc-registration.js';
 import * as legacy from './protocol.js';
+import { protocolFixtures } from './protocol-fixtures.js';
 
 export const protocolContractSchemas = {
   v1: {
@@ -89,6 +90,7 @@ export function protocolJsonArtifacts(): Record<string, unknown> {
       'JSON Schema mide longitud en puntos de código Unicode; no sustituirla por string.Length de C#.',
     ],
   };
+  artifacts['fixtures.json'] = protocolFixtures();
   return artifacts;
 }
 

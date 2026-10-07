@@ -16,6 +16,11 @@ Cuando cambie un contrato, revisar su impacto y la versión del canal antes de e
 El guard detecta cambios, no decide automáticamente si son compatibles. T08 comprobará
 estos mismos casos en C#; los tests TypeScript todavía no prueban el consumidor nativo.
 
+`fixtures.json` contiene casos sintéticos con `id`, `version`, `contract`, `input` y
+`valid` esperado, fijado explícitamente. El consumidor debe resolver el schema por versión
+y contrato, normalizar el usuario y comprobar el resultado sin coerción. Los tests leen
+estos JSON exportados y comparan los resultados con Zod. No contienen secretos reales.
+
 Referencias: [exportación Zod](https://zod.dev/json-schema),
 [Ajv draft 2020-12](https://ajv.js.org/json-schema.html),
 [recorte ECMAScript](https://tc39.es/ecma262/multipage/text-processing.html#sec-string.prototype.trim).

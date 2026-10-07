@@ -1,0 +1,1955 @@
+[
+  {
+    "id": "v1/pc-to-node/login",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "username": "Ana",
+      "password": " contraseña "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "username": "Ana",
+      "password": " contraseña "
+    }
+  },
+  {
+    "id": "v2/shell-request/login",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "username": "Ana",
+      "password": " contraseña "
+    }
+  },
+  {
+    "id": "v1/pc-to-node/logout",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "logout"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/logout",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "logout"
+    }
+  },
+  {
+    "id": "v2/shell-request/logout",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "logout"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/buyCombo",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "buyCombo",
+      "comboId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/buyCombo",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "buyCombo",
+      "comboId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  {
+    "id": "v2/shell-request/buyCombo",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "buyCombo",
+      "comboId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/listCombos",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "listCombos"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/listCombos",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "listCombos"
+    }
+  },
+  {
+    "id": "v2/shell-request/listCombos",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "listCombos"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/pause",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "pause"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/pause",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "pause"
+    }
+  },
+  {
+    "id": "v2/shell-request/pause",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "pause"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/resume",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "resume"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/resume",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "resume"
+    }
+  },
+  {
+    "id": "v2/shell-request/resume",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "resume"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/hello",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 1,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": null
+    }
+  },
+  {
+    "id": "v1/pc-to-node/heartbeat",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "heartbeat",
+      "sessionId": null,
+      "localRemainingSeconds": null
+    }
+  },
+  {
+    "id": "v1/pc-to-node/hello-v2",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 2,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": null
+    }
+  },
+  {
+    "id": "v2/pc-to-node/hello-unknown",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 2,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": null,
+      "pendingMaintenanceExitId": null,
+      "recoveryState": "unknown",
+      "controlContext": null
+    }
+  },
+  {
+    "id": "v2/pc-to-node/hello-known",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 2,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": null,
+      "pendingMaintenanceExitId": null,
+      "recoveryState": "known",
+      "controlContext": {
+        "kind": "free",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      }
+    }
+  },
+  {
+    "id": "v2/pc-to-node/hello-wrong-version",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 1,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": null,
+      "pendingMaintenanceExitId": null,
+      "recoveryState": "unknown",
+      "controlContext": null
+    }
+  },
+  {
+    "id": "v2/pc-to-node/hello-unknown-session",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 2,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "pendingMaintenanceExitId": null,
+      "recoveryState": "unknown",
+      "controlContext": null
+    }
+  },
+  {
+    "id": "v2/pc-to-node/hello-secret",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 2,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": null,
+      "pendingMaintenanceExitId": null,
+      "recoveryState": "unknown",
+      "controlContext": null,
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/heartbeat",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "heartbeat",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "localRemainingSeconds": 0,
+      "controlContext": {
+        "kind": "session",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      }
+    }
+  },
+  {
+    "id": "v2/shell-request/hello-not-shell",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "hello",
+      "protocolVersion": 2,
+      "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "sessionId": null,
+      "pendingMaintenanceExitId": null,
+      "recoveryState": "unknown",
+      "controlContext": null
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technical",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " "
+    }
+  },
+  {
+    "id": "v2/shell-request/technical",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technical-actor",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " ",
+      "actor": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/shell-request/technical-actor",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " ",
+      "actor": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/shell-request/end-maintenance",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "endMaintenance",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/end-maintenance-not-node",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "endMaintenance",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/exit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "maintenanceExit",
+      "exit": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "endedAt": "2026-10-07T12:00:00.000Z",
+        "durationSeconds": 0
+      }
+    }
+  },
+  {
+    "id": "v2/shell-request/exit-not-shell",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "maintenanceExit",
+      "exit": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "endedAt": "2026-10-07T12:00:00.000Z",
+        "durationSeconds": 0
+      }
+    }
+  },
+  {
+    "id": "v2/pc-to-node/ack",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "commandAck",
+      "commandId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "occurredAt": "2026-10-07T12:00:00.000Z",
+      "result": {
+        "status": "accepted",
+        "kind": "restart"
+      }
+    }
+  },
+  {
+    "id": "v2/shell-request/ack-not-shell",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "commandAck",
+      "commandId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "occurredAt": "2026-10-07T12:00:00.000Z",
+      "result": {
+        "status": "accepted",
+        "kind": "restart"
+      }
+    }
+  },
+  {
+    "id": "v2/pc-to-node/restart-not-applied",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "commandAck",
+      "commandId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "occurredAt": "2026-10-07T12:00:00.000Z",
+      "result": {
+        "status": "applied",
+        "effect": {
+          "kind": "restart"
+        }
+      }
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-0",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "locked"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/message-0",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "locked"
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-0",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "locked"
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-1",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/node-to-pc/message-1",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-1",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-2",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "temporary",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "name": "Temporal",
+        "purchasedSeconds": 0,
+        "remainingSeconds": 0
+      },
+      "vesRate": 40000000
+    }
+  },
+  {
+    "id": "v2/node-to-pc/message-2",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "temporary",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "name": "Temporal",
+        "purchasedSeconds": 0,
+        "remainingSeconds": 0
+      },
+      "vesRate": 40000000
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-2",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "temporary",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "name": "Temporal",
+        "purchasedSeconds": 0,
+        "remainingSeconds": 0
+      },
+      "vesRate": 40000000
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-3",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "warning",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "minutesLeft": 1
+    }
+  },
+  {
+    "id": "v2/node-to-pc/message-3",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "warning",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "minutesLeft": 1
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-3",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "warning",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "minutesLeft": 1
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-4",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "sessionEnded",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "exhausted"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/message-4",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "sessionEnded",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "exhausted"
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-4",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "sessionEnded",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "exhausted"
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-5",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "combos",
+      "combos": [
+        {
+          "comboId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Una hora",
+          "price": {
+            "micros": 1000000,
+            "currency": "USD"
+          },
+          "seconds": 3600
+        }
+      ]
+    }
+  },
+  {
+    "id": "v2/node-to-pc/message-5",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "combos",
+      "combos": [
+        {
+          "comboId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Una hora",
+          "price": {
+            "micros": 1000000,
+            "currency": "USD"
+          },
+          "seconds": 3600
+        }
+      ]
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-5",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "combos",
+      "combos": [
+        {
+          "comboId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Una hora",
+          "price": {
+            "micros": 1000000,
+            "currency": "USD"
+          },
+          "seconds": 3600
+        }
+      ]
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-6",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "error",
+      "code": "invalid_credentials",
+      "message": "Datos incorrectos"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/message-6",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "error",
+      "code": "invalid_credentials",
+      "message": "Datos incorrectos"
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-6",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "error",
+      "code": "invalid_credentials",
+      "message": "Datos incorrectos"
+    }
+  },
+  {
+    "id": "v1/node-to-pc/unknown-status",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": false,
+    "input": {
+      "type": "state",
+      "status": "inventado"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/control-free",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "controlState",
+      "context": {
+        "kind": "free",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "serverTime": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/shell-notification/control-free",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "controlState",
+      "context": {
+        "kind": "free",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "serverTime": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/control-session",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "controlState",
+      "context": {
+        "kind": "session",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "serverTime": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/shell-notification/control-session",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "controlState",
+      "context": {
+        "kind": "session",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "serverTime": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/control-maintenance",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "controlState",
+      "context": {
+        "kind": "maintenance",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "serverTime": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/shell-notification/control-maintenance",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "controlState",
+      "context": {
+        "kind": "maintenance",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "serverTime": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/maintenance-null",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "maintenanceState",
+      "maintenance": null
+    }
+  },
+  {
+    "id": "v2/shell-notification/maintenance-null",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "maintenanceState",
+      "maintenance": null
+    }
+  },
+  {
+    "id": "v2/node-to-pc/maintenance-active",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "maintenanceState",
+      "maintenance": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pc": {
+          "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "PC de prueba"
+        },
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "source": "local",
+        "startedAt": "2026-10-07T12:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/maintenance-active",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "maintenanceState",
+      "maintenance": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pc": {
+          "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "PC de prueba"
+        },
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "source": "local",
+        "startedAt": "2026-10-07T12:00:00.000Z"
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/technical-error",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "technicalError",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "code": "forbidden",
+      "message": "Sin permiso"
+    }
+  },
+  {
+    "id": "v2/shell-notification/technical-error",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "technicalError",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "code": "forbidden",
+      "message": "Sin permiso"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/authentication-error",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "pcAuthenticationError",
+      "code": "pc_credential_revoked",
+      "message": "Revocada"
+    }
+  },
+  {
+    "id": "v2/shell-notification/authentication-error",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "pcAuthenticationError",
+      "code": "pc_credential_revoked",
+      "message": "Revocada"
+    }
+  },
+  {
+    "id": "v2/node-to-pc/background",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "lockBackground",
+      "revision": 1,
+      "background": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 2000000,
+        "mimeType": "image/webp",
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/background",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "lockBackground",
+      "revision": 1,
+      "background": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 2000000,
+        "mimeType": "image/webp",
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/background-default",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "lockBackground",
+      "revision": 2,
+      "background": null
+    }
+  },
+  {
+    "id": "v2/shell-notification/background-default",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "lockBackground",
+      "revision": 2,
+      "background": null
+    }
+  },
+  {
+    "id": "v2/node-to-pc/command-lock",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "lock"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/command-lock",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "lock"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/command-restart",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "restart"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/command-restart",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "restart"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/command-powerOff",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "powerOff"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/command-powerOff",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "powerOff"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/command-showMessage",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "showMessage",
+          "text": "Aviso"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/command-showMessage",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "showMessage",
+          "text": "Aviso"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/command-startMaintenance",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "startMaintenance",
+          "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "source": "panel"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/command-startMaintenance",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "startMaintenance",
+          "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "source": "panel"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/command-endMaintenance",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "endMaintenance",
+          "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "exitId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/command-endMaintenance",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "command",
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "endMaintenance",
+          "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "exitId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/node-to-pc/exit-ack",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "maintenanceExitAcknowledged",
+      "exitId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  {
+    "id": "v2/shell-notification/exit-ack-not-shell",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "maintenanceExitAcknowledged",
+      "exitId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "maintenanceId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+    }
+  },
+  {
+    "id": "v2/shell-notification/progress",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "backgroundProgress",
+      "revision": 1,
+      "stage": "downloading",
+      "percent": 100
+    }
+  },
+  {
+    "id": "v2/node-to-pc/progress-not-node",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": false,
+    "input": {
+      "type": "backgroundProgress",
+      "revision": 1,
+      "stage": "downloading",
+      "percent": 100
+    }
+  },
+  {
+    "id": "v2/shell-notification/progress-too-large",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "backgroundProgress",
+      "revision": 1,
+      "stage": "downloading",
+      "percent": 101
+    }
+  },
+  {
+    "id": "v2/shell-notification/progress-decimal",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "backgroundProgress",
+      "revision": 1,
+      "stage": "downloading",
+      "percent": 0.5
+    }
+  },
+  {
+    "id": "v2/installation-code-request/valid",
+    "version": "v2",
+    "contract": "installation-code-request",
+    "valid": true,
+    "input": {}
+  },
+  {
+    "id": "v2/installation-code-request/invalid",
+    "version": "v2",
+    "contract": "installation-code-request",
+    "valid": false,
+    "input": {
+      "actor": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/installation-code-response/valid",
+    "version": "v2",
+    "contract": "installation-code-response",
+    "valid": true,
+    "input": {
+      "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "code": "AAAAAAAAAAAAAAAAAAAAAA",
+      "expiresAt": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/installation-code-response/invalid",
+    "version": "v2",
+    "contract": "installation-code-response",
+    "valid": false,
+    "input": {
+      "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "code": "AAAAAAAAAAAAAAAAAAAAAB",
+      "expiresAt": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/registration-request/valid",
+    "version": "v2",
+    "contract": "registration-request",
+    "valid": true,
+    "input": {
+      "installationCode": "AAAAAAAAAAAAAAAAAAAAAA",
+      "macAddress": "02-11-22-33-44-55"
+    }
+  },
+  {
+    "id": "v2/registration-request/invalid",
+    "version": "v2",
+    "contract": "registration-request",
+    "valid": false,
+    "input": {
+      "installationCode": "AAAAAAAAAAAAAAAAAAAAAA",
+      "macAddress": "01:11:22:33:44:55"
+    }
+  },
+  {
+    "id": "v2/registration-response/valid",
+    "version": "v2",
+    "contract": "registration-response",
+    "valid": true,
+    "input": {
+      "pc": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "PC de prueba",
+        "macAddress": "02:11:22:33:44:55"
+      },
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "protocolVersion": 2
+    }
+  },
+  {
+    "id": "v2/registration-response/invalid",
+    "version": "v2",
+    "contract": "registration-response",
+    "valid": false,
+    "input": {
+      "pc": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "PC de prueba",
+        "macAddress": "02:11:22:33:44:55",
+        "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+      },
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      "protocolVersion": 2
+    }
+  },
+  {
+    "id": "v2/authorization-header/valid",
+    "version": "v2",
+    "contract": "authorization-header",
+    "valid": true,
+    "input": "Bearer AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  },
+  {
+    "id": "v2/authorization-header/invalid",
+    "version": "v2",
+    "contract": "authorization-header",
+    "valid": false,
+    "input": "Bearer AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\r\n"
+  },
+  {
+    "id": "v2/registered-pc/valid",
+    "version": "v2",
+    "contract": "registered-pc",
+    "valid": true,
+    "input": {
+      "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "name": "PC de prueba",
+      "macAddress": "02:11:22:33:44:55"
+    }
+  },
+  {
+    "id": "v2/registered-pc/invalid",
+    "version": "v2",
+    "contract": "registered-pc",
+    "valid": false,
+    "input": {
+      "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "name": "PC de prueba",
+      "macAddress": "02:11:22:33:44:55",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "id": "v2/command-request/valid",
+    "version": "v2",
+    "contract": "command-request",
+    "valid": true,
+    "input": {
+      "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "kind": "restart",
+      "expected": {
+        "kind": "session",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      },
+      "confirmed": true
+    }
+  },
+  {
+    "id": "v2/command-request/invalid",
+    "version": "v2",
+    "contract": "command-request",
+    "valid": false,
+    "input": {
+      "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "kind": "restart",
+      "expected": {
+        "kind": "session",
+        "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      }
+    }
+  },
+  {
+    "id": "v2/command-response/valid",
+    "version": "v2",
+    "contract": "command-response",
+    "valid": true,
+    "input": {
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "lock"
+        }
+      },
+      "status": "requested",
+      "lastResult": null
+    }
+  },
+  {
+    "id": "v2/command-response/invalid",
+    "version": "v2",
+    "contract": "command-response",
+    "valid": false,
+    "input": {
+      "command": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "pcId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "actor": {
+          "kind": "staff",
+          "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+          "name": "Prueba"
+        },
+        "expected": {
+          "kind": "free",
+          "revision": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+        },
+        "issuedAt": "2026-10-07T12:00:00.000Z",
+        "expiresAt": "2026-10-07T12:00:30.000Z",
+        "action": {
+          "kind": "lock"
+        }
+      },
+      "status": "inventado",
+      "lastResult": null
+    }
+  },
+  {
+    "id": "v2/background-snapshot/valid",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": true,
+    "input": {
+      "revision": 0,
+      "background": null,
+      "changedAt": null,
+      "changedBy": null
+    }
+  },
+  {
+    "id": "v2/background-snapshot/invalid",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": false,
+    "input": {
+      "revision": 0,
+      "background": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 2000000,
+        "mimeType": "image/webp",
+        "width": 1920,
+        "height": 1080
+      },
+      "changedAt": null,
+      "changedBy": null
+    }
+  },
+  {
+    "id": "v2/registration-error/valid",
+    "version": "v2",
+    "contract": "registration-error",
+    "valid": true,
+    "input": {
+      "code": "installation_code_expired",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/registration-error/invalid",
+    "version": "v2",
+    "contract": "registration-error",
+    "valid": false,
+    "input": {
+      "code": "inventado",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/authentication-error/valid",
+    "version": "v2",
+    "contract": "authentication-error",
+    "valid": true,
+    "input": {
+      "code": "pc_credential_revoked",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/authentication-error/invalid",
+    "version": "v2",
+    "contract": "authentication-error",
+    "valid": false,
+    "input": {
+      "code": "inventado",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/command-error/valid",
+    "version": "v2",
+    "contract": "command-error",
+    "valid": true,
+    "input": {
+      "code": "stale_context",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/command-error/invalid",
+    "version": "v2",
+    "contract": "command-error",
+    "valid": false,
+    "input": {
+      "code": "inventado",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/background-error/valid",
+    "version": "v2",
+    "contract": "background-error",
+    "valid": true,
+    "input": {
+      "code": "invalid_image",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/background-error/invalid",
+    "version": "v2",
+    "contract": "background-error",
+    "valid": false,
+    "input": {
+      "code": "inventado",
+      "message": "Error de prueba"
+    }
+  },
+  {
+    "id": "v2/background-snapshot/changed",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": true,
+    "input": {
+      "revision": 1,
+      "background": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 2000000,
+        "mimeType": "image/webp",
+        "width": 1920,
+        "height": 1080
+      },
+      "changedAt": "2026-10-07T12:00:00.000Z",
+      "changedBy": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/background-snapshot/removed",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": true,
+    "input": {
+      "revision": 1,
+      "background": null,
+      "changedAt": "2026-10-07T12:00:00.000Z",
+      "changedBy": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/background-snapshot/size",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": false,
+    "input": {
+      "revision": 1,
+      "background": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 2000001,
+        "mimeType": "image/webp",
+        "width": 1920,
+        "height": 1080
+      },
+      "changedAt": "2026-10-07T12:00:00.000Z",
+      "changedBy": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/background-snapshot/width",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": false,
+    "input": {
+      "revision": 1,
+      "background": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 2000000,
+        "mimeType": "image/webp",
+        "width": 1921,
+        "height": 1080
+      },
+      "changedAt": "2026-10-07T12:00:00.000Z",
+      "changedBy": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/background-snapshot/hash",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": false,
+    "input": {
+      "revision": 1,
+      "background": {
+        "sha256": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "size": 2000000,
+        "mimeType": "image/webp",
+        "width": 1920,
+        "height": 1080
+      },
+      "changedAt": "2026-10-07T12:00:00.000Z",
+      "changedBy": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/background-snapshot/mime",
+    "version": "v2",
+    "contract": "background-snapshot",
+    "valid": false,
+    "input": {
+      "revision": 1,
+      "background": {
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "size": 2000000,
+        "mimeType": "image/png",
+        "width": 1920,
+        "height": 1080
+      },
+      "changedAt": "2026-10-07T12:00:00.000Z",
+      "changedBy": {
+        "kind": "staff",
+        "staffId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "Prueba"
+      }
+    }
+  }
+]
