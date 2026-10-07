@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · permisos de encargado/administrador para revocación y recuperación confirmados (opción A); continúa la revisión de decisiones
+**Última actualización:** 2026-10-07 · código local de recuperación de un uso/10 min confirmado (opción A); continúa la revisión de decisiones
 
 ## Ahora
 
@@ -13,7 +13,7 @@
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T06 completos; T07 con contrato confirmado, pendiente de implementación; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
 | **Siguiente tarea** | T07: exportar protocolo, reglas exactas de recorte del usuario y fixtures. En este chat el mantenedor está resolviendo las preguntas una por una |
 | **Progreso** | Spec 003: 6 / 59 grupos; T01–T06 completas, incluidas T02a/b/c y T05a/b; T07 pendiente de implementación; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Consumo, recuperación y permisos de revocación resueltos: detener saldo/tiempo, misma PC/sesión con credencial nueva y bloqueo hasta autorización; encargado/administrador para las tres acciones (opciones A, ADR-0020/0021). Mecanismo/confirmación temporal de revocación y emergencia pendientes para tareas posteriores |
+| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Revocación: consumo detenido, misma PC/sesión con credencial nueva y bloqueo hasta autorización; encargado/administrador y código local de un uso/10 min confirmados (opciones A, ADR-0020/0021/0022). Contratos/prueba del asistente, estado previo pausado, confirmación temporal y emergencia pendientes para tareas posteriores |
 
 ## Cómo retomar
 
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-07:** el mantenedor elige A para entregar la autorización de recuperación: código ligado a la PC revocada, un uso, 10 min, generado por encargado/administrador e introducido físicamente en el asistente. Credencial nueva solo bajo custodia del servicio, por TLS con el nodo; sin desbloqueo ni mantenimiento automático. ADR-0022, spec/plan/T34 alineados. Contratos/prototipo pendientes; T12 conserva sus condiciones. Continúa la revisión de preguntas.
+
 - **2026-10-07:** el mantenedor elige A para los permisos: encargado y administrador pueden revocar, revincular y autorizar continuar; dueño solo lee. ADR-0021 complementa ADR-0020, spec/plan/T34 alineados con validación por acción en el nodo y eventos con actor. Entrega de credencial, estado previo pausado y confirmación temporal pendientes; sin implementación de T34.
 
 - **2026-10-07:** el mantenedor elige A para recuperar una PC revocada: misma PC con credencial nueva, misma sesión y bloqueo sin consumo hasta autorización del encargado; la credencial anterior sigue invalidada. ADR-0020 registra el comportamiento, spec/plan/T34 alineados. Flujo separado de T12, que sigue exigiendo PC libre/sin mantenimiento. Permisos, mecanismo y confirmación temporal pendientes; sin implementación de T34.
@@ -81,5 +83,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-07:** T06 completada: migración 0028 para el único fondo global, revisión y autoría, sin bytes/rutas en la base de datos. Cuatro pruebas de upgrade/límites/retirada/reaplicación pasan en ambos motores; 909 tests del monorepo (391 del servidor en PostgreSQL temporal real), formato, lint, tipos y build pasan. T07 queda pendiente por indicación del mantenedor hasta revisar el contrato de normalización del usuario; T08–T59 continúan en Borrador.
 
 - **2026-10-07:** T05b completa T05: migración 0027 para mantenimiento confirmado/salida idempotente e intentos técnicos por cuenta. Cinco pruebas de upgrade, restricciones y concurrencia pasan en PGlite; 905 tests del monorepo, incluidos 387 del servidor en PostgreSQL temporal real, formato, lint, tipos y build pasan. Siguiente T06; sin mecanismo elevado ni cambios de Windows.
-
-- **2026-10-07:** T05a completada: migración 0026, cuatro pruebas de upgrade/restricciones/reserva concurrente en PGlite y PostgreSQL temporal real; 900 tests del monorepo (382 del servidor en PGlite), formato, lint, tipos y build pasan. Ejecutores limitados por CLI a dos workers; la variable de entorno no aplica ese límite. T05b es la siguiente. El mantenedor pide continuar hasta T07 y después indica dejar T07 pendiente hasta revisar la normalización del usuario; se continúa hasta T06.

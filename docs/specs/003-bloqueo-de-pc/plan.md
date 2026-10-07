@@ -378,7 +378,12 @@ fronteras separadas para C#, con fixtures que prueban ese aislamiento.
   de T34, separado de la recuperación ordinaria de T12 que exige PC libre y sin mantenimiento.
   **Permisos A confirmados (2026-10-07), ADR-0021:** encargado y administrador pueden
   revocar, revincular y autorizar continuar. El nodo valida sesión/rol en cada acción;
-  dueño solo lee. Antes de T34 hay que concretar entrega de la credencial, estado previo
+  dueño solo lee. **Entrega A confirmada (2026-10-07), ADR-0022:** código de recuperación
+  ligado a la PC revocada, un uso y 600 s, generado en panel e introducido físicamente
+  en su asistente. El servicio obtiene/custodia la credencial nueva por TLS con el nodo
+  verificado, sin mostrarla en panel/JavaScript. Requiere LAN con el nodo y no abre
+  mantenimiento ni desbloquea. Diseñar el flujo específico T34 sin ampliar T12 a PCs
+  ocupadas. Quedan contratos, acceso al asistente, respuestas perdidas, estado previo
   pausado y confirmación del instante efectivo del bloqueo, incluidos acuses perdidos.
   La ausencia de latidos o una reconciliación no deben cerrar por accidente la sesión
   conservada. Los cambios de estado se auditan con actor según ADR-0008.

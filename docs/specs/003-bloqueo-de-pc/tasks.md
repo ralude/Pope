@@ -285,6 +285,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Consumo confirmado (mantenedor, 2026-10-07):** opción A, detener saldo/tiempo durante bloqueo por revocación confirmado. No modifica las reglas de desconexión normal.
   - **Recuperación confirmada (mantenedor, 2026-10-07):** opción A, misma PC/sesión con credencial nueva; bloqueo hasta autorización del personal permitido. Contratos de recuperación y confirmación temporal siguen pendientes; no autoriza implementar T34 ni ampliar la recuperación ordinaria de T12 a PCs ocupadas.
   - **Permisos confirmados (mantenedor, 2026-10-07):** opción A, encargado/administrador para revocar, revincular y autorizar continuar; dueño solo lee. ADR-0021, validación en nodo y eventos con actor; mecanismo pendiente.
+  - **Entrega confirmada (mantenedor, 2026-10-07):** opción A, código ligado a la PC revocada, un uso y 600 s, generado en panel e introducido físicamente en su asistente. El servicio obtiene/custodia la credencial por TLS con nodo verificado, sin desbloquear ni abrir mantenimiento (ADR-0022). Desglosar contratos/nodo/asistente antes de implementar; probar caducidad, consumo concurrente, asociación, respuesta perdida según diseño aprobado y secreto ausente de panel/JavaScript. T12 conserva sus condiciones.
 
 - [ ] **T35: Autorización técnica local y remota**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
@@ -447,7 +448,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 - **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** host WinForms confirmado (ADR-0019); versiones de SDK, herramientas de tests y soporte del Windows real pendientes.
 - **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
 - **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
-- **T34:** consumo detenido, recuperación de misma PC/sesión con credencial nueva y permisos de encargado/administrador confirmados (opciones A, ADR-0020/0021); pendientes mecanismo y confirmación temporal del bloqueo, sin cierre accidental por latidos.
+- **T34:** consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador y código local de un uso/600 s confirmados (opciones A, ADR-0020/0021/0022); pendientes contratos/prueba del asistente, estado previo pausado y confirmación temporal del bloqueo, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
 - **T53/T54:** acceso de emergencia: autenticación, alcance, presencia física y auditoría; no hay mecanismo aprobado.
 - **T48–T58:** inventario Windows/congelador/NIC/monitores/juegos. No asumir datos tentativos ni modificar el Windows cotidiano para probar.
