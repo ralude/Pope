@@ -279,9 +279,10 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 - [ ] **T34: Revocación conservando la sesión**
   - **Cubre:** REQ-003-11, REQ-003-63.
-  - **Hacer:** implementar la parte del nodo tras resolver cobro/permisos y desglosar la recuperación; preservar sesión, distinguir revocación autenticada de fallo TLS y coordinar bloqueo nativo de T21.
-  - **Verificar:** revocación en canal vivo y al reconectar, jobs/reconcile no cierran sesión conservada y PC revocada no inicia una nueva; validar autorización y recepción del bloqueo.
+  - **Hacer:** implementar la parte del nodo tras resolver permisos, confirmación temporal y desglosar la recuperación; preservar sesión, detener consumo durante bloqueo por revocación confirmado, distinguir revocación autenticada de fallo TLS y coordinar bloqueo nativo de T21.
+  - **Verificar:** revocación en canal vivo y al reconectar, ausencia de consumo de saldo/tiempo durante bloqueo confirmado, jobs/reconcile no cierran sesión conservada y PC revocada no inicia una nueva; validar autorización, recepción del bloqueo y los casos de acuse perdido/desconexión conforme al diseño que se apruebe.
   - **Commit:** `feat(server): conserva la sesión al revocar una PC`.
+  - **Consumo confirmado (mantenedor, 2026-10-07):** opción A, detener saldo/tiempo durante bloqueo por revocación confirmado. Recuperación, permisos y mecanismo de confirmación temporal siguen pendientes; no autoriza implementar T34 ni modifica las reglas de desconexión normal.
 
 - [ ] **T35: Autorización técnica local y remota**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
@@ -444,7 +445,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 - **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** host WinForms confirmado (ADR-0019); versiones de SDK, herramientas de tests y soporte del Windows real pendientes.
 - **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
 - **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
-- **T34:** cobro, permisos de revocación/revinculación y recuperación del encargado, sin cierre accidental por latidos.
+- **T34:** consumo detenido durante bloqueo por revocación confirmado (opción A); pendientes permisos de revocación/revinculación, recuperación y confirmación temporal del bloqueo, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
 - **T53/T54:** acceso de emergencia: autenticación, alcance, presencia física y auditoría; no hay mecanismo aprobado.
 - **T48–T58:** inventario Windows/congelador/NIC/monitores/juegos. No asumir datos tentativos ni modificar el Windows cotidiano para probar.

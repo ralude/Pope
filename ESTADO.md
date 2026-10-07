@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · host WinForms + WebView2 confirmado (opción A); continúa la revisión de decisiones
+**Última actualización:** 2026-10-07 · consumo detenido durante bloqueo por revocación confirmado (opción A); continúa la revisión de decisiones
 
 ## Ahora
 
@@ -13,7 +13,7 @@
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T06 completos; T07 con contrato confirmado, pendiente de implementación; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
 | **Siguiente tarea** | T07: exportar protocolo, reglas exactas de recorte del usuario y fixtures. En este chat el mantenedor está resolviendo las preguntas una por una |
 | **Progreso** | Spec 003: 6 / 59 grupos; T01–T06 completas, incluidas T02a/b/c y T05a/b; T07 pendiente de implementación; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Cobro/recuperación de revocación y emergencia pendientes para tareas posteriores |
+| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Consumo durante bloqueo por revocación confirmado resuelto: detener saldo/tiempo (opción A). Recuperación, permisos, confirmación temporal de revocación y emergencia pendientes para tareas posteriores |
 
 ## Cómo retomar
 
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-07:** el mantenedor elige A para el consumo durante revocación: conservar la sesión y detener saldo/tiempo mientras el acceso esté bloqueado por revocación confirmada. No se aplica a un simple corte de red o fallo TLS. REQ-003-11, plan y T34 alineados; recuperación, permisos y confirmación temporal del bloqueo siguen pendientes. Sin cambios de código ni autorización de T34.
+
 - **2026-10-07:** el mantenedor elige A para el host: WinForms + WebView2, con React a pantalla completa y C# mínimo. ADR-0019 aceptado, spec/plan/T08 alineados; no se aprueban ni ejecutan tareas nativas. Inventario Windows, SDK/tests y prototipo T09 siguen pendientes. Continúa la revisión de preguntas una por una.
 
 - **2026-10-07:** el mantenedor elige B para el inventario Windows: dejar versiones/ediciones pendientes y continuar resolviendo decisiones de diseño. Los datos tentativos no se consideran confirmados; T08 sigue en Borrador y la compatibilidad no está verificada. Siguiente punto de revisión: base del host del Shell.
@@ -80,4 +82,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 
 - **2026-10-06:** README reescrito tomando Cullen como referencia de presentación: problema del local, operación, decisiones técnicas, arquitectura, evidencia, arranque y documentación. Distingue capacidades implementadas de Windows/nube pendientes y conserva los límites de las mediciones. Sin cambios de código ni avance de specs; siguiente T05 de la 003.
 - **2026-10-05:** T04 completada: migración 0025 y seis tests de registro/upgrade/concurrencia. 896 tests del monorepo pasan, incluidos 378 del servidor en PGlite; los 378 también pasan en PostgreSQL temporal real. Formato, lint, tipos y build pasan. Se redujo el paralelismo del ejecutor a dos workers sin cambiar límites de tests ni requisitos. Registro/auth efectivos quedan en T12/T13; siguiente T05.
-- **2026-10-04:** T03: fondo global con SHA-256, WebP/bytes/dimensiones, revisión y actor; aviso v2 sin imagen ni rutas y progreso solo local. Entrada 10 000 000 bytes/40 millones de píxeles y salida 2 000 000 bytes/1920×1080 confirmados. 890 tests (308 shared), formato, lint, tipos y build pasan; no se decodifican/suben imágenes ni se implementan endpoints aún. Siguiente T04.

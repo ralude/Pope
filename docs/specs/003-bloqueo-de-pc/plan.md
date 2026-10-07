@@ -303,7 +303,8 @@ añade el último contexto conocido, que no sustituye al acuse del efecto Window
 `controlState` lleva contexto y UTC del nodo, separado de `state`, `maintenanceState`
 y `command`. Las salidas offline se envían individualmente con su ID y se reconocen
 sin obligar a abrir un mantenimiento nuevo. Errores de autenticación distinguen la
-revocación de un fallo de transporte, sin fijar todavía el cobro durante ese bloqueo.
+revocación de un fallo de transporte; la aplicación del corte de consumo confirmado
+el 2026-10-07 queda en T34, sin alterar estos contratos ya implementados.
 La solicitud de puente `endMaintenance` identifica el mantenimiento y la petición;
 el servicio produce la salida durable incluso sin red. `nativeShellRequestSchema`
 solo admite acciones del cliente y login/salida técnica: React no fabrica hello,
@@ -367,8 +368,12 @@ fronteras separadas para C#, con fixtures que prueban ese aislamiento.
 - Reinicio/apagado durante mantenimiento: pedir confirmación, terminar el mantenimiento,
   registrar la salida y después ejecutar la orden (mantenedor, 2026-10-04).
 - Revocación: conservar la sesión y bloquear el acceso cuando la PC recibe la revocación,
-  hasta intervención del encargado. Falta decidir el cobro y la recuperación. La ausencia
-  de latidos o una reconciliación no deben cerrar por accidente la sesión conservada.
+  hasta intervención del encargado. **Opción A confirmada (2026-10-07): detener el
+  consumo de saldo y tiempo restante durante el bloqueo por revocación confirmado**.
+  El nodo decide el cobro; un simple corte de red o fallo TLS no activa esta regla.
+  Antes de T34 hay que concretar recuperación, permisos y confirmación del instante
+  efectivo del bloqueo, incluidos acuses perdidos. La ausencia de latidos o una
+  reconciliación no deben cerrar por accidente la sesión conservada.
 - Concretar la presentación y los estados admisibles del mensaje del encargado, así como
   cómo acceder a Pausar desde un juego exclusivo; quedan en las preguntas de la spec.
 
@@ -415,7 +420,7 @@ la propuesta anterior de multipart no es un contrato vigente.
 | PC reiniciada en pausa | Bloqueo al arrancar y recuperación de la pausa desde el nodo (002-31) |
 | Host muerto o UI colgada | Detectar desde el agente, relanzar y conservar estado; medir 003-32 |
 | Agente reiniciado sin estado verificable | Propuesta: permanecer bloqueada hasta obtener estado válido; concretar recuperación en la spec |
-| Credencial revocada | Rechazar conexión; conservar sesión y bloquear al recibir revocación. Cobro/recuperación pendientes; sin red solo se conoce al reconectar |
+| Credencial revocada | Rechazar conexión; conservar sesión y bloquear al recibir revocación. Detener consumo durante bloqueo confirmado (opción A); recuperación y confirmación temporal pendientes. Sin red solo se conoce al reconectar |
 | Nodo no verificado | No enviar credenciales; no confundir fallo de certificado con una revocación confirmada |
 | Pipe o mensaje falsificado | Rechazar antes de una acción nativa; no registrar contraseñas ni secretos |
 | Mantenimiento solicitado con sesión | Rechazar y exigir cierre previo; no cerrar automáticamente (003-43) |
