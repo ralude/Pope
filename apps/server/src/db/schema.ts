@@ -27,6 +27,7 @@ import type {
   Wallet,
   Weekday,
 } from '@pope/shared';
+import { MAX_BACKGROUND_BYTES, MAX_BACKGROUND_HEIGHT, MAX_BACKGROUND_WIDTH } from '@pope/shared';
 import { sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,
@@ -518,6 +519,51 @@ export const staffTechnicalLoginAttempts = pgTable(
       (${t.failedLogins} < 10 and ${t.lockedAt} is null and ${t.lockedUntil} is null) or
       (${t.failedLogins} = 10 and ${t.lockedAt} is not null and ${t.lockedUntil} is not null
         and ${t.lockedUntil} = ${t.lockedAt} + interval '60 seconds')`,
+    ),
+  ],
+);
+
+/** Un fondo para todo el local; solo metadatos, nunca bytes ni rutas (REQ-003-71). */
+export const lockScreenBackground = pgTable(
+  'lock_screen_background',
+  {
+    id: integer('id').primaryKey().default(1),
+    revision: bigint('revision', { mode: 'number' }).notNull().default(0),
+    sha256: text('sha256'),
+    size: integer('size'),
+    mimeType: text('mime_type').$type<'image/webp'>(),
+    width: integer('width'),
+    height: integer('height'),
+    changedAt: timestamp('changed_at', { withTimezone: true }),
+    changedBy: jsonb('changed_by').$type<PcMaintenance['actor']>(),
+  },
+  (t) => [
+    check('lock_screen_background_singleton_check', sql`${t.id} = 1`),
+    check(
+      'lock_screen_background_revision_check',
+      sql`${t.revision} between 0 and 9007199254740991`,
+    ),
+    check(
+      'lock_screen_background_sha256_check',
+      sql`${t.sha256} is null or ${t.sha256} ~ '^[0-9a-f]{64}$'`,
+    ),
+    check(
+      'lock_screen_background_image_check',
+      sql`
+      (${t.sha256} is null and ${t.size} is null and ${t.mimeType} is null
+        and ${t.width} is null and ${t.height} is null) or
+      (${t.sha256} is not null and ${t.size} is not null and ${t.mimeType} is not null
+        and ${t.width} is not null and ${t.height} is not null
+        and ${t.size} between 1 and ${MAX_BACKGROUND_BYTES} and ${t.mimeType} = 'image/webp'
+        and ${t.width} between 1 and ${MAX_BACKGROUND_WIDTH}
+        and ${t.height} between 1 and ${MAX_BACKGROUND_HEIGHT})`.inlineParams(),
+    ),
+    check(
+      'lock_screen_background_change_check',
+      sql`
+      (${t.revision} = 0 and ${t.sha256} is null and ${t.changedAt} is null and ${t.changedBy} is null) or
+      (${t.revision} > 0 and ${t.changedAt} is not null and ${t.changedBy} is not null
+        and coalesce(${t.changedBy}->>'kind' = 'staff', false))`,
     ),
   ],
 );

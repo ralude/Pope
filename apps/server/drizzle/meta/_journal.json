@@ -197,6 +197,13 @@
       "when": 1791384229015,
       "tag": "0027_pc_maintenance",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1791384817119,
+      "tag": "0028_lock_screen_background",
+      "breakpoints": true
     }
   ]
 }

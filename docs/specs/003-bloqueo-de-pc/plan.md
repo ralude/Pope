@@ -120,6 +120,17 @@ No hay contador por PC ni reset automático de base de datos; T35 aplica el rese
 éxito o fin del bloqueo y el aviso único en la transacción con su evento. El upgrade
 no inventa mantenimientos ni intentos anteriores y no cambia el login del panel.
 
+### T06: metadatos del fondo global persistidos
+
+`lock_screen_background` tiene una sola fila (ID 1), creada por la migración en revisión
+0 y con imagen/autoría nulas: fondo por defecto. SHA-256, bytes, tipo WebP y dimensiones
+van en columnas opcionales que se rellenan o vacían juntas, con los límites de shared.
+La revisión es un entero seguro no negativo; tras cualquier cambio debe ser positiva
+y llevar fecha UTC y actor del personal, también al quitar el fondo. No hay bytes,
+rutas ni duplicados por PC en PostgreSQL. Validar archivo/hash, autorización del
+administrador, incremento de revisión y evento atómico quedan en T43; esta migración
+no sube ni descarga imágenes ni añade endpoints o dependencias.
+
 ### Existentes que se reutilizan
 
 `packages/shared/src/protocol.ts` ya define `hello`, latidos, login, cierre, compra,

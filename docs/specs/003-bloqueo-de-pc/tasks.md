@@ -95,11 +95,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(server): guarda el mantenimiento y los intentos técnicos`.
   - **Implementada (2026-10-07):** migración 0027: una entrada confirmada abierta por PC, salida completa con ID único y segundos monotónicos; intentos por cuenta independientes de las cookies, diez fallos y bloqueo de 60 s. Cinco pruebas de upgrade, restricciones y concurrencia pasan en ambos motores; 905 tests del monorepo (387 del servidor en PostgreSQL), formato, lint, tipos y build pasan. Login efectivo/eventos/reset y conciliación offline quedan en T35–T40.
 
-- [ ] **T06: Migración de metadatos del fondo**
+- [x] **T06: Migración de metadatos del fondo**
   - **Cubre:** REQ-003-70, REQ-003-71.
   - **Hacer:** añadir los metadatos del único fondo global y su revisión, sin guardar la imagen en PostgreSQL; generar migración nueva, sin implementar todavía los endpoints.
   - **Verificar:** estado inicial por defecto, restricciones de metadatos y migración sobre base existente en ambos motores.
   - **Commit:** `feat(server): guarda los metadatos del fondo global`.
+  - **Implementada (2026-10-07):** migración 0028: una fila global, revisión cero/fondo por defecto inicialmente; SHA-256, bytes, WebP y dimensiones completos con límites de shared. Retirar conserva revisión positiva, fecha UTC y actor. Cuatro pruebas de upgrade, límites, retirada y reaplicación pasan en ambos motores; 909 tests del monorepo (391 del servidor en PostgreSQL), formato, lint, tipos y build pasan. Archivo, permisos, evento y endpoints quedan en T43.
 
 - [ ] **T07: Exportación del protocolo para C#**
   - **Cubre:** REQ-003-63; ADR-0002.
