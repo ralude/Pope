@@ -183,6 +183,13 @@
       "when": 1791149689145,
       "tag": "0025_pc_registration",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791239978891,
+      "tag": "0026_pc_control",
+      "breakpoints": true
     }
   ]
 }

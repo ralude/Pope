@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-06 · README adaptado a la presentación del proyecto; avance de specs sin cambios
+**Última actualización:** 2026-10-07 · T05a: órdenes y reservas persistidas
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T07 aprobado/en curso; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
-| **Siguiente tarea** | T05: migración de control y mantenimiento. Después T06–T07, autorizadas |
-| **Progreso** | Spec 003: 4 / 59 grupos; T01–T04 completas, incluidas T02a/b/c; T05–T07 autorizadas; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Reglas de entrada/mensajes y vigencia de órdenes confirmadas. Fondo: límite original adicional de 40 millones de píxeles confirmado. Cobro/recuperación de revocación y emergencia pendientes para tareas posteriores; inventario antes de tareas nativas dependientes |
+| **Siguiente tarea** | T05b: mantenimiento e intentos técnicos. Después T06; T07 pendiente por indicación del mantenedor |
+| **Progreso** | Spec 003: 4 / 59 grupos y T05a; T01–T04 completas, incluidas T02a/b/c; T05b–T06 autorizadas; T07 pendiente de revisión; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Bloqueos** | T07: revisar normalización del usuario antes de exportar JSON Schema; el mantenedor indica dejarla pendiente (2026-10-07). Cobro/recuperación de revocación y emergencia pendientes para tareas posteriores; inventario antes de tareas nativas dependientes |
 
 ## Cómo retomar
 
@@ -63,6 +63,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-07:** T05a completada: migración 0026, cuatro pruebas de upgrade/restricciones/reserva concurrente en PGlite y PostgreSQL temporal real; 900 tests del monorepo (382 del servidor en PGlite), formato, lint, tipos y build pasan. Ejecutores limitados por CLI a dos workers; la variable de entorno no aplica ese límite. T05b es la siguiente. El mantenedor pide continuar hasta T07 y después indica dejar T07 pendiente hasta revisar la normalización del usuario; se continúa hasta T06.
 
 - **2026-10-06:** README reescrito tomando Cullen como referencia de presentación: problema del local, operación, decisiones técnicas, arquitectura, evidencia, arranque y documentación. Distingue capacidades implementadas de Windows/nube pendientes y conserva los límites de las mediciones. Sin cambios de código ni avance de specs; siguiente T05 de la 003.
 - **2026-10-05:** T04 completada: migración 0025 y seis tests de registro/upgrade/concurrencia. 896 tests del monorepo pasan, incluidos 378 del servidor en PGlite; los 378 también pasan en PostgreSQL temporal real. Formato, lint, tipos y build pasan. Se redujo el paralelismo del ejecutor a dos workers sin cambiar límites de tests ni requisitos. Registro/auth efectivos quedan en T12/T13; siguiente T05.

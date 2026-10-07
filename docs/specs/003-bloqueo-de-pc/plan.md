@@ -94,6 +94,19 @@ La nueva migración se prueba sobre datos anteriores y con consumo concurrente e
 PGlite/PostgreSQL. Un helper de tests permite migrar hasta el estado previo y después
 aplicar pendientes en el mismo motor; no modifica migraciones ya subidas.
 
+### T05a: órdenes y reserva persistidas
+
+`pc_commands` conserva el ID de idempotencia, PC, actor del personal, solicitud sin
+secretos, contexto esperado y acción cerrada de T02, emisión/caducidad UTC (30 s),
+estado y último acuse con fecha. Un resultado solo describe aceptación/efecto/fallo;
+no demuestra apagado físico. Los JSON se tipan con shared; su validación y las
+transiciones con eventos corresponden a T28, no a esta migración.
+`pc_control_states` tiene una fila por PC, revisión UUIDv7 y reserva opcional ligada
+por FK compuesta a una orden de esa misma PC. La reserva no vence automáticamente:
+la coordinación la libera al confirmar el efecto según T29/T40. No duplica saldo,
+sesión ni pausa, ni activa restricciones de login antes de T28. Las filas se crean
+al activar la coordinación; el upgrade no inventa estados confirmados de Windows.
+
 ### Existentes que se reutilizan
 
 `packages/shared/src/protocol.ts` ya define `hello`, latidos, login, cierre, compra,

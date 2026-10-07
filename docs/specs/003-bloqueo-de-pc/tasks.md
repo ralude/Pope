@@ -79,6 +79,20 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** crear datos de órdenes, reserva de PC, mantenimiento e intentos técnicos según el plan; índices de idempotencia y una entrada abierta por PC.
   - **Verificar:** restricciones, fechas UTC, duraciones enteras y concurrencia en ambos motores; conservar tablas de sesiones y cookies existentes.
   - **Commit:** `feat(server): guarda el control y mantenimiento de PCs`.
+  - **División previa (2026-10-05):** T05a (órdenes y reserva) y T05b (mantenimiento e intentos técnicos), cada una con migración y pruebas en ambos motores. T05 se marca al completar ambas.
+
+- [x] **T05a: Persistencia de órdenes y reserva de PC**
+  - **Cubre:** REQ-003-20, REQ-003-43.
+  - **Hacer:** guardar solicitud, orden, contexto, actor y resultado; reserva ligada a una orden de la misma PC, sin activar coordinación ni liberar por caducidad.
+  - **Verificar:** upgrade, IDs únicos, vigencia de 30 s y reserva concurrente; preservar sesiones/cookies.
+  - **Commit:** `feat(server): guarda las órdenes y reservas de PCs`.
+  - **Implementada (2026-10-07):** migración 0026 con órdenes idempotentes, acuses tipados y reserva ligada a una orden de la misma PC. Cuatro pruebas de upgrade, restricciones y concurrencia; la caducidad no libera la reserva. La coordinación y los eventos quedan en T28.
+
+- [ ] **T05b: Persistencia de mantenimiento e intentos técnicos**
+  - **Cubre:** REQ-003-41, REQ-003-43, REQ-003-44, REQ-003-45.
+  - **Hacer:** entrada confirmada, salida idempotente y contador/bloqueo por cuenta independiente del panel.
+  - **Verificar:** una entrada abierta por PC, salida única, segundos enteros y bloqueo de 60 s tras diez fallos en ambos motores.
+  - **Commit:** `feat(server): guarda el mantenimiento y los intentos técnicos`.
 
 - [ ] **T06: Migración de metadatos del fondo**
   - **Cubre:** REQ-003-70, REQ-003-71.

@@ -15,6 +15,10 @@ import type {
   ExchangeRateSource,
   LedgerKind,
   PaymentMethod,
+  PcCommand,
+  PcCommandRequest,
+  PcCommandResult,
+  PcControlContext,
   SessionEndReason,
   SessionKind,
   StaffRole,
@@ -375,6 +379,81 @@ export const pcCredentials = pgTable(
       sql`
     (${t.revokedAt} is null or ${t.revokedAt} >= ${t.createdAt})
     and (${t.revokedByStaffId} is null or ${t.revokedAt} is not null)`,
+    ),
+  ],
+);
+
+/** Órdenes idempotentes; validar JSON/transiciones con shared en T28 (REQ-003-20). */
+export const pcCommands = pgTable(
+  'pc_commands',
+  {
+    id: uuid('id').primaryKey(),
+    pcId: uuid('pc_id')
+      .notNull()
+      .references(() => pcs.id),
+    actor: jsonb('actor').$type<PcCommand['actor']>().notNull(),
+    request: jsonb('request').$type<PcCommandRequest>().notNull(),
+    expected: jsonb('expected').$type<PcControlContext>().notNull(),
+    action: jsonb('action').$type<PcCommand['action']>().notNull(),
+    issuedAt: timestamp('issued_at', { withTimezone: true }).notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    status: text('status')
+      .$type<PcCommandResult['status'] | 'requested' | 'expired' | 'cancelled'>()
+      .notNull()
+      .default('requested'),
+    lastResult: jsonb('last_result').$type<PcCommandResult>(),
+    lastResultAt: timestamp('last_result_at', { withTimezone: true }),
+  },
+  (t) => [
+    unique('pc_commands_id_pc_unique').on(t.id, t.pcId),
+    index('pc_commands_pc_issued_idx').on(t.pcId, t.issuedAt),
+    index('pc_commands_pending_expiration_idx')
+      .on(t.expiresAt)
+      .where(sql`${t.status} = 'requested'`),
+    check('pc_commands_ttl_check', sql`${t.expiresAt} = ${t.issuedAt} + interval '30 seconds'`),
+    check('pc_commands_actor_check', sql`coalesce(${t.actor}->>'kind' = 'staff', false)`),
+    check(
+      'pc_commands_action_check',
+      sql`coalesce(${t.action}->>'kind' in ('lock', 'restart', 'powerOff', 'showMessage', 'startMaintenance', 'endMaintenance'), false)`,
+    ),
+    check(
+      'pc_commands_status_check',
+      sql`${t.status} in ('requested', 'accepted', 'applied', 'failed', 'expired', 'cancelled')`,
+    ),
+    check(
+      'pc_commands_result_check',
+      sql`
+      (${t.lastResult} is null and ${t.lastResultAt} is null and ${t.status} in ('requested', 'expired', 'cancelled')) or
+      (${t.lastResult} is not null and ${t.lastResultAt} is not null
+        and coalesce(${t.lastResult}->>'status' = ${t.status}, false)
+        and ${t.status} in ('accepted', 'applied', 'failed'))`,
+    ),
+    check(
+      'pc_commands_power_result_check',
+      sql`${t.status} <> 'applied' or ${t.action}->>'kind' not in ('restart', 'powerOff')`,
+    ),
+  ],
+);
+
+/** Una reserva por PC; la caducidad de una orden no confirma que Windows quedó bloqueado. */
+export const pcControlStates = pgTable(
+  'pc_control_states',
+  {
+    pcId: uuid('pc_id')
+      .primaryKey()
+      .references(() => pcs.id),
+    revision: uuid('revision').notNull(),
+    reservedCommandId: uuid('reserved_command_id'),
+    reservedAt: timestamp('reserved_at', { withTimezone: true }),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.reservedCommandId, t.pcId],
+      foreignColumns: [pcCommands.id, pcCommands.pcId],
+    }),
+    check(
+      'pc_control_states_reservation_check',
+      sql`(${t.reservedCommandId} is null) = (${t.reservedAt} is null)`,
     ),
   ],
 );
