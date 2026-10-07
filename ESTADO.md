@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · T06: metadatos del fondo global persistidos
+**Última actualización:** 2026-10-07 · T01–T06 completas; T07 pendiente de revisión por indicación del mantenedor
 
 ## Ahora
 
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-07:** registrada la indicación explícita del mantenedor de dejar T07 pendiente hasta revisar el contrato de normalización del usuario. Spec/tasks reflejan la suspensión de esa tarea; T01–T06 están completas (6/59 grupos) y la 005 sigue esperando T07. Sin cambios al protocolo exportado.
+
 - **2026-10-07:** T06 completada: migración 0028 para el único fondo global, revisión y autoría, sin bytes/rutas en la base de datos. Cuatro pruebas de upgrade/límites/retirada/reaplicación pasan en ambos motores; 909 tests del monorepo (391 del servidor en PostgreSQL temporal real), formato, lint, tipos y build pasan. T07 queda pendiente por indicación del mantenedor hasta revisar el contrato de normalización del usuario; T08–T59 continúan en Borrador.
 
 - **2026-10-07:** T05b completa T05: migración 0027 para mantenimiento confirmado/salida idempotente e intentos técnicos por cuenta. Cinco pruebas de upgrade, restricciones y concurrencia pasan en PGlite; 905 tests del monorepo, incluidos 387 del servidor en PostgreSQL temporal real, formato, lint, tipos y build pasan. Siguiente T06; sin mecanismo elevado ni cambios de Windows.
@@ -76,4 +78,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** T02c completa T02: canal v2 preparado sin activar la admisión, estado/copia de recuperación, sesión y mantenimiento separados; React no produce hello/latidos/acuses/órdenes nativas. 883 tests (301 shared), formato, lint, tipos y build pasan. La salida offline lleva ID propio y solo el servicio genera su registro. Siguiente T03; sin cambios de cuentas ni Windows.
 - **2026-10-04:** T02b: solicitudes/órdenes/acuses tipados, confirmación al reiniciar/apagar con ocupación y contexto con revisión para no alcanzar al siguiente cliente. Vigencia 30 s confirmada; aceptación Windows no es apagado físico. Mensajes de 5 s/1 000 caracteres, sin foco. 877 tests (295 shared), formato, lint, tipos y build pasan. T02c pendiente; sin ejecución nativa ni journal aún.
 - **2026-10-04:** T02a: contratos de mantenimiento confirmado, login técnico, salida durable y reconocimiento por ID; auditoría de entrada/salida/bloqueo técnico sin secretos. Confirmados cierre previo también local y mensajes de 5 s con sonido/sin foco, fuera de mantenimiento. T02 dividida en tres subtareas antes de implementar; 1/59 grupos completos. 871 tests (289 shared), formato, lint, tipos y build en verde. Sin mecanismo elevado ni mutaciones de Windows.
-- **2026-10-04:** T01 implementada: registro/auth de PCs en shared, campos estrictos y separación de secretos, MAC validada/normalizada, recuperación con otro código de la misma PC y constante v2 sin cambiar el canal actual. 862 tests del monorepo (280 shared), formato, lint, tipos y build pasan. La primera ejecución tuvo `spawn EPERM` del sandbox; con procesos permitidos funciona. Siguiente T02; sin registrar PCs reales ni modificar Windows.

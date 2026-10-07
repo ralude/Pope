@@ -171,6 +171,9 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 
 ## Preguntas abiertas
 
+- [ ] **Normalización del usuario en T07 (2026-10-05).** Zod aplica `trim` antes de validar el usuario de login de cliente/técnico; JSON Schema no representa ese procesamiento. Comprobado: `"   "` falla en Zod y pasa en el esquema; 64 letras con espacios exteriores pasan en Zod y fallan en el esquema. Propuesta: conservar el comportamiento y exportar junto al schema la instrucción y los caracteres exactos de recorte para que C# normalice solo el usuario antes de validar; nunca la contraseña. Confirmar antes de cerrar T07. Los límites Unicode sí coinciden en las versiones instaladas, incluidos emojis.
+  - **Indicación del mantenedor (2026-10-07):** dejar T07 pendiente hasta revisar el contrato. La propuesta de exportar la normalización no queda aprobada; no implementar T07 hasta nueva indicación.
+
 - [x] **Inicio de Contratos y datos (2026-10-04).** El mantenedor autoriza T01–T07 y acepta ADR-0017; confirma canal v2 y retirada del provisional v1 al cambiar admisión. Solo este bloque queda aprobado para implementar; mecanismos Windows y preguntas de negocio ajenas siguen abiertos.
 - [x] **Registro consumido con respuesta perdida.** **Resuelta (mantenedor, 2026-10-04): encargado/administrador genera otro código ligado a la misma PC, solo libre y sin mantenimiento**. Reemplaza la credencial sin duplicar PC ni reutilizar el código anterior; el hash SHA-256 no permite recuperar el secreto previo.
 - [ ] ¿Qué versiones y ediciones de Windows tienen las PCs del local? **Inventario tentativo del mantenedor (2026-10-04): probablemente Windows 10 22H2 y una PC con Windows 11**; falta comprobar versión y edición exactas. REQ-003-62 mantiene el objetivo Pro hasta revisar ese dato.
