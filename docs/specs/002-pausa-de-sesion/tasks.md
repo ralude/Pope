@@ -16,6 +16,12 @@ CA-002-02) se enumera una sola vez en [tasks de la spec 003](../003-bloqueo-de-p
 T23–T25 y verificación T56, con las regresiones allí señaladas. Esa lista sigue en
 Borrador; la fase 2 no está implementada ni modifica la aprobación de las 19 tareas de fase 1.
 
+**Cambio del mantenedor (2026-10-07, opción A):** conservar el estado previo al recuperar
+una PC revocada y congelar tiempo restante/contadores de pausa durante el bloqueo
+confirmado (REQ-002-33, CA-002-09). Se implementa/verifica en T34 y se revisa en T59 de
+la spec 003, tras concretar contratos y confirmación temporal. Las 19 tareas de fase 1
+conservan su aprobación; este cambio todavía no está implementado ni verificado.
+
 ## Decidido al aprobar
 
 Al repasar el plan contra el código salieron cuatro huecos. El mantenedor decidió las tres

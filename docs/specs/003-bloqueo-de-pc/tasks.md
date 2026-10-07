@@ -278,7 +278,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(server): enciende PCs por Wake-on-LAN`.
 
 - [ ] **T34: Revocación conservando la sesión**
-  - **Cubre:** REQ-003-11, REQ-003-63.
+  - **Cubre:** REQ-003-11, REQ-003-63; REQ-002-33, CA-002-09.
   - **Hacer:** implementar la parte del nodo tras resolver confirmación temporal y desglosar el mecanismo de recuperación; preservar sesión, detener consumo durante bloqueo por revocación confirmado, revincular la misma PC con credencial nueva sin desbloquear hasta autorización del encargado/administrador (ADR-0020/0021), distinguir revocación autenticada de fallo TLS y coordinar bloqueo nativo de T21. Validar sesión/rol en las tres acciones: revocar, revincular y autorizar continuar.
   - **Verificar:** revocación en canal vivo y al reconectar, ausencia de consumo de saldo/tiempo durante bloqueo confirmado, misma PC/sesión tras revincular, credencial anterior rechazada y nueva credencial sin desbloqueo automático; jobs/reconcile no cierran sesión conservada y PC revocada no inicia una nueva. Encargado/administrador admitidos y dueño/cliente/peticiones sin sesión rechazados en cada acción; eventos con actor, recepción del bloqueo y acuse perdido/desconexión conforme al diseño que se apruebe.
   - **Commit:** `feat(server): conserva la sesión al revocar una PC`.
@@ -286,6 +286,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Recuperación confirmada (mantenedor, 2026-10-07):** opción A, misma PC/sesión con credencial nueva; bloqueo hasta autorización del personal permitido. Contratos de recuperación y confirmación temporal siguen pendientes; no autoriza implementar T34 ni ampliar la recuperación ordinaria de T12 a PCs ocupadas.
   - **Permisos confirmados (mantenedor, 2026-10-07):** opción A, encargado/administrador para revocar, revincular y autorizar continuar; dueño solo lee. ADR-0021, validación en nodo y eventos con actor; mecanismo pendiente.
   - **Entrega confirmada (mantenedor, 2026-10-07):** opción A, código ligado a la PC revocada, un uso y 600 s, generado en panel e introducido físicamente en su asistente. El servicio obtiene/custodia la credencial por TLS con nodo verificado, sin desbloquear ni abrir mantenimiento (ADR-0022). Desglosar contratos/nodo/asistente antes de implementar; probar caducidad, consumo concurrente, asociación, respuesta perdida según diseño aprobado y secreto ausente de panel/JavaScript. T12 conserva sus condiciones.
+  - **Estado previo confirmado (mantenedor, 2026-10-07):** opción A, activa vuelve activa; pausada vuelve pausada con el tiempo que le quedaba. Durante bloqueo confirmado no se gasta ese tiempo ni otra pausa por sesión/día. Implementar y verificar REQ-002-33/CA-002-09, también con política de cierre al vencer y contadores diarios, después de diseñar intervalos en el nodo. No reanudar una pausa ni reiniciar sus límites por recuperar identidad.
 
 - [ ] **T35: Autorización técnica local y remota**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
@@ -442,13 +443,14 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** entregar informe trazable y límites al mantenedor; tras aprobación explícita, cerrar 003 y fase 2 de pausa y actualizar `ESTADO.md` sin declarar lista blanca/perfiles 004 completos.
   - **Verificar:** revisión del mantenedor, todos los criterios demostrados y requisitos de emergencia aprobados/probados; checks TS/nativos y PG real en verde antes de entrega al local.
   - **Commit:** `docs(specs): cierra el cliente Windows tras la revisión del mantenedor`.
+  - **Ampliación confirmada (2026-10-07):** incluir REQ-002-33/CA-002-09 de T34 en el informe y revisión; no declarar la excepción de pausa implementada por las pruebas anteriores de fase 1.
 
 ## Decisiones pendientes antes de ejecutar
 
 - **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** host WinForms confirmado (ADR-0019); versiones de SDK, herramientas de tests y soporte del Windows real pendientes.
 - **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
 - **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
-- **T34:** consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador y código local de un uso/600 s confirmados (opciones A, ADR-0020/0021/0022); pendientes contratos/prueba del asistente, estado previo pausado y confirmación temporal del bloqueo, sin cierre accidental por latidos.
+- **T34:** consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/600 s y regreso al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33); pendientes contratos/prueba del asistente y confirmación temporal, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
 - **T53/T54:** acceso de emergencia: autenticación, alcance, presencia física y auditoría; no hay mecanismo aprobado.
 - **T48–T58:** inventario Windows/congelador/NIC/monitores/juegos. No asumir datos tentativos ni modificar el Windows cotidiano para probar.

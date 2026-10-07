@@ -383,8 +383,12 @@ fronteras separadas para C#, con fixtures que prueban ese aislamiento.
   en su asistente. El servicio obtiene/custodia la credencial nueva por TLS con el nodo
   verificado, sin mostrarla en panel/JavaScript. Requiere LAN con el nodo y no abre
   mantenimiento ni desbloquea. Diseñar el flujo específico T34 sin ampliar T12 a PCs
-  ocupadas. Quedan contratos, acceso al asistente, respuestas perdidas, estado previo
-  pausado y confirmación del instante efectivo del bloqueo, incluidos acuses perdidos.
+  ocupadas. **Estado previo A confirmado (2026-10-07):** autorizar continuar restaura
+  activa como activa y pausada como pausada. El bloqueo confirmado no consume el tiempo
+  de pausa que quedaba ni añade otra pausa por sesión/día (REQ-002-33, CA-002-09).
+  Recuperar una pausa no la reanuda; vuelve a su flujo y límites ordinarios. Quedan
+  contratos, acceso al asistente, respuestas perdidas y confirmación de los intervalos
+  efectivos de bloqueo/continuación, incluidos acuses perdidos. El nodo fija los tiempos.
   La ausencia de latidos o una reconciliación no deben cerrar por accidente la sesión
   conservada. Los cambios de estado se auditan con actor según ADR-0008.
 - Concretar la presentación y los estados admisibles del mensaje del encargado, así como

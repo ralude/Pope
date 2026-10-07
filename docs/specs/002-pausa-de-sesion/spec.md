@@ -61,6 +61,7 @@ nombre del cliente, y el encargado ve en el panel qué PCs están en pausa.
 - **REQ-002-30:** Si la PC pierde la conexión estando en pausa, sigue bloqueada en pausa. El nodo aplica los límites con su propio reloj.
 - **REQ-002-31:** Si se va la luz durante la pausa, al volver la sesión sigue en pausa (o cerrada, si se superó el límite con la opción b).
 - **REQ-002-32:** Cada pausa genera los eventos `session.paused`, `session.resumed` y `session.pause_expired`, con actor y hora.
+- **REQ-002-33:** Si una sesión pausada queda bloqueada por revocación confirmada de su PC, el intervalo de ese bloqueo no consume el tiempo de pausa restante ni añade una pausa a los contadores de sesión/día. Recuperar la identidad y autorizar continuar conserva la pausa y el tiempo que le quedaba al comenzar el bloqueo; después se aplican sus límites y la reanudación ordinaria. La revocación no concede tiempo de pausa nuevo ni reinicia sus contadores. Un simple corte de red conserva REQ-002-30. (Mantenedor, 2026-10-07; opción A de recuperación del estado previo. Implementación pendiente en T34 de la spec 003.)
 
 ## Requisitos no funcionales
 
@@ -98,6 +99,11 @@ nombre del cliente, y el encargado ve en el panel qué PCs están en pausa.
   - **Dado** la PC 05 en pausa con 12 min de pausa restantes
   - **Entonces** el mapa del panel la pinta en morado con "12 min", y el encargado puede reanudarla o cerrarla desde su detalle.
 
+- **CA-002-09** (REQ-002-33; REQ-003-11 de la spec 003; pendiente de implementar/verificar en T34)
+  - **Dado** una sesión pausada con 8 min de pausa restantes
+  - **Cuando** la PC confirma bloqueo por revocación durante 20 min, se revincula con credencial nueva y el personal autoriza continuar
+  - **Entonces** la sesión sigue pausada con 8 min restantes, sin consumo de saldo/tiempo durante el bloqueo ni incremento de pausas por sesión/día. La credencial nueva por sí sola no permite continuar. La pausa vence al consumir sus 8 min después de la autorización, según la política configurada.
+
 ## Fuera de alcance
 
 - Pausa en consolas.
@@ -105,6 +111,8 @@ nombre del cliente, y el encargado ve en el panel qué PCs están en pausa.
 - Proteger la PC en pausa con contraseña o PIN (decisión del mantenedor, 2026-10-02).
 
 ## Preguntas abiertas
+
+- [x] **Pausa conservada al recuperar una PC revocada.** **Resuelta (mantenedor, 2026-10-07): opción A**, volver al estado previo y conservar tiempo de pausa/contadores durante el bloqueo por revocación confirmado. REQ-002-33 y CA-002-09 pertenecen a T34 de la spec 003, no a las 19 tareas ya aprobadas de fase 1. No se implementan por esta decisión.
 
 - [x] ¿Límite de pausas **por día** por cuenta, además de por sesión? **Resuelta (mantenedor, 2026-10-02): sí, por defecto 5** (REQ-002-24).
 - [x] ¿Se silencia el audio de la PC durante la pausa? **Resuelta (mantenedor, 2026-10-02): sí** (REQ-002-07).

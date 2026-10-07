@@ -23,6 +23,12 @@ La pausa se construye en **dos fases** (decisión del mantenedor, 2026-10-02):
 En la fase 1 la pantalla de pausa es del Shell: en el navegador no bloquea el teclado del
 sistema, igual que el bloqueo de la spec 001 antes de la 003.
 
+**Ampliación confirmada (mantenedor, 2026-10-07):** REQ-002-33 conserva la pausa y su
+tiempo restante durante un bloqueo por revocación confirmado, sin gastar otra pausa.
+Al recuperar la PC y autorizar continuar vuelve a su estado previo. El nodo determina
+los intervalos; contratos y confirmación temporal se concretan en T34 de la spec 003.
+CA-002-09 queda pendiente allí y no forma parte de la fase 1 ya verificada.
+
 ## Componentes afectados
 
 | Componente | Fase | Cambio |
