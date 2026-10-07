@@ -113,6 +113,9 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Verificar:** los fixtures pasan/fallan donde corresponde, exportación reproducible y detección de cambios incompatibles sin duplicar reglas de negocio.
   - **Commit:** `build(shared): exporta el protocolo para el cliente Windows`.
   - **Contrato confirmado (mantenedor, 2026-10-07):** opción A: conservar `trim` del usuario antes de validar, exportar los caracteres exactos de recorte e instrucciones para C# y verificar coincidencia con fixtures compartidos. Nunca recortar la contraseña. Implementación pendiente.
+  - **División de implementación (2026-10-07):** dos commits dentro del bloque autorizado, para separar la infraestructura de exportación de los casos de compatibilidad.
+  - [x] **T07a:** exportación reproducible/versionada de v1, v2 y puente; reglas de normalización y comprobación del contrato con JSON Schema. Implementados 19 contratos, guard de diferencias en build/tests y conjunto exacto de 25 caracteres de recorte; sin modificar el login ni contraseñas. T07b pendiente.
+  - [ ] **T07b:** fixtures compartidos válidos/inválidos, casos Unicode y fronteras de confianza; completar el grupo T07 tras verificarlos.
 
 ### Base nativa y conexión
 

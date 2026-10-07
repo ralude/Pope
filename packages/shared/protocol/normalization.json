@@ -1,0 +1,51 @@
+{
+  "versions": [
+    1,
+    2
+  ],
+  "contracts": [
+    "pc-to-node",
+    "shell-request"
+  ],
+  "messageTypes": [
+    "login",
+    "technicalLogin"
+  ],
+  "field": "username",
+  "operation": "trim-edges-before-validation",
+  "codePoints": [
+    9,
+    10,
+    11,
+    12,
+    13,
+    32,
+    160,
+    5760,
+    8192,
+    8193,
+    8194,
+    8195,
+    8196,
+    8197,
+    8198,
+    8199,
+    8200,
+    8201,
+    8202,
+    8232,
+    8233,
+    8239,
+    8287,
+    12288,
+    65279
+  ],
+  "passwordOperation": "none",
+  "instructions": [
+    "Antes de validar JSON Schema, recortar solo username en los mensajes y contratos indicados.",
+    "C#: construir char[] con codePoints y aplicar username.Trim(chars); no usar Trim() sin argumentos.",
+    "Conservar espacios interiores, mayúsculas y Unicode; no normalizar ninguna otra cadena.",
+    "No recortar ni modificar password, aunque esté formada solo por espacios.",
+    "JSON Schema mide longitud en puntos de código Unicode; no sustituirla por string.Length de C#."
+  ]
+}

@@ -4,6 +4,7 @@ dist/
 build/
 coverage/
 .turbo/
+packages/shared/protocol/**/*.json
 
 # La documentación se redacta a mano (tablas compactas y saltos de línea propios).
 *.md

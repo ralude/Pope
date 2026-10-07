@@ -142,6 +142,13 @@ diferencias con su recorte por defecto. Fixtures compartidos probarán el result
 y la aceptación/rechazo de ambos validadores, incluidos usuario vacío tras recorte,
 64 letras con espacios exteriores y Unicode. No cambia el comportamiento del login.
 
+T07 se divide en exportación/normalización (T07a) y fixtures de compatibilidad (T07b).
+Artefactos revisables en `packages/shared/protocol/`, copiados a `dist/json-schema/`
+al compilar; el build y los tests detectan diferencias con el contrato versionado.
+Ajv 8.20.0 y ajv-formats 3.0.1 son dependencias **solo de desarrollo de shared** para
+validar draft 2020-12 de forma independiente de Zod. Ya existen en el lockfile por
+Fastify; no añaden dependencias al servidor ni se usan en la lógica de producto.
+
 ### Existentes que se reutilizan
 
 `packages/shared/src/protocol.ts` ya define `hello`, latidos, login, cierre, compra,
