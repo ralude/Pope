@@ -120,6 +120,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** crear `apps/native` con servicio, host y tests; fijar SDK/framework y dependencias justificadas tras comprobar Windows; consumir fixtures T07 y documentar comandos.
   - **Verificar:** build/test/publicación `win-x64`, contratos JSON en C# y ausencia de lógica de saldo o cobro; compilar en desarrollo, no en el nodo.
   - **Commit:** `build(native): prepara el servicio y host de Windows`.
+  - **Inventario pendiente (mantenedor, 2026-10-07):** opción B, continuar decisiones de diseño sin confirmar versiones/ediciones de Windows. El inventario sigue siendo requisito antes de fijar herramientas y compatibilidad; T08 permanece en Borrador.
 
 - [ ] **T09: Prototipo de escritorio separado y WebView2**
   - **Cubre:** REQ-003-30, REQ-003-33; REQ-002-04, REQ-002-05; CA-002-02.
