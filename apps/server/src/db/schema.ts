@@ -14,6 +14,7 @@ import type {
   CustomerStatus,
   ExchangeRateSource,
   LedgerKind,
+  PcMaintenance,
   PaymentMethod,
   PcCommand,
   PcCommandRequest,
@@ -454,6 +455,69 @@ export const pcControlStates = pgTable(
     check(
       'pc_control_states_reservation_check',
       sql`(${t.reservedCommandId} is null) = (${t.reservedAt} is null)`,
+    ),
+  ],
+);
+
+/** Mantenimiento confirmado y salida durable idempotente (REQ-003-41, REQ-003-44). */
+export const pcMaintenances = pgTable(
+  'pc_maintenances',
+  {
+    id: uuid('id').primaryKey(),
+    pcId: uuid('pc_id')
+      .notNull()
+      .references(() => pcs.id),
+    /** Copia del nombre al entrar, conservada para auditoría. */
+    pcName: text('pc_name').notNull(),
+    actor: jsonb('actor').$type<PcMaintenance['actor']>().notNull(),
+    source: text('source').$type<PcMaintenance['source']>().notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    exitId: uuid('exit_id').unique(),
+    endedAt: timestamp('ended_at', { withTimezone: true }),
+    /** Segundos monotónicos del agente; no se calculan restando relojes de Windows. */
+    durationSeconds: integer('duration_seconds'),
+    endedBy: jsonb('ended_by').$type<PcMaintenance['actor']>(),
+    exitSource: text('exit_source').$type<PcMaintenance['source']>(),
+  },
+  (t) => [
+    uniqueIndex('pc_maintenances_open_idx')
+      .on(t.pcId)
+      .where(sql`${t.endedAt} is null`),
+    index('pc_maintenances_pc_started_idx').on(t.pcId, t.startedAt),
+    check('pc_maintenances_name_check', sql`length(${t.pcName}) > 0`),
+    check('pc_maintenances_actor_check', sql`coalesce(${t.actor}->>'kind' = 'staff', false)`),
+    check('pc_maintenances_source_check', sql`${t.source} in ('local', 'panel')`),
+    check(
+      'pc_maintenances_exit_fields_check',
+      sql`
+      (${t.endedAt} is null and ${t.exitId} is null and ${t.durationSeconds} is null
+        and ${t.endedBy} is null and ${t.exitSource} is null) or
+      (${t.endedAt} is not null and ${t.exitId} is not null and ${t.durationSeconds} is not null
+        and ${t.durationSeconds} >= 0 and ${t.endedBy} is not null and ${t.exitSource} is not null
+        and coalesce(${t.endedBy}->>'kind' = 'staff', false) and ${t.exitSource} in ('local', 'panel'))`,
+    ),
+  ],
+);
+
+/** Una fila por cuenta, independiente de cookies y de la PC (REQ-003-45). */
+export const staffTechnicalLoginAttempts = pgTable(
+  'staff_technical_login_attempts',
+  {
+    staffId: uuid('staff_id')
+      .primaryKey()
+      .references(() => staff.id),
+    failedLogins: integer('failed_logins').notNull().default(0),
+    lockedAt: timestamp('locked_at', { withTimezone: true }),
+    lockedUntil: timestamp('locked_until', { withTimezone: true }),
+  },
+  (t) => [
+    check('staff_technical_login_attempts_failures_check', sql`${t.failedLogins} between 0 and 10`),
+    check(
+      'staff_technical_login_attempts_lock_check',
+      sql`
+      (${t.failedLogins} < 10 and ${t.lockedAt} is null and ${t.lockedUntil} is null) or
+      (${t.failedLogins} = 10 and ${t.lockedAt} is not null and ${t.lockedUntil} is not null
+        and ${t.lockedUntil} = ${t.lockedAt} + interval '60 seconds')`,
     ),
   ],
 );

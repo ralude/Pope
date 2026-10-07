@@ -107,6 +107,19 @@ la coordinación la libera al confirmar el efecto según T29/T40. No duplica sal
 sesión ni pausa, ni activa restricciones de login antes de T28. Las filas se crean
 al activar la coordinación; el upgrade no inventa estados confirmados de Windows.
 
+### T05b: mantenimiento e intentos técnicos persistidos
+
+`pc_maintenances` guarda solo entradas confirmadas, con PC/nombre copiado, actor del
+personal, origen e inicio UTC. Índice parcial: una entrada abierta por PC; salida
+completa con UUIDv7 único, fin UTC, segundos monotónicos no negativos, actor y origen.
+El fin UTC no determina la duración: la plausibilidad y recuperación de la salida
+offline se concilian en T40. Roles, eventos y entrada efectiva quedan en T35–T40.
+`staff_technical_login_attempts` separa de las cookies del panel una fila por cuenta:
+0–9 fallos sin bloqueo o 10 con inicio/fin UTC separados exactamente por 60 s.
+No hay contador por PC ni reset automático de base de datos; T35 aplica el reset tras
+éxito o fin del bloqueo y el aviso único en la transacción con su evento. El upgrade
+no inventa mantenimientos ni intentos anteriores y no cambia el login del panel.
+
 ### Existentes que se reutilizan
 
 `packages/shared/src/protocol.ts` ya define `hello`, latidos, login, cierre, compra,

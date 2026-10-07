@@ -74,7 +74,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Implementada (2026-10-04):** migración 0025: MAC nullable para PCs existentes, códigos con hash/600 s/consumo y credenciales con revocación. FK código/PC y unicidad de credencial vigente; seis tests de upgrade, restricciones y consumo concurrente pasan en PGlite y PostgreSQL. No activa todavía registro ni autenticación del canal.
   - **Verificación cerrada (2026-10-05):** 896 tests del monorepo, 378 del servidor en ambos motores; formato, lint, tipos y build pasan. Paralelismo del ejecutor reducido, sin modificar los tests existentes.
 
-- [ ] **T05: Migración de control y mantenimiento**
+- [x] **T05: Migración de control y mantenimiento**
   - **Cubre:** REQ-003-20, REQ-003-41, REQ-003-43, REQ-003-44, REQ-003-45.
   - **Hacer:** crear datos de órdenes, reserva de PC, mantenimiento e intentos técnicos según el plan; índices de idempotencia y una entrada abierta por PC.
   - **Verificar:** restricciones, fechas UTC, duraciones enteras y concurrencia en ambos motores; conservar tablas de sesiones y cookies existentes.
@@ -88,11 +88,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(server): guarda las órdenes y reservas de PCs`.
   - **Implementada (2026-10-07):** migración 0026 con órdenes idempotentes, acuses tipados y reserva ligada a una orden de la misma PC. Cuatro pruebas de upgrade, restricciones y concurrencia; la caducidad no libera la reserva. La coordinación y los eventos quedan en T28.
 
-- [ ] **T05b: Persistencia de mantenimiento e intentos técnicos**
+- [x] **T05b: Persistencia de mantenimiento e intentos técnicos**
   - **Cubre:** REQ-003-41, REQ-003-43, REQ-003-44, REQ-003-45.
   - **Hacer:** entrada confirmada, salida idempotente y contador/bloqueo por cuenta independiente del panel.
   - **Verificar:** una entrada abierta por PC, salida única, segundos enteros y bloqueo de 60 s tras diez fallos en ambos motores.
   - **Commit:** `feat(server): guarda el mantenimiento y los intentos técnicos`.
+  - **Implementada (2026-10-07):** migración 0027: una entrada confirmada abierta por PC, salida completa con ID único y segundos monotónicos; intentos por cuenta independientes de las cookies, diez fallos y bloqueo de 60 s. Cinco pruebas de upgrade, restricciones y concurrencia pasan en ambos motores; 905 tests del monorepo (387 del servidor en PostgreSQL), formato, lint, tipos y build pasan. Login efectivo/eventos/reset y conciliación offline quedan en T35–T40.
 
 - [ ] **T06: Migración de metadatos del fondo**
   - **Cubre:** REQ-003-70, REQ-003-71.
