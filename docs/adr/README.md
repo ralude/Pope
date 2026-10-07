@@ -60,3 +60,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0022](0022-codigo-local-de-recuperacion-de-pcs.md) | Código local para recuperar la identidad de una PC revocada | Aceptado para flujo; contratos/prueba pendientes |
 | [0023](0023-alt-tab-con-sesion-de-cliente.md) | Alt+Tab disponible con una sesión de cliente | Aceptado |
 | [0024](0024-presencia-fisica-para-emergencia.md) | Presencia física para el acceso de emergencia | Aceptado para presencia física; mecanismo pendiente |
+| [0025](0025-autenticacion-windows-para-emergencia.md) | Autenticación de emergencia con la cuenta Windows existente | Aceptado para autenticación; mecanismo pendiente |

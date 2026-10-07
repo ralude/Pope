@@ -404,14 +404,14 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 - [ ] **T53: Diseño aprobado del acceso de emergencia**
   - **Cubre:** acuerdo del mantenedor sobre recuperación sin nodo; requisito nuevo pendiente en las preguntas de la spec 003.
-  - **Hacer:** tras responder las preguntas, redactar únicamente el ADR del mecanismo de recuperación con autenticación, permisos, alcance y auditoría; aplicar la presencia física obligatoria confirmada en ADR-0024 y dejar identificada la alineación documental posterior necesaria.
+  - **Hacer:** tras responder las preguntas, redactar únicamente el ADR del mecanismo de recuperación con permisos, alcance, identificación/auditoría y ruta administrativa; aplicar presencia física y autenticación Windows manual confirmadas en ADR-0024/0025 y dejar identificada la alineación documental posterior necesaria.
   - **Verificar:** revisión del mantenedor, intervención local delante de la PC sin entrada remota de emergencia, amenaza de congelador/clonación y ruta independiente del servicio muerto; no equiparar emergencia con login técnico offline ordinario.
   - **Commit:** `docs(adr): propone la recuperación de emergencia de Pope`.
 
 - [ ] **T54: Acceso de emergencia según el ADR aceptado**
   - **Cubre:** requisito de emergencia que se apruebe en T53; REQ-003-03, REQ-003-51 en la vuelta al bloqueo/restauración.
   - **Hacer:** implementar únicamente el mecanismo aprobado tras alinear spec/plan en tareas documentales separadas; ajustar/dividir esta reserva tras cerrar T53, sin inventar credenciales offline.
-  - **Verificar:** sin nodo y servicio incapaz de arrancar, presencia/intervención local conforme a ADR-0024, rechazo de entrada remota de emergencia, autorización rechazada, salida/reparación y auditoría durable; WebView2 no se eleva ni se abre entrada de cliente.
+  - **Verificar:** sin nodo y servicio incapaz de arrancar, presencia/intervención local y credenciales Windows manuales conforme a ADR-0024/0025, rechazo de entrada remota de emergencia y credenciales incorrectas, salida/reparación y auditoría durable; WebView2 no se eleva ni se abre entrada de cliente.
   - **Commit:** `feat(native): permite la recuperación de emergencia autorizada`.
 
 ### Verificación y revisión del mantenedor
@@ -456,5 +456,5 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 - **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
 - **T34:** consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/600 s y regreso al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33); pendientes contratos/prueba del asistente y confirmación temporal, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
-- **T53/T54:** presencia física obligatoria confirmada (ADR-0024), sin entrada remota de emergencia. Autenticación, permisos, alcance, comprobación de intervención local y auditoría pendientes; no hay mecanismo aprobado.
+- **T53/T54:** presencia física y autenticación Windows manual confirmadas (ADR-0024/0025), sin entrada remota de emergencia ni clave propia de Pope. Quién puede usarla, alcance, identificación/auditoría, comprobación local y ruta administrativa pendientes; no hay mecanismo aprobado.
 - **T48–T58:** inventario Windows/congelador/NIC/monitores/juegos. No asumir datos tentativos ni modificar el Windows cotidiano para probar.

@@ -536,8 +536,12 @@ aprobada de la 002 conserva sus 19 tareas; la fase 2 sigue pendiente hasta verif
   muera el host. El mantenedor solicita diseñar acceso de emergencia de Pope sin nodo;
   **presencia física obligatoria confirmada (opción A, 2026-10-07, ADR-0024)**, con
   intervención local delante de la PC afectada y sin entrada remota de emergencia.
-  Autenticación, permisos, alcance, comprobación de intervención local y auditoría
-  siguen abiertos; aprobar el mecanismo independiente del servicio antes de construir.
+  **Autenticación A confirmada (2026-10-07, ADR-0025):** credenciales manuales de la
+  cuenta administradora local Windows existente, validadas por Windows sin nodo ni
+  servicio. Sin clave propia de Pope ni uso automático del secreto del agente.
+  Permisos, alcance, identificación/auditoría y comprobación de intervención local
+  siguen abiertos; aprobar y probar la ruta administrativa independiente del servicio
+  antes de construir. No se aprueba por esta elección el mecanismo ordinario de ADR-0018.
 - **Edición, congelador y anticheat:** falta inventario; validar con juegos reales antes
   de afirmar compatibilidad o recuperación de pantalla exclusiva.
 - **Preguntas abiertas:** quedan en `spec.md`; todas las opciones señaladas como
