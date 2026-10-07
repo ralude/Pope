@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · regreso al estado previo y pausa conservada tras revocación confirmados (opción A); continúa la revisión de decisiones
+**Última actualización:** 2026-10-07 · Alt+Tab permitido con sesión temporal/de cuenta confirmado; continúa la revisión de decisiones
 
 ## Ahora
 
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-07:** el mantenedor confirma Alt+Tab permitido con sesión temporal/de cuenta, también con Pope en primer plano, e inhibido solo sin sesión. ADR-0023, REQ-003-30/CA-003-12 y T09/T21/T25/T56/T59 alineados. Pausa/revocación mantienen escritorio separado: atajo habilitado no permite volver al juego sin autorización. Sin Explorer; selector y juegos/anticheat pendientes de prueba. No se aprueban ni implementan tareas nativas.
+
 - **2026-10-07:** el mantenedor elige A para el estado al recuperar la PC: activa vuelve activa; pausada vuelve pausada conservando el tiempo restante y los contadores durante el bloqueo confirmado, sin otra pausa. REQ-002-33/CA-002-09 añadidos a spec 002 y vinculados a T34/revisión T59 de la 003. Specs/plans/tasks alineados; excepción sin implementar/verificar, fase 1 de 002 mantiene sus 19 tareas aprobadas. Confirmación temporal y contratos siguen pendientes.
 
 - **2026-10-07:** el mantenedor elige A para entregar la autorización de recuperación: código ligado a la PC revocada, un uso, 10 min, generado por encargado/administrador e introducido físicamente en el asistente. Credencial nueva solo bajo custodia del servicio, por TLS con el nodo; sin desbloqueo ni mantenimiento automático. ADR-0022, spec/plan/T34 alineados. Contratos/prototipo pendientes; T12 conserva sus condiciones. Continúa la revisión de preguntas.
@@ -81,5 +83,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-07:** el mantenedor resuelve la normalización de T07 con la opción A: conservar recorte exterior del usuario antes de validar, exportar reglas/caracteres exactos para C# y fixtures compartidos, sin modificar contraseñas. Spec/plan/tasks actualizados; T07 sin implementar. Se continúa resolviendo preguntas una por una.
 
 - **2026-10-07:** registrada la indicación explícita del mantenedor de dejar T07 pendiente hasta revisar el contrato de normalización del usuario. Spec/tasks reflejan la suspensión de esa tarea; T01–T06 están completas (6/59 grupos) y la 005 sigue esperando T07. Sin cambios al protocolo exportado.
-
-- **2026-10-07:** T06 completada: migración 0028 para el único fondo global, revisión y autoría, sin bytes/rutas en la base de datos. Cuatro pruebas de upgrade/límites/retirada/reaplicación pasan en ambos motores; 909 tests del monorepo (391 del servidor en PostgreSQL temporal real), formato, lint, tipos y build pasan. T07 queda pendiente por indicación del mantenedor hasta revisar el contrato de normalización del usuario; T08–T59 continúan en Borrador.

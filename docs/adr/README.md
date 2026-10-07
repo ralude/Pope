@@ -58,3 +58,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0020](0020-recuperacion-de-pcs-revocadas.md) | Recuperación de PCs revocadas conservando la sesión | Aceptado para comportamiento; permisos en ADR-0021, mecanismo pendiente |
 | [0021](0021-permisos-de-revocacion-y-recuperacion.md) | Permisos de revocación y recuperación de PCs | Aceptado; complementa los permisos de ADR-0020 |
 | [0022](0022-codigo-local-de-recuperacion-de-pcs.md) | Código local para recuperar la identidad de una PC revocada | Aceptado para flujo; contratos/prueba pendientes |
+| [0023](0023-alt-tab-con-sesion-de-cliente.md) | Alt+Tab disponible con una sesión de cliente | Aceptado |

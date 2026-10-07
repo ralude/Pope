@@ -128,6 +128,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** probar en VM/PC aislada creación, ACL y cambio de escritorio con host estándar y WebView2; documentar cada P/Invoke y el reparto de hilos/procesos.
   - **Verificar:** juego exclusivo sin entrada durante bloqueo, vuelta al escritorio de uso, apps intactas y ninguna ventana WebView2 trasladada después de crearla; registrar evidencia.
   - **Commit:** `test(native): valida el escritorio separado con WebView2`.
+  - **Acceso confirmado (2026-10-07, ADR-0023):** probar Pope seleccionable por Alt+Tab en el escritorio de uso sin Explorer, sin mover WebView2 ya creado. Atajo habilitado con sesión no permite llegar al juego desde pausa/revocación.
 
 - [ ] **T10: Prototipo de mantenimiento elevado**
   - **Cubre:** REQ-003-40, REQ-003-43; ADR-0018.
@@ -199,8 +200,8 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 - [ ] **T21: Bloqueo nativo y atajos restringidos**
   - **Cubre:** REQ-003-03, REQ-003-30, REQ-003-33.
-  - **Hacer:** integrar el mecanismo demostrado en T09, escritorio de bloqueo y hook según estado/foco; liberar solo tras estado autorizado del nodo.
-  - **Verificar:** Win, Alt+Tab, Ctrl+Esc, Alt+F4, clics y varios monitores; fallo de cambio no confirma éxito ni abre el escritorio de uso.
+  - **Hacer:** integrar el mecanismo demostrado en T09, escritorio de bloqueo y hook según estado/foco; Alt+Tab inhibido solo sin sesión, permitido con temporal/cuenta incluso al enfocar Pope (ADR-0023). Mantener aislamiento de pausa/revocación y liberar solo tras autorización del nodo.
+  - **Verificar:** Win, Ctrl+Esc, Alt+F4, clics y monitores; Alt+Tab inhibido sin sesión, permitido ida/vuelta con temporal/cuenta y sin acceso al juego desde pausa/revocación. Fallo de cambio no confirma éxito ni abre el escritorio de uso.
   - **Commit:** `feat(native): aplica el bloqueo en un escritorio separado`.
 
 - [ ] **T22: Supervisión y relanzamiento del host**
@@ -222,10 +223,11 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(native): silencia y restaura el audio durante la pausa`.
 
 - [ ] **T25: Acceso a Pausar durante el juego**
-  - **Cubre:** REQ-002-01, REQ-002-02, REQ-002-50.
-  - **Hacer:** implementar el acceso a Pope elegido por el mantenedor para pantalla exclusiva; conservar confirmación y límites actuales, sin habilitar acceso a Windows.
-  - **Verificar:** acceso con cada modo de juego y anticheat, cancelación sin pausa, temporal sin botón y medición desde confirmar Pausar hasta bloquear entrada < 1 s.
+  - **Cubre:** REQ-003-30, CA-003-12; REQ-002-01, REQ-002-02, REQ-002-11, REQ-002-50.
+  - **Hacer:** implementar Alt+Tab entre Pope y apps autorizadas con sesión activa temporal/cuenta, también al enfocar Pope (ADR-0023); conservar confirmación/límites de pausa y aislamiento al bloquear/pausar.
+  - **Verificar:** ida/vuelta sin Explorer con cada modo de juego/anticheat; cambiar ventana no pausa, cancelar no pausa, temporal sin botón y desde confirmar Pausar hasta bloquear entrada < 1 s. Atajo no permite escapar desde pausa/revocación; sin sesión queda inhibido.
   - **Commit:** `feat(native): permite acceder a Pope durante el juego`.
+  - **Decisión confirmada (mantenedor, 2026-10-07):** Alt+Tab como acceso, sin fijar Ctrl+Shift+P/F10. Compatibilidad/selector sin probar; T25 sigue en Borrador, sin autorización de implementación por esta decisión.
 
 - [ ] **T26: Cierre de procesos del cliente**
   - **Cubre:** REQ-003-34; CA-003-08.
@@ -425,6 +427,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** probar los ocho juegos del inventario con versión, anticheat, modo de pantalla, monitores/audio; registrar bloqueo, pausa/reanudación, LAN cortada y cierre sin reinicio.
   - **Verificar:** ninguna tecla/clic al juego pausado, audio restaurado, procesos intactos en pausa y cerrados al finalizar; máximo y distribución de latencia < 1 s, no solo promedio.
   - **Commit:** `docs(specs): verifica el bloqueo y la pausa con juegos reales`.
+  - **Acceso confirmado (2026-10-07):** probar CA-003-12 con cuenta/temporal, foco en Pope, juegos exclusivos y ausencia de escape desde pausa/revocación, sin Explorer.
 
 - [ ] **T57: Recursos y latencia de la LAN del local**
   - **Cubre:** REQ-003-60, REQ-003-61; ADR-0011, ADR-0016.
@@ -444,11 +447,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Verificar:** revisión del mantenedor, todos los criterios demostrados y requisitos de emergencia aprobados/probados; checks TS/nativos y PG real en verde antes de entrega al local.
   - **Commit:** `docs(specs): cierra el cliente Windows tras la revisión del mantenedor`.
   - **Ampliación confirmada (2026-10-07):** incluir REQ-002-33/CA-002-09 de T34 en el informe y revisión; no declarar la excepción de pausa implementada por las pruebas anteriores de fase 1.
+  - **Acceso confirmado (2026-10-07):** incluir CA-003-12 y evidencia T09/T21/T25/T56 en la revisión.
 
 ## Decisiones pendientes antes de ejecutar
 
 - **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** host WinForms confirmado (ADR-0019); versiones de SDK, herramientas de tests y soporte del Windows real pendientes.
-- **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
+- **T25:** Alt+Tab confirmado con cuenta/temporal, también al enfocar Pope (ADR-0023); selector sin Explorer y juegos pendientes de prueba. **T32:** presentación, foco, duración y estados de mensajes.
 - **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
 - **T34:** consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/600 s y regreso al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33); pendientes contratos/prueba del asistente y confirmación temporal, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.

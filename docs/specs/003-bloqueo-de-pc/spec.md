@@ -54,7 +54,7 @@ escritorio de Windows ni forma de saltársela. Solo el nodo central puede autori
 - **REQ-003-22:** **Encender por red (Wake-on-LAN).** Desde el panel se enciende una PC apagada: el nodo envía el "paquete mágico" por la LAN a la dirección MAC de su tarjeta de red, que el agente registra al instalarse (REQ-003-50). Requiere tener Wake-on-LAN activado en la BIOS y en la tarjeta de red (PCIe). Si la PC no se conecta al nodo en **2 min**, el panel lo indica sin afirmar que esté averiada; el aviso desaparece si luego se conecta. (Plazo confirmado por el mantenedor, 2026-10-04.)
 
 **Protección**
-- **REQ-003-30:** Mientras Pope esté en primer plano o bloqueado, se inhiben la tecla Windows, Alt+Tab, Ctrl+Esc y Alt+F4.
+- **REQ-003-30:** Mientras Pope esté en primer plano o bloqueado, se inhiben la tecla Windows, Ctrl+Esc y Alt+F4. **Alt+Tab se inhibe solo sin sesión de cliente**; con temporal o cuenta se permite aunque Pope esté en primer plano. En uso activo alterna entre Pope y ventanas autorizadas del escritorio de uso, sin pausar automáticamente. En pausa o bloqueo por revocación, habilitar el atajo no cambia de escritorio ni permite volver al juego: se conserva el aislamiento y autorización de reanudación/continuación. (Mantenedor, 2026-10-07; ADR-0023.)
 - **REQ-003-31:** Las directivas desactivan en Ctrl+Alt+Supr: Administrador de tareas, cambiar de usuario, cerrar sesión y cambiar contraseña.
 - **REQ-003-32:** Si `Pope.ShellHost` se cierra o se cuelga, el agente lo relanza en < 3 s y la PC vuelve a quedar bloqueada si no había sesión.
 - **REQ-003-33:** El estado bloqueado usa el escritorio separado (ADR-0009).
@@ -167,6 +167,11 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
   - **Cuando** se consume para registrar una PC
   - **Entonces** no puede reutilizarse; si pasan 10 min sin consumirlo se rechaza por caducidad, y el dueño no puede generar códigos.
 
+- **CA-003-12** (REQ-003-30; REQ-002-01, REQ-002-02, REQ-002-11)
+  - **Dado** una PC con sesión activa, temporal o de cuenta, y un juego abierto
+  - **Cuando** el cliente usa Alt+Tab para seleccionar Pope y después volver al juego
+  - **Entonces** alterna en ambas direcciones sin detener el consumo automáticamente. Solo la cuenta ofrece Pausar y confirmación. Sin sesión se inhibe Alt+Tab; con pausa/revocación no permite llegar al juego del otro escritorio. Verificar sin Explorer, con juegos exclusivos/anticheat, antes de dar por compatible el mecanismo.
+
 ## Fuera de alcance
 
 - Arranque sin disco (tipo SENET Boot).
@@ -221,7 +226,7 @@ Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La
 - [x] **Mantenimiento sin nodo.** **Resuelta (mantenedor, 2026-10-04): mantener el modo técnico, permitir terminar y bloquear sin red, y registrar la salida al reconectar** (REQ-003-44). No autoriza entrada offline.
 - [ ] **Fallo completo del agente y recuperación.** El mantenedor pide (2026-10-04) **diseñar un acceso de emergencia de Pope sin nodo**, con reglas propias aún por definir. Concretar autenticación, alcance, presencia física, auditoría y recuperación aun si el servicio no arranca; requiere decisión de seguridad en ADR. Es distinto del login técnico normal, que sigue validándose por el nodo, y de relanzar el host.
 - [x] **Entrada técnica local con sesión de cliente.** **Resuelta (mantenedor, 2026-10-04): exige cerrar previamente la sesión también desde la PC**, incluida una pausa. La entrada no cierra la sesión automáticamente.
-- [ ] **Pausar desde un juego exclusivo.** Elegir cómo volver a Pope para acceder al botón siempre disponible de REQ-002-01; validar compatibilidad con juegos y anticheat.
+- [x] **Volver a Pope desde el juego.** **Resuelta (mantenedor, 2026-10-07): Alt+Tab permitido con temporal o cuenta, también con Pope en primer plano; inhibido solo sin sesión**. En uso activo permite volver a Pope y al juego, sin pausar automáticamente. Temporal sin botón Pausar; pausa/revocación conservan escritorio aislado y no permiten escapar al juego. [ADR-0023](../../adr/0023-alt-tab-con-sesion-de-cliente.md), CA-003-12; validar selector sin Explorer y juegos/anticheat en T09/T25. No declara compatibilidad ni aprueba ejecutar tareas nativas.
 - [x] **Mensaje del encargado.** **Resuelta (mantenedor, 2026-10-04): ventana centrada con sonido, sin tomar foco ni impedir teclas/clics, se cierra sola a los 5 s**. Visible con sesión activa o pausada y con PC libre; rechazado durante mantenimiento. Ligado al estado/sesión destinatario, se descarta si cambia antes de mostrarse; no llega al cliente siguiente.
 - [x] **Vigencia de órdenes nativas.** **Resuelta (mantenedor, 2026-10-04): 30 s para aceptar**, solo mientras siga vigente el estado/sesión destinatario. No reenviar reinicio/apagado aceptado ni presentar aceptación de Windows como prueba de apagado físico. El mantenimiento confirmado no tiene límite automático de duración.
 - [x] **Entorno de validación.** **Resuelta (mantenedor, 2026-10-04): hay PC de pruebas y VM**; juegos anotados en el inventario preliminar. La VM sirve para instalación/recuperación; juego exclusivo, audio y anticheat se validan en la PC real. No modificar el Windows cotidiano para redactar el plan.

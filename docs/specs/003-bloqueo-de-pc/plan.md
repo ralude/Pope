@@ -391,8 +391,14 @@ fronteras separadas para C#, con fixtures que prueban ese aislamiento.
   efectivos de bloqueo/continuación, incluidos acuses perdidos. El nodo fija los tiempos.
   La ausencia de latidos o una reconciliación no deben cerrar por accidente la sesión
   conservada. Los cambios de estado se auditan con actor según ADR-0008.
-- Concretar la presentación y los estados admisibles del mensaje del encargado, así como
-  cómo acceder a Pausar desde un juego exclusivo; quedan en las preguntas de la spec.
+- **Acceso a Pope confirmado (2026-10-07), ADR-0023:** Alt+Tab se inhibe solo sin
+  sesión. Con temporal/cuenta se permite también al enfocar Pope; en uso activo alterna
+  entre Pope y ventanas autorizadas del escritorio de uso, sin pausar automáticamente.
+  Cuenta conserva botón/confirmación; temporal no puede pausar. Pausa/revocación siguen
+  aisladas: Alt+Tab habilitado no autoriza cambiar a los juegos. T09/T25 comprueban
+  Pope en el selector sin Explorer, con juegos exclusivos/anticheat y sin trasladar
+  WebView2 ya creado. Si el selector nativo falla, revisar el diseño conservando Alt+Tab;
+  no dar por compatible el mecanismo ni iniciar Explorer para resolverlo.
 
 ### Alternativas de mantenimiento (identidad elegida; mecanismo en revisión)
 
