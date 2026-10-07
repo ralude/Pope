@@ -112,10 +112,10 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 > requisito: sirve para dimensionar, y el rendimiento del Shell se puede probar en el equipo
 > de desarrollo. Es distinto del servidor del local (i3-2120, 8 GB; ADR-0016).
 
-> **Inventario preliminar (mantenedor, 2026-10-04):** 13 equipos; normalmente 12 utilizables
-> por clientes porque el encargado usa uno con Windows completo en modo técnico. Windows
-> 10 22H2 es probable en la mayoría y hay una PC indicada con Windows 11; falta verificar
-> versiones y ediciones. Se dispone de una PC de pruebas y una VM. Juegos principales:
+> **Inventario confirmado (mantenedor, 2026-10-07):** 13 equipos; normalmente 12 utilizables
+> por clientes porque el encargado usa uno con Windows completo en modo técnico. Doce con
+> Windows 10 Pro 22H2 y uno con Windows 11 Pro 25H2; ninguno usa Deep Freeze ni otro
+> congelador. Se dispone de una PC de pruebas y una VM. Juegos principales:
 > Valorant, Counter-Strike 2, Call of Duty, Delta Force, League of Legends, Minecraft,
 > Roblox y Blood Strike, además de juegos ocasionales pedidos por clientes; el catálogo
 > y la revisión de esas excepciones pertenecen a la spec 004.
@@ -180,21 +180,21 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 
 ## Preguntas abiertas
 
-- [x] **Base del host del Shell (T08).** **Resuelta (mantenedor, 2026-10-07): opción A, WinForms + WebView2**, con interfaz React y host C# mínimo, según [ADR-0019](../../adr/0019-host-del-shell-en-winforms.md). El inventario Windows, las versiones de herramientas y el prototipo del escritorio separado siguen pendientes; esta elección no aprueba el resto del plan/tasks.
+- [x] **Base del host del Shell (T08).** **Resuelta (mantenedor, 2026-10-07): opción A, WinForms + WebView2**, con interfaz React y host C# mínimo, según [ADR-0019](../../adr/0019-host-del-shell-en-winforms.md). Inventario Windows confirmado abajo; versiones de herramientas y prototipo del escritorio separado pendientes. Esta elección no aprueba el resto del plan/tasks.
 
 - [x] **Normalización del usuario en T07 (2026-10-05).** **Resuelta (mantenedor, 2026-10-07): opción A, conservar el recorte exterior antes de validar el usuario de login de cliente/técnico.** Exportar junto al JSON Schema las instrucciones y los caracteres exactos del `trim` de JavaScript para que C# normalice solo el usuario antes de validar; nunca la contraseña. Añadir fixtures compartidos que comprueben coincidencia, incluidos usuario solo con espacios y 64 letras con espacios exteriores. Los límites Unicode sí coinciden en las versiones instaladas, incluidos emojis.
   - **Histórico (2026-10-07):** el mantenedor dejó T07 pendiente de revisar el contrato y después aprobó la opción A; esa decisión resuelve el bloqueo. T07 sigue sin implementar.
 
 - [x] **Inicio de Contratos y datos (2026-10-04).** El mantenedor autoriza T01–T07 y acepta ADR-0017; confirma canal v2 y retirada del provisional v1 al cambiar admisión. Solo este bloque queda aprobado para implementar; mecanismos Windows y preguntas de negocio ajenas siguen abiertos.
 - [x] **Registro consumido con respuesta perdida.** **Resuelta (mantenedor, 2026-10-04): encargado/administrador genera otro código ligado a la misma PC, solo libre y sin mantenimiento**. Reemplaza la credencial sin duplicar PC ni reutilizar el código anterior; el hash SHA-256 no permite recuperar el secreto previo.
-- [ ] ¿Qué versiones y ediciones de Windows tienen las PCs del local? **Inventario tentativo del mantenedor (2026-10-04): probablemente Windows 10 22H2 y una PC con Windows 11**; falta comprobar versión y edición exactas. REQ-003-62 mantiene el objetivo Pro hasta revisar ese dato.
-  - **Indicación del mantenedor (2026-10-07): opción B**, dejar el inventario pendiente y continuar resolviendo decisiones de diseño. No confirma las versiones/ediciones tentativas ni la compatibilidad; comprobarlas antes de fijar las herramientas y ejecutar las tareas nativas dependientes.
+- [x] ¿Qué versiones y ediciones de Windows tienen las PCs del local? **Resuelta (mantenedor, 2026-10-07): 12 PCs con Windows 10 Pro 22H2 y una con Windows 11 Pro 25H2**. REQ-003-62 conserva el objetivo Pro; elegir herramientas y probar compatibilidad en ese inventario antes de integrar tareas nativas.
+  - **Histórico:** primero se pospuso el inventario (opción B); la confirmación posterior resuelve ese dato, sin declarar probada la compatibilidad.
 - [x] ¿Cuántas PCs hay? **Resuelta (mantenedor, 2026-10-04): 13 equipos, normalmente 12 disponibles para clientes**, porque uno lo usa el encargado en modo técnico.
-- [ ] ¿Tienen congelador de disco (Deep Freeze o similar)? **Dato del mantenedor (2026-10-04): no lo sabe todavía**; debe comprobarse antes de configurar actualizaciones, credenciales y datos persistentes.
+- [x] ¿Tienen congelador de disco (Deep Freeze o similar)? **Resuelta (mantenedor, 2026-10-07): ninguno usa Deep Freeze ni otro congelador**. Persistencia y recuperación ante cortes siguen por verificar; no hay restauración automática de disco que sustituya a Pope.
 - [x] ¿Wake-on-LAN para encender las PCs desde el panel? **Resuelta (mantenedor, 2026-10-02): sí** (REQ-003-22). Falta comprobar en el local que las placas y tarjetas de red lo admiten y activarlo en la BIOS.
 - [x] **Modo administrador remoto con una sesión abierta (REQ-003-43).** **Resuelta (mantenedor, 2026-10-04): exigir cerrar la sesión antes**, también si está pausada. Se usa el cierre existente; en una temporal se pierde el tiempo restante (REQ-001-69).
 - [ ] **Placeholders en el panel.** Hasta esta spec, el detalle de la PC muestra "Encender", "Reiniciar", "Apagar" e "Iniciar como administrador" desactivados ("Próximamente"), por decisión del mantenedor (2026-10-02).
-- [x] **Distribución de WebView2 (ADR-0005).** **Resuelta (mantenedor, 2026-10-04): Evergreen con instalador completo sin conexión.** El instalador comprueba el runtime y lo instala si falta, sin depender de internet. Falta verificar Windows y congelador para preparar su política de actualización y persistencia; no se asume que toda PC con Windows 10 ya lo tenga.
+- [x] **Distribución de WebView2 (ADR-0005).** **Resuelta (mantenedor, 2026-10-04): Evergreen con instalador completo sin conexión.** El instalador comprueba el runtime y lo instala si falta, sin depender de internet. Windows y ausencia de congelador confirmados; preparar y verificar política de actualización y persistencia. No se asume que toda PC con Windows 10 ya lo tenga.
 
 Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La cadena prevista es: `shell-ui` ⇄ puente de WebView2 ⇄ `Pope.ShellHost` ⇄ named pipe ⇄ `Pope.Agent` ⇄ WebSocket ⇄ nodo, con los mensajes de `packages/shared` (T08 de la spec 001) reenviados sin cambios.
 
@@ -235,4 +235,4 @@ Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La
 - [x] **Mensaje del encargado.** **Resuelta (mantenedor, 2026-10-04): ventana centrada con sonido, sin tomar foco ni impedir teclas/clics, se cierra sola a los 5 s**. Visible con sesión activa o pausada y con PC libre; rechazado durante mantenimiento. Ligado al estado/sesión destinatario, se descarta si cambia antes de mostrarse; no llega al cliente siguiente.
 - [x] **Vigencia de órdenes nativas.** **Resuelta (mantenedor, 2026-10-04): 30 s para aceptar**, solo mientras siga vigente el estado/sesión destinatario. No reenviar reinicio/apagado aceptado ni presentar aceptación de Windows como prueba de apagado físico. El mantenimiento confirmado no tiene límite automático de duración.
 - [x] **Entorno de validación.** **Resuelta (mantenedor, 2026-10-04): hay PC de pruebas y VM**; juegos anotados en el inventario preliminar. La VM sirve para instalación/recuperación; juego exclusivo, audio y anticheat se validan en la PC real. No modificar el Windows cotidiano para redactar el plan.
-- [ ] **Detalle de las pruebas del local.** Confirmar resolución y número de monitores, versiones/ediciones de juegos (especialmente Call of Duty y Minecraft), MAC/Wake-on-LAN y versiones exactas de Windows antes de ejecutar la verificación final.
+- [ ] **Detalle de las pruebas del local.** Confirmar resolución y número de monitores, versiones/ediciones de juegos (especialmente Call of Duty y Minecraft) y MAC/Wake-on-LAN antes de ejecutar la verificación final. Usar el inventario Windows confirmado y registrar builds/arquitectura/runtime en las mediciones.

@@ -25,9 +25,10 @@ el resto del diseño y ADR-0018 siguen pendientes, con aprobación siguiendo ADR
 remoto solo con la PC libre; login técnico local para encargado y administrador,
 validado por el nodo; cerrar procesos del cliente sin reiniciar Windows al terminar;
 Evergreen con instalador completo sin conexión. Hay 13 PCs (normalmente 12 para clientes)
-y se dispone de una PC de pruebas y una VM. **Inventario tentativo:** mayoría con Windows
-10 22H2 y una PC con Windows 11. **Sin confirmar:** versiones/ediciones exactas,
-congelador y las preguntas indicadas en la spec.
+y se dispone de una PC de pruebas y una VM. **Inventario confirmado por el mantenedor
+(2026-10-07):** 12 PCs con Windows 10 Pro 22H2 y una con Windows 11 Pro 25H2, ninguna
+con congelador. Compatibilidad, persistencia ante cortes y preguntas técnicas siguen
+pendientes de diseño/prueba; no se declara aprobado el resto del plan.
 
 El nodo tendrá IP fija o reserva DHCP, configurada en la instalación. Un mantenimiento
 ya autorizado continúa sin red y permite terminar/bloquear localmente; se registra la
@@ -479,8 +480,9 @@ retención explícita, sin crecer con semanas de cortes de red.
   el panel; concretar ese límite técnico al cerrar los contratos.
 
 Medir agente < 50 MB y host < 60 MB excluyendo WebView2 (003-60), y registrar también el
-consumo completo con sus procesos Chromium para conocer el coste real. Windows 10 22H2
-y congelador condicionan actualizaciones; no depender de internet para instalar o bloquear.
+consumo completo con sus procesos Chromium para conocer el coste real. Windows 10 Pro
+22H2 y Windows 11 Pro 25H2 sin congelador son el inventario confirmado; comprobar
+actualizaciones y persistencia ante cortes sin depender de internet para instalar o bloquear.
 
 ## Estrategia de pruebas
 
@@ -553,8 +555,9 @@ aprobada de la 002 conserva sus 19 tareas; la fase 2 sigue pendiente hasta verif
   acotada, salida no observada, aislamiento y comprobación local siguen por diseñar.
   Aprobar y probar la ruta administrativa independiente del servicio
   antes de construir. No se aprueba por esta elección el mecanismo ordinario de ADR-0018.
-- **Edición, congelador y anticheat:** falta inventario; validar con juegos reales antes
-  de afirmar compatibilidad o recuperación de pantalla exclusiva.
+- **Compatibilidad y anticheat:** inventario Windows/ediciones y ausencia de congelador
+  confirmados. Elegir herramientas para esas versiones y validar con juegos reales
+  antes de afirmar compatibilidad o recuperación de pantalla exclusiva.
 - **Preguntas abiertas:** quedan en `spec.md`; todas las opciones señaladas como
   propuestas necesitan decisión antes de aprobar el plan. No generar código ni tareas
   de implementación sobre ellas.

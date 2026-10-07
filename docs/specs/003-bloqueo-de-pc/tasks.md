@@ -17,7 +17,8 @@ El bloqueo de contrato de T07 queda resuelto; la tarea sigue sin implementar.
 
 **Dependencias:** ejecutar en orden, una tarea a la vez. T09/T10 deben demostrar el
 mecanismo nativo antes de integrarlo; si fallan, revisar ADR/plan y detener las tareas
-dependientes. Confirmar Windows/edición, congelador y persistencia antes de T48–T54;
+dependientes. Windows/edición y ausencia de congelador confirmados (2026-10-07);
+verificar compatibilidad y persistencia antes de T48–T54;
 registrar juegos/monitores/audio antes de T09/T21/T24/T25 y NIC/Wake-on-LAN antes de T58.
 
 La **fase 2 de la spec 002** se implementa aquí en T23–T25 y se verifica en T56; incluye
@@ -120,7 +121,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** crear `apps/native` con servicio, host y tests; fijar SDK/framework y dependencias justificadas tras comprobar Windows; consumir fixtures T07 y documentar comandos.
   - **Verificar:** build/test/publicación `win-x64`, contratos JSON en C# y ausencia de lógica de saldo o cobro; compilar en desarrollo, no en el nodo.
   - **Commit:** `build(native): prepara el servicio y host de Windows`.
-  - **Inventario pendiente (mantenedor, 2026-10-07):** opción B, continuar decisiones de diseño sin confirmar versiones/ediciones de Windows. El inventario sigue siendo requisito antes de fijar herramientas y compatibilidad; T08 permanece en Borrador.
+  - **Inventario confirmado (mantenedor, 2026-10-07):** 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Sustituye la postergación anterior (opción B); fijar herramientas y probar compatibilidad para esas versiones. T08 permanece en Borrador.
   - **Host confirmado (mantenedor, 2026-10-07):** opción A, WinForms + WebView2 con interfaz React, según ADR-0019. SDK, tests y compatibilidad Windows siguen pendientes; T08/T09 aún no están implementadas ni aprobadas para ejecutar.
 
 - [ ] **T09: Prototipo de escritorio separado y WebView2**
@@ -457,4 +458,4 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 - **T34:** consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/600 s y regreso al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33); pendientes contratos/prueba del asistente y confirmación temporal, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
 - **T53/T54:** reglas de uso cerradas en ADR-0024 a ADR-0028, incluida auditoría automática por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo. Mecanismo de captura/persistencia/envío independiente del agente, contrato/actor, salida no observada, comprobación local y ruta administrativa/aislamiento pendientes de diseño, aprobación y prueba.
-- **T48–T58:** inventario Windows/congelador/NIC/monitores/juegos. No asumir datos tentativos ni modificar el Windows cotidiano para probar.
+- **T48–T58:** Windows Pro (12 con 10 22H2, una con 11 25H2) y ausencia de congelador confirmados; NIC/monitores/versiones de juegos y pruebas de compatibilidad/persistencia pendientes. No modificar el Windows cotidiano para probar.
