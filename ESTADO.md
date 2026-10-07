@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · Autenticación Windows manual para emergencia confirmada; continúa la revisión de decisiones
+**Última actualización:** 2026-10-07 · Emergencia permitida a administrador y encargado; quedan alcance e identificación/auditoría
 
 ## Ahora
 
@@ -13,7 +13,7 @@
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T06 completos; T07 con contrato confirmado, pendiente de implementación; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
 | **Siguiente tarea** | T07: exportar protocolo, reglas exactas de recorte del usuario y fixtures. En este chat el mantenedor está resolviendo las preguntas una por una |
 | **Progreso** | Spec 003: 6 / 59 grupos; T01–T06 completas, incluidas T02a/b/c y T05a/b; T07 pendiente de implementación; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: presencia física y credenciales Windows manuales confirmadas (ADR-0024/0025); quién puede usarla, alcance, identificación/auditoría y mecanismo pendientes |
+| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: presencia física, credenciales Windows manuales y permiso de administrador/encargado confirmados (ADR-0024/0025/0026); alcance, identificación/auditoría y mecanismo pendientes |
 
 ## Cómo retomar
 
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-07:** el mantenedor elige B para permisos de emergencia: administrador y encargado pueden usar las credenciales Windows presencialmente. ADR-0026 y spec/plan/T53/T54 alineados. Windows valida la cuenta local; no se presume validado un rol vigente de Pope sin nodo. Quedan dos decisiones de emergencia: alcance e identificación/auditoría; mecanismo por diseñar/probar. Sin implementar tareas nativas ni cambiar cuentas.
+
 - **2026-10-07:** el mantenedor elige A para autenticación de emergencia: credenciales de la cuenta administradora local Windows existente introducidas físicamente, validadas por Windows sin nodo ni servicio. ADR-0025 y spec/plan/T53/T54 alineados; complementa presencia física de ADR-0024. Quién puede usarla, alcance e identificación/auditoría por decidir; ruta administrativa por diseñar/probar. Sin aprobar ADR-0018 ni implementar tareas nativas.
 
 - **2026-10-07:** el mantenedor elige A para emergencia: presencia física obligatoria delante de la PC e intervención local de una persona autorizada; sin entrada remota de emergencia. ADR-0024 y spec/plan/T53/T54 alineados. Autenticación, permisos, alcance, comprobación local y auditoría pendientes; mecanismo sin aprobar, sin implementación ni cambios de cuentas. Continúa la revisión una por una.
@@ -81,5 +83,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-07:** el mantenedor elige A para el consumo durante revocación: conservar la sesión y detener saldo/tiempo mientras el acceso esté bloqueado por revocación confirmada. No se aplica a un simple corte de red o fallo TLS. REQ-003-11, plan y T34 alineados; recuperación, permisos y confirmación temporal del bloqueo siguen pendientes. Sin cambios de código ni autorización de T34.
 
 - **2026-10-07:** el mantenedor elige A para el host: WinForms + WebView2, con React a pantalla completa y C# mínimo. ADR-0019 aceptado, spec/plan/T08 alineados; no se aprueban ni ejecutan tareas nativas. Inventario Windows, SDK/tests y prototipo T09 siguen pendientes. Continúa la revisión de preguntas una por una.
-
-- **2026-10-07:** el mantenedor elige B para el inventario Windows: dejar versiones/ediciones pendientes y continuar resolviendo decisiones de diseño. Los datos tentativos no se consideran confirmados; T08 sigue en Borrador y la compatibilidad no está verificada. Siguiente punto de revisión: base del host del Shell.

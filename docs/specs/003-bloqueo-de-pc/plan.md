@@ -539,7 +539,10 @@ aprobada de la 002 conserva sus 19 tareas; la fase 2 sigue pendiente hasta verif
   **Autenticación A confirmada (2026-10-07, ADR-0025):** credenciales manuales de la
   cuenta administradora local Windows existente, validadas por Windows sin nodo ni
   servicio. Sin clave propia de Pope ni uso automático del secreto del agente.
-  Permisos, alcance, identificación/auditoría y comprobación de intervención local
+  **Permisos B confirmados (2026-10-07, ADR-0026):** administrador y encargado pueden
+  usar esas credenciales para emergencia presencial. No se presume verificado un rol
+  vigente de Pope sin nodo; identificar a la persona aun si comparten cuenta Windows.
+  Alcance, identificación/auditoría y comprobación de intervención local
   siguen abiertos; aprobar y probar la ruta administrativa independiente del servicio
   antes de construir. No se aprueba por esta elección el mecanismo ordinario de ADR-0018.
 - **Edición, congelador y anticheat:** falta inventario; validar con juegos reales antes
