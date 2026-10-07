@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · inventario Windows pospuesto (opción B); continúa la revisión de decisiones
+**Última actualización:** 2026-10-07 · host WinForms + WebView2 confirmado (opción A); continúa la revisión de decisiones
 
 ## Ahora
 
@@ -41,7 +41,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 - [ ] **T31:** confirmar dos criterios al abrir una sesión temporal: el tope de 24 h por cobro y que la PC deba estar conectada al nodo (si no, se cobraría por una PC que no puede desbloquearse).
 - [ ] **T07 (spec 005):** revisar la verificación de la tasa manual (CA-005-06, REQ-001-13) y la forma del Bs: el criterio escribe «3,00 USD (≈ 120,00 Bs)» en una línea, y el panel lo pone debajo del importe, sin paréntesis, como en el diseño.
 - [ ] **Cliente Windows:** decidir el ADR [0010](docs/adr/0010-lista-blanca-y-restauracion.md) para la spec 004. ADR-0005 (WebView2) y ADR-0009 (escritorio separado) aceptados por el mantenedor el 2026-10-04; no siguen bloqueando la planificación de la 003.
-- [ ] **Plan 003:** revisar [ADR-0017](docs/adr/0017-comunicacion-segura-del-cliente-windows.md) y [ADR-0018](docs/adr/0018-mantenimiento-con-cuenta-windows-existente.md). El mantenedor eligió reutilizar una cuenta administradora Windows existente; falta aprobar y probar el mecanismo de elevación, custodia y salida. No se ha modificado ninguna cuenta de Windows.
+- [ ] **Plan 003:** revisar [ADR-0017](docs/adr/0017-comunicacion-segura-del-cliente-windows.md) y [ADR-0018](docs/adr/0018-mantenimiento-con-cuenta-windows-existente.md). Host WinForms + WebView2 confirmado en [ADR-0019](docs/adr/0019-host-del-shell-en-winforms.md); SDK/tests/compatibilidad pendientes. El mantenedor eligió reutilizar una cuenta administradora Windows existente; falta aprobar y probar el mecanismo de elevación, custodia y salida. No se ha modificado ninguna cuenta de Windows.
 - [ ] **Ajustes en el panel:** ya existe «Ajustes del local» (spec 005, T23b) con el nombre del local y «Permitir vender sin stock». La gracia de latidos y las sesiones temporales conservadas (spec 001) siguen sin pantalla, sin tarea; hasta entonces, por la API (`PUT /settings`).
 - [ ] **Spec 005, parte 2:** imprimir en papel el PDF del encargado (se comprobó que se descarga y ocupa una página) y medir REQ-005-71 (una venta en menos de 500 ms) en el i3-2120 del local, con las mediciones de la spec 001. Ver [`mediciones.md`](docs/specs/005-inventario-y-caja/mediciones.md).
 - [ ] **Spec 008:** averiguar si el plan de SENET del local incluye acceso a la API y quién tiene las credenciales.
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-07:** el mantenedor elige A para el host: WinForms + WebView2, con React a pantalla completa y C# mínimo. ADR-0019 aceptado, spec/plan/T08 alineados; no se aprueban ni ejecutan tareas nativas. Inventario Windows, SDK/tests y prototipo T09 siguen pendientes. Continúa la revisión de preguntas una por una.
+
 - **2026-10-07:** el mantenedor elige B para el inventario Windows: dejar versiones/ediciones pendientes y continuar resolviendo decisiones de diseño. Los datos tentativos no se consideran confirmados; T08 sigue en Borrador y la compatibilidad no está verificada. Siguiente punto de revisión: base del host del Shell.
 
 - **2026-10-07:** el mantenedor resuelve la normalización de T07 con la opción A: conservar recorte exterior del usuario antes de validar, exportar reglas/caracteres exactos para C# y fixtures compartidos, sin modificar contraseñas. Spec/plan/tasks actualizados; T07 sin implementar. Se continúa resolviendo preguntas una por una.
@@ -79,4 +81,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-06:** README reescrito tomando Cullen como referencia de presentación: problema del local, operación, decisiones técnicas, arquitectura, evidencia, arranque y documentación. Distingue capacidades implementadas de Windows/nube pendientes y conserva los límites de las mediciones. Sin cambios de código ni avance de specs; siguiente T05 de la 003.
 - **2026-10-05:** T04 completada: migración 0025 y seis tests de registro/upgrade/concurrencia. 896 tests del monorepo pasan, incluidos 378 del servidor en PGlite; los 378 también pasan en PostgreSQL temporal real. Formato, lint, tipos y build pasan. Se redujo el paralelismo del ejecutor a dos workers sin cambiar límites de tests ni requisitos. Registro/auth efectivos quedan en T12/T13; siguiente T05.
 - **2026-10-04:** T03: fondo global con SHA-256, WebP/bytes/dimensiones, revisión y actor; aviso v2 sin imagen ni rutas y progreso solo local. Entrada 10 000 000 bytes/40 millones de píxeles y salida 2 000 000 bytes/1920×1080 confirmados. 890 tests (308 shared), formato, lint, tipos y build pasan; no se decodifican/suben imágenes ni se implementan endpoints aún. Siguiente T04.
-- **2026-10-04:** T02c completa T02: canal v2 preparado sin activar la admisión, estado/copia de recuperación, sesión y mantenimiento separados; React no produce hello/latidos/acuses/órdenes nativas. 883 tests (301 shared), formato, lint, tipos y build pasan. La salida offline lleva ID propio y solo el servicio genera su registro. Siguiente T03; sin cambios de cuentas ni Windows.

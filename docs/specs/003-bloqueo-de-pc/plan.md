@@ -436,7 +436,11 @@ retención explícita, sin crecer con semanas de cortes de red.
   compatibilidad con el Windows real antes de fijar SDK y herramientas del instalador.
 - **SDK oficial WebView2:** dependencia nativa prevista por ADR-0005/0006. Host sin
   elevación y servicio sin UI. Evergreen y su instalador completo offline están
-  confirmados; elegir WinForms/WPF y fijar versiones mínimas en el diseño final.
+  confirmados. **Host WinForms + WebView2 confirmado por el mantenedor (opción A,
+  2026-10-07), según ADR-0019:** ventana sin bordes con React a pantalla completa,
+  C# mínimo para ventana, WebView2 y puente. Fijar versiones mínimas tras comprobar
+  Windows; T09 debe demostrar el escritorio separado y la recuperación. Se conserva
+  el respaldo WPF de ADR-0005 si el prototipo falla, previa revisión del plan.
 - **C# estándar:** WebSocket, pipe, JSON y temporización; APIs Win32/COM comentadas en
   español. Sin lógica de tarifas, saldos, límites de pausa ni decisión de cobro.
 - **Tests C#:** justificar framework de tests y validador JSON Schema (p. ej.

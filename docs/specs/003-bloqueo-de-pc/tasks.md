@@ -121,6 +121,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Verificar:** build/test/publicación `win-x64`, contratos JSON en C# y ausencia de lógica de saldo o cobro; compilar en desarrollo, no en el nodo.
   - **Commit:** `build(native): prepara el servicio y host de Windows`.
   - **Inventario pendiente (mantenedor, 2026-10-07):** opción B, continuar decisiones de diseño sin confirmar versiones/ediciones de Windows. El inventario sigue siendo requisito antes de fijar herramientas y compatibilidad; T08 permanece en Borrador.
+  - **Host confirmado (mantenedor, 2026-10-07):** opción A, WinForms + WebView2 con interfaz React, según ADR-0019. SDK, tests y compatibilidad Windows siguen pendientes; T08/T09 aún no están implementadas ni aprobadas para ejecutar.
 
 - [ ] **T09: Prototipo de escritorio separado y WebView2**
   - **Cubre:** REQ-003-30, REQ-003-33; REQ-002-04, REQ-002-05; CA-002-02.
@@ -440,7 +441,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 ## Decisiones pendientes antes de ejecutar
 
-- **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** SDK/framework y soporte del Windows real pendientes.
+- **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** host WinForms confirmado (ADR-0019); versiones de SDK, herramientas de tests y soporte del Windows real pendientes.
 - **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
 - **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
 - **T34:** cobro, permisos de revocación/revinculación y recuperación del encargado, sin cierre accidental por latidos.

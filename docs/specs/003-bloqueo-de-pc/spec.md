@@ -171,6 +171,8 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 
 ## Preguntas abiertas
 
+- [x] **Base del host del Shell (T08).** **Resuelta (mantenedor, 2026-10-07): opción A, WinForms + WebView2**, con interfaz React y host C# mínimo, según [ADR-0019](../../adr/0019-host-del-shell-en-winforms.md). El inventario Windows, las versiones de herramientas y el prototipo del escritorio separado siguen pendientes; esta elección no aprueba el resto del plan/tasks.
+
 - [x] **Normalización del usuario en T07 (2026-10-05).** **Resuelta (mantenedor, 2026-10-07): opción A, conservar el recorte exterior antes de validar el usuario de login de cliente/técnico.** Exportar junto al JSON Schema las instrucciones y los caracteres exactos del `trim` de JavaScript para que C# normalice solo el usuario antes de validar; nunca la contraseña. Añadir fixtures compartidos que comprueben coincidencia, incluidos usuario solo con espacios y 64 letras con espacios exteriores. Los límites Unicode sí coinciden en las versiones instaladas, incluidos emojis.
   - **Histórico (2026-10-07):** el mantenedor dejó T07 pendiente de revisar el contrato y después aprobó la opción A; esa decisión resuelve el bloqueo. T07 sigue sin implementar.
 
