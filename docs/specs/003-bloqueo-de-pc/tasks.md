@@ -1,6 +1,6 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Contratos y datos T01–T06 completos; T07 pendiente de revisión del contrato por indicación del mantenedor (2026-10-07). T08–T59 siguen en Borrador.
+- **Estado:** Contratos y datos T01–T06 completos; contrato de T07 confirmado (opción A, mantenedor 2026-10-07), implementación pendiente. T08–T59 siguen en Borrador.
 - **Plan:** [plan.md](plan.md), aprobado para este bloque; resto pendiente.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
@@ -10,9 +10,10 @@ el cuerpo y los tests citan los REQ. Si excede unas 400 líneas, dividir antes d
 **Autorizado:** implementar T01–T07, una tarea por commit; ADR-0017 aceptado, canal v2 y
 recuperación de registro confirmados. T08–T59 requieren cerrar sus decisiones y aprobación
 antes de implementar; ADR-0018 sigue Propuesto. No se modifica Windows en este bloque.
-**Indicación posterior (2026-10-07):** el mantenedor deja T07 pendiente hasta revisar
-el contrato de normalización del usuario. T01–T06 ya están completas; no continuar
-con T07 hasta nueva indicación.
+**Decisión posterior (2026-10-07):** tras dejar T07 pendiente de revisar el contrato,
+el mantenedor confirma la opción A: conservar el recorte exterior del usuario y exportar
+sus reglas exactas para C#, con fixtures compartidos y sin modificar contraseñas.
+El bloqueo de contrato de T07 queda resuelto; la tarea sigue sin implementar.
 
 **Dependencias:** ejecutar en orden, una tarea a la vez. T09/T10 deben demostrar el
 mecanismo nativo antes de integrarlo; si fallan, revisar ADR/plan y detener las tareas
@@ -110,7 +111,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** exportar JSON Schema y fixtures válidos/inválidos desde los esquemas zod, incluyendo mensajes existentes y nuevos; versionar los artefactos de compatibilidad.
   - **Verificar:** los fixtures pasan/fallan donde corresponde, exportación reproducible y detección de cambios incompatibles sin duplicar reglas de negocio.
   - **Commit:** `build(shared): exporta el protocolo para el cliente Windows`.
-  - **Pendiente (mantenedor, 2026-10-07):** revisar la diferencia entre `trim` de Zod y la validación JSON Schema del usuario. La normalización propuesta no está aprobada; no se ha implementado esta tarea.
+  - **Contrato confirmado (mantenedor, 2026-10-07):** opción A: conservar `trim` del usuario antes de validar, exportar los caracteres exactos de recorte e instrucciones para C# y verificar coincidencia con fixtures compartidos. Nunca recortar la contraseña. Implementación pendiente.
 
 ### Base nativa y conexión
 

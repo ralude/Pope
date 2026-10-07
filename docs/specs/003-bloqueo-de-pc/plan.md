@@ -131,6 +131,16 @@ rutas ni duplicados por PC en PostgreSQL. Validar archivo/hash, autorización de
 administrador, incremento de revisión y evento atómico quedan en T43; esta migración
 no sube ni descarga imágenes ni añade endpoints o dependencias.
 
+### T07: normalización confirmada para la exportación
+
+El mantenedor elige la opción A (2026-10-07): conservar el `trim` exterior del usuario
+de login de cliente/técnico antes de validar, sin transformar la contraseña. La
+exportación incluirá, junto a JSON Schema, instrucciones y el conjunto exacto de
+caracteres que recorta JavaScript; C# usará ese conjunto explícito para evitar
+diferencias con su recorte por defecto. Fixtures compartidos probarán el resultado
+y la aceptación/rechazo de ambos validadores, incluidos usuario vacío tras recorte,
+64 letras con espacios exteriores y Unicode. No cambia el comportamiento del login.
+
 ### Existentes que se reutilizan
 
 `packages/shared/src/protocol.ts` ya define `hello`, latidos, login, cierre, compra,

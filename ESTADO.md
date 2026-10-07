@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · T01–T06 completas; T07 pendiente de revisión por indicación del mantenedor
+**Última actualización:** 2026-10-07 · normalización de T07 confirmada (opción A); implementación pendiente
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T06 completos; T07 pendiente de revisión; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
-| **Siguiente tarea** | Revisar el contrato de normalización del usuario para T07; no implementarla hasta nueva indicación del mantenedor |
-| **Progreso** | Spec 003: 6 / 59 grupos; T01–T06 completas, incluidas T02a/b/c y T05a/b; T07 pendiente de revisión; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | T07: revisar normalización del usuario antes de exportar JSON Schema; el mantenedor indica dejarla pendiente (2026-10-07). Cobro/recuperación de revocación y emergencia pendientes para tareas posteriores; inventario antes de tareas nativas dependientes |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T06 completos; T07 con contrato confirmado, pendiente de implementación; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
+| **Siguiente tarea** | T07: exportar protocolo, reglas exactas de recorte del usuario y fixtures. En este chat el mantenedor está resolviendo las preguntas una por una |
+| **Progreso** | Spec 003: 6 / 59 grupos; T01–T06 completas, incluidas T02a/b/c y T05a/b; T07 pendiente de implementación; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Cobro/recuperación de revocación y emergencia pendientes para tareas posteriores; inventario antes de tareas nativas dependientes |
 
 ## Cómo retomar
 
@@ -53,7 +53,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Contratos y datos T01–T06 completos; T07 pendiente de revisión; resto Borrador | 6 / 59 |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Contratos y datos T01–T06 completos; contrato de T07 confirmado, implementación pendiente; resto Borrador | 6 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -63,6 +63,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-07:** el mantenedor resuelve la normalización de T07 con la opción A: conservar recorte exterior del usuario antes de validar, exportar reglas/caracteres exactos para C# y fixtures compartidos, sin modificar contraseñas. Spec/plan/tasks actualizados; T07 sin implementar. Se continúa resolviendo preguntas una por una.
 
 - **2026-10-07:** registrada la indicación explícita del mantenedor de dejar T07 pendiente hasta revisar el contrato de normalización del usuario. Spec/tasks reflejan la suspensión de esa tarea; T01–T06 están completas (6/59 grupos) y la 005 sigue esperando T07. Sin cambios al protocolo exportado.
 
@@ -77,4 +79,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-04:** T03: fondo global con SHA-256, WebP/bytes/dimensiones, revisión y actor; aviso v2 sin imagen ni rutas y progreso solo local. Entrada 10 000 000 bytes/40 millones de píxeles y salida 2 000 000 bytes/1920×1080 confirmados. 890 tests (308 shared), formato, lint, tipos y build pasan; no se decodifican/suben imágenes ni se implementan endpoints aún. Siguiente T04.
 - **2026-10-04:** T02c completa T02: canal v2 preparado sin activar la admisión, estado/copia de recuperación, sesión y mantenimiento separados; React no produce hello/latidos/acuses/órdenes nativas. 883 tests (301 shared), formato, lint, tipos y build pasan. La salida offline lleva ID propio y solo el servicio genera su registro. Siguiente T03; sin cambios de cuentas ni Windows.
 - **2026-10-04:** T02b: solicitudes/órdenes/acuses tipados, confirmación al reiniciar/apagar con ocupación y contexto con revisión para no alcanzar al siguiente cliente. Vigencia 30 s confirmada; aceptación Windows no es apagado físico. Mensajes de 5 s/1 000 caracteres, sin foco. 877 tests (295 shared), formato, lint, tipos y build pasan. T02c pendiente; sin ejecución nativa ni journal aún.
-- **2026-10-04:** T02a: contratos de mantenimiento confirmado, login técnico, salida durable y reconocimiento por ID; auditoría de entrada/salida/bloqueo técnico sin secretos. Confirmados cierre previo también local y mensajes de 5 s con sonido/sin foco, fuera de mantenimiento. T02 dividida en tres subtareas antes de implementar; 1/59 grupos completos. 871 tests (289 shared), formato, lint, tipos y build en verde. Sin mecanismo elevado ni mutaciones de Windows.
