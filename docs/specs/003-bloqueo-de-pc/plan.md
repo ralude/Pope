@@ -371,9 +371,15 @@ fronteras separadas para C#, con fixtures que prueban ese aislamiento.
   hasta intervención del encargado. **Opción A confirmada (2026-10-07): detener el
   consumo de saldo y tiempo restante durante el bloqueo por revocación confirmado**.
   El nodo decide el cobro; un simple corte de red o fallo TLS no activa esta regla.
-  Antes de T34 hay que concretar recuperación, permisos y confirmación del instante
-  efectivo del bloqueo, incluidos acuses perdidos. La ausencia de latidos o una
-  reconciliación no deben cerrar por accidente la sesión conservada.
+  **Recuperación A confirmada (2026-10-07), ADR-0020:** revincular la misma PC con
+  credencial nueva y conservar la sesión. La anterior sigue revocada. La nueva
+  credencial no desbloquea ni reactiva el consumo automáticamente; requiere autorización
+  del encargado desde el nodo para continuar. Es un flujo específico de T34, separado
+  de la recuperación ordinaria de T12 que exige PC libre y sin mantenimiento.
+  Antes de T34 hay que concretar permisos, entrega de la credencial, estado previo
+  pausado y confirmación del instante efectivo del bloqueo, incluidos acuses perdidos.
+  La ausencia de latidos o una reconciliación no deben cerrar por accidente la sesión
+  conservada. Los cambios de estado se auditan con actor según ADR-0008.
 - Concretar la presentación y los estados admisibles del mensaje del encargado, así como
   cómo acceder a Pausar desde un juego exclusivo; quedan en las preguntas de la spec.
 
@@ -420,7 +426,7 @@ la propuesta anterior de multipart no es un contrato vigente.
 | PC reiniciada en pausa | Bloqueo al arrancar y recuperación de la pausa desde el nodo (002-31) |
 | Host muerto o UI colgada | Detectar desde el agente, relanzar y conservar estado; medir 003-32 |
 | Agente reiniciado sin estado verificable | Propuesta: permanecer bloqueada hasta obtener estado válido; concretar recuperación en la spec |
-| Credencial revocada | Rechazar conexión; conservar sesión y bloquear al recibir revocación. Detener consumo durante bloqueo confirmado (opción A); recuperación y confirmación temporal pendientes. Sin red solo se conoce al reconectar |
+| Credencial revocada | Rechazar conexión; conservar sesión y detener consumo durante bloqueo confirmado. Recuperar la misma PC con credencial nueva; mantener bloqueo hasta autorización del encargado (ADR-0020). Permisos/mecanismo/confirmación temporal pendientes; sin red solo se conoce al reconectar |
 | Nodo no verificado | No enviar credenciales; no confundir fallo de certificado con una revocación confirmada |
 | Pipe o mensaje falsificado | Rechazar antes de una acción nativa; no registrar contraseñas ni secretos |
 | Mantenimiento solicitado con sesión | Rechazar y exigir cierre previo; no cerrar automáticamente (003-43) |
