@@ -55,4 +55,5 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0017](0017-comunicacion-segura-del-cliente-windows.md) | Comunicación segura entre nodo, agente y Shell de Windows | Aceptado |
 | [0018](0018-mantenimiento-con-cuenta-windows-existente.md) | Mantenimiento con una cuenta administradora Windows existente | Propuesto |
 | [0019](0019-host-del-shell-en-winforms.md) | Host del Shell en WinForms con WebView2 | Aceptado |
-| [0020](0020-recuperacion-de-pcs-revocadas.md) | Recuperación de PCs revocadas conservando la sesión | Aceptado para comportamiento; permisos/mecanismo pendientes |
+| [0020](0020-recuperacion-de-pcs-revocadas.md) | Recuperación de PCs revocadas conservando la sesión | Aceptado para comportamiento; permisos en ADR-0021, mecanismo pendiente |
+| [0021](0021-permisos-de-revocacion-y-recuperacion.md) | Permisos de revocación y recuperación de PCs | Aceptado; complementa los permisos de ADR-0020 |

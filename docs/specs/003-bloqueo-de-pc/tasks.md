@@ -279,11 +279,12 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 - [ ] **T34: Revocación conservando la sesión**
   - **Cubre:** REQ-003-11, REQ-003-63.
-  - **Hacer:** implementar la parte del nodo tras resolver permisos, confirmación temporal y desglosar el mecanismo de recuperación; preservar sesión, detener consumo durante bloqueo por revocación confirmado, revincular la misma PC con credencial nueva sin desbloquear hasta autorización del encargado (ADR-0020), distinguir revocación autenticada de fallo TLS y coordinar bloqueo nativo de T21.
-  - **Verificar:** revocación en canal vivo y al reconectar, ausencia de consumo de saldo/tiempo durante bloqueo confirmado, misma PC/sesión tras revincular, credencial anterior rechazada y nueva credencial sin desbloqueo automático; jobs/reconcile no cierran sesión conservada y PC revocada no inicia una nueva. Validar autorización, eventos con actor, recepción del bloqueo y acuse perdido/desconexión conforme al diseño que se apruebe.
+  - **Hacer:** implementar la parte del nodo tras resolver confirmación temporal y desglosar el mecanismo de recuperación; preservar sesión, detener consumo durante bloqueo por revocación confirmado, revincular la misma PC con credencial nueva sin desbloquear hasta autorización del encargado/administrador (ADR-0020/0021), distinguir revocación autenticada de fallo TLS y coordinar bloqueo nativo de T21. Validar sesión/rol en las tres acciones: revocar, revincular y autorizar continuar.
+  - **Verificar:** revocación en canal vivo y al reconectar, ausencia de consumo de saldo/tiempo durante bloqueo confirmado, misma PC/sesión tras revincular, credencial anterior rechazada y nueva credencial sin desbloqueo automático; jobs/reconcile no cierran sesión conservada y PC revocada no inicia una nueva. Encargado/administrador admitidos y dueño/cliente/peticiones sin sesión rechazados en cada acción; eventos con actor, recepción del bloqueo y acuse perdido/desconexión conforme al diseño que se apruebe.
   - **Commit:** `feat(server): conserva la sesión al revocar una PC`.
   - **Consumo confirmado (mantenedor, 2026-10-07):** opción A, detener saldo/tiempo durante bloqueo por revocación confirmado. No modifica las reglas de desconexión normal.
-  - **Recuperación confirmada (mantenedor, 2026-10-07):** opción A, misma PC/sesión con credencial nueva; bloqueo hasta autorización del encargado. Permisos, contratos de recuperación y confirmación temporal siguen pendientes; no autoriza implementar T34 ni ampliar la recuperación ordinaria de T12 a PCs ocupadas.
+  - **Recuperación confirmada (mantenedor, 2026-10-07):** opción A, misma PC/sesión con credencial nueva; bloqueo hasta autorización del personal permitido. Contratos de recuperación y confirmación temporal siguen pendientes; no autoriza implementar T34 ni ampliar la recuperación ordinaria de T12 a PCs ocupadas.
+  - **Permisos confirmados (mantenedor, 2026-10-07):** opción A, encargado/administrador para revocar, revincular y autorizar continuar; dueño solo lee. ADR-0021, validación en nodo y eventos con actor; mecanismo pendiente.
 
 - [ ] **T35: Autorización técnica local y remota**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
@@ -446,7 +447,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 - **T01:** base ADR-0017, canal v2 y recuperación de registro confirmados; **T02:** cerrar contratos que dependan de reglas aún abiertas; **T08:** host WinForms confirmado (ADR-0019); versiones de SDK, herramientas de tests y soporte del Windows real pendientes.
 - **T25:** forma de volver a Pope durante juego exclusivo; **T32:** presentación, foco, duración y estados de mensajes.
 - **T12:** recuperación confirmada mediante código nuevo ligado a la misma PC libre/sin mantenimiento; comprobar disponibilidad tanto al emitir como al consumir.
-- **T34:** consumo detenido y recuperación de misma PC/sesión con credencial nueva confirmados (opciones A, ADR-0020); pendientes permisos de revocación/revinculación/continuación, mecanismo y confirmación temporal del bloqueo, sin cierre accidental por latidos.
+- **T34:** consumo detenido, recuperación de misma PC/sesión con credencial nueva y permisos de encargado/administrador confirmados (opciones A, ADR-0020/0021); pendientes mecanismo y confirmación temporal del bloqueo, sin cierre accidental por latidos.
 - **T35:** entrada técnica local con sesión/pausa; la remota ya exige cierre separado previo.
 - **T53/T54:** acceso de emergencia: autenticación, alcance, presencia física y auditoría; no hay mecanismo aprobado.
 - **T48–T58:** inventario Windows/congelador/NIC/monitores/juegos. No asumir datos tentativos ni modificar el Windows cotidiano para probar.
