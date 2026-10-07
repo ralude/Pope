@@ -4,7 +4,7 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · Windows completo para emergencia confirmado; queda decidir identificación/auditoría
+**Última actualización:** 2026-10-07 · Reglas de uso de emergencia cerradas; mecanismo técnico pendiente
 
 ## Ahora
 
@@ -13,7 +13,7 @@
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T06 completos; T07 con contrato confirmado, pendiente de implementación; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 espera T07 |
 | **Siguiente tarea** | T07: exportar protocolo, reglas exactas de recorte del usuario y fixtures. En este chat el mantenedor está resolviendo las preguntas una por una |
 | **Progreso** | Spec 003: 6 / 59 grupos; T01–T06 completas, incluidas T02a/b/c y T05a/b; T07 pendiente de implementación; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: presencia física, credenciales Windows manuales, permiso de administrador/encargado y Windows completo para reparar confirmados (ADR-0024/0025/0026/0027); identificación/auditoría y mecanismo pendientes |
+| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario Windows pospuesto por el mantenedor (opción B, 2026-10-07), obligatorio antes de fijar herramientas/compatibilidad y tareas nativas dependientes. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
 
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-07:** el mantenedor elige B para auditoría de emergencia: cuenta Windows autenticada, PC y entrada/salida UTC automáticas, sin nombre/usuario Pope ni motivo. Registro durable local y envío idempotente al nodo al volver. ADR-0028 y spec/plan/T53/T54 alineados; cuenta compartida no identifica persona ni valida rol Pope. Cero preguntas de uso de emergencia; mecanismo técnico, contratos/actor, persistencia y pruebas pendientes. T53/T54 no completadas, sin cambios de producto ni Windows.
+
 - **2026-10-07:** el mantenedor elige A para alcance de emergencia: Windows completo bajo la cuenta administradora existente para reparar Pope, red, controladores u otros fallos. ADR-0027 y spec/plan/T53/T54 alineados; entorno separado del cliente, WebView2 restringido y cobro en el nodo. Queda una decisión de emergencia: identificación/auditoría; ruta, aislamiento y salida por diseñar/probar. Sin implementar tareas nativas ni modificar Windows.
 
 - **2026-10-07:** el mantenedor elige B para permisos de emergencia: administrador y encargado pueden usar las credenciales Windows presencialmente. ADR-0026 y spec/plan/T53/T54 alineados. Windows valida la cuenta local; no se presume validado un rol vigente de Pope sin nodo. Quedan dos decisiones de emergencia: alcance e identificación/auditoría; mecanismo por diseñar/probar. Sin implementar tareas nativas ni cambiar cuentas.
@@ -81,5 +83,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-07:** el mantenedor elige A para los permisos: encargado y administrador pueden revocar, revincular y autorizar continuar; dueño solo lee. ADR-0021 complementa ADR-0020, spec/plan/T34 alineados con validación por acción en el nodo y eventos con actor. Entrega de credencial, estado previo pausado y confirmación temporal pendientes; sin implementación de T34.
 
 - **2026-10-07:** el mantenedor elige A para recuperar una PC revocada: misma PC con credencial nueva, misma sesión y bloqueo sin consumo hasta autorización del encargado; la credencial anterior sigue invalidada. ADR-0020 registra el comportamiento, spec/plan/T34 alineados. Flujo separado de T12, que sigue exigiendo PC libre/sin mantenimiento. Permisos, mecanismo y confirmación temporal pendientes; sin implementación de T34.
-
-- **2026-10-07:** el mantenedor elige A para el consumo durante revocación: conservar la sesión y detener saldo/tiempo mientras el acceso esté bloqueado por revocación confirmada. No se aplica a un simple corte de red o fallo TLS. REQ-003-11, plan y T34 alineados; recuperación, permisos y confirmación temporal del bloqueo siguen pendientes. Sin cambios de código ni autorización de T34.

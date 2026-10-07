@@ -541,12 +541,17 @@ aprobada de la 002 conserva sus 19 tareas; la fase 2 sigue pendiente hasta verif
   servicio. Sin clave propia de Pope ni uso automático del secreto del agente.
   **Permisos B confirmados (2026-10-07, ADR-0026):** administrador y encargado pueden
   usar esas credenciales para emergencia presencial. No se presume verificado un rol
-  vigente de Pope sin nodo; identificar a la persona aun si comparten cuenta Windows.
+  vigente de Pope sin nodo. La atribución por cuenta Windows sigue ADR-0028.
   **Alcance A confirmado (2026-10-07, ADR-0027):** Windows completo bajo esa identidad
   administradora para reparar Pope, red, controladores u otros fallos del equipo,
   separado del cliente y sin elevar WebView2. El nodo conserva sesiones y cobro.
-  Identificación/auditoría, aislamiento, salida y comprobación de intervención local
-  siguen abiertos; aprobar y probar la ruta administrativa independiente del servicio
+  **Auditoría B confirmada (2026-10-07, ADR-0028):** cuenta Windows autenticada, PC y
+  entrada/salida UTC automáticas, sin pedir nombre/usuario Pope ni motivo. Guardar
+  localmente de forma durable y enviar al nodo sin duplicados cuando esté disponible.
+  Una cuenta compartida no distingue personas ni demuestra un rol Pope vigente.
+  Las reglas de uso están cerradas; captura sin agente, contratos/actor, persistencia
+  acotada, salida no observada, aislamiento y comprobación local siguen por diseñar.
+  Aprobar y probar la ruta administrativa independiente del servicio
   antes de construir. No se aprueba por esta elección el mecanismo ordinario de ADR-0018.
 - **Edición, congelador y anticheat:** falta inventario; validar con juegos reales antes
   de afirmar compatibilidad o recuperación de pantalla exclusiva.
