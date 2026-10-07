@@ -542,7 +542,10 @@ aprobada de la 002 conserva sus 19 tareas; la fase 2 sigue pendiente hasta verif
   **Permisos B confirmados (2026-10-07, ADR-0026):** administrador y encargado pueden
   usar esas credenciales para emergencia presencial. No se presume verificado un rol
   vigente de Pope sin nodo; identificar a la persona aun si comparten cuenta Windows.
-  Alcance, identificación/auditoría y comprobación de intervención local
+  **Alcance A confirmado (2026-10-07, ADR-0027):** Windows completo bajo esa identidad
+  administradora para reparar Pope, red, controladores u otros fallos del equipo,
+  separado del cliente y sin elevar WebView2. El nodo conserva sesiones y cobro.
+  Identificación/auditoría, aislamiento, salida y comprobación de intervención local
   siguen abiertos; aprobar y probar la ruta administrativa independiente del servicio
   antes de construir. No se aprueba por esta elección el mecanismo ordinario de ADR-0018.
 - **Edición, congelador y anticheat:** falta inventario; validar con juegos reales antes
