@@ -162,6 +162,8 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Aprobación explícita (mantenedor, 2026-10-08):** «apruebo y sigue con T10». ADR-0018 Aceptado; autoriza el prototipo con operaciones fijas, sin cambios de cuentas/grupos/UAC. Dividir antes de ejecutar para commits revisables; T10 solo se cierra con evidencia efectiva:
     - [x] **T10a:** infraestructura de custodia DPAPI, propietario/ACL SYSTEM, importación/reemplazo y entrada privada local. **Preparada (2026-10-08):** código aislado del prototipo; comprobación con fixture pública Unicode, blob corrupto y rechazo de custodia fuera de SYSTEM pasa en desarrollo. Configuración exige elevación antes de abrir el prompt. La ACL y el reemplazo efectivos se demostrarán en VM en T10d; no se afirma custodia instalada.
     - [ ] **T10b:** broker de prueba SYSTEM en sesión 0, token/logon y traslado a consola con operaciones fijas; sin ejecutor general.
+      - [x] **T10b1:** primitivas de token, logon/elevación y evidencia de identidad/integridad/sesión. **Preparada (2026-10-08):** lectura del token real en desarrollo: SID/logon, UAC limitado, integridad media 8192 y sesión 1; coincidencia con WindowsIdentity y comprobación independiente de elevación. La obtención del token administrativo/cliente desde SYSTEM queda para VM.
+      - [ ] **T10b2:** servicio fijo y ayudante sin GUI en consola; preparar arranque y finalización acotados.
     - [ ] **T10c:** perfil, escritorio por SID de logon y Job Object; herramientas/Explorer bajo cuenta existente, aislamiento y cierre exclusivo.
     - [ ] **T10d:** prueba en VM de credenciales inválidas, WebView2 limitado, salida, fallo/recuperación y datos/procesos previos intactos; registrar límites y revisar ADR/plan si la ruta falla.
 
