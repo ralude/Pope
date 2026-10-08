@@ -33,7 +33,7 @@ pendientes de diseño/prueba; no se declara aprobado el resto del plan.
 El nodo tendrá IP fija o reserva DHCP, configurada en la instalación. Un mantenimiento
 ya autorizado continúa sin red y permite terminar/bloquear localmente; se registra la
 salida al reconectar. El mantenedor eligió reutilizar una cuenta administradora Windows
-existente; falta revisar y verificar el mecanismo propuesto en ADR-0018.
+existente; ADR-0018 aceptado el 2026-10-08, pendiente de demostrar el mecanismo en T10.
 
 ## Componentes afectados
 
@@ -408,7 +408,7 @@ fronteras separadas para C#, con fixtures que prueban ese aislamiento.
   WebView2 ya creado. Si el selector nativo falla, revisar el diseño conservando Alt+Tab;
   no dar por compatible el mecanismo ni iniciar Explorer para resolverlo.
 
-### Alternativas de mantenimiento (identidad elegida; mecanismo en revisión)
+### Alternativas de mantenimiento (ruta de ensayo aprobada; verificación pendiente)
 
 La cuenta del personal de Pope autoriza la operación; el token y los permisos de
 Windows proceden de otra identidad local. Ninguna opción convierte la cuenta del
@@ -422,17 +422,18 @@ cliente en administradora ni ejecuta el escritorio o WebView2 como LocalSystem.
 
 **Elección del mantenedor (2026-10-04): B**, cuenta Windows existente. La opción A fue
 la recomendación inicial y se conserva solo como alternativa comparada. ADR-0018
-desarrolla B como propuesta técnica aún sin aprobar. Hay que prototipar
+desarrolla B, aceptada para ensayar el 2026-10-08. Hay que prototipar
 obtención de token elevado con UAC, aislamiento del escritorio/perfil, compatibilidad
 con las directivas del cliente y cierre de todos los procesos administrativos al salir.
 No basta con lanzar `explorer.exe` desde el usuario restringido ni con añadirlo
 temporalmente al grupo Administradores. La desinstalación conservará la cuenta y sus
 datos, y un cambio externo de contraseña necesitará reconfigurar su custodia en el agente.
 
-**Propuesta T10 preparada (2026-10-08):** ADR-0018 detalla DPAPI de máquina con ACL
+**Ruta T10 aprobada (2026-10-08):** ADR-0018 detalla DPAPI de máquina con ACL
 SYSTEM, reconfiguración local, broker de prueba, token elevado/logon, perfil/escritorio
 propios y cierre por Job Object. Solo usa APIs Windows, sin proponer nuevas dependencias.
-No está aprobada ni implementada; demostrar cada propiedad en la VM antes de integrarla.
+El mantenedor aprueba explícitamente y pide continuar T10. Demostrar cada propiedad
+en la VM antes de integrarla; la aceptación no sustituye esa prueba.
 
 ### Fondo
 

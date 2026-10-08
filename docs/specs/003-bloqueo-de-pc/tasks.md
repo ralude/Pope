@@ -1,6 +1,6 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** T01–T08 completos; pruebas Home aceptadas para cerrar T08 (mantenedor, 2026-10-08). T09–T20 autorizadas para continuación autónoma, con sus verificaciones previas. T21–T59 en Borrador.
+- **Estado:** T01–T09 completos; T10–T20 autorizadas para continuación autónoma, con sus verificaciones previas. ADR-0018 aceptado (mantenedor, 2026-10-08). T21–T59 en Borrador.
 - **Plan:** [plan.md](plan.md), autorizado hasta T20; decisiones técnicas abiertas y verificaciones previas pendientes.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
@@ -159,6 +159,11 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Verificar:** Windows completo administrativo, usuario cliente sigue limitado, salida conserva datos previos y fallo de credenciales vuelve a bloqueo; documentar mecanismo antes de integrarlo.
   - **Commit:** `test(native): valida el mantenimiento con cuenta Windows existente`.
   - **Preparación (2026-10-08):** ADR-0018 concreta una ruta candidata: DPAPI de máquina + ACL SYSTEM, broker de prueba, token/logon/perfil, escritorio propio y cierre por Job Object. VM: solo `vboxuser` habilitada, administradora con UAC activo; su token medio no demuestra cuenta cliente estándar. Sin código ni cambios de cuentas/servicios. T10 sigue abierta: revisar/aprobar el ADR Propuesto antes de construir; después demostrar la ruta, sin inferir elevación/aislamiento desde el grupo Administradores.
+  - **Aprobación explícita (mantenedor, 2026-10-08):** «apruebo y sigue con T10». ADR-0018 Aceptado; autoriza el prototipo con operaciones fijas, sin cambios de cuentas/grupos/UAC. Dividir antes de ejecutar para commits revisables; T10 solo se cierra con evidencia efectiva:
+    - [ ] **T10a:** custodia DPAPI, propietario/ACL SYSTEM y entrada privada local; comprobar reemplazo protegido y rechazo sin elevación.
+    - [ ] **T10b:** broker de prueba SYSTEM en sesión 0, token/logon y traslado a consola con operaciones fijas; sin ejecutor general.
+    - [ ] **T10c:** perfil, escritorio por SID de logon y Job Object; herramientas/Explorer bajo cuenta existente, aislamiento y cierre exclusivo.
+    - [ ] **T10d:** prueba en VM de credenciales inválidas, WebView2 limitado, salida, fallo/recuperación y datos/procesos previos intactos; registrar límites y revisar ADR/plan si la ruta falla.
 
 - [ ] **T11: Transporte cifrado del nodo**
   - **Cubre:** REQ-003-63; ADR-0017.

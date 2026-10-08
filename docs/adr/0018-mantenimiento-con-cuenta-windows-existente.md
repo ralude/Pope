@@ -1,6 +1,6 @@
 # ADR-0018: Mantenimiento con una cuenta administradora Windows existente
 
-- **Estado:** Propuesto (identidad elegida por el mantenedor; mecanismo pendiente de revisión)
+- **Estado:** Aceptado (mantenedor, 2026-10-08; mecanismo pendiente de demostrar en T10)
 - **Fecha:** 2026-10-04
 - **Relacionado:** ADR-0005, ADR-0006, ADR-0017, spec 003
 
@@ -12,10 +12,10 @@ sin escribir nada en la PC. Esa autorización del nodo no otorga por sí misma u
 administrador de Windows y no debe elevar la cuenta cliente ni el host de WebView2.
 
 Tras comparar las alternativas del plan, el mantenedor eligió **reutilizar una cuenta
-administradora Windows existente** el 2026-10-04. Falta aprobar y verificar cómo se
+administradora Windows existente** el 2026-10-04. El 2026-10-08 aprueba la ruta candidata; falta verificar cómo se
 protege su credencial y se abre y cierra el entorno administrativo.
 
-## Decisión propuesta
+## Decisión
 
 - Configurar en cada PC una cuenta local administradora ya existente, destinada al
   mantenimiento. Pope no crea otra ni modifica el grupo o los privilegios del cliente.
@@ -23,7 +23,7 @@ protege su credencial y se abre y cierra el entorno administrativo.
   No se solicitan contraseñas por chat ni se guardan en el nodo, en configuración plana,
   en argumentos de procesos, en el Shell React ni en el perfil WebView2.
 - El agente custodia el secreto con protección de Windows y ACL restringida. Antes de
-  aprobar el mecanismo, fijar almacenamiento, recuperación y sustitución de la
+  habilitar el mecanismo, verificar almacenamiento, recuperación y sustitución de la
   contraseña si el administrador la cambia fuera de Pope. Una contraseña no válida
   impide abrir mantenimiento y produce un error operativo, sin fallback a LocalSystem.
 - El nodo valida personal/rol o la orden remota y comprueba que la PC no tenga sesión
@@ -47,7 +47,7 @@ protege su credencial y se abre y cierra el entorno administrativo.
 - La desinstalación elimina únicamente los secretos y cambios propios de Pope;
   **conserva la cuenta administradora existente**, su contraseña y sus archivos.
 
-## Mecanismo propuesto para T10 (2026-10-08; pendiente de aprobación)
+## Mecanismo aprobado para ensayar en T10 (2026-10-08)
 
 - **Custodia:** blob DPAPI de máquina en `%ProgramData%\Pope\Maintenance\credential.bin`,
   con directorio/archivo sin herencia y DACL exclusiva de SYSTEM. El configurador local
@@ -84,8 +84,9 @@ protege su credencial y se abre y cierra el entorno administrativo.
   de cliente. El ensayo debe identificar esa diferencia y demostrar permisos efectivos;
   no habilitar/crear cuentas ni alterar grupos como consecuencia implícita de esta revisión.
 
-Esta propuesta concreta la ruta a ensayar; **no está aprobada ni implementada**.
-La autorización general T10–T20 no acepta por sí sola este ADR Propuesto.
+El mantenedor aprueba explícitamente esta ruta y pide continuar T10 el 2026-10-08.
+La aprobación autoriza el prototipo; **no demuestra su funcionamiento** ni habilita
+la integración antes de verificar las propiedades anteriores.
 
 ## Alternativas consideradas
 

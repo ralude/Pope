@@ -4,7 +4,7 @@
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0005, ADR-0006, ADR-0007, ADR-0009, ADR-0010
 - **Seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), aceptado por el mantenedor el 2026-10-04.
-- **Propuesta de mantenimiento:** [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md), con cuenta Windows existente elegida por el mantenedor; mecanismo pendiente de revisión.
+- **Mantenimiento:** [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md), aceptado el 2026-10-08; ruta candidata pendiente de demostrar en T10.
 - **Specs relacionadas:** 001, 002, 004
 
 **Confirmado por el mantenedor (2026-10-04):** C# para el servicio y el control nativo de
@@ -228,7 +228,7 @@ Detectadas al revisar la conexión NestJS ↔ .NET ↔ WebView2 (2026-09-25). La
 - [x] **Códigos de instalación (REQ-003-10).** **Resuelta (mantenedor, 2026-10-04): encargado y administrador pueden generarlos; un uso y caducidad de 10 min**.
 - [x] **Cierre de sesión y aplicaciones abiertas.** **Resuelta (mantenedor, 2026-10-04): cerrar los juegos y procesos del cliente sin reiniciar Windows** (REQ-003-34). La pausa los conserva. La limpieza de perfiles, credenciales guardadas y configuración sigue requiriendo coordinación con la spec 004.
 - [x] **Identidad Windows para mantenimiento.** **Resuelta (mantenedor, 2026-10-04): cuenta administradora Windows existente**, tras revisar las alternativas del plan. No se crea una cuenta nueva ni se eleva la del cliente. La propuesta técnica se documenta en ADR-0018.
-- [ ] **Mecanismo de mantenimiento elevado.** Revisar ADR-0018 y concretar custodia/recuperación de credenciales, token con UAC, perfil, escritorio o sesión Windows independiente, y cierre exclusivo de los procesos de ese mantenimiento. Una contraseña del personal de Pope no es una credencial de Windows. La elección de la cuenta no demuestra todavía que ese mecanismo funcione.
+- [ ] **Verificación del mantenimiento elevado.** ADR-0018 aceptado explícitamente por el mantenedor (2026-10-08): DPAPI/ACL SYSTEM, broker, token elevado/logon, perfil/escritorio y cierre por Job Object. T10 debe demostrar esa ruta antes de integrarla; revisar ADR/plan si falla. Una contraseña del personal de Pope no es una credencial de Windows; la aprobación del ensayo no demuestra su funcionamiento.
 - [x] **Mantenimiento sin nodo.** **Resuelta (mantenedor, 2026-10-04): mantener el modo técnico, permitir terminar y bloquear sin red, y registrar la salida al reconectar** (REQ-003-44). No autoriza entrada offline.
 - [x] **Presencia física para emergencia.** **Resuelta (mantenedor, 2026-10-07): opción A, presencia física obligatoria delante de la PC afectada**, con intervención local de una persona autorizada; no se incorpora entrada remota de emergencia. La presencia no sustituye autenticación. [ADR-0024](../../adr/0024-presencia-fisica-para-emergencia.md) registra solo esta condición; mecanismo pendiente.
 - [x] **Autenticación de emergencia.** **Resuelta (mantenedor, 2026-10-07): opción A, introducir físicamente las credenciales de la cuenta administradora local Windows existente**, validadas por Windows sin nodo ni servicio del agente. Sin clave de emergencia propia de Pope ni introducción automática del secreto custodiado. [ADR-0025](../../adr/0025-autenticacion-windows-para-emergencia.md) complementa ADR-0024; ruta administrativa pendiente de diseño y prueba.
