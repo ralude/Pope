@@ -95,7 +95,7 @@ REQ-003-02/62/63; evidencia preliminar, sin cierre de T08b ni aprobación de REQ
   T08b y el grupo T08 permanecen abiertos, sin avanzar a T09–T20.
   El mantenedor confirma que por ahora solo está disponible la VM Home.
 
-## T09/T10 · prototipos pendientes
+## T09/T10 · prototipos nativos
 
 ### T09a · herramienta preparada (2026-10-08)
 
@@ -130,6 +130,32 @@ REQ-003-02/62/63; evidencia preliminar, sin cierre de T08b ni aprobación de REQ
   Fuente reproducible en `Pope.DesktopProbe`; sin servicios ni cambios de cuenta/UAC.
   Escritorios destruidos al terminar; watchdog independiente restaura a los 120 s.
 
-T09 sigue abierta por T09c: juego exclusivo y evidencia gráfica. Las pruebas reales
-del local (juegos/anticheat/audio) y compatibilidad Pro siguen pendientes antes de
-entrega. T10 debe demostrar mantenimiento elevado, con ADR-0018 todavía Propuesto.
+### T09c · juego exclusivo verificado en VM (2026-10-08)
+
+- Paquetes portátiles oficiales: Chocolate Doom **3.1.1** + Freedoom **0.13.0**, fase 1
+  E1M1 sin monstruos ni sonido. SHA256 de los ZIP comprobados antes de extraer:
+  Chocolate `58c34c61ae954493fce5ff01fd553898240a0de25658aa97b43ac9510c49581f`,
+  Freedoom `3f9b264f3e3ce503b4fb7f6bdcb1f419d93c7b546f4df3e874dd878db9688f59`.
+- Ejecución final `game-run-20261008-152316`, **15:23:17 UTC**, salida **0**.
+  Modo inicial **1920×955**, juego **800×600** antes/después del bloqueo. Configuración
+  `fullscreen=1`, dimensiones explícitas y renderizador software: fuente 3.1.1 utiliza
+  `SDL_WINDOW_FULLSCREEN` en esta rama, frente a `FULLSCREEN_DESKTOP` sin dimensiones.
+- Alt+Tab: juego → Pope (PID 1844) → juego (1840), sin Explorer. PID del juego intacto
+  durante bloqueo y retorno; la app auxiliar se oculta tras T09b para dejar esos dos
+  participantes en el selector. Windows minimiza el juego al perder foco; restaurar
+  esa ventana conserva la partida y recupera el renderizado, sin relanzar el juego.
+- Demo Doom 1.9: **372 tics**, **196** entre marcas de bloqueo/retorno; **0** con
+  movimiento y **0** con disparos. Movimiento antes y movimiento/disparo después
+  sirven como controles positivos. Bloqueo recibe teclas/clics y Alt+Tab no alcanza
+  al juego. Informe `GamePassed=true`, `Passed=true`, `Restored=true`.
+- Evidencia local ignorada: `tmp/t09c-evidence/`, informe/demo/configuraciones/JSONL
+  y tres capturas de pantalla. Fuente reproducible `GameProbe.cs`; no se instala juego
+  ni servicio. La VM se congeló entre T09b y la transferencia; ACPI no respondió y se
+  reinició la VM aislada, recuperando Guest Control. No se atribuye una causa sin prueba.
+- El mantenedor acepta la VM para **cerrar T09 y avanzar**, conservando pruebas físicas
+  con juegos reales/anticheat en **T25/T56 antes de entrega**. Audio no probado; tampoco
+  demuestra compatibilidad del inventario Pro. T10/ADR-0018 sigue pendiente de mecanismo.
+
+Fuentes del juego: [descarga de Chocolate Doom](https://www.chocolate-doom.org/wiki/index.php/Downloads),
+[Freedoom](https://freedoom.github.io/download.html), [modo gráfico de 3.1.1](https://github.com/chocolate-doom/chocolate-doom/blob/chocolate-doom-3.1.1/src/i_video.c)
+y [formato de grabación](https://github.com/chocolate-doom/chocolate-doom/blob/chocolate-doom-3.1.1/src/doom/g_game.c).

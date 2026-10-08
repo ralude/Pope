@@ -142,7 +142,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
     - **Verificación preliminar (2026-10-08):** Guest Control recuperado; misma VM Home 22H2 x64 (19045.2965), 8192 MB y ahora 4 vCPU. Agent/ShellHost autocontenidos `--check-build` devuelven 0 sin SDK en PATH; 334 tests C# correctos, cero fallos/omitidos, con SDK portable 10.0.401/runtime 10.0.12. Informes JSON/TRX recogidos en `tmp/`; detalle en `mediciones.md`. No cierra T08b ni habilita T09–T20: faltan ambas versiones Pro.
     - **Aprobación posterior (2026-10-08):** «toma estas pruebas hechas con win 10 home como validas y seguimos con T09». Los resultados anteriores pasan a ser evidencia aceptada para T08b; T08 completa, grupo 8/59. T09 conserva sus verificaciones de escritorio, ACL, WebView2 y juego exclusivo.
 
-- [ ] **T09: Prototipo de escritorio separado y WebView2**
+- [x] **T09: Prototipo de escritorio separado y WebView2**
   - **Cubre:** REQ-003-30, REQ-003-33; REQ-002-04, REQ-002-05; CA-002-02.
   - **Hacer:** probar en VM/PC aislada creación, ACL y cambio de escritorio con host estándar y WebView2; documentar cada P/Invoke y el reparto de hilos/procesos.
   - **Verificar:** juego exclusivo sin entrada durante bloqueo, vuelta al escritorio de uso, apps intactas y ninguna ventana WebView2 trasladada después de crearla; registrar evidencia.
@@ -151,7 +151,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **División previa (2026-10-08):** herramienta de prueba separada del host de producto, usando el SDK ya justificado; sin cambios permanentes de Windows. Mantener commits revisables y marcar T09 solo tras sus verificaciones.
     - [x] **T09a:** APIs Win32 comentadas y ventanas del prototipo, una instancia nueva por escritorio; publicación autocontenida y comprobaciones de compilación. **Implementada (2026-10-08):** `Pope.DesktopProbe` separado del producto, SDK WebView2 existente y DACL explícita del usuario/SYSTEM; token elevado rechazado. Build sin avisos, publicación autocontenida y `--check-build` correctos. La coordinación y prueba efectiva de Windows corresponden a T09b; T09 permanece abierta.
     - [x] **T09b:** coordinación con retorno acotado, comprobaciones de ACL/entrada/Alt+Tab/continuidad y ejecución registrada en VM. **Verificada (2026-10-08):** Home 22H2, WebView2 154.0.4258.62; dos ejecuciones correctas, última `run-20261008-145830`, salida 0. DACL usuario/SYSTEM, ausencia de Explorer, teclas/clics aislados, latidos y PID conservados; Alt+Tab ida/vuelta y escritorio original restaurado. Detalle en `mediciones.md`; juego exclusivo pendiente en T09c.
-    - [ ] **T09c:** juego en pantalla completa exclusiva, retorno con juego intacto y evidencia del modo gráfico; revisión del resultado antes de tareas dependientes.
+    - [x] **T09c:** juego en pantalla completa exclusiva, retorno con juego intacto y evidencia del modo gráfico. **Verificada en VM y aceptada (mantenedor, 2026-10-08):** Freedoom 0.13.0 + Chocolate Doom 3.1.1, modo SDL exclusivo 800×600 frente a 1920×955 inicial; Alt+Tab ida/vuelta sin Explorer, PID/partida conservados y 196 tics de demo sin movimiento/disparos durante bloqueo. Controles positivos antes/después; salida 0 y escritorio original restaurado. El mantenedor acepta la VM para cerrar el prototipo T09 y avanzar; juegos reales/anticheat siguen obligatorios en T25/T56 antes de entrega, sin declarar esa compatibilidad. Detalle en `mediciones.md`.
 
 - [ ] **T10: Prototipo de mantenimiento elevado**
   - **Cubre:** REQ-003-40, REQ-003-43; ADR-0018.

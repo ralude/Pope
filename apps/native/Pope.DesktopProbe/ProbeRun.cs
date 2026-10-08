@@ -8,7 +8,7 @@ namespace Pope.DesktopProbe;
 
 internal static class ProbeRun
 {
-    internal static int Run(string directory)
+    internal static int Run(string directory, string? game = null)
     {
         Directory.CreateDirectory(directory);
         if (Directory.EnumerateFileSystemEntries(directory).Any()) throw new ArgumentException("Usa una carpeta de resultados nueva");
@@ -90,6 +90,7 @@ internal static class ProbeRun
             }
             report["AppsPreserved"] = true;
             Require((bool)report["AltTabWithoutExplorer"]!, "Alt+Tab no alterna entre Pope y app sin Explorer");
+            if (game != null) GameProbe.Run(use, locked, directory, game, children, report);
             report["Passed"] = true;
         }
         catch (Exception error) { report["Passed"] = false; report["Error"] = error.ToString(); }
@@ -153,7 +154,7 @@ internal static class ProbeRun
         throw new TimeoutException("WebView2 no estuvo listo en 40 s");
     }
 
-    private static JsonElement Read(string directory, string role)
+    internal static JsonElement Read(string directory, string role)
     {
         // Solo lee registros terminados: el escritor puede estar añadiendo el siguiente.
         for (var attempt = 0; attempt < 10; attempt++)
@@ -171,14 +172,14 @@ internal static class ProbeRun
         }
         throw new IOException("No hay un registro completo de la ventana de prueba");
     }
-    private static void Switch(nint desktop) { if (!DesktopNative.SwitchDesktop(desktop)) throw new Win32Exception(); }
-    private static void Require(bool condition, string error) { if (!condition) throw new InvalidOperationException(error); }
-    private static void Capture(nint desktop, string directory, string role) => ProbeInput.On(desktop, () =>
+    internal static void Switch(nint desktop) { if (!DesktopNative.SwitchDesktop(desktop)) throw new Win32Exception(); }
+    internal static void Require(bool condition, string error) { if (!condition) throw new InvalidOperationException(error); }
+    internal static void Capture(nint desktop, string directory, string role) => ProbeInput.On(desktop, () =>
     {
-        var bounds = Screen.PrimaryScreen!.Bounds;
-        using var bitmap = new Bitmap(bounds.Width, bounds.Height);
+        var size = DesktopNative.Resolution();
+        using var bitmap = new Bitmap(size.Width, size.Height);
         using var graphics = Graphics.FromImage(bitmap);
-        graphics.CopyFromScreen(bounds.Location, Point.Empty, bounds.Size);
+        graphics.CopyFromScreen(Point.Empty, Point.Empty, size);
         bitmap.Save(Path.Combine(directory, role + "-desktop.png"), ImageFormat.Png);
     });
 }

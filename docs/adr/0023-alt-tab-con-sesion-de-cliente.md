@@ -25,6 +25,12 @@ con juegos exclusivos/anticheat. No se da por disponible el selector nativo ante
 esa prueba ni se inicia Explorer como solución. Si falla, revisar el diseño del
 selector manteniendo este comportamiento antes de integrar tareas dependientes.
 
+**Alcance posterior aprobado (mantenedor, 2026-10-08):** acepta Freedoom/Chocolate Doom
+en la VM Home para cerrar el prototipo T09 y avanzar. Se verificaron modo exclusivo,
+ida/vuelta sin Explorer, entrada aislada y retorno con partida/PID intactos. Los juegos
+reales/anticheat se mantienen como requisito físico de T25/T56 antes de entregar;
+este resultado no demuestra su compatibilidad. No cambia el comportamiento decidido.
+
 ## Alternativas consideradas
 
 - **Ctrl+Shift+P o F10 como acceso principal:** exigen aprender otro atajo; el

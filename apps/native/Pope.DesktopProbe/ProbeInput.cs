@@ -26,6 +26,7 @@ internal static class ProbeInput
 
     internal static void Focus(nint window)
     {
+        if (IsIconic(window)) ShowWindow(window, 9);
         if (!SetForegroundWindow(window) && GetForegroundWindow() != window)
         {
             // El bloqueo de foco de Windows exige entrada previa para activar una app.
@@ -66,7 +67,19 @@ internal static class ProbeInput
         Thread.Sleep(700);
     }
 
-    private static Input Key(ushort key, uint flags = 0) => new() { Type = 1, Data = new() { Keyboard = new() { Key = key, Flags = flags } } };
+    internal static void Hold(ushort key, int milliseconds, bool click = false)
+    {
+        Send(click ? [Key(key), new() { Type = 0, Data = new() { Mouse = new() { Flags = 2 } } }] : [Key(key)]);
+        try { Thread.Sleep(milliseconds); }
+        finally { Send(click ? [Key(key, 2), new() { Type = 0, Data = new() { Mouse = new() { Flags = 4 } } }] : [Key(key, 2)]); }
+    }
+
+    // Oculta solo la ventana auxiliar ya verificada; deja juego/Pope en el selector.
+    [DllImport("user32.dll")]
+    internal static extern bool ShowWindow(nint window, int command);
+
+    // SDL identifica teclas por scan code; un VK sin scan no prueba entrada del juego.
+    private static Input Key(ushort key, uint flags = 0) => new() { Type = 1, Data = new() { Keyboard = new() { Scan = (ushort)MapVirtualKey(key, 0), Flags = flags | 8 } } };
     private static void Send(Input[] input)
     {
         if (SendInput((uint)input.Length, input, Marshal.SizeOf<Input>()) != input.Length) throw new Win32Exception("No se inyectó toda la entrada de prueba");
@@ -84,6 +97,13 @@ internal static class ProbeInput
     private struct ClientRect { internal int Left, Top, Right, Bottom; }
     [StructLayout(LayoutKind.Sequential)]
     private struct CursorPoint { internal int X, Y; }
+
+    // Traduce las teclas internas del ensayo a códigos físicos para SendInput/SDL.
+    [DllImport("user32.dll", EntryPoint = "MapVirtualKeyW")]
+    private static extern uint MapVirtualKey(uint key, uint mapping);
+    // Detecta minimización: enfocar una ventana exclusiva no basta para restaurarla.
+    [DllImport("user32.dll")]
+    private static extern bool IsIconic(nint window);
 
     // Mide el área cliente real; el centro del monitor no garantiza acertar en la app.
     [DllImport("user32.dll", SetLastError = true)]

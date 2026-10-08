@@ -475,6 +475,11 @@ Windows 10 Home 22H2 para cerrar T08b/T08 y continuar T09. Sustituye el gate Pro
 a T09 descrito en este apartado. REQ-003-62 y el inventario conservan Pro como objetivo;
 pruebas Pro pendientes antes de entregar al local, sin inferir su resultado desde Home.
 
+**Cierre del prototipo T09 (mantenedor, 2026-10-08):** acepta el ensayo de Freedoom/
+Chocolate Doom exclusivo en VM Home para cerrar T09 y avanzar. Se conserva validación
+física de juegos reales/anticheat en T25/T56 antes de entrega, sin afirmar compatibilidad
+desde la VM. Complementa la secuencia del entorno aislado y ADR-0023.
+
 - SDK **10.0.401** fijado con `global.json`, solo parches estables de esa banda; framework
   `net10.0-windows`, ejecutables autocontenidos `win-x64`, según ADR-0006. El SDK de esta
   sesión se extrae bajo `tmp/`, sin instalación global ni cambios de servicio/cuentas.

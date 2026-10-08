@@ -29,9 +29,10 @@ internal static class DesktopNative
         finally { Marshal.FreeHGlobal(pointer); }
     }
 
-    internal static Process Start(string desktop, params string[] arguments)
+    internal static Process Start(string desktop, params string[] arguments) => StartExternal(desktop, Environment.ProcessPath!, arguments);
+
+    internal static Process StartExternal(string desktop, string executable, params string[] arguments)
     {
-        var executable = Environment.ProcessPath!;
         var command = new StringBuilder(string.Join(" ", new[] { executable }.Concat(arguments).Select(Quote)));
         var startup = new StartupInfo { Size = Marshal.SizeOf<StartupInfo>(), Desktop = $"winsta0\\{desktop}" };
         // WebView2 crea sus propios procesos: heredar un único escritorio permite que
@@ -89,6 +90,11 @@ internal static class DesktopNative
         }, 0)) throw new Win32Exception();
         return found;
     }
+
+    internal static Size Resolution() => new(GetSystemMetrics(0), GetSystemMetrics(1));
+    // Consulta el modo visible efectivo, para distinguir pantalla exclusiva de F11.
+    [DllImport("user32.dll")]
+    private static extern int GetSystemMetrics(int index);
 
     private delegate bool WindowCallback(nint window, nint parameter);
     // Enumera ventanas del escritorio concreto para comprobar ausencia real de Explorer.

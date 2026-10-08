@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-08 · T08 completa; T09b verificada en VM, juego exclusivo T09c pendiente
+**Última actualización:** 2026-10-08 · T09 completa y aceptada con VM; siguiente T10, mecanismo elevado pendiente
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T08 completos; T09–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T09c: probar juego exclusivo y retorno intacto. T09a/T09b completas; escritorio/WebView2/entrada/Alt+Tab verificados en VM. Home aceptado para T08; Pro pendiente antes de entrega |
-| **Progreso** | Spec 003: 8 / 59 grupos; T01–T08 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación T09–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09b demuestra escritorio separado, ACL, WebView2, entrada y retorno con aplicaciones intactas en VM; juego exclusivo T09c pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 completos; T10–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
+| **Siguiente tarea** | T10: revisar y aprobar el mecanismo de mantenimiento elevado (ADR-0018 Propuesto), después probarlo en la VM. T09 cerrada con aprobación explícita; juegos reales/anticheat pendientes en T25/T56 |
+| **Progreso** | Spec 003: 9 / 59 grupos; T01–T09 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación T09–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 requiere resolver ADR-0018 Propuesto antes de construir. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
 
@@ -53,7 +53,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T08 completos; T09–T20 autorizadas; compatibilidad Pro pendiente antes de entrega; T21–T59 Borrador | 8 / 59 |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T09 completos; T10–T20 autorizadas; compatibilidad Pro pendiente antes de entrega; T21–T59 Borrador | 9 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -63,6 +63,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-08:** T09c y grupo T09 completos con aprobación explícita de la VM por el mantenedor. Freedoom 0.13.0/Chocolate Doom 3.1.1, modo exclusivo 800x600 frente a 1920x955, Alt+Tab juego/Pope sin Explorer, PID/partida conservados. Demo: 196 tics bloqueados, cero movimiento/disparos y controles positivos antes/después; salida 0 y escritorio original restaurado. Capturas/informe/demo en tmp/t09c-evidence. Juegos reales/anticheat conservados en T25/T56 antes de entrega, sin afirmar compatibilidad Pro/audio. Grupo 9/59; siguiente T10, ADR-0018 Propuesto y mecanismo elevado pendientes.
 
 - **2026-10-08:** T09b verificada en VM Home: WebView2 en uso/bloqueo sin elevación, DACL usuario/SYSTEM, sin Explorer en escritorios temporales; Alt+Tab ida/vuelta, teclas/clics aislados, latidos/PID conservados y retorno original correcto. Dos ejecuciones, final 14:58:30 UTC, salida 0; JSONL/PNG/informe recogidos en tmp/t09b-evidence. Herencia de un único handle permite inicializar WebView2. Sin cambios permanentes de Windows. T09c/juego exclusivo pendiente; grupo sigue 8/59.
 
@@ -81,5 +83,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-07:** T07b2 y grupo T07 completos: 333 fixtures compartidos, incluidos recorte Unicode, contraseña intacta, longitudes por puntos de código, límites numéricos, UUIDv7 y UTC. Contratos JSON reproducibles con comprobación de diferencias; la verificación C# queda en T08. Contratos y datos 7/59; siguiente T08 todavía Borrador.
 
 - **2026-10-07:** T07b1 completa: fixtures con resultados esperados explícitos para los 19 contratos. Zod y Ajv comprueban los mismos JSON exportados, sin coerción ni mutación; órdenes/acuses/salida y progreso respetan la frontera del Shell. Matriz Unicode y límites adicionales en T07b2; todavía 6/59.
-
-- **2026-10-07:** T07a completa: 19 contratos versionados v1/v2/puente y normalización explícita de usuario con 25 caracteres ECMAScript, sin tocar password. Build comprueba diferencias con los JSON revisables y copia a dist; conserva rutas v1. Ajv/formatos solo para tests; cuatro pruebas de exportación/recorte y 312 tests shared en verde. T07b fixtures pendiente; grupo sigue 6/59, sin tareas nativas.

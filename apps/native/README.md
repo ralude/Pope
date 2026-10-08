@@ -1,10 +1,10 @@
-# Cliente Windows · base de T08
+# Cliente Windows · base y prototipos
 
 Servicio `Pope.Agent`, host WinForms `Pope.ShellHost` y tests de compatibilidad con los
 contratos Zod exportados. REQ-003-02/60/62/63; ADR-0002/0006/0017/0019.
 
-**Estado:** T08 completa; pruebas Home aceptadas por el mantenedor el 2026-10-08 para
-continuar T09. Compatibilidad Pro pendiente antes de entregar al local. No hay bloqueo,
+**Estado:** T08/T09 completas; pruebas Home y prototipo del juego aceptados por el
+mantenedor el 2026-10-08. Compatibilidad Pro pendiente antes de entregar al local. No hay bloqueo,
 conexión, puente ni servicio operativos.
 El inicio ordinario de ambos ejecutables devuelve un error deliberado hasta sus tareas
 de implementación; `--check-build` solo comprueba que arranca el artefacto. No usar estos
@@ -71,8 +71,16 @@ con `pnpm --filter @pope/native publish:probe`; salida en `apps/native/dist/prob
 `--check-build` verifica el arranque sin abrir ventanas. En una VM de pruebas, ejecutar
 `--run-on-vm <carpeta absoluta nueva>`: crea escritorios temporales, comprueba entrada,
 Alt+Tab y continuidad, escribe JSONL/PNG/informe y restaura el escritorio inicial.
-Hay recuperación independiente a los 120 s y ventanas acotadas a 180 s. T09b pasa
-en Home; el juego exclusivo sigue pendiente en T09c. No ejecutar en Windows cotidiano.
+Hay recuperación independiente a los 120 s y ventanas acotadas a 180 s. T09 pasa
+en Home y el mantenedor acepta la VM para el prototipo. No ejecutar en Windows cotidiano.
+
+Para el ensayo del juego: `--game-on-vm <carpeta absoluta nueva> <carpeta del juego>`.
+La segunda carpeta contiene `chocolate/chocolate-doom.exe` (3.1.1) y
+`data/freedoom-0.13.0/freedoom1.wad`, extraídos de los ZIP oficiales. No se incluyen
+en Git. El prototipo crea sus configuraciones/grabación en la carpeta de resultados,
+solicita modo exclusivo 800×600 con renderizador software, verifica Alt+Tab/PID/entrada
+y analiza los comandos reales de la demo guardada. Restaura ventanas minimizadas;
+SDL necesita scan codes y `default.cfg` conserva códigos DOS. Audio no probado.
 
 Cada ventana WebView2 se crea en el escritorio asignado al nacer el proceso, en su hilo
 STA y con perfil propio. Nunca se mueve entre escritorios. Las ventanas registran PID,
