@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+  <!-- Reutiliza el SDK WebView2 fijado en T08; herramienta aislada de T09. -->
+  <ItemGroup>
+    <ProjectReference Include="../Pope.ShellHost/Pope.ShellHost.csproj" />
+  </ItemGroup>
+  <!-- WebView2 agrega WPF también al consumidor transitivo; solo usamos WinForms. -->
+  <Target Name="RemoveUnusedWpfReference" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.Filename)' == 'Microsoft.Web.WebView2.Wpf'" />
+    </ItemGroup>
+  </Target>
+</Project>

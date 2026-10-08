@@ -7,7 +7,8 @@
     "lint": "dotnet format Pope.slnx --verify-no-changes --no-restore",
     "test": "dotnet test Pope.slnx -c Release -p:RestoreLockedMode=true",
     "publish:agent": "dotnet publish Pope.Agent -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -o dist/agent",
-    "publish:host": "dotnet publish Pope.ShellHost -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -o dist/host"
+    "publish:host": "dotnet publish Pope.ShellHost -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -o dist/host",
+    "publish:probe": "dotnet publish Pope.DesktopProbe -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -o dist/probe"
   },
   "devDependencies": {
     "@pope/shared": "workspace:*"

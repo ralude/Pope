@@ -63,6 +63,21 @@ dotnet test Pope.slnx -c Release --no-build --no-restore
 
 ## Contratos y límites de la evidencia
 
+### Prototipo T09
+
+`Pope.DesktopProbe` es una herramienta de prueba separada del servicio/host de producto.
+Reutiliza WinForms y el SDK WebView2 fijado, sin paquetes nuevos. Publicar desde la raíz
+con `pnpm --filter @pope/native publish:probe`; salida en `apps/native/dist/probe/`.
+`--check-build` verifica el arranque sin abrir ventanas. T09a prepara las APIs y ventanas;
+la coordinación y ejecución aislada en VM corresponden a T09b.
+
+Cada ventana WebView2 se crea en el escritorio asignado al nacer el proceso, en su hilo
+STA y con perfil propio. Nunca se mueve entre escritorios. Las ventanas registran PID,
+escritorio inicial/actual, elevación, latidos y contadores de entrada; capturan WebView2
+para comprobar el renderizado. Rechazan tokens elevados y tienen duración acotada.
+La DACL del prototipo solo permite al usuario actual y SYSTEM; no aísla procesos de la
+misma identidad ni sustituye la lista blanca o el puente de producción.
+
 Los tests copian los JSON actuales de `packages/shared/protocol`, no una segunda
 definición de reglas. JsonSchema.Net se usa solo en tests, con formatos obligatorios y
 draft 2020-12. Los 333 fixtures cubren 19 contratos v1/v2 y casos inválidos de seguridad;

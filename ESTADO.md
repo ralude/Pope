@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-08 · T08 completa con pruebas Home aceptadas; siguiente T09
+**Última actualización:** 2026-10-08 · T08 completa; T09a preparada, coordinación/pruebas T09b pendientes
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T08 completos; T09–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T09: prototipo de escritorio separado y WebView2 en la VM. Pruebas Home aceptadas por el mantenedor para cerrar T08b/T08; Pro pendiente antes de la entrega al local |
+| **Siguiente tarea** | T09b: coordinar y ejecutar el prototipo de escritorio separado/WebView2 en la VM. T09a preparada; T09c exige juego exclusivo. Home aceptado para T08; Pro pendiente antes de entrega |
 | **Progreso** | Spec 003: 8 / 59 grupos; T01–T08 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación T09–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 debe demostrar escritorio separado, ACL, WebView2, entrada y retorno con aplicaciones intactas; juego exclusivo pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
@@ -64,6 +64,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-08:** T09a preparada: herramienta aislada Pope.DesktopProbe, con APIs Win32 comentadas, DACL explícita, ventanas STA/WebView2 por escritorio y rechazo de token elevado. Build sin avisos y publicación autocontenida/arranque de comprobación correctos en desarrollo. Consulta de VM confirma sesión 1 interactiva y WebView2 154.0.4258.62 instalado. T09b coordinará y verificará escritorios/entrada/retorno; T09c probará juego exclusivo. T09 sigue abierta, grupo 8/59; sin cambios permanentes de Windows.
+
 - **2026-10-08:** el mantenedor acepta las pruebas realizadas en Windows 10 Home para cerrar T08b/T08 y continuar T09. Spec/plan/tasks alineados; grupo 8/59. La aprobación sustituye el gate Pro previo a T09, sin declarar probados los Windows Pro ni cumplido REQ-003-62 para el inventario. Pro sigue pendiente antes de la entrega al local. T09 conserva la verificación del escritorio separado, WebView2, ACL, retorno y juego exclusivo.
 
 - **2026-10-08:** el mantenedor informa de que la VM vuelve a estar disponible. Guest Control autenticado funciona; VirtualBox/Guest Additions 7.2.20, Windows 10 Home 22H2 x64 (19045.2965), 8192 MB y ahora 4 vCPU. Ejecutados los artefactos preparados con hashes comprobados: Agent/ShellHost `--check-build` devuelven 0 antes de extraer el SDK portable, sin .NET en PATH; los 334 tests C# pasan, cero fallos/omitidos, con SDK 10.0.401/runtime 10.0.12. Informes JSON/TRX recogidos en `tmp/`, sin instalar servicios ni modificar cuentas, shell, UAC o escritorios. Home conserva alcance preliminar; T08b/T08 abiertas y T09–T20 pendientes de la verificación Pro. Detalle en `mediciones.md`.
@@ -81,5 +83,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-07:** T07a completa: 19 contratos versionados v1/v2/puente y normalización explícita de usuario con 25 caracteres ECMAScript, sin tocar password. Build comprueba diferencias con los JSON revisables y copia a dist; conserva rutas v1. Ajv/formatos solo para tests; cuatro pruebas de exportación/recorte y 312 tests shared en verde. T07b fixtures pendiente; grupo sigue 6/59, sin tareas nativas.
 
 - **2026-10-07:** inventario confirmado por el mantenedor: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2; ninguna usa Deep Freeze ni otro congelador. Spec/plan/tasks alineados, sin afirmar compatibilidad nativa. Cerradas las decisiones de uso de emergencia, el mantenedor pide seguir las tareas; se retoma T07 ya autorizado. T08–T59 siguen en Borrador.
-
-- **2026-10-07:** el mantenedor elige B para auditoría de emergencia: cuenta Windows autenticada, PC y entrada/salida UTC automáticas, sin nombre/usuario Pope ni motivo. Registro durable local y envío idempotente al nodo al volver. ADR-0028 y spec/plan/T53/T54 alineados; cuenta compartida no identifica persona ni valida rol Pope. Cero preguntas de uso de emergencia; mecanismo técnico, contratos/actor, persistencia y pruebas pendientes. T53/T54 no completadas, sin cambios de producto ni Windows.

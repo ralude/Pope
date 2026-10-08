@@ -148,6 +148,10 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Verificar:** juego exclusivo sin entrada durante bloqueo, vuelta al escritorio de uso, apps intactas y ninguna ventana WebView2 trasladada después de crearla; registrar evidencia.
   - **Commit:** `test(native): valida el escritorio separado con WebView2`.
   - **Acceso confirmado (2026-10-07, ADR-0023):** probar Pope seleccionable por Alt+Tab en el escritorio de uso sin Explorer, sin mover WebView2 ya creado. Atajo habilitado con sesión no permite llegar al juego desde pausa/revocación.
+  - **División previa (2026-10-08):** herramienta de prueba separada del host de producto, usando el SDK ya justificado; sin cambios permanentes de Windows. Mantener commits revisables y marcar T09 solo tras sus verificaciones.
+    - [x] **T09a:** APIs Win32 comentadas y ventanas del prototipo, una instancia nueva por escritorio; publicación autocontenida y comprobaciones de compilación. **Implementada (2026-10-08):** `Pope.DesktopProbe` separado del producto, SDK WebView2 existente y DACL explícita del usuario/SYSTEM; token elevado rechazado. Build sin avisos, publicación autocontenida y `--check-build` correctos. La coordinación y prueba efectiva de Windows corresponden a T09b; T09 permanece abierta.
+    - [ ] **T09b:** coordinación con retorno acotado, comprobaciones de ACL/entrada/Alt+Tab/continuidad y ejecución registrada en VM.
+    - [ ] **T09c:** juego en pantalla completa exclusiva, retorno con juego intacto y evidencia del modo gráfico; revisión del resultado antes de tareas dependientes.
 
 - [ ] **T10: Prototipo de mantenimiento elevado**
   - **Cubre:** REQ-003-40, REQ-003-43; ADR-0018.

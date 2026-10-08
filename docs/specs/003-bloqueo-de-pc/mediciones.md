@@ -97,6 +97,20 @@ REQ-003-02/62/63; evidencia preliminar, sin cierre de T08b ni aprobación de REQ
 
 ## T09/T10 · prototipos pendientes
 
+### T09a · herramienta preparada (2026-10-08)
+
+- `Pope.DesktopProbe`: proceso independiente del producto, WinForms y WebView2 ya
+  fijados, sin nuevas dependencias externas. Las llamadas Win32 llevan comentarios.
+- Creación temporal con DACL explícita; procesos con `STARTUPINFO.lpDesktop` desde el
+  arranque, antes de crear ventanas. Una instancia STA y perfil WebView2 por escritorio.
+  Token elevado rechazado; evidencia de escritorio/PID/entrada/latidos y captura PNG.
+- Build Release de la solución: **0 avisos y 0 errores**. Publicación autocontenida
+  `win-x64` y `--check-build` correctos en desarrollo, sin mostrar ventanas allí.
+- Consulta de Guest Control en VM: proceso en **sesión 1 interactiva**, mismo usuario
+  que Explorer; runtime WebView2 **154.0.4258.62** ya instalado. No se instala runtime.
+- No se han ejecutado todavía cambios de escritorio ni dado por comprobadas ACL,
+  aislamiento, Alt+Tab o juego exclusivo; T09b/T09c y el grupo T09 siguen abiertos.
+
 No se han creado/cambiado escritorios, instalado servicios, modificado UAC ni probado
 credenciales de mantenimiento Windows. La VM Home vuelve a estar accesible, pero la
 compatibilidad Pro sigue pendiente antes de la entrega; el mantenedor autoriza T09

@@ -2,4 +2,5 @@
   <Project Path="Pope.Agent/Pope.Agent.csproj" />
   <Project Path="Pope.ShellHost/Pope.ShellHost.csproj" />
   <Project Path="Pope.Native.Tests/Pope.Native.Tests.csproj" />
+  <Project Path="Pope.DesktopProbe/Pope.DesktopProbe.csproj" />
 </Solution>
