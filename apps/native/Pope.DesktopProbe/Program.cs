@@ -6,6 +6,8 @@ internal static class Program
     private static int Main(string[] args)
     {
         if (args is ["--check-build"]) { Console.WriteLine("Prototipo aislado T09 · REQ-003-33"); return 0; }
+        if (args is ["--credential-check"]) return ProbeCredential.Check();
+        if (args is ["--configure-maintenance", var id]) return ProbeCredential.Configure(id);
         if (args is ["--run-on-vm", var output] && Path.IsPathFullyQualified(output)) return ProbeRun.Run(output);
         if (args is ["--game-on-vm", var gameOutput, var game] && Path.IsPathFullyQualified(gameOutput) && Path.IsPathFullyQualified(game))
             return ProbeRun.Run(gameOutput, game);
