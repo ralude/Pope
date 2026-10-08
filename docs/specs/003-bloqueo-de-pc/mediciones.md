@@ -25,7 +25,7 @@ REQ-003-02/60/62/63; ADR-0002/0006/0017/0019.
 
 | Entorno exigido | Evidencia | Estado |
 |---|---|---|
-| Windows 10 Pro 22H2 x64 | Build exacto de Windows, publicación autocontenida, fixtures, arranque de artefactos | Pendiente: el mantenedor instalará pronto la VM en VirtualBox |
+| Windows 10 Pro 22H2 x64 | Build exacto de Windows, publicación autocontenida, fixtures, arranque de artefactos | Pendiente: la VM disponible es Home, autorizada solo para comprobaciones preliminares |
 | Windows 11 Pro 25H2 x64 | Build exacto de Windows, publicación autocontenida, fixtures, arranque de artefactos | Pendiente: acceso a PC/VM de esa versión |
 
 La matriz oficial de [.NET 10](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)
@@ -33,10 +33,37 @@ no incluye Windows 10 Pro 22H2. El build en desarrollo no demuestra cumplimiento
 REQ-003-62; registrar resultado real sin confundir compatibilidad funcional con soporte
 del fabricante. No cambiar framework/inventario/ADR sin resolver cualquier fallo.
 
+### VM Home · preparación y acceso (2026-10-07)
+
+- VirtualBox **7.2.20 r175154**, VM «22h2 pope», UUID
+  `954b5530-1c41-4970-810f-c35d5aa48b05`, Guest Additions de la misma versión.
+  Configuración observada: **8192 MB**, **2 vCPU**, red NAT.
+- Guest Control permitió lecturas autenticadas iniciales: registro `ProductName=Windows
+  10 Home`, `EditionID=Core`, `DisplayVersion=22H2`, build **19045.2965**; CIM confirma
+  `Microsoft Windows 10 Home`, SKU **101**, arquitectura x64. Sin `dotnet` en PATH.
+- El mantenedor autoriza **Home solo para pruebas preliminares**; no es evidencia de
+  cumplimiento de REQ-003-62 en las ediciones Pro del inventario.
+- Preparados en `tmp/` (ignorado): publicaciones autocontenidas, los tests compilados y
+  fixtures T07, manifest SHA256, SDK portable con SHA512 y runner. El runner comprobará
+  primero el arranque `--check-build` sin SDK y después los 334 tests del protocolo.
+  No instala servicios ni SDK global; no modifica cuentas, UAC o escritorios.
+- **No se han ejecutado esos artefactos ni los tests dentro de la VM.** Los intentos de
+  crear/copiar archivos y abrir procesos no iniciaron sesión de Guest Control
+  (`starting`/`VERR_DUPLICATE`). La captura muestra CPU al 100%; el log de VirtualBox
+  registra latidos intermitentes y retrasos de ejecución.
+- Recuperación intentada: snapshot en vivo detenido al guardar estado, cancelado por
+  `IProgress.Cancel()` y vuelta a `running`; **ningún snapshot completado**. El reinicio
+  normal mediante Guest Additions falla con `VERR_DUPLICATE`. La solicitud ACPI de apagado
+  se acepta, pero la VM sigue `running` en la comprobación posterior. Sin reset forzado.
+- Siguiente paso: recuperar Windows/Guest Additions y ejecutar el paquete preparado.
+  La credencial se conserva solo en un archivo ignorado con ACL restringida; los comandos
+  usan `--passwordfile`, sin imprimirla ni incorporarla al repositorio.
+
 ## T09/T10 · prototipos pendientes
 
 No se han creado/cambiado escritorios, instalado servicios, modificado UAC ni probado
-credenciales Windows. La VM anunciada aún no está disponible. T09 requiere también PC
+credenciales de mantenimiento Windows. La VM Home disponible tiene el bloqueo de acceso
+descrito arriba. T09 requiere también PC
 real con juego exclusivo, monitores/audio/versiones registrados, ida/vuelta por Alt+Tab
 sin Explorer y apps intactas. T10 debe demostrar token elevado, perfil, aislamiento y
 salida exclusiva de mantenimiento, con ADR-0018 todavía Propuesto. Las verificaciones

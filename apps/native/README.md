@@ -78,5 +78,6 @@ T08a comprueba build/tests/publicación en desarrollo. No demuestra consumo de R
 aislamiento, juego exclusivo, audio, recuperación ni compatibilidad de las PCs del local.
 La [matriz oficial .NET 10](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)
 incluye Windows 11 25H2 y no Windows 10 Pro 22H2. T08b debe registrar la ejecución real
-en ambos Windows; la VM Windows 10 aún está pendiente de instalar. Ver
+en ambos Windows Pro; la VM disponible es Windows 10 Home 22H2, autorizada solo para
+pruebas preliminares, con 8 GB y 2 vCPU. Ver
 [mediciones de la spec](../../docs/specs/003-bloqueo-de-pc/mediciones.md).

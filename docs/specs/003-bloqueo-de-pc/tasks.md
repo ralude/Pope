@@ -18,8 +18,9 @@ El bloqueo de contrato de T07 queda resuelto; el progreso se registra en sus sub
 **Autorización posterior (mantenedor, 2026-10-07):** continuar autónomamente desde T08
 hasta T20. Sustituye el límite de implementación T01–T07, conservando una tarea por
 commit, decisiones aceptadas y gates de verificación. ADR-0018 conserva su estado
-Propuesto y no se da por validado el mecanismo. El mantenedor instalará pronto la VM
-VirtualBox con Windows 10 Pro 22H2; no está disponible en esta sesión.
+Propuesto y no se da por validado el mecanismo. La VM está disponible: «22h2 pope»,
+8192 MB y 2 vCPU, pero informa Windows 10 Home 22H2. El mantenedor autoriza Home solo
+para pruebas preliminares; se mantiene la validación obligatoria del inventario Pro.
 
 **Dependencias:** ejecutar en orden, una tarea a la vez. T09/T10 deben demostrar el
 mecanismo nativo antes de integrarlo; si fallan, revisar ADR/plan y detener las tareas
@@ -137,7 +138,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Host confirmado (mantenedor, 2026-10-07):** opción A, WinForms + WebView2 con interfaz React, según ADR-0019. No equivale a haber superado la compatibilidad ni el prototipo T09.
   - **División antes de entregar (2026-10-07):** separar preparación en desarrollo y verificación del inventario; T08 se marca solo cuando ambas estén completas.
   - [x] **T08a:** solución Agent/ShellHost/tests, SDK/dependencias fijadas y justificadas, scripts del workspace, fixtures T07, build/test y publicación autocontenida `win-x64` en desarrollo. Sin instalar servicios ni modificar Windows. **Implementada (2026-10-07):** SDK 10.0.401/runtime 10.0.12, host WinForms + WebView2, locks de NuGet y scripts integrados; 334 tests C# pasan, build sin avisos y arranque de ambos artefactos comprobado en Windows 10.0.26300.0. 1 581 tests del workspace y controles obligatorios en verde. Compatibilidad real del inventario en T08b; grupo sigue 7/59.
-  - [ ] **T08b:** verificar los artefactos y los contratos en Windows 10 Pro 22H2 y Windows 11 Pro 25H2; registrar versiones/evidencia. VM Windows 10 todavía pendiente de instalar; no inferir compatibilidad del SDK ni del build en desarrollo. Antes de pasar a T09.
+  - [ ] **T08b:** verificar los artefactos y los contratos en Windows 10 Pro 22H2 y Windows 11 Pro 25H2; registrar versiones/evidencia. VM Windows 10 Home 22H2 disponible con 8192 MB y 2 vCPU; pruebas preliminares en Home autorizadas por el mantenedor (2026-10-07), sin sustituir Pro. No inferir compatibilidad del SDK ni del build en desarrollo. Antes de pasar a T09.
 
 - [ ] **T09: Prototipo de escritorio separado y WebView2**
   - **Cubre:** REQ-003-30, REQ-003-33; REQ-002-04, REQ-002-05; CA-002-02.

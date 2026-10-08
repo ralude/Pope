@@ -490,7 +490,9 @@ inventario Windows), sin añadir funcionalidad. El grupo solo se cierra al verif
 - T08b requiere los ejecutables y pruebas en Windows 10 Pro 22H2 y Windows 11 Pro 25H2.
   La matriz oficial actual de .NET no incluye el primero: compatibilidad funcional y
   soporte del fabricante son evidencias distintas. No afirmar REQ-003-62 hasta probar.
-  VM de Windows 10 anunciada por el mantenedor, aún pendiente de instalar y dar acceso.
+  VM «22h2 pope» disponible en VirtualBox 7.2.20, Guest Additions 7.2.20, 8192 MB y 2 vCPU.
+  Registro y CIM identifican Windows 10 Home 22H2 (19045.2965); el mantenedor autoriza
+  pruebas preliminares en Home, conservando la verificación obligatoria del inventario Pro.
 
 Referencias consultadas: [SDK .NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0),
 [Windows admitidos](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md),
