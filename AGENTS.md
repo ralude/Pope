@@ -134,7 +134,8 @@ El mantenedor domina TypeScript pero **no C#**:
 - **Un commit = un cambio lógico**, idealmente una tarea de `tasks.md`. Si el mensaje
   necesita un "y", probablemente son dos commits.
 - No mezcles refactor, formato y funcionalidad en el mismo commit.
-- Cada commit deja el repo compilando y con los tests en verde.
+- Cada commit deja el cambio compilando y sus comprobaciones pertinentes en verde;
+  la batería completa se ejecuta al cerrar la tarea principal, según la sección siguiente.
 - El cuerpo explica el **porqué** y referencia `Spec: 002 · REQ-002-04` o `ADR-0007`.
 - Orientativo: < 400 líneas cambiadas (sin contar lockfiles ni generados). Si es más,
   divídelo.
@@ -247,7 +248,40 @@ Shell (`apps/shell-ui`, React + Vite, sin router):
   si añade reglas (p. ej. React).
 - **Prettier:** `.prettierrc.json` en la raíz. Los `.md` no se formatean: la documentación
   se redacta a mano.
-- Antes de cada commit: `pnpm format` y luego `pnpm lint`, `pnpm typecheck` y `pnpm test`.
+
+## Validación por tarea y uso de Windows (aprobado el 2026-10-08)
+
+- **Durante la implementación:** resolver primero la incertidumbre técnica principal
+  con una prueba acotada. Compilar lo afectado y ejecutar las pruebas relacionadas con
+  el comportamiento cambiado, sin esperar al final para detectar errores.
+- **Antes de cada commit pequeño:** comprobar formato, tipos/compilación y tests de los
+  paquetes afectados y de sus dependientes cuando el cambio pueda repercutir en ellos.
+  Un cambio únicamente documental requiere revisar su contenido, enlaces y diff;
+  no obliga a repetir compilaciones, tests de producto ni pruebas manuales de Windows.
+- **Al cerrar cada tarea principal de `tasks.md`** (T10, T11, etc., no cada subdivisión):
+  ejecutar `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build`,
+  además de las pruebas de integración/Windows exigidas por esa tarea. Solo marcarla
+  completa cuando pase también su criterio funcional; tests automáticos en verde no
+  sustituyen una prueba real pendiente o fallida. Antes de entregar al local se conserva
+  la obligación de probar contra PostgreSQL real y en los equipos/versiones exigidos.
+- Usar la caché existente y evitar comprobaciones equivalentes repetidas sobre el mismo
+  código/configuración. Si una compilación ya satisface `build` y `typecheck` de un paquete
+  (actualmente el nativo), puede contarse para ambos, dejando registrado qué se ejecutó.
+  Repetir una comprobación cuando cambien sus entradas, falle o quede una duda concreta.
+- Ejecutar comprobaciones independientes en paralelo cuando no compartan escrituras
+  de compilación, recursos exclusivos o estado de la VM. Mantener secuenciales formato,
+  compilación y comprobaciones que dependan de sus resultados.
+- **Primero en el Windows 11 de desarrollo:** compilación, tests, interfaz/WebView2 y
+  comprobaciones nativas aisladas y reversibles que preserven el entorno de trabajo.
+  Registrar la versión real; el equipo declara 26H2, compilación 26300.9457, y no sustituye
+  la validación exigida en Windows 11 Pro 25H2 del local.
+- **Después en la VM:** publicar y transferir una versión estable para comprobar
+  servicios, credenciales administrativas, cambios de sesión, fallos/recuperación,
+  instalación y desinstalación. Los ensayos que cambien shell, autologin, cuentas,
+  grupos, UAC o directivas se hacen en VM/PC de pruebas desechable, dentro de la spec/ADR
+  aprobada. La estrategia no autoriza esos cambios en el Windows cotidiano.
+- Agrupar cambios antes de publicar/transferir a la VM y conservar evidencia de lo ya
+  probado. Mantener las pruebas físicas de juegos, audio y anticheat que exige la spec.
 
 ## Ante la duda
 
