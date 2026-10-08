@@ -44,21 +44,30 @@ internal sealed class ProbeBroker(string id) : ServiceBase
     internal static int Helper(string id)
     {
         var report = new Dictionary<string, object?> { ["Utc"] = DateTime.UtcNow, ["HelperSession"] = Process.GetCurrentProcess().SessionId };
+        nint fallback = 0;
         try
         {
             using var identity = WindowsIdentity.GetCurrent();
             ProbeRun.Require(identity.IsSystem && Process.GetCurrentProcess().SessionId != 0, "Ayudante SYSTEM sin GUI en consola requerido");
             foreach (var privilege in new[] { "SeTcbPrivilege", "SeAssignPrimaryTokenPrivilege", "SeIncreaseQuotaPrivilege", "SeBackupPrivilege", "SeRestorePrivilege" })
                 ProbePrivilege.Enable(privilege);
+            fallback = DesktopNative.OpenDesktop("PopeFallback" + id, 0, false, 0x100);
+            if (fallback == 0) throw new System.ComponentModel.Win32Exception();
+            ProbeRun.Switch(fallback);
             using var credential = ProbeCredential.Read(id);
             using var admin = ProbeToken.Logon(credential, ProbeToken.ConsoleSession());
             using var client = ProbeToken.ConsoleUser(ProbeToken.ConsoleSession());
             report["Admin"] = admin.State; report["Client"] = client.State;
             ProbeRun.Require(admin.State.Logon != client.State.Logon, "Se reutilizó el inicio de sesión cliente");
             report["TokensPassed"] = true;
+            MaintenanceRun.Run(id, admin, client, report);
             return 0;
         }
         catch (Exception error) { report["Error"] = error.ToString(); return 1; }
-        finally { File.WriteAllText(Path.Combine(ProbeCredential.Root(id), "helper.json"), JsonSerializer.Serialize(report)); }
+        finally
+        {
+            if (fallback != 0) { report["Fallback"] = DesktopNative.SwitchDesktop(fallback); DesktopNative.CloseDesktop(fallback); }
+            File.WriteAllText(Path.Combine(ProbeCredential.Root(id), "helper.json"), JsonSerializer.Serialize(report));
+        }
     }
 }
