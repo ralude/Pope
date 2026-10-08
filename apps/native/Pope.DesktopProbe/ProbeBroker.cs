@@ -20,7 +20,10 @@ internal sealed class ProbeBroker(string id) : ServiceBase
                 ProbeRun.Require(identity.IsSystem && Process.GetCurrentProcess().SessionId == 0, "El broker exige SYSTEM en sesión 0");
                 foreach (var privilege in new[] { "SeTcbPrivilege", "SeAssignPrimaryTokenPrivilege", "SeIncreaseQuotaPrivilege", "SeBackupPrivilege", "SeRestorePrivilege" })
                     ProbePrivilege.Enable(privilege);
-                ProbeCredential.Import(id);
+                var phase = File.ReadAllText(Path.Combine(ProbeCredential.Root(id), "phase"));
+                if (phase == "cleanup") { ProbeCredential.Clean(id); report["Cleaned"] = true; return; }
+                ProbeRun.Require(phase is "normal" or "crash", "Fase de ensayo no admitida");
+                if (File.Exists(Path.Combine(ProbeCredential.Root(id), "pending.bin"))) ProbeCredential.Import(id);
                 var session = ProbeToken.ConsoleSession();
                 ProbeRun.Require(session is not 0 and not uint.MaxValue, "No hay consola interactiva");
                 using var token = ProbeToken.SystemInSession(session);
@@ -54,6 +57,7 @@ internal sealed class ProbeBroker(string id) : ServiceBase
             fallback = DesktopNative.OpenDesktop("PopeFallback" + id, 0, false, 0x100);
             if (fallback == 0) throw new System.ComponentModel.Win32Exception();
             ProbeRun.Switch(fallback);
+            report["Custody"] = ProbeCredential.Verify(id);
             using var credential = ProbeCredential.Read(id);
             using var admin = ProbeToken.Logon(credential, ProbeToken.ConsoleSession());
             using var client = ProbeToken.ConsoleUser(ProbeToken.ConsoleSession());

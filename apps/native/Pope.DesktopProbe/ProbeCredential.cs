@@ -83,6 +83,47 @@ internal static class ProbeCredential
         return OpenBlob(File.ReadAllBytes(Path.Combine(Root(id), "Maintenance", "credential.bin")));
     }
 
+    internal static object Verify(string id)
+    {
+        RequireSystem();
+        var root = Root(id);
+        var path = Path.Combine(root, "Maintenance", "credential.bin");
+        var original = File.ReadAllBytes(path);
+        var damaged = original.ToArray(); damaged[0] ^= 255;
+        var pending = Path.Combine(root, "pending.bin");
+        try
+        {
+            File.WriteAllBytes(pending, damaged);
+            try { Import(id); throw new InvalidOperationException("Aceptó reemplazo corrupto"); }
+            catch (Win32Exception) { }
+            ProbeRun.Require(File.ReadAllBytes(path).SequenceEqual(original), "Reemplazo fallido alteró el blob anterior");
+            File.WriteAllBytes(pending, original); Import(id);
+            ProbeRun.Require(File.ReadAllBytes(path).SequenceEqual(original), "Reemplazo válido no conservó el blob");
+            var fileAcl = new FileInfo(path).GetAccessControl().GetSecurityDescriptorSddlForm(AccessControlSections.All);
+            var folderAcl = new DirectoryInfo(Path.GetDirectoryName(path)!).GetAccessControl().GetSecurityDescriptorSddlForm(AccessControlSections.All);
+            foreach (var acl in new[] { fileAcl, folderAcl })
+            {
+                var descriptor = new RawSecurityDescriptor(acl);
+                ProbeRun.Require(descriptor.Owner!.Value == "S-1-5-18" && descriptor.DiscretionaryAcl!.Count == 1 &&
+                    descriptor.DiscretionaryAcl[0] is CommonAce ace && ace.SecurityIdentifier.Value == "S-1-5-18", "Custodia sin propietario/ACL exclusiva SYSTEM");
+            }
+            return new { FileAcl = fileAcl, FolderAcl = folderAcl, ReplacementPassed = true };
+        }
+        finally { if (File.Exists(pending)) File.Delete(pending); }
+    }
+
+    internal static void Clean(string id)
+    {
+        RequireSystem();
+        var root = Root(id);
+        var directory = Path.Combine(root, "Maintenance");
+        var file = Path.Combine(directory, "credential.bin");
+        if (File.Exists(file)) File.Delete(file);
+        if (Directory.Exists(directory)) Directory.Delete(directory);
+        var pending = Path.Combine(root, "pending.bin");
+        if (File.Exists(pending)) File.Delete(pending);
+    }
+
     private static CredentialBuffer OpenBlob(byte[] blob) => new(Transform(blob, protect: false));
     internal static int Check()
     {

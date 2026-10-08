@@ -170,6 +170,8 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
       - [x] **T10c3:** coordinación de transiciones y Explorer/job. **Preparada (2026-10-08):** token/perfil/escritorio de padre/hijo, rechazo de cuenta ficticia sin intentos sobre cuenta real, continuidad WebView2, cierre exclusivo y datos/procesos previos conservados. Explorer debe conservar token/logon y pertenecer al escritorio/job; delegación o salida invalida la ruta. Retorno a bloqueo externo preparado por el runner T10d, sin afirmar ejecución VM ni recuperación probada.
     - [ ] **T10d:** prueba en VM de credenciales inválidas, WebView2 limitado, salida, fallo/recuperación y datos/procesos previos intactos; registrar límites y revisar ADR/plan si la ruta falla.
       - [ ] **T10d1:** runner, instalación/retirada por GUID y retorno externo; publicar y comprobar artefacto sin elevación.
+        - [x] **T10d1a:** instalación/retirada fija, comprobaciones de reemplazo/ACL y bootstrap sin secretos en argumentos. **Preparada (2026-10-08):** servicio/árbol temporal por GUID, binarios protegidos contra escritura del cliente; entrada privada y exportación solo de informes. SYSTEM comprueba propietario/DACL, reemplazo corrupto conserva blob y reemplazo válido funciona; limpieza fija de custodia/servicio/archivos propios. Build/checks en verde; comportamiento efectivo pendiente en VM.
+        - [ ] **T10d1b:** runner externo, fallo del broker y publicación/verificación no elevada en VM.
       - [ ] **T10d2:** entrada privada/UAC local y ejecución efectiva en VM, evidencia y conclusión del mecanismo.
 
 - [ ] **T11: Transporte cifrado del nodo**
