@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · T07 completa; Contratos y datos cerrados, siguiente T08 en Borrador
+**Última actualización:** 2026-10-07 · continuación T08–T20 autorizada; T08 en preparación, VM Windows 10 pendiente
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): Contratos y datos T01–T07 completos; resto de [plan/tasks](docs/specs/003-bloqueo-de-pc/tasks.md) en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T08: solución y pruebas nativas. Revisar SDK/framework, compatibilidad y dependencias antes de aprobar este bloque; todavía Borrador |
-| **Progreso** | Spec 003: 7 / 59 grupos; T01–T07 completas, incluidas T02a/b/c, T05a/b y T07a/b1/b2; resto Borrador. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T07 completos; T08–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
+| **Siguiente tarea** | T08a: solución, herramientas y pruebas en desarrollo. T08b requiere validar Windows 10 Pro 22H2/11 Pro 25H2 antes de T09; la VM Windows 10 está pendiente de instalar y dar acceso |
+| **Progreso** | Spec 003: 7 / 59 grupos; T01–T07 completas. T08 dividida en preparación T08a y compatibilidad T08b; continuación T08–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad/herramientas y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
@@ -53,7 +53,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | Contratos y datos T01–T07 completos; resto Borrador | 7 / 59 |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T07 completos; T08–T20 autorizadas, compatibilidad Windows pendiente; T21–T59 Borrador | 7 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -63,6 +63,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-07:** el mantenedor pide continuar autónomamente T08–T20. Se registra el alcance sin aceptar implícitamente ADR-0018 ni omitir los prototipos obligatorios. T08 se divide en herramientas/contratos en desarrollo (T08a) y compatibilidad del inventario (T08b). SDK .NET 10.0.401 y dependencias justificadas en el plan; la matriz oficial no incluye Windows 10 Pro 22H2. El mantenedor instalará pronto VirtualBox con esa versión; aún no hay acceso para validar T08b/T09/T10.
 
 - **2026-10-07:** T07b2 y grupo T07 completos: 333 fixtures compartidos, incluidos recorte Unicode, contraseña intacta, longitudes por puntos de código, límites numéricos, UUIDv7 y UTC. Contratos JSON reproducibles con comprobación de diferencias; la verificación C# queda en T08. Contratos y datos 7/59; siguiente T08 todavía Borrador.
 
@@ -79,7 +81,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-07:** el mantenedor elige B para permisos de emergencia: administrador y encargado pueden usar las credenciales Windows presencialmente. ADR-0026 y spec/plan/T53/T54 alineados. Windows valida la cuenta local; no se presume validado un rol vigente de Pope sin nodo. Quedan dos decisiones de emergencia: alcance e identificación/auditoría; mecanismo por diseñar/probar. Sin implementar tareas nativas ni cambiar cuentas.
 
 - **2026-10-07:** el mantenedor elige A para autenticación de emergencia: credenciales de la cuenta administradora local Windows existente introducidas físicamente, validadas por Windows sin nodo ni servicio. ADR-0025 y spec/plan/T53/T54 alineados; complementa presencia física de ADR-0024. Quién puede usarla, alcance e identificación/auditoría por decidir; ruta administrativa por diseñar/probar. Sin aprobar ADR-0018 ni implementar tareas nativas.
-
-- **2026-10-07:** el mantenedor elige A para emergencia: presencia física obligatoria delante de la PC e intervención local de una persona autorizada; sin entrada remota de emergencia. ADR-0024 y spec/plan/T53/T54 alineados. Autenticación, permisos, alcance, comprobación local y auditoría pendientes; mecanismo sin aprobar, sin implementación ni cambios de cuentas. Continúa la revisión una por una.
-
-- **2026-10-07:** el mantenedor confirma Alt+Tab permitido con sesión temporal/de cuenta, también con Pope en primer plano, e inhibido solo sin sesión. ADR-0023, REQ-003-30/CA-003-12 y T09/T21/T25/T56/T59 alineados. Pausa/revocación mantienen escritorio separado: atajo habilitado no permite volver al juego sin autorización. Sin Explorer; selector y juegos/anticheat pendientes de prueba. No se aprueban ni implementan tareas nativas.

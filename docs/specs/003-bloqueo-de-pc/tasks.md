@@ -1,19 +1,25 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Contratos y datos T01–T07 completos. T08–T59 siguen en Borrador.
-- **Plan:** [plan.md](plan.md), aprobado para este bloque; resto pendiente.
+- **Estado:** T01–T07 completos. T08–T20 autorizadas para continuación autónoma (mantenedor, 2026-10-07), con sus verificaciones previas. T21–T59 en Borrador.
+- **Plan:** [plan.md](plan.md), autorizado hasta T20; decisiones técnicas abiertas y verificaciones previas pendientes.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
 actualiza `ESTADO.md`. Cada commit deja el repo compilando y con los tests en verde;
 el cuerpo y los tests citan los REQ. Si excede unas 400 líneas, dividir antes de ejecutar.
 
-**Autorizado:** implementar T01–T07, una tarea por commit; ADR-0017 aceptado, canal v2 y
+**Autorización inicial:** implementar T01–T07, una tarea por commit; ADR-0017 aceptado, canal v2 y
 recuperación de registro confirmados. T08–T59 requieren cerrar sus decisiones y aprobación
 antes de implementar; ADR-0018 sigue Propuesto. No se modifica Windows en este bloque.
 **Decisión posterior (2026-10-07):** tras dejar T07 pendiente de revisar el contrato,
 el mantenedor confirma la opción A: conservar el recorte exterior del usuario y exportar
 sus reglas exactas para C#, con fixtures compartidos y sin modificar contraseñas.
 El bloqueo de contrato de T07 queda resuelto; el progreso se registra en sus subtareas.
+
+**Autorización posterior (mantenedor, 2026-10-07):** continuar autónomamente desde T08
+hasta T20. Sustituye el límite de implementación T01–T07, conservando una tarea por
+commit, decisiones aceptadas y gates de verificación. ADR-0018 conserva su estado
+Propuesto y no se da por validado el mecanismo. El mantenedor instalará pronto la VM
+VirtualBox con Windows 10 Pro 22H2; no está disponible en esta sesión.
 
 **Dependencias:** ejecutar en orden, una tarea a la vez. T09/T10 deben demostrar el
 mecanismo nativo antes de integrarlo; si fallan, revisar ADR/plan y detener las tareas
@@ -127,8 +133,11 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** crear `apps/native` con servicio, host y tests; fijar SDK/framework y dependencias justificadas tras comprobar Windows; consumir fixtures T07 y documentar comandos.
   - **Verificar:** build/test/publicación `win-x64`, contratos JSON en C# y ausencia de lógica de saldo o cobro; compilar en desarrollo, no en el nodo.
   - **Commit:** `build(native): prepara el servicio y host de Windows`.
-  - **Inventario confirmado (mantenedor, 2026-10-07):** 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Sustituye la postergación anterior (opción B); fijar herramientas y probar compatibilidad para esas versiones. T08 permanece en Borrador.
-  - **Host confirmado (mantenedor, 2026-10-07):** opción A, WinForms + WebView2 con interfaz React, según ADR-0019. SDK, tests y compatibilidad Windows siguen pendientes; T08/T09 aún no están implementadas ni aprobadas para ejecutar.
+  - **Inventario confirmado (mantenedor, 2026-10-07):** 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Sustituye la postergación anterior (opción B); fijar herramientas y probar compatibilidad para esas versiones. La continuación T08–T20 está autorizada; la compatibilidad sigue pendiente.
+  - **Host confirmado (mantenedor, 2026-10-07):** opción A, WinForms + WebView2 con interfaz React, según ADR-0019. No equivale a haber superado la compatibilidad ni el prototipo T09.
+  - **División antes de entregar (2026-10-07):** separar preparación en desarrollo y verificación del inventario; T08 se marca solo cuando ambas estén completas.
+  - [ ] **T08a:** solución Agent/ShellHost/tests, SDK/dependencias fijadas y justificadas, scripts del workspace, fixtures T07, build/test y publicación autocontenida `win-x64` en desarrollo. Sin instalar servicios ni modificar Windows.
+  - [ ] **T08b:** verificar los artefactos y los contratos en Windows 10 Pro 22H2 y Windows 11 Pro 25H2; registrar versiones/evidencia. VM Windows 10 todavía pendiente de instalar; no inferir compatibilidad del SDK ni del build en desarrollo. Antes de pasar a T09.
 
 - [ ] **T09: Prototipo de escritorio separado y WebView2**
   - **Cubre:** REQ-003-30, REQ-003-33; REQ-002-04, REQ-002-05; CA-002-02.

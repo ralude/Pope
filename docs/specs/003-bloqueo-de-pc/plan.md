@@ -1,6 +1,6 @@
 # Plan 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Aprobado parcialmente: Contratos y datos (T01–T07), mantenedor 2026-10-04. El resto sigue en Borrador.
+- **Estado:** Aprobado para T01–T20: T01–T07 (2026-10-04), continuación autónoma T08–T20 (mantenedor, 2026-10-07). T21–T59 y mecanismos aún abiertos siguen pendientes.
 - **Spec:** [spec.md](spec.md), aprobada para este bloque; resto pendiente.
 - **ADRs que aplican:** ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008,
   ADR-0009, ADR-0015 y ADR-0016. ADR-0010 sigue Propuesto y pertenece a la spec 004.
@@ -461,6 +461,41 @@ la propuesta anterior de multipart no es un contrato vigente.
 | Desinstalación o instalación a medias | Restaurar solo lo que Pope cambió y conservar datos previos; verificar en entorno desechable |
 
 ## Impacto en recursos (ADR-0011)
+
+### Preparación T08 autorizada (2026-10-07)
+
+El mantenedor pide continuar autónomamente T08–T20, una tarea por commit. Se conserva
+el orden y las verificaciones previas de T09/T10; esta autorización no resuelve por sí
+sola el mecanismo propuesto de ADR-0018 ni permite omitir pruebas del entorno aislado.
+Se divide T08 en T08a (herramientas, solución y contratos) y T08b (compatibilidad en el
+inventario Windows), sin añadir funcionalidad. El grupo solo se cierra al verificar ambas.
+
+- SDK **10.0.401** fijado con `global.json`, solo parches estables de esa banda; framework
+  `net10.0-windows`, ejecutables autocontenidos `win-x64`, según ADR-0006. El SDK de esta
+  sesión se extrae bajo `tmp/`, sin instalación global ni cambios de servicio/cuentas.
+- Servicio: API oficial `System.ServiceProcess.ServiceController` **10.0.12**, para
+  `ServiceBase`, sin infraestructura de hosting adicional. T08 no arranca ni instala
+  el servicio: el ciclo de vida protegido pertenece a T15.
+- Host: SDK oficial `Microsoft.Web.WebView2` **1.0.4191.47**, WinForms según ADR-0019.
+  Se excluye la referencia WPF que el paquete añade automáticamente para evitar el
+  conflicto WindowsBase; no se suprimen advertencias. UI/aislamiento quedan en T09/T19.
+- Tests: **xUnit 2.9.3**, adaptador Visual Studio **2.8.2** y **Microsoft.NET.Test.Sdk
+  17.14.1** para `dotnet test`; **JsonSchema.Net 7.3.1** por su soporte draft 2020-12,
+  formatos obligatorios y evaluación directa de los JSON exportados en T07. Son
+  dependencias exclusivas de pruebas, nunca se publican con agente/host. Los fixtures
+  verifican puntos de código, patrones, formatos y normalización sin coerción.
+- Versiones transitivas fijadas en `packages.lock.json`; scripts del workspace con
+  restauración bloqueada. Turborepo depende de shared para regenerar/comprobar contratos;
+  C# consume los mismos JSON y no replica tarifas, saldo ni decisiones de cobro.
+- T08b requiere los ejecutables y pruebas en Windows 10 Pro 22H2 y Windows 11 Pro 25H2.
+  La matriz oficial actual de .NET no incluye el primero: compatibilidad funcional y
+  soporte del fabricante son evidencias distintas. No afirmar REQ-003-62 hasta probar.
+  VM de Windows 10 anunciada por el mantenedor, aún pendiente de instalar y dar acceso.
+
+Referencias consultadas: [SDK .NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0),
+[Windows admitidos](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md),
+[SDK WebView2](https://www.nuget.org/packages/Microsoft.Web.WebView2/1.0.4191.47),
+[JsonSchema.Net](https://www.nuget.org/packages/JsonSchema.Net/7.3.1).
 
 Aplicar el presupuesto vigente del ADR-0016: nodo en i3-2120, Node ≤ 384 MB y total
 Pope ~1 GB. Ningún runtime .NET, SDK o compilación se instala en el nodo para los clientes.

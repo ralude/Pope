@@ -1,6 +1,6 @@
 # Spec 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Aprobada parcialmente: Contratos y datos (T01–T07), mantenedor 2026-10-04. El resto sigue en Borrador.
+- **Estado:** Aprobada para T01–T20: T01–T07 (2026-10-04), continuación autónoma T08–T20 (mantenedor, 2026-10-07). T21–T59 y mecanismos aún abiertos siguen pendientes.
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0005, ADR-0006, ADR-0007, ADR-0009, ADR-0010
 - **Seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), aceptado por el mantenedor el 2026-10-04.
@@ -179,6 +179,8 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 - Consolas, VR y otros dispositivos.
 
 ## Preguntas abiertas
+
+- [ ] **Compatibilidad nativa de T08 (2026-10-07).** La matriz oficial de [.NET 10](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md) incluye Windows 11 Pro 25H2, pero no Windows 10 Pro 22H2. Esto no demuestra que el ejecutable falle ni que cumpla REQ-003-62: verificar los artefactos autocontenidos en el inventario real antes de cerrar T08. El mantenedor confirma que instalará pronto VirtualBox con Windows 10 Pro 22H2; aún no hay acceso. No sustituir esa evidencia por build/tests en el equipo de desarrollo ni cambiar el inventario o el ADR-0006.
 
 - [x] **Base del host del Shell (T08).** **Resuelta (mantenedor, 2026-10-07): opción A, WinForms + WebView2**, con interfaz React y host C# mínimo, según [ADR-0019](../../adr/0019-host-del-shell-en-winforms.md). Inventario Windows confirmado abajo; versiones de herramientas y prototipo del escritorio separado pendientes. Esta elección no aprueba el resto del plan/tasks.
 
