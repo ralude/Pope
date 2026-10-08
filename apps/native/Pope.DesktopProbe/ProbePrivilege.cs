@@ -8,7 +8,7 @@ internal static class ProbePrivilege
 {
     internal static void Enable(string name)
     {
-        using var identity = WindowsIdentity.GetCurrent();
+        using var identity = WindowsIdentity.GetCurrent(TokenAccessLevels.Query | TokenAccessLevels.AdjustPrivileges);
         if (!LookupPrivilegeValue(null, name, out var luid)) throw new Win32Exception();
         var privileges = new Privileges { Count = 1, Luid = luid, Attributes = 2 };
         if (!AdjustTokenPrivileges(identity.Token, false, ref privileges, 0, 0, 0)) throw new Win32Exception();
