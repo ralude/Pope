@@ -15,6 +15,13 @@ internal static class Program
             return 0;
         }
         if (args is ["--maintenance-helper", var helperId]) return ProbeBroker.Helper(helperId);
+        if (args is ["--maintenance-denial", var denialId]) return ProbeDenial.Run(denialId);
+        if (args is ["--maintenance-window", var windowId, "admin" or "child"])
+        {
+            ApplicationConfiguration.Initialize();
+            Application.Run(new MaintenanceWindow(windowId, args[2]));
+            return 0;
+        }
         if (args is ["--run-on-vm", var output] && Path.IsPathFullyQualified(output)) return ProbeRun.Run(output);
         if (args is ["--game-on-vm", var gameOutput, var game] && Path.IsPathFullyQualified(gameOutput) && Path.IsPathFullyQualified(game))
             return ProbeRun.Run(gameOutput, game);

@@ -26,9 +26,17 @@ internal sealed class ProbeLaunch : IDisposable
             throw new ArgumentException("Argumentos internos no admitidos");
         var command = new StringBuilder(string.Join(" ", new[] { executable }.Concat(arguments).Select(value => $"\"{value}\"")));
         var startup = new Startup { Size = Marshal.SizeOf<Startup>(), Desktop = "winsta0\\" + desktop };
-        // Herencia desactivada también entre sesiones: nunca transfiere tokens/secretos.
-        if (!CreateProcessAsUser(token.Handle, executable, command, 0, 0, false, 0x08000404, environment,
-            Path.GetDirectoryName(executable), ref startup, out var info)) throw new Win32Exception();
+        // Solo WebView2 requiere un handle de su escritorio en esta misma sesión (T09).
+        // Los tokens/job/perfil no son heredables; entre sesiones siempre false.
+        var inheritedDesktop = arguments is ["--window", "use" or "lock", _]
+            ? DesktopNative.OpenDesktop(desktop, 0, true, DesktopNative.DesktopAccess) : 0;
+        ProcessInfo info;
+        try
+        {
+            if (!CreateProcessAsUser(token.Handle, executable, command, 0, 0, inheritedDesktop != 0, 0x08000404, environment,
+                Path.GetDirectoryName(executable), ref startup, out info)) throw new Win32Exception();
+        }
+        finally { if (inheritedDesktop != 0) DesktopNative.CloseDesktop(inheritedDesktop); }
         try
         {
             if (!AssignProcess(job, info.Process)) throw new Win32Exception();
