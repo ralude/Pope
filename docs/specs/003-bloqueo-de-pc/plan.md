@@ -429,6 +429,11 @@ No basta con lanzar `explorer.exe` desde el usuario restringido ni con añadirlo
 temporalmente al grupo Administradores. La desinstalación conservará la cuenta y sus
 datos, y un cambio externo de contraseña necesitará reconfigurar su custodia en el agente.
 
+**Propuesta T10 preparada (2026-10-08):** ADR-0018 detalla DPAPI de máquina con ACL
+SYSTEM, reconfiguración local, broker de prueba, token elevado/logon, perfil/escritorio
+propios y cierre por Job Object. Solo usa APIs Windows, sin proponer nuevas dependencias.
+No está aprobada ni implementada; demostrar cada propiedad en la VM antes de integrarla.
+
 ### Fondo
 
 El panel acepta JPG/PNG/WebP hasta 10 MB, reduce sin deformar a máximo 1920×1080 y

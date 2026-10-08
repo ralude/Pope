@@ -159,3 +159,12 @@ REQ-003-02/62/63; evidencia preliminar, sin cierre de T08b ni aprobación de REQ
 Fuentes del juego: [descarga de Chocolate Doom](https://www.chocolate-doom.org/wiki/index.php/Downloads),
 [Freedoom](https://freedoom.github.io/download.html), [modo gráfico de 3.1.1](https://github.com/chocolate-doom/chocolate-doom/blob/chocolate-doom-3.1.1/src/i_video.c)
 y [formato de grabación](https://github.com/chocolate-doom/chocolate-doom/blob/chocolate-doom-3.1.1/src/doom/g_game.c).
+
+### T10 · preparación y revisión pendiente (2026-10-08)
+
+Consulta de solo lectura por Guest Control: única cuenta habilitada `vboxuser`, miembro
+de Administradores; integrada Administrador deshabilitada; `EnableLUA=1`, sesión 1.
+No se crean/habilitan cuentas ni se modifica UAC. T09 usó el token no elevado de esa
+cuenta; no prueba los permisos de una identidad cliente estándar. ADR-0018 ahora detalla
+la ruta candidata de custodia/token/escritorio/perfil/salida para revisión humana;
+sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación realizada.

@@ -47,6 +47,46 @@ protege su credencial y se abre y cierra el entorno administrativo.
 - La desinstalación elimina únicamente los secretos y cambios propios de Pope;
   **conserva la cuenta administradora existente**, su contraseña y sus archivos.
 
+## Mecanismo propuesto para T10 (2026-10-08; pendiente de aprobación)
+
+- **Custodia:** blob DPAPI de máquina en `%ProgramData%\Pope\Maintenance\credential.bin`,
+  con directorio/archivo sin herencia y DACL exclusiva de SYSTEM. El configurador local
+  elevado recoge la credencial mediante entrada privada; nunca por chat, argumentos,
+  React o logs. Configura el blob/ACL antes de habilitar el acceso. DPAPI de máquina
+  exige esta ACL: no se interpreta el cifrado como permiso exclusivo del servicio.
+- **Sustitución/recuperación:** el técnico vuelve a configurar localmente tras cambiar
+  la contraseña o restaurar Windows. Escritura temporal protegida y sustitución atómica;
+  conservar el blob anterior si falla. No exportar el secreto ni ofrecer recuperación
+  desde el nodo. Una credencial inválida deja la PC bloqueada y requiere reconfiguración.
+- **Token:** broker nativo de prueba como servicio SYSTEM, separado de WebView2, con
+  operaciones fijas del ensayo; ningún ejecutor elevado configurable por el cliente.
+  Probar `LogonUser` interactivo y el token elevado vinculado, duplicarlo como primario
+  y asignarlo a la sesión de consola. Comprobar SID, elevación e integridad efectivos;
+  si Windows no concede el token requerido, fallar y revisar la ruta, sin cambiar UAC.
+- **Entorno candidato:** escritorio temporal propio dentro de `WinSta0`, con DACL para
+  SYSTEM y el SID del **nuevo logon**, no el SID genérico de la cuenta. Conceder solo los
+  permisos necesarios en la estación de ventanas y retirar únicamente las ACE propias.
+  Cargar el perfil existente y su entorno con las APIs Windows; no reutilizar el perfil
+  cliente ni borrar archivos. Registrar escritorio, SID/logon, perfil y token por proceso.
+- **Salida candidata:** crear procesos suspendidos, asignarlos a un Job Object sin
+  breakaway y reanudarlos. Al salir cerrar solo el job de ese mantenimiento, descargar
+  únicamente la referencia al perfil adquirida por Pope, retirar permisos y volver al
+  bloqueo. Verificar Explorer y herramientas/hijos en ese job: si Explorer reutiliza
+  otro proceso o una herramienta escapa, no dar por probado el cierre ni matar por nombre.
+- **Límites del ensayo:** probar cuenta/clave inválida, aislamiento desde el token
+  cliente, continuidad de WebView2 sin elevar, fallo del broker y recuperación acotada.
+  El prototipo no integra autorización del nodo ni acceso remoto de producto. Solo tras
+  demostrar token/perfil/ACL/salida se decidirá si esta ruta basta o hay que proponer una
+  sesión Windows independiente. No se afirma que las APIs garanticen el resultado.
+- **Inventario VM leído (2026-10-08):** solo `vboxuser` habilitada, miembro de
+  Administradores; cuenta integrada Administrador deshabilitada, `EnableLUA=1`.
+  T09 utilizó el token no elevado de `vboxuser`; eso no equivale a una cuenta estándar
+  de cliente. El ensayo debe identificar esa diferencia y demostrar permisos efectivos;
+  no habilitar/crear cuentas ni alterar grupos como consecuencia implícita de esta revisión.
+
+Esta propuesta concreta la ruta a ensayar; **no está aprobada ni implementada**.
+La autorización general T10–T20 no acepta por sí sola este ADR Propuesto.
+
 ## Alternativas consideradas
 
 - **Cuenta administradora creada por Pope:** separa mejor el perfil, pero crea otra
@@ -72,3 +112,9 @@ protege su credencial y se abre y cierra el entorno administrativo.
 Referencias: [UAC y tokens](https://learn.microsoft.com/en-us/windows/security/application-security/application-control/user-account-control/how-it-works),
 [procesos con otra identidad](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithlogonw)
 y [privilegios del host WebView2](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/security).
+
+Fuentes de la propuesta T10: [DPAPI y alcance de máquina](https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata),
+[LogonUser](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-logonuserw),
+[consulta del token](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-gettokeninformation),
+[carga del perfil](https://learn.microsoft.com/en-us/windows/win32/api/userenv/nf-userenv-loaduserprofilew)
+y [Job Objects y límites de herencia](https://learn.microsoft.com/en-us/windows/win32/procthread/job-objects).

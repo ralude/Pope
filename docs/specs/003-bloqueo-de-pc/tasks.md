@@ -158,6 +158,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** demostrar con una cuenta Windows existente token elevado, perfil/escritorio y cierre exclusivo; ensayar permisos y límites del servicio en sesión 0 sin elevar WebView2.
   - **Verificar:** Windows completo administrativo, usuario cliente sigue limitado, salida conserva datos previos y fallo de credenciales vuelve a bloqueo; documentar mecanismo antes de integrarlo.
   - **Commit:** `test(native): valida el mantenimiento con cuenta Windows existente`.
+  - **Preparación (2026-10-08):** ADR-0018 concreta una ruta candidata: DPAPI de máquina + ACL SYSTEM, broker de prueba, token/logon/perfil, escritorio propio y cierre por Job Object. VM: solo `vboxuser` habilitada, administradora con UAC activo; su token medio no demuestra cuenta cliente estándar. Sin código ni cambios de cuentas/servicios. T10 sigue abierta: revisar/aprobar el ADR Propuesto antes de construir; después demostrar la ruta, sin inferir elevación/aislamiento desde el grupo Administradores.
 
 - [ ] **T11: Transporte cifrado del nodo**
   - **Cubre:** REQ-003-63; ADR-0017.
