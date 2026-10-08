@@ -90,6 +90,27 @@ la integración antes de verificar las propiedades anteriores.
 
 ## Alternativas consideradas
 
+### Resultado parcial de T10 (2026-10-08)
+
+La ruta está aceptada para ensayar, pero **no queda demostrada**. En la VM Home:
+DPAPI/propietario/ACL SYSTEM y reemplazo correctos; token administrativo completo,
+integridad 12288 y logon distinto del cliente limitado (8192). Perfil, ventana/hijo,
+aislamiento, continuidad WebView2 y cierre exclusivo de esos procesos pasan.
+**Explorer lanzado termina** antes de comprobar su token/ventanas/job. El ensayo falla;
+no se afirma delegación ni una causa concreta. La fase de muerte del broker no se ejecuta.
+
+Se retiran credencial/servicio/árbol temporal, vuelve el escritorio original y continúa
+el Explorer previo. No se cambian cuentas, grupos ni UAC. La VM usa la misma cuenta con
+token medio/alto: eso limita la evidencia de identidad/perfiles frente al cliente estándar.
+Revisar arranque/causa y ADR/plan antes de integrar o avanzar; **T10 permanece abierta**.
+Una sesión Windows independiente sigue siendo una alternativa por diseñar/probar,
+no una solución ya aprobada ni garantizada. Detalle en [mediciones T10](../specs/003-bloqueo-de-pc/mediciones.md).
+
+El mantenedor elige **revisar una sesión Windows independiente** el 2026-10-08.
+La elección autoriza preparar la propuesta; no sustituye este mecanismo aceptado
+ni demuestra que la alternativa cumpla los requisitos. La petición posterior limita
+el trabajo inmediato a completar el pipeline pendiente de T10.
+
 - **Cuenta administradora creada por Pope:** separa mejor el perfil, pero crea otra
   identidad y obliga a gestionarla. El mantenedor prefirió la existente.
 - **Login administrativo manual en Windows:** evita guardar esa credencial en el agente,

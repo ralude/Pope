@@ -15,8 +15,10 @@ internal static class Program
             return 0;
         }
         if (args is ["--maintenance-helper", var helperId]) return ProbeBroker.Helper(helperId);
+        if (args is ["--maintenance-cleanup", var cleanupId]) return ProbeBroker.CleanupHelper(cleanupId);
         if (args is ["--maintenance-denial", var denialId]) return ProbeDenial.Run(denialId);
         if (args is ["--install-maintenance", var installId]) return ProbeInstall.Run(installId);
+        if (args is ["--maintenance-on-vm", var runId]) return MaintenanceRunner.Run(Guid.ParseExact(runId, "N").ToString("N"));
         if (args is ["--maintenance-window", var windowId, "admin" or "child"])
         {
             ApplicationConfiguration.Initialize();

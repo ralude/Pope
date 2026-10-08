@@ -168,3 +168,77 @@ No se crean/habilitan cuentas ni se modifica UAC. T09 usó el token no elevado d
 cuenta; no prueba los permisos de una identidad cliente estándar. ADR-0018 ahora detalla
 la ruta candidata de custodia/token/escritorio/perfil/salida para revisión humana;
 sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación realizada.
+
+### T10 · aprobación, prototipo y gate fallido (2026-10-08)
+
+- ADR-0018 aceptado explícitamente; prototipo aislado `Pope.DesktopProbe`, sin autorización
+  del nodo ni acceso remoto de producto. Build sin avisos; formato, lint, tipos y tests
+  del workspace pasan. SDK 10.0.401/runtime 10.0.12, mismo WebView2 de T09.
+- Paquete autocontenido ZIP **52 182 221 bytes**, SHA256
+  `a4832b393467502cdf894d7bf069274739e42b0903fdc408626c93658ac1a081`.
+  DLL del prototipo SHA256
+  `56f0791612c1727a0d00669198343b0b203de7abad95718a452db1f4c5450098`.
+  Ambos coinciden en host/VM. Arranque, fixture DPAPI/Unicode/corrupción y lectura del
+  token limitado pasan sin instalar SDK. La primera orden de arranque por Guest Control
+  agota espera de stdout, pero el runner sigue y termina; no se repite la autenticación UI.
+- Ejecución `6b0b8eee385344e6ae18a3fd9d2dec83`, **16:17:56.1749172 UTC**.
+  El mantenedor completa UAC y entrada privada local. No contraseña en chat/argumentos
+  ni logs. Servicio SYSTEM en sesión 0; ayudante sin GUI en sesión 1; ventanas bajo sus
+  tokens de usuario. Token administrativo completo (tipo 2), integridad **12288**;
+  cliente sin elevación, **8192**. Misma cuenta Windows, logons distintos en sesión 1.
+- Propietario SYSTEM y DACL exclusiva SYSTEM comprobados en directorio/blob. Reemplazo
+  corrupto conserva el anterior; reemplazo válido funciona. Un usuario inexistente y
+  una única contraseña ficticia tras login válido devuelven **1326**. Política consultada:
+  bloqueo tras **10** intentos; no se cambia ni se repiten fallos sobre la cuenta real.
+- Cliente no puede leer/cambiar el escritorio administrativo, leer el blob ni duplicar
+  el token elevado. Ventana/hijo coinciden en token, logon, escritorio y perfil esperado;
+  ambos pertenecen al job y terminan al cerrarlo. WebView2 continúa vivo y sin elevación.
+  Fixture previa del perfil y procesos previos se conservan.
+- **Falla Explorer:** el proceso lanzado termina a los 5 s de observación. No hay prueba
+  de Explorer vivo bajo ese token/escritorio/job; no demuestra Windows completo. El
+  código de salida no se registró en esta ejecución; no se afirma que haya delegado.
+  Consulta de Application/1000 de los últimos 20 min: **0** fallos de Explorer registrados,
+  lo que tampoco identifica la causa. `NormalPassed=false`, ayudante/instalador salen **1**.
+- La fase posterior de muerte del broker **no se ejecuta** por el gate anterior; retorno
+  externo/fallo todavía no aprobados. Retorno a bloqueo y escritorio original correctos;
+  credencial, servicio y árbol temporal retirados. Comprobación posterior confirma raíz
+  ausente, servicio ausente y cero procesos del prototipo; **1 Explorer previo sigue vivo**.
+- La revisión automática rechaza exportar informes completos/capturas por contenido
+  potencialmente sensible. Se inspeccionan y extraen dentro de la VM solo resultados
+  técnicos (booleans, niveles y códigos), guardados en `tmp/t10-evidence/result-sanitized.json`.
+  Informes/PNG completos quedan en la VM; no se exportan credenciales ni perfiles WebView2.
+- **Conclusión:** T10 abierta, 9/59 grupos. Revisar arranque/causa de Explorer y ADR/plan
+  antes de integrar o avanzar T11. No prueba Windows completo, fallo del broker, cuentas
+  cliente estándar/perfiles de cuentas distintas ni compatibilidad Pro del inventario.
+
+### T10 · pipeline completado con la estrategia aprobada (2026-10-08)
+
+- El mantenedor aprueba actualizar `AGENTS.md`: comprobaciones pertinentes por commit,
+  batería completa por tarea y Windows de desarrollo antes de transferir a la VM.
+  Pide completar ahora solo el pipeline pendiente de T10; la siguiente revisión elegida
+  es una sesión Windows independiente, sin aceptar todavía otro mecanismo.
+- Formato nativo (`dotnet format ... --no-restore`) y `pnpm format` correctos.
+  `pnpm lint` y `pnpm typecheck` completos pasan; se reutilizan resultados de Turborepo
+  para entradas sin cambios. El build nativo de typecheck cuenta también como build,
+  porque ambos scripts ejecutan la misma compilación Release; cero errores/avisos.
+  `pnpm build --filter=!@pope/native` completa la compilación de los cinco paquetes TS,
+  reutilizando caché. Sigue el aviso previo de tamaño de chunk del panel.
+- Tests ejecutados: **1 581 correctos** en total. Los cinco paquetes TS pasan:
+  shared **646**, servidor **391**, panel **110**, Shell **52** y simulador **48**.
+  Los **334** tests nativos pasan, sin omitidos, con
+  `dotnet test apps/native/Pope.slnx -c Release --no-build --no-restore`, usando los
+  artefactos ya compilados. La batería TS se ejecuta con
+  `pnpm test --filter=!@pope/native`; no se recompila el nativo para repetir sus tests.
+- En el Windows 11 de desarrollo, el registro informa **26H2, 26300.9457**.
+  `--credential-check` pasa con datos ficticios en memoria (DPAPI/Unicode/corrupción
+  y rechazo de custodia fuera de SYSTEM); `--token-check` pasa con token no elevado,
+  integridad **8192**, sesión **1**. Resultado sanitizado en
+  `tmp/t10-final-host-sanitized.json`. Sin entrada de contraseña real, instalación
+  de servicio ni cambios de cuentas, grupos, UAC, directivas o sesión del equipo.
+- Logs del pipeline ignorados en `tmp/t10-final-*.log`. La evidencia funcional de VM
+  anterior conserva su validez y sus límites; no se vuelve a publicar/transferir ni
+  repetir esa ejecución porque no cambió el mecanismo que falló.
+- **Pipeline automático completo; T10 funcional abierta.** Explorer sigue sin demostrar
+  Windows completo en la VM, y la fase de muerte del broker sigue sin ejecutar.
+  No avanzar T11 ni marcar T10/T10d2 completas. La prueba de desarrollo no sustituye
+  Windows 11 Pro 25H2 del local ni Windows 10 Pro 22H2.

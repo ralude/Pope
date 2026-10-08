@@ -23,9 +23,15 @@ internal sealed class ProbeDesktop : IDisposable
         {
             var descriptor = Read(station);
             descriptor.DiscretionaryAcl ??= new RawAcl(2, 1);
-            ProbeRun.Require(!descriptor.DiscretionaryAcl.OfType<CommonAce>().Any(ace => ace.SecurityIdentifier == logon), "El SID de logon ya tenía una ACE en la estación");
-            descriptor.DiscretionaryAcl.InsertAce(descriptor.DiscretionaryAcl.Count, new CommonAce(AceFlags.None, AceQualifier.AccessAllowed, StationRights, logon, false, null));
-            Write(station, descriptor); granted = true;
+            // La consola ya tiene permisos: no atribuir ni retirar su ACE preexistente.
+            if (!descriptor.DiscretionaryAcl.OfType<CommonAce>().Any(ace => ace.SecurityIdentifier == logon &&
+                ace.AceQualifier == AceQualifier.AccessAllowed && (ace.AccessMask & StationRights) == StationRights))
+            {
+                var insert = 0;
+                while (insert < descriptor.DiscretionaryAcl.Count && !descriptor.DiscretionaryAcl[insert].IsInherited) insert++;
+                descriptor.DiscretionaryAcl.InsertAce(insert, new CommonAce(AceFlags.None, AceQualifier.AccessAllowed, StationRights, logon, false, null));
+                Write(station, descriptor); granted = true;
+            }
             var bytes = Bytes(new RawSecurityDescriptor($"O:SYG:SYD:P(A;;0x{DesktopNative.DesktopAccess:X};;;SY)(A;;0x{DesktopNative.DesktopAccess:X};;;{logonSid})"));
             var pinned = GCHandle.Alloc(bytes, GCHandleType.Pinned);
             try
@@ -43,6 +49,12 @@ internal sealed class ProbeDesktop : IDisposable
     {
         if (Handle != 0) { DesktopNative.CloseDesktop(Handle); Handle = 0; }
         if (!granted) return;
+        Remove(station, logon); granted = false;
+    }
+
+    internal static void Recover(string logonSid) => Remove(GetProcessWindowStation(), new SecurityIdentifier(logonSid));
+    private static void Remove(nint station, SecurityIdentifier logon)
+    {
         // Relee la ACL actual: conserva cambios concurrentes, quita solo nuestra ACE exacta.
         var descriptor = Read(station);
         var acl = descriptor.DiscretionaryAcl;
@@ -50,7 +62,7 @@ internal sealed class ProbeDesktop : IDisposable
             for (var index = acl.Count - 1; index >= 0; index--)
                 if (acl[index] is CommonAce ace && ace.SecurityIdentifier == logon && ace.AccessMask == StationRights && ace.AceFlags == AceFlags.None)
                 { acl.RemoveAce(index); break; }
-        Write(station, descriptor); granted = false;
+        Write(station, descriptor);
     }
 
     private static RawSecurityDescriptor Read(nint handle)

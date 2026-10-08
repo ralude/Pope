@@ -4,8 +4,9 @@
 - **Plan:** [plan.md](plan.md), autorizado hasta T20; decisiones técnicas abiertas y verificaciones previas pendientes.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
-actualiza `ESTADO.md`. Cada commit deja el repo compilando y con los tests en verde;
-el cuerpo y los tests citan los REQ. Si excede unas 400 líneas, dividir antes de ejecutar.
+actualiza `ESTADO.md`. Cada commit pasa las comprobaciones pertinentes; al cerrar una
+tarea principal, pasar la batería completa según `AGENTS.md`. El cuerpo y los tests
+citan los REQ. Si excede unas 400 líneas, dividir antes de ejecutar.
 
 **Autorización inicial:** implementar T01–T07, una tarea por commit; ADR-0017 aceptado, canal v2 y
 recuperación de registro confirmados. T08–T59 requieren cerrar sus decisiones y aprobación
@@ -169,10 +170,13 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
       - [x] **T10c2:** ventanas administrativas y observaciones desde el token cliente limitado. **Preparada (2026-10-08):** ventana/hijo sin WebView2 exige usuario elevado no SYSTEM y registra token, perfil/escritorio; proceso cliente prueba rechazo de leer/cambiar escritorio, leer blob y duplicar token administrativo. Herencia de escritorio WebView2 restringida al lanzamiento de ese rol en la misma sesión. Build/checks en verde; pruebas efectivas pendientes de VM.
       - [x] **T10c3:** coordinación de transiciones y Explorer/job. **Preparada (2026-10-08):** token/perfil/escritorio de padre/hijo, rechazo de cuenta ficticia sin intentos sobre cuenta real, continuidad WebView2, cierre exclusivo y datos/procesos previos conservados. Explorer debe conservar token/logon y pertenecer al escritorio/job; delegación o salida invalida la ruta. Retorno a bloqueo externo preparado por el runner T10d, sin afirmar ejecución VM ni recuperación probada.
     - [ ] **T10d:** prueba en VM de credenciales inválidas, WebView2 limitado, salida, fallo/recuperación y datos/procesos previos intactos; registrar límites y revisar ADR/plan si la ruta falla.
-      - [ ] **T10d1:** runner, instalación/retirada por GUID y retorno externo; publicar y comprobar artefacto sin elevación.
+      - [x] **T10d1:** runner, instalación/retirada por GUID y retorno externo; publicar y comprobar artefacto sin elevación.
         - [x] **T10d1a:** instalación/retirada fija, comprobaciones de reemplazo/ACL y bootstrap sin secretos en argumentos. **Preparada (2026-10-08):** servicio/árbol temporal por GUID, binarios protegidos contra escritura del cliente; entrada privada y exportación solo de informes. SYSTEM comprueba propietario/DACL, reemplazo corrupto conserva blob y reemplazo válido funciona; limpieza fija de custodia/servicio/archivos propios. Build/checks en verde; comportamiento efectivo pendiente en VM.
-        - [ ] **T10d1b:** runner externo, fallo del broker y publicación/verificación no elevada en VM.
+        - [x] **T10d1b:** runner externo, infraestructura de fallo del broker y publicación/verificación no elevada en VM. **Preparada y comprobada parcialmente (2026-10-08):** hashes ZIP/DLL coinciden; arranque, DPAPI/Unicode/corrupción y token cliente pasan en Home sin SDK. Supervisor limitado fuera del job, servicio temporal por GUID y limpieza de ACE tras fallo preparados; prueba de muerte del broker no ejecutada porque Explorer falla primero en T10d2. Un intento de contraseña ficticia tras login correcto; política VM consultada: umbral 10. Sin cambios de cuentas/grupos/UAC.
       - [ ] **T10d2:** entrada privada/UAC local y ejecución efectiva en VM, evidencia y conclusión del mecanismo.
+        - **Ejecución parcial (2026-10-08, 16:17:56 UTC):** usuario completa UAC/entrada privada; token administrativo completo (tipo 2, integridad 12288), cliente limitado (8192), logons distintos en sesión 1 y broker sesión 0. Custodia/propietario/ACL SYSTEM y reemplazo pasan; cuenta y contraseña inválidas devuelven 1326. Cliente no lee/cambia escritorio, lee blob ni duplica token; perfil/ventana/hijo y cierre por job pasan, WebView2 conserva continuidad. **Gate fallido:** Explorer lanzado termina antes de comprobar token/ventanas/job; Windows completo administrativo no demostrado, causa no establecida. No ejecutar fase de muerte del broker ni avanzar T11. Retorno original y retiro de credencial/servicio/árbol/procesos propios comprobados; Explorer previo vivo, fixture de datos conservada. Revisar ADR/plan; T10 permanece abierta, 9/59. Detalle en `mediciones.md`.
+        - **Dirección elegida (mantenedor, 2026-10-08):** revisar una sesión Windows independiente; preparar propuesta antes de construirla. Completar ahora solo el pipeline pendiente de T10 según la validación por tarea aprobada en `AGENTS.md`. La batería automática no cierra T10d2 ni autoriza avanzar T11.
+        - **Pipeline completado (2026-10-08):** formato, lint, tipos y compilación completos pasan; 1 581 tests correctos (1 247 TS + 334 nativos, sin omitidos nativos). En desarrollo Windows 11 26H2/26300.9457 pasan fixture DPAPI y lectura del token limitado, sin cambios del sistema. Caché reutilizada y una compilación nativa para build/tipos; no repetir publicación/VM sin cambio del mecanismo. T10d2 sigue abierta por el gate funcional. Detalle en `mediciones.md`.
 
 - [ ] **T11: Transporte cifrado del nodo**
   - **Cubre:** REQ-003-63; ADR-0017.

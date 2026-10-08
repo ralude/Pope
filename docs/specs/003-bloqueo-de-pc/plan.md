@@ -442,6 +442,21 @@ handles entre sesiones. El ayudante obtiene los tokens, perfil y escritorio; las
 se ejecutan bajo el usuario previsto. Un único servicio temporal por GUID y Job Objects
 acotan todos los procesos del ensayo; no es el servicio de producto de T15.
 
+**Gate T10 fallido (2026-10-08):** la infraestructura de custodia/token/perfil/ACL y el
+cierre de ventana/hijo propios funcionan en VM. El proceso de Explorer termina antes
+de demostrar Windows completo dentro del nuevo escritorio/logon/job. No ejecutar aún
+la fase de muerte del broker ni avanzar T11/integración. Revisar el arranque y la causa
+efectiva (salida, ventanas/procesos delegados y permisos) antes de decidir si esta ruta
+basta o proponer otra sesión Windows. No usar switches no documentados, desactivar UAC,
+alterar cuentas/directivas ni matar el Explorer previo como solución implícita.
+
+**Dirección elegida (mantenedor, 2026-10-08):** revisar una sesión Windows independiente.
+La revisión y propuesta de ADR/plan quedan como siguiente paso; no construir otra ruta
+ni avanzar T11. El mantenedor pide completar ahora solo el pipeline pendiente del
+prototipo T10 con la estrategia de comprobaciones aprobada en `AGENTS.md`, conservando
+la prueba parcial de VM y el gate abierto. No repetir esa ejecución sin cambios que
+puedan resolver el fallo.
+
 ### Fondo
 
 El panel acepta JPG/PNG/WebP hasta 10 MB, reduce sin deformar a máximo 1920×1080 y

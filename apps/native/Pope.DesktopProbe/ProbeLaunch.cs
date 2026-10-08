@@ -40,9 +40,10 @@ internal sealed class ProbeLaunch : IDisposable
         try
         {
             if (!AssignProcess(job, info.Process)) throw new Win32Exception();
-            if (ResumeThread(info.Thread) == uint.MaxValue) throw new Win32Exception();
             var process = Process.GetProcessById((int)info.Pid);
+            _ = process.Handle; // Retenerlo suspendido: permite consultar ExitCode aunque termine enseguida.
             children.Add(process);
+            if (ResumeThread(info.Thread) == uint.MaxValue) throw new Win32Exception();
             return process;
         }
         catch { TerminateProcess(info.Process, 1); throw; }

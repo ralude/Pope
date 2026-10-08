@@ -18,7 +18,7 @@ internal static class ProbeCredential
         if (!DesktopNative.Elevated()) throw new InvalidOperationException("La configuración exige elevación local");
         var root = Root(id);
         if (Directory.Exists(root)) throw new IOException("Usa un identificador de ensayo nuevo");
-        var user = new StringBuilder(260);
+        var user = new StringBuilder(".\\" + Environment.UserName, 260);
         var password = new StringBuilder(256);
         var info = new CredentialInfo
         {

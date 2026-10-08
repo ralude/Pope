@@ -9,6 +9,23 @@ namespace Pope.DesktopProbe;
 
 internal static class MaintenanceRun
 {
+    internal static void Crash(string id, ProbeToken admin)
+    {
+        using var profile = new ProbeProfile(admin, load: true);
+        using var desktop = new ProbeDesktop("PopeAdmin" + id, admin.State.Logon!);
+        using var job = new ProbeLaunch();
+        var window = job.Start(admin, Environment.ProcessPath!, desktop.Name, profile.EnvironmentBlock, "--maintenance-window", id, "admin");
+        var directory = MaintenanceWindow.Evidence(id);
+        Wait(directory, "admin"); Wait(directory, "child");
+        using var child = Process.GetProcessById(ProbeRun.Read(directory, "child").GetProperty("Pid").GetInt32());
+        ProbeRun.Require(job.Contains(window) && job.Contains(child), "Hijos de fallo fuera del job");
+        ProbeRun.Switch(desktop.Handle);
+        File.WriteAllText(Path.Combine(ProbeCredential.Root(id), "crash-state.json"), JsonSerializer.Serialize(new[] { window.Id, child.Id }));
+        File.WriteAllText(Path.Combine(directory, "crash-ready"), "Fallo del broker propio preparado");
+        Thread.Sleep(60000); // El instalador mata el broker exacto; kernel debe cerrar este job.
+        throw new TimeoutException("No se produjo el fallo de broker esperado");
+    }
+
     internal static void Run(string id, ProbeToken admin, ProbeToken client, Dictionary<string, object?> report)
     {
         var directory = MaintenanceWindow.Evidence(id);
@@ -29,7 +46,7 @@ internal static class MaintenanceRun
         try
         {
             ProbeRun.Require(!DesktopNative.Acl(administrative.Handle).Contains(admin.State.User), "Escritorio administrativo concedido por SID genérico");
-            InvalidCredentials(report);
+            InvalidCredentials(admin, report);
             using var clientJob = new ProbeLaunch();
             var web = clientJob.Start(client, Environment.ProcessPath!, usage.Name, clientProfile.EnvironmentBlock, "--window", "use", directory);
             Wait(directory, "use");
@@ -115,13 +132,27 @@ internal static class MaintenanceRun
         }
         throw new TimeoutException("Ventana no preparada: " + role);
     }
-    private static void InvalidCredentials(Dictionary<string, object?> report)
+    private static void InvalidCredentials(ProbeToken admin, Dictionary<string, object?> report)
     {
         // Un único usuario ficticio inexistente: no bloquea una cuenta real por intentos.
         var invalid = Encoding.Unicode.GetBytes("PopeMissing-" + Guid.NewGuid().ToString("N") + "\0Clave ficticia\0");
         using var credential = new ProbeCredential.CredentialBuffer(invalid);
         try { using var token = ProbeToken.Logon(credential, ProbeToken.ConsoleSession()); throw new InvalidOperationException("Windows aceptó credenciales ficticias"); }
-        catch (Win32Exception error) { report["InvalidCredentialError"] = error.NativeErrorCode; }
+        catch (Win32Exception error)
+        {
+            ProbeRun.Require(error.NativeErrorCode == 1326, "Rechazo de cuenta ficticia inesperado");
+            report["InvalidCredentialError"] = error.NativeErrorCode;
+        }
+        // VM consultada: umbral 10. Un único fallo tras autenticar correctamente;
+        // no repite intentos ni altera la política/cuenta o su contraseña.
+        using var identity = new WindowsIdentity(admin.Handle);
+        using var badPassword = new ProbeCredential.CredentialBuffer(Encoding.Unicode.GetBytes(identity.Name + "\0PopeFixture-" + Guid.NewGuid().ToString("N") + "\0"));
+        try { using var token = ProbeToken.Logon(badPassword, ProbeToken.ConsoleSession()); throw new InvalidOperationException("Windows aceptó la contraseña ficticia"); }
+        catch (Win32Exception error)
+        {
+            ProbeRun.Require(error.NativeErrorCode == 1326, "Rechazo de contraseña ficticia inesperado");
+            report["InvalidPasswordError"] = error.NativeErrorCode;
+        }
     }
     private static WindowsIdentity ProcessIdentity(Process process)
     {

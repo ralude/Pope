@@ -4,18 +4,24 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-08 · T09 completa; ADR-0018 aprobado, T10 en curso
+**Última actualización:** 2026-10-08 · pipeline T10 completo; gate funcional abierto; revisar sesión Windows independiente
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 completos; T10–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T10d1b: runner externo y publicación; instalador temporal y comprobaciones preparados, prueba efectiva pendiente en VM. ADR-0018 aceptado explícitamente. T09 cerrada con aprobación explícita; juegos reales/anticheat pendientes en T25/T56 |
+| **Siguiente tarea** | T10d2: revisar una sesión Windows independiente, opción elegida por el mantenedor tras el fallo de Explorer. Proponer el mecanismo y revisar ADR-0018/plan antes de construir o volver a ejecutar. T10 sigue abierta; no avanzar T11. T09 cerrada con aprobación explícita; juegos reales/anticheat pendientes en T25/T56 |
 | **Progreso** | Spec 003: 9 / 59 grupos; T01–T09 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación T09–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 en curso con ADR-0018 Aceptado (2026-10-08): ruta candidata autorizada, aún sin demostrar; VM solo tiene vboxuser habilitada (administradora), UAC activo, sin cuenta cliente estándar demostrada. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
+| **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar/avanzar T11. Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. VM usa vboxuser con token medio/alto; cuenta cliente estándar/perfiles distintos aún sin demostrar. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
+
+El mantenedor aprueba la validación por tarea de `AGENTS.md`: comprobaciones pertinentes
+por commit, batería completa al cierre de cada Txx, Windows 11 de desarrollo primero
+para pruebas aisladas/reversibles y VM después para las que alteran el sistema. La
+aprobación no cierra el gate funcional de T10 ni autoriza construir una ruta alternativa
+sin revisar y aprobar el mecanismo.
 
 1. Lee completos [`AGENTS.md`](AGENTS.md) y este archivo al iniciar un chat o una tarea,
    y al retomar tras una compactación, sin esperar a que el usuario lo pida.
@@ -64,6 +70,10 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-08:** estrategia de validación por tarea y Windows de desarrollo → VM aprobada y guardada en AGENTS.md. Pipeline pendiente de T10 completado: formato/lint/tipos/build pasan; 1 581 tests correctos (1 247 TS + 334 nativos). Fixture DPAPI/token limitado pasa en Windows 11 de desarrollo 26H2/26300.9457; sin cambios del sistema. Caché y compilación nativa compartida entre build/tipos; sin repetir publicación/VM. Siguiente revisión elegida: sesión Windows independiente, sin construirla aún. T10 permanece abierta por el gate de Explorer; no avanzar T11.
+
+- **2026-10-08:** T10d1b publicada/comprobada y T10d2 parcial en VM (16:17:56 UTC). Mantenedor completa entrada privada/UAC. DPAPI/ACL/propietario SYSTEM/reemplazo, token completo 12288, cliente limitado 8192/logon distinto, perfil/aislamiento, WebView2 y cierre exclusivo de ventana/hijo pasan. Explorer lanzado termina: Windows completo sin demostrar, fase de muerte del broker no ejecutada. Retorno y limpieza completos, Explorer previo vivo; sin cambios de cuentas/grupos/UAC. Revisión automática rechaza informes/capturas completos; resultado técnico sanitizado guardado. T10 abierta, 9/59; siguiente revisar ADR/plan, detener T11.
+
 - **2026-10-08:** T10d1a preparada: instalador privado elevado, servicio/binarios/archivos por GUID, importación/reemplazo y verificación de propietario/DACL SYSTEM. Exporta solo informes y retira custodia/servicio/árbol propios. Build/checks en verde; instalación y retirada reales pendientes en VM, sin credencial capturada todavía. T10 abierta, 9/59; siguiente T10d1b.
 
 - **2026-10-08:** T10c3 preparada: coordinación de token/perfil/ACL, credencial ficticia inválida, padre/hijo/job, continuidad WebView2 y retorno a bloqueo externo. Explorer debe seguir en el nuevo logon elevado y escritorio/job; salida o delegación falla sin matar procesos por nombre. Datos/procesos previos se comprueban. Build/checks en verde; aún sin ejecución elevada en VM. T10 abierta, 9/59; siguiente T10d1 (runner y publicación), luego T10d2.
@@ -77,10 +87,4 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-08:** T10b1 preparada: primitivas Win32 de logon interactivo, token vinculado/primario, sesión y token cliente limitado; todas con comentarios. Consulta real en desarrollo confirma token limitado (tipo 3), integridad 8192, sesión 1 y SID/logon coherentes. Sin autenticación administrativa ni cambios de Windows; obtención desde SYSTEM pendiente en VM. T10 abierta, 9/59; siguiente T10b2.
 
 - **2026-10-08:** T10a preparada: DPAPI de máquina, entrada privada nativa sin persistencia plana, staging protegido y almacén SYSTEM con reemplazo atómico. Fixture pública comprueba Unicode, corrupción y rechazo fuera de SYSTEM en desarrollo. Build sin avisos; verificación efectiva de ACL/propietario/configuración y reemplazo pendiente en VM en T10d. Sin cuentas ni credenciales reales configuradas. T10 abierta, 9/59; siguiente T10b.
-
-- **2026-10-08:** el mantenedor aprueba explícitamente ADR-0018 y pide continuar T10. Ruta de ensayo aceptada, sin dar por demostradas sus propiedades; división previa T10a (custodia), T10b (broker/token), T10c (entorno/salida), T10d (pruebas VM). T10 abierta, 9/59; siguiente T10a.
-
-- **2026-10-08:** preparación T10: inventario de solo lectura confirma vboxuser como única cuenta habilitada y administradora, integrada Administrador deshabilitada, UAC activo y sesión 1. ADR-0018 concreta la ruta candidata DPAPI/ACL SYSTEM, broker, token/logon/perfil, escritorio propio y Job Object con salida exclusiva; sigue Propuesto y requiere aprobación humana antes de construir. Sin código T10 ni cambios de cuentas, grupos, UAC o servicios. T09 cerrada, 9/59; siguiente revisión de ADR-0018.
-
-- **2026-10-08:** T09c y grupo T09 completos con aprobación explícita de la VM por el mantenedor. Freedoom 0.13.0/Chocolate Doom 3.1.1, modo exclusivo 800x600 frente a 1920x955, Alt+Tab juego/Pope sin Explorer, PID/partida conservados. Demo: 196 tics bloqueados, cero movimiento/disparos y controles positivos antes/después; salida 0 y escritorio original restaurado. Capturas/informe/demo en tmp/t09c-evidence. Juegos reales/anticheat conservados en T25/T56 antes de entrega, sin afirmar compatibilidad Pro/audio. Grupo 9/59; siguiente T10, ADR-0018 Propuesto y mecanismo elevado pendientes.
 
