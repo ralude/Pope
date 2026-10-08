@@ -68,8 +68,11 @@ dotnet test Pope.slnx -c Release --no-build --no-restore
 `Pope.DesktopProbe` es una herramienta de prueba separada del servicio/host de producto.
 Reutiliza WinForms y el SDK WebView2 fijado, sin paquetes nuevos. Publicar desde la raíz
 con `pnpm --filter @pope/native publish:probe`; salida en `apps/native/dist/probe/`.
-`--check-build` verifica el arranque sin abrir ventanas. T09a prepara las APIs y ventanas;
-la coordinación y ejecución aislada en VM corresponden a T09b.
+`--check-build` verifica el arranque sin abrir ventanas. En una VM de pruebas, ejecutar
+`--run-on-vm <carpeta absoluta nueva>`: crea escritorios temporales, comprueba entrada,
+Alt+Tab y continuidad, escribe JSONL/PNG/informe y restaura el escritorio inicial.
+Hay recuperación independiente a los 120 s y ventanas acotadas a 180 s. T09b pasa
+en Home; el juego exclusivo sigue pendiente en T09c. No ejecutar en Windows cotidiano.
 
 Cada ventana WebView2 se crea en el escritorio asignado al nacer el proceso, en su hilo
 STA y con perfil propio. Nunca se mueve entre escritorios. Las ventanas registran PID,

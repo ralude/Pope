@@ -97,8 +97,7 @@ internal sealed class ProbeWindow : Form
             Version = version,
             Error = error
         };
-        var path = Path.Combine(directory, $"{role}.json");
-        File.WriteAllText(path + ".tmp", JsonSerializer.Serialize(state));
-        File.Move(path + ".tmp", path, true);
+        // Historial acotado por los 180 s de prueba; evita reemplazar un archivo leído.
+        File.AppendAllText(Path.Combine(directory, $"{role}.jsonl"), JsonSerializer.Serialize(state) + "\n");
     }
 }

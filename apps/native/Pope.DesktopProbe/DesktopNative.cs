@@ -34,9 +34,17 @@ internal static class DesktopNative
         var executable = Environment.ProcessPath!;
         var command = new StringBuilder(string.Join(" ", new[] { executable }.Concat(arguments).Select(Quote)));
         var startup = new StartupInfo { Size = Marshal.SizeOf<StartupInfo>(), Desktop = $"winsta0\\{desktop}" };
-        if (!CreateProcess(executable, command, 0, 0, false, 0x08000000, 0, null, ref startup, out var process)) throw new Win32Exception();
-        try { return Process.GetProcessById((int)process.ProcessId); }
-        finally { CloseHandle(process.Process); CloseHandle(process.Thread); }
+        // WebView2 crea sus propios procesos: heredar un único escritorio permite que
+        // sus hilos se conecten al mismo. Los handles persistentes no son heredables.
+        var inheritedDesktop = OpenDesktop(desktop, 0, true, DesktopAccess);
+        if (inheritedDesktop == 0) throw new Win32Exception();
+        try
+        {
+            if (!CreateProcess(executable, command, 0, 0, true, 0x08000000, 0, null, ref startup, out var process)) throw new Win32Exception();
+            try { return Process.GetProcessById((int)process.ProcessId); }
+            finally { CloseHandle(process.Process); CloseHandle(process.Thread); }
+        }
+        finally { CloseDesktop(inheritedDesktop); }
     }
 
     private static string Quote(string value)
@@ -68,6 +76,27 @@ internal static class DesktopNative
         if (!GetUserObjectSecurity(desktop, ref information, bytes, length, out _)) throw new Win32Exception();
         return new RawSecurityDescriptor(bytes, 0).GetSddlForm(AccessControlSections.Access);
     }
+
+    internal static bool HasExplorer(nint desktop)
+    {
+        var found = false;
+        if (!EnumDesktopWindows(desktop, (window, _) =>
+        {
+            GetWindowThreadProcessId(window, out var pid);
+            using var process = Process.GetProcessById((int)pid);
+            found |= process.ProcessName.Equals("explorer", StringComparison.OrdinalIgnoreCase);
+            return true;
+        }, 0)) throw new Win32Exception();
+        return found;
+    }
+
+    private delegate bool WindowCallback(nint window, nint parameter);
+    // Enumera ventanas del escritorio concreto para comprobar ausencia real de Explorer.
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool EnumDesktopWindows(nint desktop, WindowCallback callback, nint parameter);
+    // Identifica al propietario de cada ventana sin depender de sus títulos.
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(nint window, out uint pid);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct SecurityAttributes { internal int Length; internal nint Descriptor; internal int Inherit; }

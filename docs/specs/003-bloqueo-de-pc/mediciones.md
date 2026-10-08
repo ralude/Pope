@@ -111,11 +111,25 @@ REQ-003-02/62/63; evidencia preliminar, sin cierre de T08b ni aprobación de REQ
 - No se han ejecutado todavía cambios de escritorio ni dado por comprobadas ACL,
   aislamiento, Alt+Tab o juego exclusivo; T09b/T09c y el grupo T09 siguen abiertos.
 
-No se han creado/cambiado escritorios, instalado servicios, modificado UAC ni probado
-credenciales de mantenimiento Windows. La VM Home vuelve a estar accesible, pero la
-compatibilidad Pro sigue pendiente antes de la entrega; el mantenedor autoriza T09
-con los resultados Home aceptados. T09 requiere también PC
-real con juego exclusivo, monitores/audio/versiones registrados, ida/vuelta por Alt+Tab
-sin Explorer y apps intactas. T10 debe demostrar token elevado, perfil, aislamiento y
-salida exclusiva de mantenimiento, con ADR-0018 todavía Propuesto. Las verificaciones
-son dependencias de T11–T20, no resultados que puedan inferirse de los fixtures C#.
+### T09b · escritorio y entrada verificados en VM (2026-10-08)
+
+- Home 22H2, sesión 1 no elevada, WebView2 154.0.4258.62. Dos ejecuciones correctas:
+  `run-20261008-145600` y final `run-20261008-145830` (14:58:30 UTC), salida **0**.
+- DACL efectiva protegida, solo usuario/SYSTEM; ningún Explorer en los escritorios
+  temporales. WebView2 renderiza en ambos, en procesos/STA distintos; escritorio
+  inicial/actual idéntico. Alt+Tab alterna Pope (PID 3192) / app (968) sin Explorer.
+- App recibe teclas/clics en uso; en bloqueo ambos contadores quedan intactos y su
+  latido avanza. Bloqueo recibe las teclas/clics de prueba y Alt+Tab no alcanza la app.
+  Al volver recibe entrada, conserva PID y las tres ventanas siguen ejecutándose.
+  Informe `Passed=true`, `Restored=true`; capturas de pantalla completa inspeccionadas.
+- WebView2 necesitó heredar **un único handle de escritorio** al crear cada proceso;
+  los persistentes no son heredables. Sin esa herencia, la inicialización no terminaba.
+  El reemplazo de archivos de diagnóstico produjo `UnauthorizedAccessException` en
+  la VM; se usa JSONL acotado por duración y se evita el diálogo modal de excepción.
+- Evidencia local ignorada: `tmp/t09b-evidence/` (informe, tres JSONL y cuatro PNG).
+  Fuente reproducible en `Pope.DesktopProbe`; sin servicios ni cambios de cuenta/UAC.
+  Escritorios destruidos al terminar; watchdog independiente restaura a los 120 s.
+
+T09 sigue abierta por T09c: juego exclusivo y evidencia gráfica. Las pruebas reales
+del local (juegos/anticheat/audio) y compatibilidad Pro siguen pendientes antes de
+entrega. T10 debe demostrar mantenimiento elevado, con ADR-0018 todavía Propuesto.
