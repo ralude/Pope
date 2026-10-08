@@ -3,7 +3,9 @@
 Servicio `Pope.Agent`, host WinForms `Pope.ShellHost` y tests de compatibilidad con los
 contratos Zod exportados. REQ-003-02/60/62/63; ADR-0002/0006/0017/0019.
 
-**Estado:** T08a completa; compatibilidad T08b pendiente. No hay bloqueo, conexión, puente ni servicio operativos.
+**Estado:** T08 completa; pruebas Home aceptadas por el mantenedor el 2026-10-08 para
+continuar T09. Compatibilidad Pro pendiente antes de entregar al local. No hay bloqueo,
+conexión, puente ni servicio operativos.
 El inicio ordinario de ambos ejecutables devuelve un error deliberado hasta sus tareas
 de implementación; `--check-build` solo comprueba que arranca el artefacto. No usar estos
 binarios como Shell de Windows ni instalarlos en el local. T08b verifica el inventario;
@@ -74,10 +76,12 @@ WebView2 ni muestra UI; su navegación y puente se implementan después del prot
 El SDK de WebView2 añade una referencia WPF que se elimina antes de resolver assemblies
 porque este host solo usa WinForms; no se silencian advertencias de compilación.
 
-T08a comprueba build/tests/publicación en desarrollo. No demuestra consumo de RAM,
-aislamiento, juego exclusivo, audio, recuperación ni compatibilidad de las PCs del local.
+T08a comprueba build/tests/publicación en desarrollo. T08b añade arranque autocontenido
+y 334 tests ejecutados en Home, aceptados por el mantenedor para continuar T09.
+No demuestra consumo de RAM, aislamiento, juego exclusivo, audio, recuperación ni
+compatibilidad Pro de las PCs del local.
 La [matriz oficial .NET 10](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)
-incluye Windows 11 25H2 y no Windows 10 Pro 22H2. T08b debe registrar la ejecución real
-en ambos Windows Pro; la VM disponible es Windows 10 Home 22H2, autorizada solo para
-pruebas preliminares, con 8 GB y 2 vCPU. Ver
+incluye Windows 11 25H2 y no Windows 10 Pro 22H2. La ejecución real en ambos Windows Pro
+queda pendiente antes de la entrega; la VM disponible es Windows 10 Home 22H2,
+con 8 GB y ahora 4 vCPU. Sus pruebas fueron aceptadas el 2026-10-08 para cerrar T08. Ver
 [mediciones de la spec](../../docs/specs/003-bloqueo-de-pc/mediciones.md).

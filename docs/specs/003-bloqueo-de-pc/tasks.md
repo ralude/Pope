@@ -1,6 +1,6 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** T01–T07 completos. T08–T20 autorizadas para continuación autónoma (mantenedor, 2026-10-07), con sus verificaciones previas. T21–T59 en Borrador.
+- **Estado:** T01–T08 completos; pruebas Home aceptadas para cerrar T08 (mantenedor, 2026-10-08). T09–T20 autorizadas para continuación autónoma, con sus verificaciones previas. T21–T59 en Borrador.
 - **Plan:** [plan.md](plan.md), autorizado hasta T20; decisiones técnicas abiertas y verificaciones previas pendientes.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
@@ -129,7 +129,7 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
 ### Base nativa y conexión
 
-- [ ] **T08: Solución y pruebas nativas**
+- [x] **T08: Solución y pruebas nativas**
   - **Cubre:** REQ-003-02, REQ-003-60, REQ-003-62, REQ-003-63.
   - **Hacer:** crear `apps/native` con servicio, host y tests; fijar SDK/framework y dependencias justificadas tras comprobar Windows; consumir fixtures T07 y documentar comandos.
   - **Verificar:** build/test/publicación `win-x64`, contratos JSON en C# y ausencia de lógica de saldo o cobro; compilar en desarrollo, no en el nodo.
@@ -138,8 +138,9 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Host confirmado (mantenedor, 2026-10-07):** opción A, WinForms + WebView2 con interfaz React, según ADR-0019. No equivale a haber superado la compatibilidad ni el prototipo T09.
   - **División antes de entregar (2026-10-07):** separar preparación en desarrollo y verificación del inventario; T08 se marca solo cuando ambas estén completas.
   - [x] **T08a:** solución Agent/ShellHost/tests, SDK/dependencias fijadas y justificadas, scripts del workspace, fixtures T07, build/test y publicación autocontenida `win-x64` en desarrollo. Sin instalar servicios ni modificar Windows. **Implementada (2026-10-07):** SDK 10.0.401/runtime 10.0.12, host WinForms + WebView2, locks de NuGet y scripts integrados; 334 tests C# pasan, build sin avisos y arranque de ambos artefactos comprobado en Windows 10.0.26300.0. 1 581 tests del workspace y controles obligatorios en verde. Compatibilidad real del inventario en T08b; grupo sigue 7/59.
-  - [ ] **T08b:** verificar los artefactos y los contratos en Windows 10 Pro 22H2 y Windows 11 Pro 25H2; registrar versiones/evidencia. VM Windows 10 Home 22H2 disponible con 8192 MB y 2 vCPU; pruebas preliminares en Home autorizadas por el mantenedor (2026-10-07), sin sustituir Pro. No inferir compatibilidad del SDK ni del build en desarrollo. Antes de pasar a T09.
+  - [x] **T08b:** artefactos y contratos ejecutados en la VM Home y aceptados por el mantenedor (2026-10-08) para cerrar T08 y continuar T09. Esta decisión sustituye el gate original de pruebas en Windows 10 Pro 22H2 y Windows 11 Pro 25H2 antes de T09. Se conserva la comprobación Pro antes de entregar al local, sin declarar cumplido REQ-003-62 para ese inventario.
     - **Verificación preliminar (2026-10-08):** Guest Control recuperado; misma VM Home 22H2 x64 (19045.2965), 8192 MB y ahora 4 vCPU. Agent/ShellHost autocontenidos `--check-build` devuelven 0 sin SDK en PATH; 334 tests C# correctos, cero fallos/omitidos, con SDK portable 10.0.401/runtime 10.0.12. Informes JSON/TRX recogidos en `tmp/`; detalle en `mediciones.md`. No cierra T08b ni habilita T09–T20: faltan ambas versiones Pro.
+    - **Aprobación posterior (2026-10-08):** «toma estas pruebas hechas con win 10 home como validas y seguimos con T09». Los resultados anteriores pasan a ser evidencia aceptada para T08b; T08 completa, grupo 8/59. T09 conserva sus verificaciones de escritorio, ACL, WebView2 y juego exclusivo.
 
 - [ ] **T09: Prototipo de escritorio separado y WebView2**
   - **Cubre:** REQ-003-30, REQ-003-33; REQ-002-04, REQ-002-05; CA-002-02.

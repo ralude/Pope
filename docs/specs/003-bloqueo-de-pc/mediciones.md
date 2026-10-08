@@ -21,7 +21,12 @@ REQ-003-02/60/62/63; ADR-0002/0006/0017/0019.
   el paquete nativo integrado: **1 581 tests**, incluidos los 334 C# (el resto se
   verificó en esta sesión y se reutilizó desde caché al integrar el workspace).
 
-## T08b · compatibilidad del inventario pendiente
+## T08b · resultados Home aceptados; compatibilidad Pro pendiente
+
+**Aprobación posterior (mantenedor, 2026-10-08):** acepta las pruebas Home de este
+informe como válidas para cerrar T08b/T08 y continuar T09. Sustituye el gate anterior;
+las notas preliminares de abajo conservan el alcance existente cuando se ejecutaron.
+No se han probado los Windows Pro del inventario; se verificarán antes de la entrega.
 
 | Entorno exigido | Evidencia | Estado |
 |---|---|---|
@@ -94,7 +99,8 @@ REQ-003-02/62/63; evidencia preliminar, sin cierre de T08b ni aprobación de REQ
 
 No se han creado/cambiado escritorios, instalado servicios, modificado UAC ni probado
 credenciales de mantenimiento Windows. La VM Home vuelve a estar accesible, pero la
-compatibilidad Pro de T08b sigue pendiente antes de T09. T09 requiere también PC
+compatibilidad Pro sigue pendiente antes de la entrega; el mantenedor autoriza T09
+con los resultados Home aceptados. T09 requiere también PC
 real con juego exclusivo, monitores/audio/versiones registrados, ida/vuelta por Alt+Tab
 sin Explorer y apps intactas. T10 debe demostrar token elevado, perfil, aislamiento y
 salida exclusiva de mantenimiento, con ADR-0018 todavía Propuesto. Las verificaciones

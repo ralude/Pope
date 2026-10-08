@@ -470,6 +470,11 @@ sola el mecanismo propuesto de ADR-0018 ni permite omitir pruebas del entorno ai
 Se divide T08 en T08a (herramientas, solución y contratos) y T08b (compatibilidad en el
 inventario Windows), sin añadir funcionalidad. El grupo solo se cierra al verificar ambas.
 
+**Decisión posterior (mantenedor, 2026-10-08):** aceptar los resultados ejecutados en
+Windows 10 Home 22H2 para cerrar T08b/T08 y continuar T09. Sustituye el gate Pro previo
+a T09 descrito en este apartado. REQ-003-62 y el inventario conservan Pro como objetivo;
+pruebas Pro pendientes antes de entregar al local, sin inferir su resultado desde Home.
+
 - SDK **10.0.401** fijado con `global.json`, solo parches estables de esa banda; framework
   `net10.0-windows`, ejecutables autocontenidos `win-x64`, según ADR-0006. El SDK de esta
   sesión se extrae bajo `tmp/`, sin instalación global ni cambios de servicio/cuentas.
