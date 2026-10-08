@@ -435,6 +435,13 @@ propios y cierre por Job Object. Solo usa APIs Windows, sin proponer nuevas depe
 El mantenedor aprueba explícitamente y pide continuar T10. Demostrar cada propiedad
 en la VM antes de integrarla; la aceptación no sustituye esa prueba.
 
+**Herramienta T10:** ampliar únicamente `Pope.DesktopProbe`. Referencia a `Pope.Agent`
+para reutilizar `System.ServiceProcess.ServiceController` ya fijado en T08, sin paquete
+nuevo. Broker sesión 0 y ayudante SYSTEM sin GUI en consola: Windows no permite heredar
+handles entre sesiones. El ayudante obtiene los tokens, perfil y escritorio; las ventanas
+se ejecutan bajo el usuario previsto. Un único servicio temporal por GUID y Job Objects
+acotan todos los procesos del ensayo; no es el servicio de producto de T15.
+
 ### Fondo
 
 El panel acepta JPG/PNG/WebP hasta 10 MB, reduce sin deformar a máximo 1920×1080 y

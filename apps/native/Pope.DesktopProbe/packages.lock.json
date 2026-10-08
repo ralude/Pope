@@ -7,6 +7,17 @@
         "resolved": "1.0.4191.47",
         "contentHash": "Snb6mlTpuz6ZFjWMwIdg28Xp6kAUMy3zaLUyGbFSaw+/AJKlwoX8EiaWJ1eUMfKyJHksPkFjJHl1LIB7kX+0AQ=="
       },
+      "System.ServiceProcess.ServiceController": {
+        "type": "Transitive",
+        "resolved": "10.0.12",
+        "contentHash": "sFV+RM/yPtshiCAEIuTm8Dt4F7VuKRbL50PnGC9nXHolk/jw+z3T8zx7axKTBC8mqtQU2ZmjsoPC9b1iwOilNQ=="
+      },
+      "pope.agent": {
+        "type": "Project",
+        "dependencies": {
+          "System.ServiceProcess.ServiceController": "[10.0.12, )"
+        }
+      },
       "pope.shellhost": {
         "type": "Project",
         "dependencies": {
@@ -19,6 +30,11 @@
         "type": "Transitive",
         "resolved": "1.0.4191.47",
         "contentHash": "Snb6mlTpuz6ZFjWMwIdg28Xp6kAUMy3zaLUyGbFSaw+/AJKlwoX8EiaWJ1eUMfKyJHksPkFjJHl1LIB7kX+0AQ=="
+      },
+      "System.ServiceProcess.ServiceController": {
+        "type": "Transitive",
+        "resolved": "10.0.12",
+        "contentHash": "sFV+RM/yPtshiCAEIuTm8Dt4F7VuKRbL50PnGC9nXHolk/jw+z3T8zx7axKTBC8mqtQU2ZmjsoPC9b1iwOilNQ=="
       }
     }
   }

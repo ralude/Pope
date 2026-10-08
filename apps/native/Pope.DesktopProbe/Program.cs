@@ -9,6 +9,12 @@ internal static class Program
         if (args is ["--credential-check"]) return ProbeCredential.Check();
         if (args is ["--token-check"]) return ProbeToken.Check();
         if (args is ["--configure-maintenance", var id]) return ProbeCredential.Configure(id);
+        if (args is ["--maintenance-service", var serviceId])
+        {
+            System.ServiceProcess.ServiceBase.Run(new ProbeBroker(serviceId) { ServiceName = ProbeBroker.Name(serviceId) });
+            return 0;
+        }
+        if (args is ["--maintenance-helper", var helperId]) return ProbeBroker.Helper(helperId);
         if (args is ["--run-on-vm", var output] && Path.IsPathFullyQualified(output)) return ProbeRun.Run(output);
         if (args is ["--game-on-vm", var gameOutput, var game] && Path.IsPathFullyQualified(gameOutput) && Path.IsPathFullyQualified(game))
             return ProbeRun.Run(gameOutput, game);
