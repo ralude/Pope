@@ -25,7 +25,7 @@ REQ-003-02/60/62/63; ADR-0002/0006/0017/0019.
 
 | Entorno exigido | Evidencia | Estado |
 |---|---|---|
-| Windows 10 Pro 22H2 x64 | Build exacto de Windows, publicación autocontenida, fixtures, arranque de artefactos | Pendiente: la VM disponible es Home, autorizada solo para comprobaciones preliminares |
+| Windows 10 Pro 22H2 x64 | Build exacto de Windows, publicación autocontenida, fixtures, arranque de artefactos | Pendiente: la VM Home supera las comprobaciones preliminares, sin sustituir Pro |
 | Windows 11 Pro 25H2 x64 | Build exacto de Windows, publicación autocontenida, fixtures, arranque de artefactos | Pendiente: acceso a PC/VM de esa versión |
 
 La matriz oficial de [.NET 10](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)
@@ -59,11 +59,42 @@ del fabricante. No cambiar framework/inventario/ADR sin resolver cualquier fallo
   La credencial se conserva solo en un archivo ignorado con ACL restringida; los comandos
   usan `--passwordfile`, sin imprimirla ni incorporarla al repositorio.
 
+### VM Home · ejecución preliminar (2026-10-08)
+
+REQ-003-02/62/63; evidencia preliminar, sin cierre de T08b ni aprobación de REQ-003-62.
+
+- El mantenedor informa de que la VM vuelve a estar disponible. Guest Control permite
+  ejecutar y copiar archivos con la cuenta existente. VirtualBox/Guest Additions siguen
+  en **7.2.20 r175154**, misma VM/UUID; **8192 MB y ahora 4 vCPU**, red NAT.
+- El runner identifica **Windows 10 Home 22H2 x64**, `EditionID=Core`, build
+  **19045.2965**. Inicio del informe: **2026-10-08T14:18:24.8666668Z**.
+- Paquete preparado en la sesión anterior, ejecutado en
+  `C:\Users\vboxuser\Pope-T08b-20261008\`. SHA256 de los dos ejecutables, DLL de tests y
+  fixtures comprobados contra su manifest antes de ejecutar. Los ejecutables y JSON
+  del protocolo coinciden con los del workspace; no se compila en el invitado.
+- **Agent y ShellHost `--check-build`: código 0**, antes de extraer el SDK portable;
+  no había `dotnet` en PATH. Se comprueba el arranque de las publicaciones autocontenidas,
+  sin inicializar WebView2 ni mostrar UI. No demuestra el bloqueo ni el host operativo.
+- SDK portable **10.0.401**, SHA512 comprobado antes de extraer, runtime **10.0.12**.
+  `dotnet vstest` sobre el DLL preparado: **334/334 correctos**, cero fallos y cero
+  omitidos; 333 fixtures T07 más cobertura de los 19 contratos. Código de salida **0**.
+- Informes recogidos en `tmp/vm-t08b/result-smoke.json`, `result.json` y `protocol.trx`
+  (ignorados por Git). El TRX confirma 334 ejecutados/correctos y runtime 10.0.12.
+  Credencial fuera de Git y de los informes; usada exclusivamente mediante archivo.
+- `pnpm format`, `pnpm lint`, `pnpm typecheck` y `pnpm test` correctos antes de registrar
+  la evidencia. Turborepo reutiliza la caché de los paquetes sin cambios de producto;
+  los 334 tests del invitado se ejecutan realmente y tienen su TRX independiente.
+- Sin instalación global de SDK/runtime, servicio, cambios de cuentas, shell, UAC o
+  escritorios. El bloqueo anterior de Guest Control queda resuelto. La siguiente
+  verificación sigue siendo ejecutar artefactos/contratos en **ambos Windows Pro**;
+  T08b y el grupo T08 permanecen abiertos, sin avanzar a T09–T20.
+  El mantenedor confirma que por ahora solo está disponible la VM Home.
+
 ## T09/T10 · prototipos pendientes
 
 No se han creado/cambiado escritorios, instalado servicios, modificado UAC ni probado
-credenciales de mantenimiento Windows. La VM Home disponible tiene el bloqueo de acceso
-descrito arriba. T09 requiere también PC
+credenciales de mantenimiento Windows. La VM Home vuelve a estar accesible, pero la
+compatibilidad Pro de T08b sigue pendiente antes de T09. T09 requiere también PC
 real con juego exclusivo, monitores/audio/versiones registrados, ida/vuelta por Alt+Tab
 sin Explorer y apps intactas. T10 debe demostrar token elevado, perfil, aislamiento y
 salida exclusiva de mantenimiento, con ADR-0018 todavía Propuesto. Las verificaciones
