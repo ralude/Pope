@@ -20,6 +20,9 @@ estos mismos casos en C#; los tests TypeScript todavía no prueban el consumidor
 `valid` esperado, fijado explícitamente. El consumidor debe resolver el schema por versión
 y contrato, normalizar el usuario y comprobar el resultado sin coerción. Los tests leen
 estos JSON exportados y comparan los resultados con Zod. No contienen secretos reales.
+Cuando figure `normalizedUsername`, comprobar también ese valor exacto tras el recorte.
+La matriz incluye los 25 caracteres de recorte, caracteres conservados, espacios interiores,
+mayúsculas/acentos y límites con emojis. Nunca medir esos límites con longitud UTF-16.
 
 Referencias: [exportación Zod](https://zod.dev/json-schema),
 [Ajv draft 2020-12](https://ajv.js.org/json-schema.html),

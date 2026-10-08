@@ -288,5 +288,116 @@ export function protocolFixtures(): ProtocolFixture[] {
   ] as const)
     add('v2', ['background-snapshot'], name, false, { ...snapshot, background });
 
+  add('v2', outgoing, 'money-decimal', false, {
+    type: 'state',
+    status: 'active',
+    session: { ...account, money: { ...money, micros: 0.1 } },
+    vesRate: null,
+  });
+  add('v2', outgoing, 'money-unsafe', false, {
+    type: 'state',
+    status: 'active',
+    session: { ...account, money: { ...money, micros: 9_007_199_254_740_992 } },
+    vesRate: null,
+  });
+  add('v2', outgoing, 'money-extra', false, {
+    type: 'state',
+    status: 'active',
+    session: { ...account, money: { ...money, password: 'prueba' } },
+    vesRate: null,
+  });
+  add('v2', ['registration-response'], 'credential-padding-bits', false, {
+    pc,
+    credential: `${'A'.repeat(42)}B`,
+    protocolVersion: 2,
+  });
+  add('v2', ['installation-code-response'], 'not-utc', false, {
+    id,
+    code,
+    expiresAt: '2026-10-07T12:00:00+01:00',
+  });
+  add('v2', ['installation-code-response'], 'not-v7', false, {
+    id: '00000000-0000-4000-8000-000000000000',
+    code,
+    expiresAt: time,
+  });
+  for (const result of [
+    { status: 'applied', effect: { kind: 'lock' } },
+    { status: 'failed', kind: 'lock', code: 'native_failure', message: 'Fallo de prueba' },
+  ])
+    add('v2', ['pc-to-node'], `ack-${result.status}`, true, { ...ack, result });
+  for (const stage of ['verifying', 'ready'])
+    add('v2', ['shell-notification'], stage, true, {
+      type: 'backgroundProgress',
+      revision: 1,
+      stage,
+    });
+  add('v2', ['shell-notification'], 'progress-failed', true, {
+    type: 'backgroundProgress',
+    revision: 1,
+    stage: 'failed',
+    code: 'hash_mismatch',
+  });
+
+  // Reglas de longitud Unicode, contraseña intacta y recorte explícito del usuario.
+  const trimPoints = [
+    9, 10, 11, 12, 13, 32, 160, 5760, 8192, 8193, 8194, 8195, 8196, 8197, 8198, 8199, 8200, 8201,
+    8202, 8232, 8233, 8239, 8287, 12288, 65279,
+  ];
+  for (const [version, contract, type] of [
+    ['v1', 'pc-to-node', 'login'],
+    ['v2', 'pc-to-node', 'login'],
+    ['v2', 'shell-request', 'login'],
+    ['v2', 'pc-to-node', 'technicalLogin'],
+    ['v2', 'shell-request', 'technicalLogin'],
+  ] as const) {
+    const login = { type, requestId: id, username: 'Ana', password: ' \ufeffprueba\u0085 ' };
+    for (const point of [...trimPoints, 0x0085, 0x180e, 0x200b]) {
+      const char = String.fromCodePoint(point);
+      const interior = `Á${char}na`;
+      const expected = trimPoints.includes(point) ? interior : `${char}${interior}${char}`;
+      add(
+        version,
+        [contract],
+        `${type}-unicode-${String(point)}`,
+        true,
+        { ...login, username: `${char}${interior}${char}` },
+        expected,
+      );
+    }
+    for (const [name, username, valid] of [
+      ['limit', ` ${'😀'.repeat(64)} `, true],
+      ['over-limit', '😀'.repeat(65), false],
+      ['empty-trim', ' \ufeff\u3000\t', false],
+    ] as const)
+      add(
+        version,
+        [contract],
+        `${type}-${name}`,
+        valid,
+        { ...login, username },
+        valid ? '😀'.repeat(64) : undefined,
+      );
+    for (const [name, password, valid] of [
+      ['password-limit', '😀'.repeat(256), true],
+      ['password-over-limit', '😀'.repeat(257), false],
+      ['password-space', ' ', true],
+      ['password-empty', '', false],
+    ] as const)
+      add(version, [contract], `${type}-${name}`, valid, { ...login, password });
+    add(
+      version,
+      [contract],
+      `${type}-ascii-limit`,
+      true,
+      { ...login, username: ` ${'a'.repeat(64)} ` },
+      'a'.repeat(64),
+    );
+    add(version, [contract], `${type}-ascii-over-limit`, false, {
+      ...login,
+      username: 'a'.repeat(65),
+    });
+    add(version, [contract], `${type}-extra-property`, version === 'v1', { ...login, credential });
+  }
   return fixtures;
 }

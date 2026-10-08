@@ -59,12 +59,15 @@ describe('fixtures compartidos con C#', () => {
     if (contract === undefined) throw new Error(`Contrato desconocido: ${fixture.id}`);
     const original = structuredClone(fixture.input);
     const normalized = normalizeProtocolInput(fixture.contract, fixture.input);
-    expect(contract.schema.safeParse(fixture.input).success).toBe(fixture.valid);
+    const parsed = contract.schema.safeParse(fixture.input);
+    expect(parsed.success).toBe(fixture.valid);
     expect(contract.validate(normalized), JSON.stringify(contract.validate.errors)).toBe(
       fixture.valid,
     );
-    if (fixture.normalizedUsername !== undefined)
+    if (fixture.normalizedUsername !== undefined) {
       expect(normalized).toHaveProperty('username', fixture.normalizedUsername);
+      expect(parsed.success && parsed.data).toHaveProperty('username', fixture.normalizedUsername);
+    }
     if (original !== null && typeof original === 'object' && 'password' in original)
       expect(normalized).toHaveProperty('password', original.password);
     expect(fixture.input).toEqual(original);

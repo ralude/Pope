@@ -1951,5 +1951,2769 @@
         "name": "Prueba"
       }
     }
+  },
+  {
+    "id": "v2/node-to-pc/money-decimal",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": false,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 0.1,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/shell-notification/money-decimal",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 0.1,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/node-to-pc/money-unsafe",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": false,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 9007199254740992,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/shell-notification/money-unsafe",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 9007199254740992,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/node-to-pc/money-extra",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": false,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD",
+          "password": "prueba"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/shell-notification/money-extra",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": false,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD",
+          "password": "prueba"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/registration-response/credential-padding-bits",
+    "version": "v2",
+    "contract": "registration-response",
+    "valid": false,
+    "input": {
+      "pc": {
+        "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "name": "PC de prueba",
+        "macAddress": "02:11:22:33:44:55"
+      },
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAB",
+      "protocolVersion": 2
+    }
+  },
+  {
+    "id": "v2/installation-code-response/not-utc",
+    "version": "v2",
+    "contract": "installation-code-response",
+    "valid": false,
+    "input": {
+      "id": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "code": "AAAAAAAAAAAAAAAAAAAAAA",
+      "expiresAt": "2026-10-07T12:00:00+01:00"
+    }
+  },
+  {
+    "id": "v2/installation-code-response/not-v7",
+    "version": "v2",
+    "contract": "installation-code-response",
+    "valid": false,
+    "input": {
+      "id": "00000000-0000-4000-8000-000000000000",
+      "code": "AAAAAAAAAAAAAAAAAAAAAA",
+      "expiresAt": "2026-10-07T12:00:00.000Z"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/ack-applied",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "commandAck",
+      "commandId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "occurredAt": "2026-10-07T12:00:00.000Z",
+      "result": {
+        "status": "applied",
+        "effect": {
+          "kind": "lock"
+        }
+      }
+    }
+  },
+  {
+    "id": "v2/pc-to-node/ack-failed",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "commandAck",
+      "commandId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "occurredAt": "2026-10-07T12:00:00.000Z",
+      "result": {
+        "status": "failed",
+        "kind": "lock",
+        "code": "native_failure",
+        "message": "Fallo de prueba"
+      }
+    }
+  },
+  {
+    "id": "v2/shell-notification/verifying",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "backgroundProgress",
+      "revision": 1,
+      "stage": "verifying"
+    }
+  },
+  {
+    "id": "v2/shell-notification/ready",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "backgroundProgress",
+      "revision": 1,
+      "stage": "ready"
+    }
+  },
+  {
+    "id": "v2/shell-notification/progress-failed",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "backgroundProgress",
+      "revision": 1,
+      "stage": "failed",
+      "code": "hash_mismatch"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-9",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\tÁ\tna\t",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\tna"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-10",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\nÁ\nna\n",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\nna"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-11",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\u000bÁ\u000bna\u000b",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\u000bna"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-12",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\fÁ\fna\f",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\fna"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-13",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\rÁ\rna\r",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\rna"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-32",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-160",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-5760",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8192",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8193",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8194",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8195",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8196",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8197",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8198",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8199",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8200",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8201",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8202",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8232",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8233",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8239",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8287",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-12288",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "　Á　na　",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á　na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-65279",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "﻿Á﻿na﻿",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á﻿na"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-133",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ána",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Ána"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-6158",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "᠎Á᠎na᠎",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "᠎Á᠎na᠎"
+  },
+  {
+    "id": "v1/pc-to-node/login-unicode-8203",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "​Á​na​",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "​Á​na​"
+  },
+  {
+    "id": "v1/pc-to-node/login-limit",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+  },
+  {
+    "id": "v1/pc-to-node/login-over-limit",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-empty-trim",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " ﻿　\t",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-password-limit",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-password-over-limit",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-password-space",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " "
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-password-empty",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": ""
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-ascii-limit",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "id": "v1/pc-to-node/login-ascii-over-limit",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v1/pc-to-node/login-extra-property",
+    "version": "v1",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " ﻿prueba ",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-9",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\tÁ\tna\t",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\tna"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-10",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\nÁ\nna\n",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\nna"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-11",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\u000bÁ\u000bna\u000b",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\u000bna"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-12",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\fÁ\fna\f",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\fna"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-13",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\rÁ\rna\r",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\rna"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-32",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-160",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-5760",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8192",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8193",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8194",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8195",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8196",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8197",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8198",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8199",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8200",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8201",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8202",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8232",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8233",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8239",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8287",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-12288",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "　Á　na　",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á　na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-65279",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "﻿Á﻿na﻿",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á﻿na"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-133",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ána",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Ána"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-6158",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "᠎Á᠎na᠎",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "᠎Á᠎na᠎"
+  },
+  {
+    "id": "v2/pc-to-node/login-unicode-8203",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "​Á​na​",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "​Á​na​"
+  },
+  {
+    "id": "v2/pc-to-node/login-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+  },
+  {
+    "id": "v2/pc-to-node/login-over-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-empty-trim",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " ﻿　\t",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-password-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-password-over-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-password-space",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-password-empty",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": ""
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-ascii-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "id": "v2/pc-to-node/login-ascii-over-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/login-extra-property",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " ﻿prueba ",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "id": "v2/shell-request/login-unicode-9",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\tÁ\tna\t",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\tna"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-10",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\nÁ\nna\n",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\nna"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-11",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\u000bÁ\u000bna\u000b",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\u000bna"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-12",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\fÁ\fna\f",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\fna"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-13",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\rÁ\rna\r",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\rna"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-32",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-160",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-5760",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8192",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8193",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8194",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8195",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8196",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8197",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8198",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8199",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8200",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8201",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8202",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8232",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8233",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8239",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8287",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-12288",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "　Á　na　",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á　na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-65279",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "﻿Á﻿na﻿",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á﻿na"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-133",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ána",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Ána"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-6158",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "᠎Á᠎na᠎",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "᠎Á᠎na᠎"
+  },
+  {
+    "id": "v2/shell-request/login-unicode-8203",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "​Á​na​",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "​Á​na​"
+  },
+  {
+    "id": "v2/shell-request/login-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+  },
+  {
+    "id": "v2/shell-request/login-over-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/shell-request/login-empty-trim",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " ﻿　\t",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/shell-request/login-password-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/shell-request/login-password-over-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/shell-request/login-password-space",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " "
+    }
+  },
+  {
+    "id": "v2/shell-request/login-password-empty",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": ""
+    }
+  },
+  {
+    "id": "v2/shell-request/login-ascii-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "id": "v2/shell-request/login-ascii-over-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/shell-request/login-extra-property",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "login",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " ﻿prueba ",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-9",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\tÁ\tna\t",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\tna"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-10",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\nÁ\nna\n",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\nna"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-11",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\u000bÁ\u000bna\u000b",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\u000bna"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-12",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\fÁ\fna\f",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\fna"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-13",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\rÁ\rna\r",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\rna"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-32",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-160",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-5760",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8192",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8193",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8194",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8195",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8196",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8197",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8198",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8199",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8200",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8201",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8202",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8232",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8233",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8239",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8287",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-12288",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "　Á　na　",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á　na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-65279",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "﻿Á﻿na﻿",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á﻿na"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-133",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ána",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Ána"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-6158",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "᠎Á᠎na᠎",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "᠎Á᠎na᠎"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-unicode-8203",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "​Á​na​",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "​Á​na​"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-over-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-empty-trim",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " ﻿　\t",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-password-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-password-over-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-password-space",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-password-empty",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": ""
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-ascii-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-ascii-over-limit",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/pc-to-node/technicalLogin-extra-property",
+    "version": "v2",
+    "contract": "pc-to-node",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " ﻿prueba ",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-9",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\tÁ\tna\t",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\tna"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-10",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\nÁ\nna\n",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\nna"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-11",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\u000bÁ\u000bna\u000b",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\u000bna"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-12",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\fÁ\fna\f",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\fna"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-13",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "\rÁ\rna\r",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á\rna"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-32",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-160",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-5760",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8192",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8193",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8194",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8195",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8196",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8197",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8198",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8199",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8200",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8201",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8202",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8232",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8233",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8239",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8287",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " Á na ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-12288",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "　Á　na　",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á　na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-65279",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "﻿Á﻿na﻿",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Á﻿na"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-133",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ána",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "Ána"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-6158",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "᠎Á᠎na᠎",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "᠎Á᠎na᠎"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-unicode-8203",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "​Á​na​",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "​Á​na​"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-over-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-empty-trim",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " ﻿　\t",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-password-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-password-over-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-password-space",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " "
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-password-empty",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": ""
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-ascii-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": true,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ",
+      "password": " ﻿prueba "
+    },
+    "normalizedUsername": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-ascii-over-limit",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "password": " ﻿prueba "
+    }
+  },
+  {
+    "id": "v2/shell-request/technicalLogin-extra-property",
+    "version": "v2",
+    "contract": "shell-request",
+    "valid": false,
+    "input": {
+      "type": "technicalLogin",
+      "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "username": "Ana",
+      "password": " ﻿prueba ",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
   }
 ]

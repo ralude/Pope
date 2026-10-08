@@ -1,6 +1,6 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Contratos y datos T01–T06 completos; T07a/b1 completas, T07b2 pendiente. T08–T59 siguen en Borrador.
+- **Estado:** Contratos y datos T01–T07 completos. T08–T59 siguen en Borrador.
 - **Plan:** [plan.md](plan.md), aprobado para este bloque; resto pendiente.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
@@ -107,18 +107,18 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Commit:** `feat(server): guarda los metadatos del fondo global`.
   - **Implementada (2026-10-07):** migración 0028: una fila global, revisión cero/fondo por defecto inicialmente; SHA-256, bytes, WebP y dimensiones completos con límites de shared. Retirar conserva revisión positiva, fecha UTC y actor. Cuatro pruebas de upgrade, límites, retirada y reaplicación pasan en ambos motores; 909 tests del monorepo (391 del servidor en PostgreSQL), formato, lint, tipos y build pasan. Archivo, permisos, evento y endpoints quedan en T43.
 
-- [ ] **T07: Exportación del protocolo para C#**
+- [x] **T07: Exportación del protocolo para C#**
   - **Cubre:** REQ-003-63; ADR-0002.
   - **Hacer:** exportar JSON Schema y fixtures válidos/inválidos desde los esquemas zod, incluyendo mensajes existentes y nuevos; versionar los artefactos de compatibilidad.
   - **Verificar:** los fixtures pasan/fallan donde corresponde, exportación reproducible y detección de cambios incompatibles sin duplicar reglas de negocio.
   - **Commit:** `build(shared): exporta el protocolo para el cliente Windows`.
-  - **Contrato confirmado (mantenedor, 2026-10-07):** opción A: conservar `trim` del usuario antes de validar, exportar los caracteres exactos de recorte e instrucciones para C# y verificar coincidencia con fixtures compartidos. Nunca recortar la contraseña. Implementación pendiente.
-  - **División de implementación (2026-10-07):** dos commits dentro del bloque autorizado, para separar la infraestructura de exportación de los casos de compatibilidad.
+  - **Contrato confirmado (mantenedor, 2026-10-07):** opción A: conservar `trim` del usuario antes de validar, exportar los caracteres exactos de recorte e instrucciones para C# y verificar coincidencia con fixtures compartidos. Nunca recortar la contraseña. Implementado en T07a/b.
+  - **División de implementación (2026-10-07):** exportación/normalización (T07a) y fixtures (T07b, subdividida abajo), dentro del bloque autorizado.
   - [x] **T07a:** exportación reproducible/versionada de v1, v2 y puente; reglas de normalización y comprobación del contrato con JSON Schema. Implementados 19 contratos, guard de diferencias en build/tests y conjunto exacto de 25 caracteres de recorte; sin modificar el login ni contraseñas. T07b pendiente.
-  - [ ] **T07b:** fixtures compartidos válidos/inválidos, casos Unicode y fronteras de confianza; completar el grupo T07 tras verificarlos.
+  - [x] **T07b:** fixtures compartidos válidos/inválidos, casos Unicode y fronteras de confianza. 333 casos exportados; resultados explícitos coinciden entre Zod y Ajv. La comprobación en C# corresponde a T08.
     - **División antes de verificar/entregar (2026-10-07):** T07b1 cubre los 19 contratos y fronteras de confianza; T07b2 añade la matriz Unicode/contraseña. Se separan para mantener commits de unas 400 líneas no generadas.
     - [x] **T07b1:** casos compartidos de los 19 contratos, con resultados esperados explícitos y comprobación Zod/JSON Schema. Incluye órdenes separadas de React, salida durable solo del agente, secretos, recuperación, pausa y fondos; matriz Unicode/límites adicionales en T07b2.
-    - [ ] **T07b2:** casos Unicode de usuario y contraseña, límites y diferencias entre v1/v2; cierre de T07.
+    - [x] **T07b2:** casos Unicode de usuario y contraseña, límites y diferencias entre v1/v2; cierre de T07. Incluye los 25 caracteres de recorte, Unicode conservado, espacios interiores, 64/65 caracteres de usuario, 256/257 de contraseña, enteros seguros, UUIDv7 y UTC. Grupo 7/59; T08 sigue en Borrador.
 
 ### Base nativa y conexión
 
