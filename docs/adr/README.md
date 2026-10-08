@@ -64,3 +64,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0026](0026-permisos-del-acceso-de-emergencia.md) | Permisos del acceso de emergencia | Aceptado para permisos; mecanismo pendiente |
 | [0027](0027-windows-completo-en-emergencia.md) | Windows completo para reparar en emergencia | Aceptado para alcance; mecanismo pendiente |
 | [0028](0028-auditoria-de-emergencia-por-cuenta-windows.md) | Auditoría de emergencia por cuenta Windows | Aceptado para auditoría; mecanismo pendiente |
+| [0029](0029-sesion-windows-de-mantenimiento-con-uac.md) | Sesión Windows de mantenimiento con UAC | Propuesto; alcance de elevación y entrada/retorno pendientes |

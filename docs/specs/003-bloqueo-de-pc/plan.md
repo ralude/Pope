@@ -457,6 +457,14 @@ prototipo T10 con la estrategia de comprobaciones aprobada en `AGENTS.md`, conse
 la prueba parcial de VM y el gate abierto. No repetir esa ejecución sin cambios que
 puedan resolver el fallo.
 
+**Revisión documental preparada (2026-10-08):** [ADR-0029 Propuesto](../../adr/0029-sesion-windows-de-mantenimiento-con-uac.md)
+compara la sesión propia con UAC normal frente a Explorer siempre elevado. Describe
+entrada candidata mediante LogonUI/proveedor V2 y salida por sesión, señalando lo que
+las APIs no demuestran: transición, retorno autenticado y recuperación independiente.
+No sustituye ADR-0018 ni autoriza código, nuevas credenciales, lenguajes o políticas.
+Primero resolver la pregunta de elevación de la spec; después concretar y aprobar
+el mecanismo/plan antes de construirlo. Las etapas propuestas están en ese ADR.
+
 ### Fondo
 
 El panel acepta JPG/PNG/WebP hasta 10 MB, reduce sin deformar a máximo 1920×1080 y
