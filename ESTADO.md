@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-07 · continuación T08–T20 autorizada; T08 en preparación, VM Windows 10 pendiente
+**Última actualización:** 2026-10-07 · T08a completa; T08b pendiente de Windows 10/11 del inventario, continuación T08–T20 autorizada
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T07 completos; T08–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T08a: solución, herramientas y pruebas en desarrollo. T08b requiere validar Windows 10 Pro 22H2/11 Pro 25H2 antes de T09; la VM Windows 10 está pendiente de instalar y dar acceso |
-| **Progreso** | Spec 003: 7 / 59 grupos; T01–T07 completas. T08 dividida en preparación T08a y compatibilidad T08b; continuación T08–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad/herramientas y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
+| **Siguiente tarea** | T08b: validar los artefactos y contratos en Windows 10 Pro 22H2/11 Pro 25H2 antes de T09; la VM Windows 10 está pendiente de instalar y dar acceso. T08a completa |
+| **Progreso** | Spec 003: 7 / 59 grupos; T01–T07 completas y T08a implementada/verificada en desarrollo. T08 permanece abierta por compatibilidad T08b; continuación T08–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Bloqueos** | T08b: falta acceso a Windows 10 Pro 22H2 y Windows 11 Pro 25H2 del inventario; VirtualBox Windows 10 pendiente de instalar. La matriz oficial .NET 10 no incluye Windows 10 Pro 22H2; compatibilidad por demostrar antes de T09–T20. SDK/framework y tests C# preparados en T08a. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
 
@@ -63,6 +63,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-07:** T08a completa: solución Agent/ShellHost/tests con .NET 10.0.401, WinForms + SDK WebView2, locks de NuGet y scripts del workspace. 333 fixtures T07 coinciden en C#, más cobertura de los 19 contratos: 334 tests nativos; 1 581 tests del workspace en verde. Build sin avisos, publicaciones autocontenidas `win-x64` y arranque de comprobación pasan en desarrollo. Sin instalar servicios, mostrar UI ni cambiar Windows. T08b requiere Windows 10 Pro 22H2 y Windows 11 Pro 25H2 del inventario; VirtualBox Windows 10 aún no está disponible. T08 no se cierra y no se salta a T09–T20. Evidencia en `docs/specs/003-bloqueo-de-pc/mediciones.md`.
 
 - **2026-10-07:** el mantenedor pide continuar autónomamente T08–T20. Se registra el alcance sin aceptar implícitamente ADR-0018 ni omitir los prototipos obligatorios. T08 se divide en herramientas/contratos en desarrollo (T08a) y compatibilidad del inventario (T08b). SDK .NET 10.0.401 y dependencias justificadas en el plan; la matriz oficial no incluye Windows 10 Pro 22H2. El mantenedor instalará pronto VirtualBox con esa versión; aún no hay acceso para validar T08b/T09/T10.
 

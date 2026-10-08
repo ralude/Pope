@@ -1,0 +1,15 @@
+{
+  "name": "@pope/native",
+  "private": true,
+  "scripts": {
+    "build": "dotnet build Pope.slnx -c Release -p:RestoreLockedMode=true",
+    "typecheck": "dotnet build Pope.slnx -c Release -p:RestoreLockedMode=true",
+    "lint": "dotnet format Pope.slnx --verify-no-changes --no-restore",
+    "test": "dotnet test Pope.slnx -c Release -p:RestoreLockedMode=true",
+    "publish:agent": "dotnet publish Pope.Agent -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -o dist/agent",
+    "publish:host": "dotnet publish Pope.ShellHost -c Release -r win-x64 --self-contained true -p:RestoreLockedMode=true -o dist/host"
+  },
+  "devDependencies": {
+    "@pope/shared": "workspace:*"
+  }
+}

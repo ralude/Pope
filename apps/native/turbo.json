@@ -1,0 +1,14 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": ["**/bin/**", "**/obj/**"]
+    },
+    "lint": {
+      "dependsOn": ["build"]
+    },
+    "test": {
+      "dependsOn": ["build"]
+    }
+  }
+}
