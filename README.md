@@ -182,6 +182,7 @@ pnpm build
 # Sustituye usuario, contraseña y base por los de tu PostgreSQL de desarrollo.
 $env:DATABASE_URL = 'postgres://pope:clave@127.0.0.1:5432/pope'
 $env:POPE_MODE = 'local'
+$env:HOST = '127.0.0.1' # HTTP solo para desarrollo; en la LAN configurar TLS.
 
 # Administrador inicial: pide usuario, nombre y contraseña de forma interactiva.
 pnpm --filter @pope/server staff:create-admin
@@ -194,6 +195,9 @@ pnpm --filter @pope/server start
 ```
 
 Abre `http://127.0.0.1:3000` para entrar al panel compilado con el administrador creado.
+
+En la LAN el nodo exige HTTPS/WSS: configurar `POPE_TLS_CERT_FILE` y `POPE_TLS_KEY_FILE`
+según la [guía TLS](docs/specs/003-bloqueo-de-pc/tls.md).
 `GET /health` permite comprobar el nodo. Desde el panel puedes configurar tarifas, crear
 clientes, recargar saldo y abrir la caja antes de registrar cobros.
 

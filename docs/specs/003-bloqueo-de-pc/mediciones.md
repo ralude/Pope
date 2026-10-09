@@ -319,3 +319,18 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   verificar ventana cliente viva e informe, cerrar manualmente la sesión previa y
   continuar observación/retirada. Cuenta temporal y snapshots se conservan. Sin código
   nuevo; revisión documental, sin repetir compilación ni tests. T10 permanece abierta.
+
+### T11 · HTTPS/WSS del nodo (2026-10-09)
+
+- Fastify/Node sirven HTTPS/WSS sobre el mismo puerto, TLS mínimo 1.2; validan PEM,
+  vigencia y correspondencia antes de abrir PostgreSQL. HTTP local solo en loopback.
+- Prueba acotada: 14 tests config/transporte pasan; siete nuevos con HTTPS/WSS reales,
+  certificado ajeno/SAN erróneo/protocolo antiguo rechazados, certificado caducado,
+  clave distinta y PEM corrupto/excesivo rechazados al arrancar. Cookies Secure y
+  credenciales ficticias ausentes de logs. Certificados efímeros, sin CA/internet.
+- `pnpm format`, `pnpm lint`, `pnpm typecheck`, `pnpm test` y `pnpm build` correctos.
+  Total 1 588 tests: 1 254 TS (398 servidor) y 334 nativos; cero fallos/omitidos.
+  Build nativo también satisface su comprobación de tipos, sin cambio C#.
+  Pruebas repetidas solo para el helper corregido; logs en `tmp/t11-*.log` (ignorados).
+- Sin dependencias nuevas, claves versionadas, cambios de Windows ni integración
+  del mantenimiento T10. Registro/autenticación y confianza del agente en T12–T16.

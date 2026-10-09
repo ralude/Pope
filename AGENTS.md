@@ -184,6 +184,9 @@ Servidor (`apps/server`, NestJS sobre Fastify):
   carpeta donde el nodo guarda sus archivos, como las fotos de los productos, por defecto
   `apps/server/data/`, que no se sube al repo).
   Al arrancar aplica las migraciones pendientes. Comprobar: `GET /health`.
+  En modo local, HTTP solo permite `HOST=127.0.0.1` o `::1` para desarrollo. En la LAN
+  configurar juntos `POPE_TLS_CERT_FILE` y `POPE_TLS_KEY_FILE` (PEM): sirve HTTPS/WSS
+  en el mismo puerto. Confianza y renovación: [`tls.md`](docs/specs/003-bloqueo-de-pc/tls.md).
 - Fotos de los productos: el panel las reduce y las sube en WebP (`PUT /products/:id/photo`,
   cuerpo `image/webp` de 512 KB como mucho, sin multipart). El parser de ese tipo está en
   `bootstrap.ts`; el nodo guarda el archivo en `POPE_DATA_DIR/products/`.

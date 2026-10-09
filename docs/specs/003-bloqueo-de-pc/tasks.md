@@ -191,14 +191,14 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
           - [ ] **T10d2s3 · observación y retirada:** crear la cuenta con el asistente autorizado, observar cliente/sesión propia/Explorer/herramienta UAC, regreso manual y continuidad; conservar evidencia y retirar solo fixture identificada. No cerrar T10 por este ensayo inicial.
             - [x] **T10d2s3a · instrumentos (2026-10-09):** cuenta temporal privada creada/verificada. Observador CLI `--session-window` registra token, perfil, PID/inicio, Explorer estable, consola, archivo ficticio y cliente desde herramienta alta; UAC humano y duración máxima 15 min. Consulta de proceso con permisos mínimos verificada en host; build/formato y 334 tests pasan. Publicador VM/UUID con ZIP/hash y accesos propios listo, sin entrada/retorno automático. Ejecución manual y retirada aún pendientes.
 
-- [ ] **T11: Transporte cifrado del nodo**
+- [x] **T11: Transporte cifrado del nodo**
   - **Cubre:** REQ-003-63; ADR-0017.
   - **Hacer:** configurar HTTPS/WSS y certificados en `apps/server` según ADR aceptado, con guía de confianza y rotación; mantener operación por LAN sin internet.
   - **Verificar:** conexión válida, certificado ajeno/caducado rechazado, contraseñas ausentes de logs y funcionamiento local sin nube.
   - **Commit:** `feat(server): cifra la conexión del cliente Windows`.
   - **División previa a entrega (2026-10-09):** T11a implementa configuración/TLS y sus pruebas; T11b documenta confianza/rotación y registra la batería completa, para mantener commits revisables. T11 se marca solo al cerrar ambas.
   - [x] **T11a:** PEM acotados/validados antes de abrir PostgreSQL, HTTPS/WSS en el mismo puerto, TLS ≥ 1.2, HTTP local solo loopback y cookies Secure con TLS. Pruebas reales con certificados efímeros (identidad ajena/nombre, caducidad, clave distinta y ausencia de secretos); tipos y build correctos. Cierre de batería/guía en T11b.
-  - [ ] **T11b:** guía de confianza/renovación, comandos de desarrollo/LAN y validación completa antes de cerrar T11.
+  - [x] **T11b (2026-10-09):** [guía TLS](tls.md), comandos HTTP loopback/HTTPS LAN y procedimiento de confianza/renovación. Formato, lint, tipos, tests y build completos pasan: 1 588 tests (398 servidor + 334 nativos), HTTPS/WSS reales comprobados; sin secretos versionados, cambios de Windows ni dependencias nuevas. T11 completa; T12 siguiente, T10 aplazada.
 
 - [ ] **T12: Emisión y consumo de códigos de instalación**
   - **Cubre:** REQ-003-10, REQ-003-11; CA-003-11.
