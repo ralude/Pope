@@ -1,6 +1,6 @@
 # T10 · Ensayo mínimo de sesión Windows propia
 
-- **Estado:** Propuesto; requiere aprobación de la preparación de VM antes de ejecutar
+- **Estado:** Aprobado para este ensayo mínimo (mantenedor, 2026-10-08: «confirmo»); ejecución pendiente
 - **Fecha:** 2026-10-08
 - **Cubre:** viabilidad previa de REQ-003-40/43; no cierra esos requisitos ni T10
 - **Relacionado:** [ADR-0018](../../adr/0018-mantenimiento-con-cuenta-windows-existente.md), [ADR-0029](../../adr/0029-sesion-windows-de-mantenimiento-con-uac.md), [plan](plan.md), [tasks](tasks.md)
@@ -32,7 +32,10 @@ recuperación tras muerte del servicio. Esas propiedades siguen pendientes en T1
 
 ## Preparación propuesta para aprobación
 
-La autorización solicitada se limita a esta VM y a la preparación descrita aquí:
+El mantenedor confirma el ensayo propuesto el 2026-10-08. La autorización se limita
+a esta VM, el snapshot y la cuenta estándar temporal con su retirada, conforme a los
+pasos siguientes. No repetir esa solicitud de aprobación. El reinicio forzado de una
+VM que no responde requiere resolver la recuperación por separado.
 
 1. El mantenedor guarda su trabajo en la VM y la reserva para el ensayo. Inventariar
    cuentas, grupos, UAC, sesiones y recursos del prototipo mediante lecturas. Si Guest
@@ -53,8 +56,8 @@ La autorización solicitada se limita a esta VM y a la preparación descrita aqu
    trabajo e inicia `PopeT10Client`. No terminar automáticamente esa sesión previa ni
    sus procesos. Confirmar que la administradora ya no tiene una sesión abierta.
 
-La cuenta temporal requiere aprobación explícita: ADR-0018 prohíbe crear/habilitar
-cuentas como consecuencia implícita del ensayo. Esta propuesta amplía únicamente la
+La cuenta temporal tiene aprobación explícita: ADR-0018 prohíbe crear/habilitar
+cuentas como consecuencia implícita del ensayo. Esta confirmación amplía únicamente la
 preparación de pruebas, conserva la identidad administradora existente y no autoriza
 instalar proveedores ni implementar el mecanismo propuesto en ADR-0029.
 

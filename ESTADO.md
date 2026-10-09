@@ -4,16 +4,16 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-08 · Ensayo mínimo de sesión propia preparado; autorización de cuenta temporal en VM pendiente
+**Última actualización:** 2026-10-09 · Ensayo autorizado; VM recuperada y snapshot listo, preparar cuenta temporal
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 completos; T10–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T10d2s: aprobar y ejecutar el [ensayo mínimo de sesión propia](docs/specs/003-bloqueo-de-pc/ensayo-sesion-windows.md) en VM: snapshot, cuenta cliente estándar temporal y observación manual de sesión/Explorer/UAC/continuidad. Preparación documental T10d2v completa; cambios de VM pendientes de autorización. Primero recuperar lecturas Guest Control (consulta actual agota plazo). ADR-0029 aceptado solo para alcance; entrada/retorno/recuperación aún pendientes. T10 abierta; no avanzar T11 |
+| **Siguiente tarea** | T10d2s: ejecutar el [ensayo mínimo aprobado](docs/specs/003-bloqueo-de-pc/ensayo-sesion-windows.md). VM recuperada tras reinicio forzado autorizado; inventario revalidado y snapshot previo listo. Preparador de cuenta estándar temporal listo: entrada privada en VM, después observar sesión/Explorer/UAC/continuidad y retirar fixture. No volver a pedir autorización de cuenta/snapshot/reinicio. ADR-0029 acepta solo alcance; entrada/retorno/recuperación autónomos aún pendientes. T10 abierta; no avanzar T11 |
 | **Progreso** | Spec 003: 9 / 59 grupos; T01–T09 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación T09–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
-| **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control actual: nueva lectura agota plazo, recuperar antes del ensayo. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar/avanzar T11. Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. VM usa vboxuser con token medio/alto; cuenta cliente estándar/perfiles distintos aún sin demostrar. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
+| **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar/avanzar T11. Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. VM usa vboxuser con token medio/alto; cuenta cliente estándar/perfiles distintos aún sin demostrar. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
 
@@ -29,12 +29,12 @@ limitado bajo la administradora existente; las herramientas deben demostrar elev
 mediante UAC. Entrada/retorno automatizados y recuperación aún no están demostrados;
 no instalar proveedores ni modificar Windows a partir de esos candidatos.
 
-[Ensayo mínimo](docs/specs/003-bloqueo-de-pc/ensayo-sesion-windows.md) Propuesto y preparado:
-solicitar autorización para snapshot y cuenta cliente estándar temporal en `22h2 pope`.
-No crear esa cuenta hasta la respuesta. VM encendida según VirtualBox, sin snapshots;
-lectura actual de inventario Guest Control agota plazo, sin resultado nuevo. Recuperar
-esa lectura antes de cambios. El cambio manual de usuario solo estudia el escritorio,
-no cumple entrada remota/retorno autónomo ni cierra T10. No reiniciar automáticamente.
+[Ensayo mínimo](docs/specs/003-bloqueo-de-pc/ensayo-sesion-windows.md) aprobado explícitamente:
+«confirmo» autoriza snapshot y cuenta cliente estándar temporal con retirada en `22h2 pope`.
+El mantenedor confirma Windows sin respuesta y luego autoriza el reinicio forzado.
+Ejecutado únicamente en VM; Guest Control vuelve a leer. Snapshot operativo previo:
+`0535d231-c5b4-4c22-b0bf-cd3483d99ebc`; cuenta temporal aún no creada al preparar el asistente.
+El cambio manual de usuario solo estudia el escritorio y no cierra T10.
 
 1. Lee completos [`AGENTS.md`](AGENTS.md) y este archivo al iniciar un chat o una tarea,
    y al retomar tras una compactación, sin esperar a que el usuario lo pida.
@@ -83,6 +83,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-09:** ensayo mínimo autorizado («confirmo», 2026-10-08 local). Windows VM sin respuesta confirmado por mantenedor; reinicio forzado autorizado y ejecutado. Snapshot de recuperación 3f484244 guardado, luego snapshot operativo 0535d231 tras revalidar Home 22H2/19045.2965, único usuario habilitado administrador, UAC activo, cuenta temporal ausente. Preparador PowerShell privado listo: guard de UUID/modelo VM, ACL del manifiesto, SecureString, cuenta Usuarios y verificación de grupos/UAC; sintaxis y rechazo del Windows cotidiano comprobados. Sin cuenta nueva todavía ni cambio C#; no repetir pipeline de producto. T10 abierta, siguiente ejecutar preparación/observación.
+
 - **2026-10-08:** T10d2v documental completa: ensayo mínimo Propuesto para snapshot, cuenta estándar temporal `PopeT10Client`, inicio/cambio manual Windows, Explorer normal/UAC, continuidad y retirada por SID/GUID. La preparación de VM necesita autorización explícita; no se crea cuenta ni instala proveedor. Consulta actual Guest Control agota plazo; VM figura encendida y sin snapshots, inventario anterior sin revalidar. Documentadas restricciones COM/AOT y retorno como hipótesis. Diff/enlaces revisados sin repetir pipeline de producto; T10 abierta, 9/59, siguiente aprobación/preparación T10d2s.
 
 - **2026-10-08:** T10d2u documental: el mantenedor confirma «Windows normal con UAC (recomendado)». ADR-0029 aceptado solo para alcance y sustituye el criterio de Explorer elevado de ADR-0018, conservando identidad/custodia. Spec/plan/T10 alineados; entrada automatizada, retorno y recuperación pendientes de mecanismo aprobado. Sin código ni cambios de Windows; revisión documental sin repetir tests. T10 abierta, 9/59; siguiente preparar prueba mínima de sesión propia en VM y concretar mecanismo.
@@ -100,5 +102,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-08:** T10c2 preparada: ventana/hijo administrativo sin WebView2, rechazo de SYSTEM/no elevación y evidencia de token/perfil/escritorio. Cliente limitado prueba DACL del escritorio, custodia y duplicación del token. Build/checks en verde; aún no ejecutado con credencial real. T10 abierta, 9/59; siguiente T10c3.
 
 - **2026-10-08:** T10c1 preparada: APIs de carga/entorno/descarga de perfil y escritorios con ACL SYSTEM/SID del nuevo logon. ACE propia de estación sin CREATEDESKTOP/EXITWINDOWS, retirada selectiva; no borrar perfiles ni permisos ajenos. Se solicita acceso de ajuste explícito al token del broker para activar privilegios ya concedidos. Build/checks en verde; propiedades reales pendientes en VM. T10 abierta, 9/59; siguiente T10c2.
-
-- **2026-10-08:** T10b2 preparada: broker ServiceBase SYSTEM en sesión 0, ayudante sin GUI en consola y operaciones fijas por GUID. Reutiliza dependencia T08; Job Object sin breakaway, asignación suspendida y plazo 120 s. Build/locks/checks en verde; aún sin servicio instalado ni token administrativo demostrado. T10c dividida previamente en perfil/ACL, ventanas y coordinación. T10 abierta, 9/59; siguiente T10c1.

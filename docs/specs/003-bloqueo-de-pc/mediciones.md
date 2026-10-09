@@ -259,3 +259,24 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   cuentas, grupos, UAC, políticas, sesiones Windows o proveedor realizado aquí.
 - Cambio documental; revisión de contenido/enlaces/diff, sin repetir compilaciones ni
   los 1 581 tests ya ejecutados sobre el mismo código. T10/T10d2 siguen abiertas.
+
+### T10 · recuperación autorizada y asistente de cuenta temporal (2026-10-09 UTC)
+
+- «Confirmo» aprueba el ensayo y su preparación (2026-10-08 local). El mantenedor
+  informa Windows VM sin respuesta y autoriza explícitamente reinicio forzado.
+- Primer intento de snapshot en vivo devuelve `VBOX_E_INVALID_VM_STATE`, sin resultado.
+  Snapshot normal completado: `Pope-T10-before-own-session-20261009-035332`, UUID
+  `3f484244-5a23-44cc-aaa0-72461724216c`. Luego se ejecuta reset solo de esta VM.
+- Guest Control vuelve a responder. Inventario del **2026-10-09T03:59:16.5462407Z**:
+  VirtualBox, Home/Core 22H2, 19045.2965, una cuenta habilitada administradora,
+  `PopeT10Client` ausente, EnableLUA=1, sesión de lectura 1 y prototipo anterior disponible.
+- Snapshot con Windows operativo completado: UUID `0535d231-c5b4-4c22-b0bf-cd3483d99ebc`;
+  es la referencia previa a la creación de cuenta. El snapshot anterior se conserva.
+- Preparador PowerShell limitado a UUID/modelo de esta VM y administradora elevada:
+  contraseña privada como SecureString, cuenta Usuarios, grupos/UAC previos conservados,
+  manifiesto sin secreto con escritura exclusiva SYSTEM/Administradores. Si falla,
+  deshabilita únicamente la cuenta creada con el SID/marcador del ensayo.
+- AST correcto y rechazo del Windows cotidiano antes de escrituras comprobado. La
+  primera lectura CIM en sandbox no tiene permisos; la comprobación elevada de solo
+  lectura termina con el rechazo esperado. Sin ejecutar creación de cuentas en el host.
+  No cambia C# ni entradas del pipeline anterior; no repetir tests/compilación de producto.
