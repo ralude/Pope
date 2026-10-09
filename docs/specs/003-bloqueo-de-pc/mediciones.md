@@ -242,3 +242,20 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   Windows completo en la VM, y la fase de muerte del broker sigue sin ejecutar.
   No avanzar T11 ni marcar T10/T10d2 completas. La prueba de desarrollo no sustituye
   Windows 11 Pro 25H2 del local ni Windows 10 Pro 22H2.
+
+### T10 · preparación de sesión propia y acceso a VM (2026-10-08)
+
+- VirtualBox informa `22h2 pope` en ejecución; consulta de Guest Additions devuelve
+  7.2.20. La lista de snapshots indica que no hay ninguno; no se crea uno en esta etapa.
+- La nueva lectura de inventario mediante Guest Control, con plazo de 25 s, falla con
+  `VERR_TIMEOUT` al leer salida del proceso. Se cancela la espera del host; el cierre
+  de la sesión Guest Control también devuelve timeout. La orden solo leía inventario.
+  No hay JSON nuevo ni prueba de modificación de Windows o de congelación de la VM.
+- No actualizar el inventario de cuentas desde esa orden: sigue siendo evidencia previa
+  el único usuario habilitado/administrador. Recuperar lecturas antes del ensayo.
+- [Ensayo mínimo Propuesto](ensayo-sesion-windows.md): snapshot verificado y cuenta
+  cliente estándar temporal requieren autorización; entrada/retorno manuales solo
+  comprueban viabilidad del escritorio, no REQ-003-40/43 completos. Ningún cambio de
+  cuentas, grupos, UAC, políticas, sesiones Windows o proveedor realizado aquí.
+- Cambio documental; revisión de contenido/enlaces/diff, sin repetir compilaciones ni
+  los 1 581 tests ya ejecutados sobre el mismo código. T10/T10d2 siguen abiertas.

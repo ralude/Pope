@@ -467,6 +467,12 @@ El mecanismo no está aceptado: concretar y aprobar entrada, retorno y recuperac
 antes de construirlo. No añadir credenciales, lenguajes o políticas desde los candidatos.
 Las etapas propuestas están en ese ADR; empezar por viabilidad del escritorio en VM.
 
+**Ensayo mínimo Propuesto (2026-10-08):** [preparación y secuencia](ensayo-sesion-windows.md)
+con snapshot y cuenta cliente estándar temporal, pendientes de autorización explícita.
+La observación inicial usa cambio manual de usuario y no satisface entrada remota ni
+retorno autónomo. Recuperar acceso de lectura a la VM antes de preparar el ensayo;
+la consulta actual de Guest Control agota plazo y no actualiza el inventario anterior.
+
 ### Fondo
 
 El panel acepta JPG/PNG/WebP hasta 10 MB, reduce sin deformar a máximo 1920×1080 y
