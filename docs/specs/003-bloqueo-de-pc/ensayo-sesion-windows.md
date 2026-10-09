@@ -35,7 +35,10 @@ recuperación tras muerte del servicio. Esas propiedades siguen pendientes en T1
 **Avance (2026-10-09):** recuperación y snapshots completados con autorización.
 Snapshot operativo `0535d231-c5b4-4c22-b0bf-cd3483d99ebc`. Cuenta estándar temporal creada
 mediante entrada privada y verificada por SID/marcador/grupos; UAC y administradores
-conservados. Ensayo `7d26df55ba4248e09e985fd18f03439a`. Cambio manual de usuario pendiente.
+conservados. Ensayo `7d26df55ba4248e09e985fd18f03439a`. Publicación y accesos propios
+comprobados. Windows abre Explorer cliente en sesión 2, pero la ventana/informe cliente
+aún no se corroboran; Explorer administrativo previo sigue en sesión 1. Cerrar esa
+sesión previa manualmente antes de medir una nueva, conservando el cliente.
 
 El mantenedor confirma el ensayo propuesto el 2026-10-08. La autorización se limita
 a esta VM, el snapshot y la cuenta estándar temporal con su retirada, conforme a los

@@ -29,6 +29,11 @@ dependientes. Windows/edición y ausencia de congelador confirmados (2026-10-07)
 verificar compatibilidad y persistencia antes de T48–T54;
 registrar juegos/monitores/audio antes de T09/T21/T24/T25 y NIC/Wake-on-LAN antes de T58.
 
+**Cambio de orden (mantenedor, 2026-10-09):** «deja t10 para luego y ve con las
+siguientes tareas». T10 se aplaza abierta; continuar T11–T20, una tarea por commit.
+Sustituye el bloqueo anterior de avance a T11. No valida el mantenimiento ni autoriza
+integrar su mecanismo pendiente: T37 y las verificaciones de T10 se conservan.
+
 La **fase 2 de la spec 002** se implementa aquí en T23–T25 y se verifica en T56; incluye
 regresiones de T17/T22/T27/T55. Sus 19 tareas de fase 1 permanecen aprobadas y completas.
 La lista no implementa el catálogo ni restauración de perfiles de la spec 004.

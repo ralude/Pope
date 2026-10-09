@@ -300,3 +300,22 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   `--no-restore` falla NETSDK1112 por configuración de paquetes de runtime; la restauración
   correspondiente a self-contained resuelve el empaquetado. Sin dependencias nuevas.
   Ensayo manual, lectura de evidencia y retirada pendientes; no cierra T10.
+
+### T10 · publicación y arranque cliente por verificar (2026-10-09 UTC)
+
+- Publicación transferida y preparada con UAC humano: `deployment.json` presente,
+  accesos Cliente/Administrador con destino y argumentos fijos correctos. SHA256 EXE
+  `88D8481D487F7CD953C6E6FE4D8F3D0DF7440E5A9DBF14EE38A2D79E2C62E6A9` y DLL
+  `4B596FFD5802BBD32F24DB17BEB60154B3021C1F0A90E9A9B76F14F84701FF16`
+  coinciden con la publicación comprobada del host.
+- El mantenedor comunica «Ventana Cliente abierta». Lecturas posteriores no encuentran
+  `Pope.DesktopProbe` ni `client.json` (ObjectNotFound); no hay eventos Application
+  1000/1026 del prototipo en la ventana consultada de 45 min. Esto no establece causa
+  de cierre ni prueba un fallo del observador. No exportar perfiles ni informes completos.
+- Explorer observado: PID 9484/sesión 2 y PID 10484/sesión 1; este último pertenece
+  al SID de vboxuser. La sesión administrativa previa no consta cerrada: no reutilizarla
+  como evidencia de inicio nuevo ni cerrarla automáticamente.
+- El mantenedor informa Windows preparando la cuenta y luego «ya funciona». Pendiente
+  verificar ventana cliente viva e informe, cerrar manualmente la sesión previa y
+  continuar observación/retirada. Cuenta temporal y snapshots se conservan. Sin código
+  nuevo; revisión documental, sin repetir compilación ni tests. T10 permanece abierta.

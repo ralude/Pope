@@ -37,6 +37,20 @@ existente; ADR-0018 aceptado el 2026-10-08, pendiente de demostrar el mecanismo 
 
 ## Componentes afectados
 
+**Cambio de orden (mantenedor, 2026-10-09):** aplazar T10 y continuar las siguientes
+tareas aprobadas T11–T20. Sustituye las indicaciones históricas de detener T11 por el
+gate de T10. El mantenimiento sigue sin demostrar; no integrarlo hasta cerrar T10.
+
+**Concreción T11 (ADR-0017):** TLS nativo de Fastify/Node, sin proxy ni dependencia
+nueva; `POPE_TLS_CERT_FILE` y `POPE_TLS_KEY_FILE` apuntan a PEM locales protegidos.
+Certificado y clave se validan antes de abrir la base o escuchar; TLS mínimo 1.2.
+En modo local sin TLS solo se permite escuchar en loopback para desarrollo. El mismo
+puerto sirve HTTPS, WSS y panel; las cookies locales pasan a Secure cuando hay TLS.
+La guía de confianza y renovación va en `tls.md`; la verificación/fijación del cliente
+se implementará en T14/T16, sin confiar automáticamente en certificados recibidos.
+Tests de transporte con OpenSSL (herramienta de desarrollo, también incluida en Git
+for Windows), certificados/clave efímeros en carpeta temporal y eliminación al cerrar.
+
 | Componente | Cambio y requisitos |
 |---|---|
 | `apps/native/Pope.Agent` | Servicio LocalSystem sin UI: registro, credencial, WebSocket, latidos, copia del estado y supervisión del host (003-02, 10, 11, 32, 63) |
