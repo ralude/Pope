@@ -14,6 +14,7 @@ describe('loadConfig (ADR-0003)', () => {
       host: '0.0.0.0',
       databaseUrl: DATABASE_URL,
       memoryLogMs: null,
+      tls: null,
       dataDir: resolve(import.meta.dirname, '..', 'data'),
     });
   });
@@ -27,6 +28,7 @@ describe('loadConfig (ADR-0003)', () => {
       host: '127.0.0.1',
       databaseUrl: DATABASE_URL,
       memoryLogMs: null,
+      tls: null,
       dataDir: resolve(import.meta.dirname, '..', 'data'),
     });
   });

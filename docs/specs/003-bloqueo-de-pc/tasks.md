@@ -196,6 +196,9 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** configurar HTTPS/WSS y certificados en `apps/server` según ADR aceptado, con guía de confianza y rotación; mantener operación por LAN sin internet.
   - **Verificar:** conexión válida, certificado ajeno/caducado rechazado, contraseñas ausentes de logs y funcionamiento local sin nube.
   - **Commit:** `feat(server): cifra la conexión del cliente Windows`.
+  - **División previa a entrega (2026-10-09):** T11a implementa configuración/TLS y sus pruebas; T11b documenta confianza/rotación y registra la batería completa, para mantener commits revisables. T11 se marca solo al cerrar ambas.
+  - [x] **T11a:** PEM acotados/validados antes de abrir PostgreSQL, HTTPS/WSS en el mismo puerto, TLS ≥ 1.2, HTTP local solo loopback y cookies Secure con TLS. Pruebas reales con certificados efímeros (identidad ajena/nombre, caducidad, clave distinta y ausencia de secretos); tipos y build correctos. Cierre de batería/guía en T11b.
+  - [ ] **T11b:** guía de confianza/renovación, comandos de desarrollo/LAN y validación completa antes de cerrar T11.
 
 - [ ] **T12: Emisión y consumo de códigos de instalación**
   - **Cubre:** REQ-003-10, REQ-003-11; CA-003-11.

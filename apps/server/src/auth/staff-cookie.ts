@@ -9,14 +9,13 @@ export const STAFF_COOKIE = 'pope_staff_session';
  * Opciones de la cookie (pregunta resuelta de la spec 001: token en cookie httpOnly).
  * - `httpOnly`: el JavaScript de la página no puede leerla.
  * - `sameSite: 'strict'`: el navegador no la envía desde otras webs (protege de CSRF).
- * - `secure` solo en la nube: en el local el panel va por http en la LAN, y con `secure` el
- *   navegador no la enviaría.
+ * - `secure` en nube y nodo con TLS; HTTP solo para desarrollo local en loopback.
  */
 export function staffCookieOptions(config: AppConfig, expires: Date): CookieSerializeOptions {
   return {
     httpOnly: true,
     sameSite: 'strict',
-    secure: config.mode === 'cloud',
+    secure: config.mode === 'cloud' || config.tls !== null,
     path: '/',
     expires,
   };

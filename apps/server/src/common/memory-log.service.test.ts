@@ -12,6 +12,7 @@ const config = (memoryLogMs: number | null): AppConfig => ({
   databaseUrl: 'postgres://test',
   memoryLogMs,
   dataDir: '/tmp/pope-test',
+  tls: null,
 });
 
 describe('registro de memoria (ADR-0011)', () => {

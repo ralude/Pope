@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-09 · T10 aplazada por el mantenedor; continuar T11–T20
+**Última actualización:** 2026-10-09 · Transporte HTTPS/WSS implementado; cierre T11 pendiente
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 completos; T10–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T11: transporte HTTPS/WSS del nodo. Mantenedor indica «deja t10 para luego y ve con las siguientes tareas» (2026-10-09): T10 queda abierta y aplazada; continuar T11–T20 sin integrar el mantenimiento pendiente. Cuenta temporal/observación/retirada de VM siguen pendientes al retomar T10; no volver a pedir la autorización ya concedida |
+| **Siguiente tarea** | T11b: cerrar batería completa y documentar confianza/rotación TLS; luego T12. T10 abierta y aplazada por indicación del mantenedor (2026-10-09). Cuenta temporal/observación/retirada VM pendientes al retomar T10; no volver a pedir la autorización ya concedida |
 | **Progreso** | Spec 003: 9 / 59 grupos; T01–T09 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación T09–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar/avanzar T11. Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
@@ -92,6 +92,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-09:** T11a implementa TLS nativo de Fastify/Node sin dependencias nuevas. HTTPS/WSS reales y rechazo de certificados/nombre/PEM/clave/caducidad, TLS antiguo, cookies Secure y ausencia de credenciales en logs comprobados con fixtures efímeros. Build/tipos correctos; cierre de batería y guía en T11b. T10 aplazada, sin cambios de Windows.
 
 - **2026-10-09:** mantenedor aplaza T10 y autoriza seguir las siguientes tareas aprobadas. Siguiente T11 (HTTPS/WSS); T10 y la observación/retirada de fixture VM quedan pendientes. Conservada la evidencia del observador publicada antes del cambio de orden. Sin cambios de Windows.
 

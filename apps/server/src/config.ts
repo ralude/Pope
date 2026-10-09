@@ -13,21 +13,33 @@ const SERVER_ROOT = fileURLToPath(new URL('..', import.meta.url));
 export const popeModeSchema = z.enum(['local', 'cloud']);
 export type PopeMode = z.infer<typeof popeModeSchema>;
 
-const configSchema = z.object({
-  // Obligatorio: nunca se arranca en un modo por accidente.
-  POPE_MODE: popeModeSchema,
-  PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
-  // Por defecto escucha en todas las interfaces: las PCs llegan por la LAN.
-  HOST: z.string().min(1).default('0.0.0.0'),
-  // Cadena de conexión de PostgreSQL, p. ej. postgres://pope:clave@127.0.0.1:5432/pope.
-  DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
-  // Opcional: cada cuántos ms se registra la memoria del proceso (prueba de carga, ADR-0011).
-  // Ausente = desactivado. Mínimo 1000 para no llenar el log.
-  POPE_MEMORY_LOG_MS: z.coerce.number().int().min(1000).optional(),
-  // Opcional: carpeta donde el nodo guarda sus archivos, como las fotos de los productos
-  // (spec 005). Por defecto, `data/` junto al servidor.
-  POPE_DATA_DIR: z.string().min(1).optional(),
-});
+const configSchema = z
+  .object({
+    // Obligatorio: nunca se arranca en un modo por accidente.
+    POPE_MODE: popeModeSchema,
+    PORT: z.coerce.number().int().min(1).max(65_535).default(3000),
+    // Por defecto escucha en todas las interfaces: las PCs llegan por la LAN.
+    HOST: z.string().min(1).default('0.0.0.0'),
+    // Cadena de conexión de PostgreSQL, p. ej. postgres://pope:clave@127.0.0.1:5432/pope.
+    DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+    // Opcional: cada cuántos ms se registra la memoria del proceso (prueba de carga, ADR-0011).
+    // Ausente = desactivado. Mínimo 1000 para no llenar el log.
+    POPE_MEMORY_LOG_MS: z.coerce.number().int().min(1000).optional(),
+    // Opcional: carpeta donde el nodo guarda sus archivos, como las fotos de los productos
+    // (spec 005). Por defecto, `data/` junto al servidor.
+    POPE_DATA_DIR: z.string().min(1).optional(),
+    POPE_TLS_CERT_FILE: z.string().min(1).optional(),
+    POPE_TLS_KEY_FILE: z.string().min(1).optional(),
+  })
+  .superRefine((config, context) => {
+    if (Boolean(config.POPE_TLS_CERT_FILE) !== Boolean(config.POPE_TLS_KEY_FILE)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['POPE_TLS_CERT_FILE', 'POPE_TLS_KEY_FILE'],
+        message: 'Configura juntos el certificado y la clave TLS',
+      });
+    }
+  });
 
 export interface AppConfig {
   mode: PopeMode;
@@ -38,6 +50,8 @@ export interface AppConfig {
   memoryLogMs: number | null;
   /** Carpeta de datos del nodo, ruta absoluta (fotos de los productos, REQ-005-03). */
   dataDir: string;
+  /** PEM del nodo (ADR-0017); null solo en HTTP de desarrollo o tras proxy cloud. */
+  tls: { certFile: string; keyFile: string } | null;
 }
 
 /** Token de inyección de la configuración. */
@@ -52,7 +66,16 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       .join('\n');
     throw new Error(`Configuración no válida:\n${problems}`);
   }
-  const { POPE_MODE, PORT, HOST, DATABASE_URL, POPE_MEMORY_LOG_MS, POPE_DATA_DIR } = result.data;
+  const {
+    POPE_MODE,
+    PORT,
+    HOST,
+    DATABASE_URL,
+    POPE_MEMORY_LOG_MS,
+    POPE_DATA_DIR,
+    POPE_TLS_CERT_FILE,
+    POPE_TLS_KEY_FILE,
+  } = result.data;
   return {
     mode: POPE_MODE,
     port: PORT,
@@ -61,5 +84,9 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
     memoryLogMs: POPE_MEMORY_LOG_MS ?? null,
     // Una ruta relativa se toma desde la carpeta en que se arranca el nodo.
     dataDir: resolve(POPE_DATA_DIR ?? resolve(SERVER_ROOT, 'data')),
+    tls:
+      POPE_TLS_CERT_FILE && POPE_TLS_KEY_FILE
+        ? { certFile: resolve(POPE_TLS_CERT_FILE), keyFile: resolve(POPE_TLS_KEY_FILE) }
+        : null,
   };
 }

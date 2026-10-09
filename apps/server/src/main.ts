@@ -6,19 +6,21 @@ import { fileURLToPath } from 'node:url';
 
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { type NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { AppModule } from './app.module.js';
 import { configureApp } from './bootstrap.js';
 import { loadConfig } from './config.js';
 import { openPostgresDatabase } from './db/postgres.js';
+import { createNodeAdapter } from './transport.js';
 
 const config = loadConfig(process.env);
+const adapter = await createNodeAdapter(config);
 // Aplica las migraciones pendientes antes de aceptar conexiones.
 const database = await openPostgresDatabase(config.databaseUrl);
 const app = await NestFactory.create<NestFastifyApplication>(
   AppModule.register(config, database),
-  new FastifyAdapter(),
+  adapter,
 );
 // El nodo local sirve el panel compilado (T45a): `apps/panel/dist`, junto a este paquete.
 let panelDir: string | null = null;

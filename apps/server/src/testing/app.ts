@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { type Type } from '@nestjs/common';
-import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
+import { type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { Test } from '@nestjs/testing';
 
 import { AppModule } from '../app.module.js';
@@ -14,6 +14,7 @@ import { configureApp } from '../bootstrap.js';
 import type { AppConfig } from '../config.js';
 import type { DatabaseHandle } from '../db/database.js';
 import { createTestDatabase } from './database.js';
+import { createNodeAdapter } from '../transport.js';
 
 export interface TestApp {
   app: NestFastifyApplication;
@@ -28,6 +29,7 @@ export interface TestAppOptions {
   clock?: Clock;
   /** Carpeta de un panel compilado de prueba, para servirlo (T45a). */
   panelDir?: string;
+  tls?: AppConfig['tls'];
 }
 
 /**
@@ -48,6 +50,7 @@ export async function createTestApp(
     databaseUrl: 'postgres://test',
     memoryLogMs: null,
     dataDir,
+    tls: options.tls ?? null,
   };
   const builder = Test.createTestingModule({
     imports: [AppModule.register(config, database)],
@@ -57,7 +60,9 @@ export async function createTestApp(
     builder.overrideProvider(Clock).useValue(options.clock);
   }
   const moduleRef = await builder.compile();
-  const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
+  const app = moduleRef.createNestApplication<NestFastifyApplication>(
+    await createNodeAdapter(config),
+  );
   await configureApp(app, { panelDir: options.panelDir ?? null });
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
