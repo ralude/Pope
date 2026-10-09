@@ -1,6 +1,6 @@
 # ADR-0018: Mantenimiento con una cuenta administradora Windows existente
 
-- **Estado:** Aceptado (mantenedor, 2026-10-08; mecanismo pendiente de demostrar en T10)
+- **Estado:** Aceptado para identidad/custodia; criterio de Explorer elevado reemplazado por ADR-0029 (mantenedor, 2026-10-08); mecanismo no demostrado en T10
 - **Fecha:** 2026-10-04
 - **Relacionado:** ADR-0005, ADR-0006, ADR-0017, spec 003
 

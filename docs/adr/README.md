@@ -53,7 +53,7 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0015](0015-dinero-en-micro-unidades.md) | Importes en micro-unidades enteras | Aceptado |
 | [0016](0016-servidor-del-local-i3-siempre-encendido.md) | El servidor del local es un i3-2120 con 8 GB, casi siempre encendido | Aceptado |
 | [0017](0017-comunicacion-segura-del-cliente-windows.md) | Comunicación segura entre nodo, agente y Shell de Windows | Aceptado |
-| [0018](0018-mantenimiento-con-cuenta-windows-existente.md) | Mantenimiento con una cuenta administradora Windows existente | Aceptado |
+| [0018](0018-mantenimiento-con-cuenta-windows-existente.md) | Mantenimiento con una cuenta administradora Windows existente | Aceptado para identidad/custodia; elevación reemplazada por ADR-0029 |
 | [0019](0019-host-del-shell-en-winforms.md) | Host del Shell en WinForms con WebView2 | Aceptado |
 | [0020](0020-recuperacion-de-pcs-revocadas.md) | Recuperación de PCs revocadas conservando la sesión | Aceptado para comportamiento; permisos en ADR-0021, mecanismo pendiente |
 | [0021](0021-permisos-de-revocacion-y-recuperacion.md) | Permisos de revocación y recuperación de PCs | Aceptado; complementa los permisos de ADR-0020 |
@@ -64,4 +64,4 @@ anterior, y en el viejo solo se actualiza el estado.
 | [0026](0026-permisos-del-acceso-de-emergencia.md) | Permisos del acceso de emergencia | Aceptado para permisos; mecanismo pendiente |
 | [0027](0027-windows-completo-en-emergencia.md) | Windows completo para reparar en emergencia | Aceptado para alcance; mecanismo pendiente |
 | [0028](0028-auditoria-de-emergencia-por-cuenta-windows.md) | Auditoría de emergencia por cuenta Windows | Aceptado para auditoría; mecanismo pendiente |
-| [0029](0029-sesion-windows-de-mantenimiento-con-uac.md) | Sesión Windows de mantenimiento con UAC | Propuesto; alcance de elevación y entrada/retorno pendientes |
+| [0029](0029-sesion-windows-de-mantenimiento-con-uac.md) | Sesión Windows de mantenimiento con UAC | Aceptado para alcance; entrada/retorno y recuperación Propuestos |

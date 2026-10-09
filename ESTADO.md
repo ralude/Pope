@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-08 · revisión de sesión Windows preparada; aclarar UAC antes de otra ruta T10
+**Última actualización:** 2026-10-08 · Windows normal con UAC confirmado; preparar viabilidad de sesión propia en VM
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 completos; T10–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T10d2: resolver con el mantenedor el alcance de elevación de ADR-0029 Propuesto (Windows normal de administrador con UAC frente a Explorer/todo elevado). Revisión documental T10d2r preparada; después concretar/aprobar entrada, retorno y recuperación antes de construir. ADR-0018 sigue vigente; T10 abierta, no avanzar T11. T09 cerrada; juegos reales/anticheat pendientes en T25/T56 |
+| **Siguiente tarea** | T10d2: preparar la prueba mínima de viabilidad de sesión propia en VM y concretar entrada/retorno/recuperación. ADR-0029 aceptado para alcance: Windows normal con UAC. ADR-0018 conserva identidad/custodia; Explorer siempre elevado ya no es requisito. Preparación de otra cuenta cliente y mecanismo pendientes de autorización/aprobación concreta. T10 abierta; no avanzar T11 |
 | **Progreso** | Spec 003: 9 / 59 grupos; T01–T09 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación T09–T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar/avanzar T11. Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. VM usa vboxuser con token medio/alto; cuenta cliente estándar/perfiles distintos aún sin demostrar. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
@@ -23,11 +23,11 @@ para pruebas aisladas/reversibles y VM después para las que alteran el sistema.
 aprobación no cierra el gate funcional de T10 ni autoriza construir una ruta alternativa
 sin revisar y aprobar el mecanismo.
 
-La [propuesta ADR-0029](docs/adr/0029-sesion-windows-de-mantenimiento-con-uac.md) documenta
-que el inicio normal de una cuenta administradora usa Explorer limitado con UAC; otra
-sesión no garantiza Explorer elevado. La pregunta de alcance está en la spec y requiere
-respuesta antes de implementar. Entrada/retorno automatizados y recuperación aún no
-están demostrados; no instalar proveedores ni modificar Windows a partir del borrador.
+[ADR-0029](docs/adr/0029-sesion-windows-de-mantenimiento-con-uac.md) aceptado para alcance:
+el mantenedor elige «Windows normal con UAC (recomendado)». Explorer puede seguir
+limitado bajo la administradora existente; las herramientas deben demostrar elevación
+mediante UAC. Entrada/retorno automatizados y recuperación aún no están demostrados;
+no instalar proveedores ni modificar Windows a partir de esos candidatos.
 
 1. Lee completos [`AGENTS.md`](AGENTS.md) y este archivo al iniciar un chat o una tarea,
    y al retomar tras una compactación, sin esperar a que el usuario lo pida.
@@ -76,6 +76,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-08:** T10d2u documental: el mantenedor confirma «Windows normal con UAC (recomendado)». ADR-0029 aceptado solo para alcance y sustituye el criterio de Explorer elevado de ADR-0018, conservando identidad/custodia. Spec/plan/T10 alineados; entrada automatizada, retorno y recuperación pendientes de mecanismo aprobado. Sin código ni cambios de Windows; revisión documental sin repetir tests. T10 abierta, 9/59; siguiente preparar prueba mínima de sesión propia en VM y concretar mecanismo.
+
 - **2026-10-08:** T10d2r documental preparada: ADR-0029 Propuesto para sesión Windows propia con UAC, fuentes Microsoft y etapas de prueba. Explorer normal usa token limitado; pendiente confirmar si el mantenedor acepta ese alcance o exige todo elevado. Entrada mediante proveedor V2, retorno autenticado y supervisor son candidatos por concretar/probar; no se añaden lenguajes, credenciales, cuentas ni políticas. ADR-0018 vigente; T10/T10d2 abiertas, 9/59. Solo documentos: diff/enlaces revisados, sin repetir pipeline automático. Siguiente: respuesta de alcance, luego diseño/aprobación del mecanismo.
 
 - **2026-10-08:** estrategia de validación por tarea y Windows de desarrollo → VM aprobada y guardada en AGENTS.md. Pipeline pendiente de T10 completado: formato/lint/tipos/build pasan; 1 581 tests correctos (1 247 TS + 334 nativos). Fixture DPAPI/token limitado pasa en Windows 11 de desarrollo 26H2/26300.9457; sin cambios del sistema. Caché y compilación nativa compartida entre build/tipos; sin repetir publicación/VM. Siguiente revisión elegida: sesión Windows independiente, sin construirla aún. T10 permanece abierta por el gate de Explorer; no avanzar T11.
@@ -93,6 +95,4 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-08:** T10b2 preparada: broker ServiceBase SYSTEM en sesión 0, ayudante sin GUI en consola y operaciones fijas por GUID. Reutiliza dependencia T08; Job Object sin breakaway, asignación suspendida y plazo 120 s. Build/locks/checks en verde; aún sin servicio instalado ni token administrativo demostrado. T10c dividida previamente en perfil/ACL, ventanas y coordinación. T10 abierta, 9/59; siguiente T10c1.
 
 - **2026-10-08:** T10b1 preparada: primitivas Win32 de logon interactivo, token vinculado/primario, sesión y token cliente limitado; todas con comentarios. Consulta real en desarrollo confirma token limitado (tipo 3), integridad 8192, sesión 1 y SID/logon coherentes. Sin autenticación administrativa ni cambios de Windows; obtención desde SYSTEM pendiente en VM. T10 abierta, 9/59; siguiente T10b2.
-
-- **2026-10-08:** T10a preparada: DPAPI de máquina, entrada privada nativa sin persistencia plana, staging protegido y almacén SYSTEM con reemplazo atómico. Fixture pública comprueba Unicode, corrupción y rechazo fuera de SYSTEM en desarrollo. Build sin avisos; verificación efectiva de ACL/propietario/configuración y reemplazo pendiente en VM en T10d. Sin cuentas ni credenciales reales configuradas. T10 abierta, 9/59; siguiente T10b.
 

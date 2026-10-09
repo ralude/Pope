@@ -1,9 +1,9 @@
 # ADR-0029: Sesión Windows de mantenimiento con UAC
 
-- **Estado:** Propuesto; pendiente confirmar alcance de elevación y concretar entrada/retorno
+- **Estado:** Aceptado para alcance (mantenedor, 2026-10-08); entrada/retorno y recuperación siguen Propuestos
 - **Fecha:** 2026-10-08
 - **Relacionado:** ADR-0006, ADR-0009, ADR-0017, ADR-0018, spec 003, T10
-- **Reemplazaría:** ADR-0018 si el mantenedor acepta el cambio; mientras tanto sigue vigente
+- **Reemplaza:** el criterio de Explorer siempre elevado de ADR-0018; conserva su identidad/custodia y no acepta otro mecanismo de entrada
 
 ## Contexto
 
@@ -42,18 +42,19 @@ La integración con nodo/panel y la emergencia siguen en sus tareas posteriores.
    [conectar](https://learn.microsoft.com/en-us/windows/win32/api/wtsapi32/nf-wtsapi32-wtsconnectsessionw),
    [cerrar sesión](https://learn.microsoft.com/es-es/windows/win32/api/wtsapi32/nf-wtsapi32-wtslogoffsession).
 
-## Decisión propuesta
+## Decisión de alcance aceptada
 
-Recomendar **una sesión Windows propia de la cuenta administradora, con el escritorio
+Usar **una sesión Windows propia de la cuenta administradora, con el escritorio
 normal de Windows y UAC activo**. Explorer permanece con el token limitado de esa
 cuenta; las herramientas que lo necesitan deben demostrar elevación efectiva mediante
 el flujo UAC de Windows. No desactivar UAC ni abrir escritorio/herramientas como SYSTEM.
 
-Esto cambia el criterio de Explorer elevado de ADR-0018. No interpretar su aprobación
-anterior como aceptación de este cambio. Hay que confirmar si «Windows con permisos de
-administrador» permite este comportamiento normal, incluidos los diálogos UAC que
-puedan exigir las políticas al usar herramientas. La entrada al mantenimiento debe
-seguir sin introducir otra contraseña en la PC; la configuración inicial es distinta.
+El mantenedor responde explícitamente **«Windows normal con UAC (recomendado)»** a la
+pregunta de alcance el 2026-10-08. Esto cambia el criterio de Explorer elevado de
+ADR-0018: acepta el comportamiento normal, incluidos los diálogos UAC que puedan exigir
+las políticas al usar herramientas. La entrada al mantenimiento sigue sin introducir
+otra contraseña en la PC; la configuración inicial es distinta. La respuesta acepta
+solo el alcance, no los componentes, políticas o credenciales aún por diseñar.
 
 Conservar identidad Windows existente, custodia local DPAPI/ACL SYSTEM, configuración
 privada, sustitución atómica y eliminación exclusiva de secretos propios. Pope no crea
@@ -141,9 +142,9 @@ ruta. La compatibilidad del inventario Pro sigue siendo obligatoria antes de ent
   pero no está demostrado que satisfaga entrada remota, elevación o recuperación.
 - Aumenta el trabajo nativo y de instalación respecto a la ruta anterior. Conviene
   probar primero el escritorio y la vuelta antes de completar un proveedor o instalador.
-- **Decisión del mantenedor pendiente:** escritorio normal de una cuenta administradora
-  con UAC, o requisito de Explorer/herramientas siempre elevados.
-- **Diseño pendiente tras esa decisión:** transición a LogonUI, proveedor/lenguaje,
+- **Alcance confirmado:** escritorio normal de una cuenta administradora con UAC;
+  no se exige Explorer siempre elevado. Las herramientas deben demostrar elevación.
+- **Diseño pendiente:** transición a LogonUI, proveedor/lenguaje,
   autenticación de retorno, supervisor independiente y preparación reversible de VM.
-- Este ADR sigue Propuesto. Aceptar el alcance del escritorio no acepta automáticamente
-  las políticas, componentes o nuevas credenciales aún abiertos.
+- Este ADR está aceptado solo para el alcance. Las políticas, componentes y nuevas
+  credenciales aún abiertos siguen pendientes de diseño, aprobación y prueba.
