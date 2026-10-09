@@ -22,15 +22,20 @@ recuperación tras muerte del servicio. Esas propiedades siguen pendientes en T1
 - VM objetivo: `22h2 pope`, UUID `954b5530-1c41-4970-810f-c35d5aa48b05`.
 - Última ejecución válida: Windows 10 Home 22H2, 19045.2965, 8 GB, 4 vCPU;
   solo `vboxuser` habilitada y administradora, con UAC activo. Revalidar antes del ensayo.
-- Consulta actual: VirtualBox informa VM en ejecución y Guest Additions 7.2.20.
-  No hay snapshots. Una nueva lectura de inventario por Guest Control agota el plazo;
+- Consulta previa: VirtualBox informa VM en ejecución y Guest Additions 7.2.20.
+  Entonces no había snapshots. La lectura de inventario por Guest Control agota el plazo;
   no hay resultado actualizado de cuentas ni evidencia de que la VM esté congelada.
-- No iniciar otra ejecución de autenticación ni interpretar el timeout como fallo del
+- Ante un timeout, no repetir la ejecución de autenticación ni interpretarlo como fallo del
   ensayo. Recuperar acceso de lectura antes de cualquier cambio; no reiniciar por defecto.
 - El prototipo anterior conserva su evidencia parcial y el fallo de Explorer. Sus dos
   logons en SessionId 1 no demuestran dos sesiones Windows ni dos perfiles de usuario.
 
-## Preparación propuesta para aprobación
+## Preparación aprobada
+
+**Avance (2026-10-09):** recuperación y snapshots completados con autorización.
+Snapshot operativo `0535d231-c5b4-4c22-b0bf-cd3483d99ebc`. Cuenta estándar temporal creada
+mediante entrada privada y verificada por SID/marcador/grupos; UAC y administradores
+conservados. Ensayo `7d26df55ba4248e09e985fd18f03439a`. Cambio manual de usuario pendiente.
 
 El mantenedor confirma el ensayo propuesto el 2026-10-08. La autorización se limita
 a esta VM, el snapshot y la cuenta estándar temporal con su retirada, conforme a los
@@ -62,6 +67,16 @@ preparación de pruebas, conserva la identidad administradora existente y no aut
 instalar proveedores ni implementar el mecanismo propuesto en ADR-0029.
 
 ## Secuencia de observación
+
+Instrumentos preparados: `Pope.DesktopProbe --session-window <GUID N> client|admin|elevated`.
+El [publicador](../../../apps/native/probes/deploy-own-session.ps1) comprueba UUID,
+identidad y ZIP/hash, y crea dos accesos de escritorio propios con destino protegido.
+El administrador abre la herramienta alta mediante el botón UAC; el usuario acepta
+Windows manualmente. No se introduce automáticamente ninguna credencial.
+Los informes/fixtures van al LocalAppData de cada identidad, separados por GUID/rol;
+la observación no publica contraseñas, perfiles ni capturas. La muestra inicial permite
+comparar PID/inicio/logon tras regresar. Esta etapa tiene un máximo de 15 minutos desde
+que se abre la ventana cliente; si caduca, la continuidad no queda demostrada.
 
 | Paso | Acción | Comprobación |
 |---|---|---|

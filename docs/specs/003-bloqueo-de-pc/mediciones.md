@@ -280,3 +280,23 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   primera lectura CIM en sandbox no tiene permisos; la comprobación elevada de solo
   lectura termina con el rechazo esperado. Sin ejecutar creación de cuentas en el host.
   No cambia C# ni entradas del pipeline anterior; no repetir tests/compilación de producto.
+
+### T10 · cuenta temporal e instrumentos de observación (2026-10-09 UTC)
+
+- El mantenedor completa UAC/entrada privada y confirma «Cuenta estándar creada y
+  comprobada». Lectura posterior del ensayo `7d26df55ba4248e09e985fd18f03439a`:
+  Stage=Ready, StandardVerified/Enabled/SidMatches/MarkerMatches/IsUsers=true,
+  IsAdministrator=false, grupo administrativo intacto y EnableLUA=1.
+- Observador nativo de cliente, administrador limitado y herramienta elevada con UAC
+  manual. Comprueba perfil/token y Explorer por PID/inicio/imagen durante 30 s; conserva
+  muestra inicial del cliente y copia técnica desde la herramienta alta. Archivos
+  ficticios propios y límites de 15 min; no cambia ni cierra sesiones automáticamente.
+- Formato y compilación nativos correctos, cero avisos; **334 tests** pasan sin omitidos.
+  `--process-token-check` en desarrollo confirma consulta Win32 del proceso coherente
+  con WindowsIdentity: no elevado, integridad 8192, sesión 1. No se abre GUI de ensayo
+  ni se altera Windows del equipo cotidiano. Publicador PowerShell: AST y guard del
+  host correctos. No repetir checks TS: no cambian sus entradas.
+- Publicación autocontenida correcta con dependencias bloqueadas. El primer intento
+  `--no-restore` falla NETSDK1112 por configuración de paquetes de runtime; la restauración
+  correspondiente a self-contained resuelve el empaquetado. Sin dependencias nuevas.
+  Ensayo manual, lectura de evidencia y retirada pendientes; no cierra T10.

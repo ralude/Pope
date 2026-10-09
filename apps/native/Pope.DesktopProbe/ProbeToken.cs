@@ -11,6 +11,27 @@ internal sealed class ProbeToken(nint handle) : IDisposable
     internal TokenState State => Inspect(Handle);
     public void Dispose() => CloseHandle(Handle);
 
+    internal static ProbeToken ForProcess(int pid)
+    {
+        var process = OpenProcess(0x1000, false, (uint)pid);
+        if (process == 0) throw new Win32Exception();
+        try
+        {
+            if (!OpenProcessToken(process, 8, out var token)) throw new Win32Exception();
+            return new ProbeToken(token);
+        }
+        finally { CloseHandle(process); }
+    }
+
+    internal static int CheckProcess()
+    {
+        using var identity = WindowsIdentity.GetCurrent();
+        using var token = ForProcess(Environment.ProcessId);
+        ProbeRun.Require(token.State == Inspect(identity.Token), "Consulta de proceso incoherente con WindowsIdentity");
+        Console.WriteLine(JsonSerializer.Serialize(token.State));
+        return 0;
+    }
+
     internal static ProbeToken Logon(ProbeCredential.CredentialBuffer credential, uint session)
     {
         var input = Marshal.PtrToStringUni(credential.User) ?? throw new InvalidDataException("Falta usuario Windows");
@@ -144,6 +165,12 @@ internal sealed class ProbeToken(nint handle) : IDisposable
     // Consulta SID/logon, elevación, integridad y sesión efectivos del token.
     [DllImport("advapi32.dll", SetLastError = true)]
     private static extern bool GetTokenInformation(nint token, int kind, nint information, int length, out int needed);
+    // Abre únicamente consulta limitada del proceso observado, sin duplicación ni terminación.
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern nint OpenProcess(uint access, bool inherit, uint pid);
+    // Lee el token del proceso; no solicita derechos para elevarlo o cambiarlo.
+    [DllImport("advapi32.dll", SetLastError = true)]
+    private static extern bool OpenProcessToken(nint process, uint access, out nint token);
     // Duplica como token primario no heredable, apto para CreateProcessAsUser.
     [DllImport("advapi32.dll", EntryPoint = "DuplicateTokenEx", SetLastError = true)]
     private static extern bool DuplicateToken(nint existing, uint access, nint attributes, int level, int type, out nint duplicate);

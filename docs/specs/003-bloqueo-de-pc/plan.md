@@ -471,8 +471,9 @@ Las etapas propuestas están en ese ADR; empezar por viabilidad del escritorio e
 con snapshot y cuenta cliente estándar temporal, incluida su retirada; no se autoriza
 otro mecanismo de mantenimiento. Recuperación y ejecución efectivas pendientes.
 La observación inicial usa cambio manual de usuario y no satisface entrada remota ni
-retorno autónomo. Recuperar acceso de lectura a la VM antes de preparar el ensayo;
-la consulta actual de Guest Control agota plazo y no actualiza el inventario anterior.
+retorno autónomo. Guest Control recuperado tras reinicio forzado autorizado; inventario
+revalidado y snapshot operativo guardado. Cuenta estándar temporal creada y verificada;
+observación manual y retirada pendientes. Detalle en las mediciones.
 
 ### Fondo
 
