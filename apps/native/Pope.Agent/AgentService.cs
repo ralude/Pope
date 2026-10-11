@@ -17,9 +17,9 @@ internal sealed class AgentService : ServiceBase
         AutoLog = false; // Los logs propios solo aceptan códigos cerrados y están acotados.
         CanStop = true;
         CanShutdown = true;
-        lifetime = new AgentLifetime(new AgentLog(root), () => AgentCustody.Read(root),
-            // T16 sustituirá esta espera por el canal autenticado; no inventar UI ni negocio.
-            static (_, token) => Task.Delay(Timeout.InfiniteTimeSpan, token));
+        var log = new AgentLog(root);
+        lifetime = new AgentLifetime(log, () => AgentCustody.Read(root),
+            (configuration, token) => new AgentChannel(configuration, log).RunAsync(token));
         lifetime.Failure += () => ThreadPool.QueueUserWorkItem(_ => Stop());
     }
 

@@ -23,7 +23,15 @@ public sealed class AgentLifetimeTests
                 Assert.Throws<TimeoutException>(() => lifetime.Stop());
                 Assert.True(lifetime.Failed);
             }
-            finally { release.SetResult(); }
+            finally
+            {
+                release.SetResult();
+                Assert.True(SpinWait.SpinUntil(() =>
+                {
+                    try { lifetime.Stop(); return true; }
+                    catch (TimeoutException) { return false; }
+                }, 2000));
+            }
         }
         finally { Directory.Delete(root, recursive: true); }
     }

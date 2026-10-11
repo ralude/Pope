@@ -255,6 +255,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(native): mantiene la conexión autenticada con el nodo`.
   - **División previa (2026-10-11):** T16a validación de contratos exportados sin dependencia de producto nueva; T16b canal TLS/Bearer, hello/latidos y reconexión cancelable; T16c pruebas de transporte real, límites/reintentos y batería general. T15/T10 quedan abiertas por instrucción del mantenedor.
   - [x] **T16a (2026-10-11):** validador limitado al subconjunto JSON Schema exportado, embebido y sin dependencias nuevas; rechazo de campos duplicados, profundidad/tamaño y palabras clave futuras desconocidas. Fixtures v2 contrastan también el validador de producto; 343 tests nativos pasan. Siguiente T16b.
+  - [x] **T16b (2026-10-11):** servicio conectado mediante ClientWebSocket/BCL, TLS 1.2/1.3 y certificado fijado vigente/SAN, sin proxy ni redirecciones; Bearer solo en cabecera. Hello unknown, único latido de 10 s, frames de 16 KiB y envío/recepción cancelables; backoff 1/2/4/8/16/30 s. Tres pruebas de WSS real/reconexión/certificado ajeno/backoff pasan; 346 nativas, build/formato correctos. T16c verifica ataques y estabilidad antes del cierre.
 
 - [ ] **T17: Estado de sesión y cuenta local monotónica**
   - **Cubre:** REQ-003-04; REQ-002-30, REQ-002-31; ADR-0007.
