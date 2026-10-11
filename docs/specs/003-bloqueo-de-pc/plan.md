@@ -294,6 +294,26 @@ La integración vive en las fixtures del servidor, excluidas del build de produc
 su tarea `test` depende del build del simulador para ejecutar la CLI compilada incluso
 en un checkout limpio. No añade una dependencia de producto al servidor.
 
+### Concreción T15 (2026-10-11)
+
+`ServiceBase` corre como LocalSystem y no muestra UI. Configuración privada versionada:
+PC/nombre asignados, URL HTTPS sin usuario/query y certificado público del nodo recibido
+por medio confiable, junto con credencial canónica. Entrada JSON estricta de hasta 64 KiB;
+certificado DER y vigencia comprobados, sin mensajes de error que reproduzcan contenido.
+Credencial en buffer privado borrado al disponer; nunca en argumentos/logs/WebView2.
+
+DPAPI de máquina protege el documento completo; DACL protegida, propietario SYSTEM y
+acceso solo SYSTEM/administración en carpeta/archivo. Comprobar esa custodia antes de leer,
+no seguir puntos de reanálisis y reemplazar atómicamente dentro de la carpeta protegida.
+Logs propios: códigos cerrados, UTC y dos archivos de hasta 64 KiB cada uno, sin excepción
+ni mensaje/cuerpo externo. Ninguna biblioteca nueva: .NET y APIs Win32 con comentarios.
+
+Pruebas locales iniciales con buffers/archivos temporales, sin cambiar el sistema.
+El ensayo SCM usará servicio demand por GUID, binarios/configuración en carpeta nueva
+protegida, sin UI ni conexión al nodo en T15; verificar token medio denegado, arranque,
+parada, corrupción y retirada. La instalación de producto/arranque automático es T50;
+no modifica servicios preexistentes, cuentas, shell, autologin, UAC ni directivas.
+
 ### T03: fondo global
 
 Límites exactos: original **10 000 000 bytes** y **40 000 000 píxeles** (confirmados

@@ -240,6 +240,10 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** implementar arranque/parada de `Pope.Agent`, configuración validada, custodia según ADR y logs acotados; separar servicio sin UI del usuario interactivo.
   - **Verificar:** parada limpia, configuración corrupta, permisos del usuario cliente denegados y ausencia de secretos; ejecutar como servicio solo en entorno de pruebas.
   - **Commit:** `feat(native): inicia el agente y protege su configuración`.
+  - **División previa (2026-10-11):** T15a configuración/logs y pruebas sin efectos del sistema; T15b DPAPI/ACL; T15c ciclo de vida, ensayo temporal SCM/denegación y batería completa. No instalar como servicio permanente ni modificar shell/cuentas/directivas.
+  - [x] **T15a (2026-10-11):** configuración JSON estricta de 64 KiB, UUIDv7/credencial canónicos, HTTPS y certificado vigente/SAN; buffer privado borrado al disponer. Logs de códigos cerrados y dos archivos de 64 KiB, también tras corrupción/tamaño previo excesivo. Tres tests nuevos, 337 nativos en total; build/formato correctos. Sin servicio instalado ni cambios del sistema; siguiente custodia T15b.
+  - [ ] **T15b:** lectura/escritura atómica protegida por DPAPI de máquina y ACL SYSTEM/administración.
+  - [ ] **T15c:** arranque/parada sin UI, configuración corrupta y custodia verificados como servicio temporal; retirada comprobada y batería general.
 
 - [ ] **T16: Conexión y reconexión del agente**
   - **Cubre:** REQ-003-02, REQ-003-04, REQ-003-63.

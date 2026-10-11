@@ -81,6 +81,19 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
+      "System.Diagnostics.EventLog": {
+        "type": "Transitive",
+        "resolved": "10.0.12",
+        "contentHash": "sOZM+VyRj1pg/ItlHsvrSbjws6oGqZveTzTNBGZ9ziwRDyKsOF3ub6vhvOdxotCIqtlnyHAIwP5sLNvgiZC+pQ=="
+      },
+      "System.ServiceProcess.ServiceController": {
+        "type": "Transitive",
+        "resolved": "10.0.12",
+        "contentHash": "sFV+RM/yPtshiCAEIuTm8Dt4F7VuKRbL50PnGC9nXHolk/jw+z3T8zx7axKTBC8mqtQU2ZmjsoPC9b1iwOilNQ==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "10.0.12"
+        }
+      },
       "xunit.abstractions": {
         "type": "Transitive",
         "resolved": "2.0.3",
@@ -120,8 +133,28 @@
         "dependencies": {
           "xunit.extensibility.core": "[2.9.3]"
         }
+      },
+      "pope.agent": {
+        "type": "Project",
+        "dependencies": {
+          "System.ServiceProcess.ServiceController": "[10.0.12, )"
+        }
       }
     },
-    "net10.0-windows7.0/win-x64": {}
+    "net10.0-windows7.0/win-x64": {
+      "System.Diagnostics.EventLog": {
+        "type": "Transitive",
+        "resolved": "10.0.12",
+        "contentHash": "sOZM+VyRj1pg/ItlHsvrSbjws6oGqZveTzTNBGZ9ziwRDyKsOF3ub6vhvOdxotCIqtlnyHAIwP5sLNvgiZC+pQ=="
+      },
+      "System.ServiceProcess.ServiceController": {
+        "type": "Transitive",
+        "resolved": "10.0.12",
+        "contentHash": "sFV+RM/yPtshiCAEIuTm8Dt4F7VuKRbL50PnGC9nXHolk/jw+z3T8zx7axKTBC8mqtQU2ZmjsoPC9b1iwOilNQ==",
+        "dependencies": {
+          "System.Diagnostics.EventLog": "10.0.12"
+        }
+      }
+    }
   }
 }
