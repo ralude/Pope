@@ -246,7 +246,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [ ] **T15c:** arranque/parada sin UI, configuración corrupta y custodia verificados como servicio temporal; retirada comprobada y batería general.
     - [x] **T15c1 (2026-10-11):** envoltorio ServiceBase sin UI/AutoLog, frontera LocalSystem/sesión 0 y un único trabajo cancelable con límite de parada. Tres tests nuevos de parada/duplicados/fallo/deadline; 343 nativos pasan, build/formato correctos. No se instala servicio aún; ensayo temporal y batería pendientes.
     - [x] **T15c2 (2026-10-11):** ensayo demand por GUID preparado, publicación protegida/custodia ficticia y retirada en finally con verificación; UAC solo del instalador y token medio para denegación. Sintaxis PowerShell, build/formato, 343 tests y rechazo real de arranque no-SYSTEM/sin UAC correctos. Artefactos autocontenidos publicados; todavía no instalado/ejecutado como servicio. T15c3 pendiente.
-    - [ ] **T15c3:** ejecutar en desarrollo, comprobar denegación del token medio/retirada y cerrar batería.
+    - [ ] **T15c3:** ejecutar en desarrollo, comprobar denegación del token medio/retirada y cerrar batería. **2026-10-11:** batería general correcta (1 628 tests); lanzamiento del ensayo GUID `b3181fdb63634f5eb24eef508f365a79` cancelado por Windows/UAC antes de arrancar. Servicio inexistente (1060), carpeta protegida ausente; prueba funcional pendiente de aceptar UAC. No cerrar T15 ni avanzar T16 hasta verificarla.
 
 - [ ] **T16: Conexión y reconexión del agente**
   - **Cubre:** REQ-003-02, REQ-003-04, REQ-003-63.

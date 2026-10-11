@@ -1,5 +1,28 @@
 # Mediciones 003 · cliente Windows
 
+## T15 · implementación local; ensayo SCM pendiente (2026-10-11)
+
+REQ-003-02/63, ADR-0017; Windows 11 Pro 26H2/26300.9457, sin VM.
+
+- T15a/b/c1/c2 implementadas: configuración estricta, HTTPS/certificado vigente/SAN,
+  DPAPI de máquina, buffers borrados, DACL/propietario SYSTEM/administración,
+  trabajo único cancelable y logs cerrados con dos archivos de hasta 64 KiB.
+- Nueve tests nativos nuevos pasan; **343 nativos** sin omitidos. Pruebas de guardas
+  autocontenidas rechazan inicio fuera de SCM/SYSTEM y ensayo sin elevación, sin instalar.
+- Batería general completa correcta: formato/lint/tipos/build y **1 628 tests**, incluidos
+  420 del servidor (evidencia PostgreSQL real reutilizada por caché), 54 simulador y
+  343 nativos. Logs `tmp/t15-final-{format,lint,typecheck,build,test-pg}.log`.
+- Ensayo preparado `b3181fdb63634f5eb24eef508f365a79`, manifiesto/hashes en
+  `tmp/agent-service-b3181fdb63634f5eb24eef508f365a79/`. Lanzamiento UAC desde token medio:
+  Windows devuelve **«El usuario ha cancelado la operación»** antes de iniciar el
+  instalador elevado. No registrar resultado de custodia real, parada ni corrupción SCM.
+  `sc query Pope.Agent.Test.b3181fdb63634f5eb24eef508f365a79` devuelve 1060 y la carpeta
+  `ProgramData/PopeAgentTest-b3181fdb63634f5eb24eef508f365a79` no existe.
+- **T15/T15c3 siguen abiertas:** reabrir el ensayo y aceptar UAC para comprobar
+  SYSTEM/sesión 0, denegación del token medio, parada, corrupción y retirada.
+  [Lanzador revisable](../../../apps/native/probes/test-agent-service.ps1).
+  T16–T20 pendientes; T10 abierta. PostgreSQL temporal propio detenido al terminar.
+
 ## T14 · simulador autenticado (2026-10-11)
 
 REQ-003-10/11/63, REQ-002-30; mismo entorno Windows de T12/T13, sin VM ni cambios del sistema.
