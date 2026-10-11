@@ -212,7 +212,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(server): registra PCs con códigos de instalación`.
   - **División previa (2026-10-09):** T12a contratos de auditoría sin secretos; T12b endpoints/transacciones y prueba inicial; T12c recuperación/caducidad/concurrencia en ambos motores y cierre de batería. T12 se marca tras completar las tres.
   - [x] **T12a (2026-10-11):** eventos estrictos de emisión y consumo de instalación, actor del personal en emisión/sistema en consumo y vínculo mediante ID del código. Rechazo de secretos y actores incorrectos verificado; endpoints y consumo efectivo quedan en T12b/c.
-  - [ ] **T12b:** endpoints con roles, RNG/hash, asignación de PC/nombre y consumo atómico con evento; respuestas no-store.
+  - [x] **T12b (2026-10-11):** endpoints con roles, RNG/hash, asignación de PC/nombre y consumo atómico con evento; respuestas no-store. Tres pruebas HTTP, formato, lint, tipos y build correctos; recuperación/concurrencia y cierre de batería en T12c.
   - [ ] **T12c:** recuperación solo libre, límites temporales, concurrencia, respuesta perdida y validación completa.
 
 - [ ] **T13: Autenticación del WebSocket de PCs**

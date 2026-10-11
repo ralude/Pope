@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-11 · T12a completa; T10 abierta; siguiente T12b
+**Última actualización:** 2026-10-11 · T12b completa; T10 abierta; siguiente T12c
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 y T11 completos; T10 aplazada; T12–T20 autorizadas para continuación autónoma; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T12b: endpoints y consumo de códigos de instalación; T12a completa. Continuar T12–T20 en esta máquina, sin VM (mantenedor, 2026-10-11). T10 abierta hasta realizar ese bloque. Cuenta temporal/observación/retirada VM pendientes al retomar T10; no volver a pedir la autorización ya concedida |
+| **Siguiente tarea** | T12c: recuperación, caducidad y concurrencia en ambos motores; T12a/b completas. Continuar T12–T20 en esta máquina, sin VM (mantenedor, 2026-10-11). T10 abierta hasta realizar ese bloque. Cuenta temporal/observación/retirada VM pendientes al retomar T10; no volver a pedir la autorización ya concedida |
 | **Progreso** | Spec 003: 10 / 59 grupos; T01–T09 y T11 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
@@ -97,6 +97,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-11:** T12b completa: endpoints de emisión/registro con roles, RNG criptográfico, hashes SHA-256, consumo/evento transaccionales, nombre automático y respuestas no-store. Recuperación conserva PC/posición y exige disponibilidad al emitir/consumir. Tres tests HTTP, formato, lint, tipos y build del servidor correctos; siguiente T12c para ampliar evidencia y cerrar batería. Sin VM ni cambios de Windows; T10 abierta.
 
 - **2026-10-11:** T12a completa: revisados los cambios previos de contratos/eventos y concretado el registro sin secretos, con actor del personal al emitir y sistema al consumir. Continuación T12–T20 en desarrollo sin VM por instrucción del mantenedor; T10 abierta. Build/tests de shared y comprobaciones de dependientes registradas antes del commit; siguiente T12b.
 
