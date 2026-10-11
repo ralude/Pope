@@ -290,6 +290,9 @@ Hello comunica `known` solo si conserva contexto emitido por el nodo y sesión c
 en otro caso usa `unknown`, sin fabricar revisión ni cierre. Hasta la coordinación T28
 el nodo puede devolver solo `state`: conservar la sesión local para mostrar/latir y pedir
 la copia autorizada al reconectar. La simulación no prueba efectos nativos de Windows.
+La integración vive en las fixtures del servidor, excluidas del build de producto;
+su tarea `test` depende del build del simulador para ejecutar la CLI compilada incluso
+en un checkout limpio. No añade una dependencia de producto al servidor.
 
 ### T03: fondo global
 

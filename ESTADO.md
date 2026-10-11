@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-11 · T14b completa; T10 abierta; siguiente T14c
+**Última actualización:** 2026-10-11 · T14 completa; T10 abierta; siguiente T15
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 y T11–T13 completos; T10 aplazada; T14–T20 autorizadas para continuación autónoma en esta máquina, sin VM; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T14c: integración real TLS/login/latidos/pausa y batería general; T14a/b completas. Continuar hasta T20 en esta máquina, sin VM (mantenedor, 2026-10-11). T10 abierta hasta realizar ese bloque. Cuenta temporal/observación/retirada VM pendientes al retomar T10; no volver a pedir la autorización ya concedida |
-| **Progreso** | Spec 003: 12 / 59 grupos; T01–T09 y T11–T13 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 y T11–T14 completos; T10 aplazada; T15–T20 autorizadas para continuación autónoma en esta máquina, sin VM; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
+| **Siguiente tarea** | T15: ciclo de vida del servicio, configuración/custodia y logs acotados. Continuar hasta T20 en esta máquina, sin VM (mantenedor, 2026-10-11). T10 abierta hasta realizar ese bloque. Cuenta temporal/observación/retirada VM pendientes al retomar T10; no volver a pedir la autorización ya concedida |
+| **Progreso** | Spec 003: 13 / 59 grupos; T01–T09 y T11–T14 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
@@ -87,7 +87,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T09 y T11–T13 completos; T10 aplazada; T14–T20 autorizadas en desarrollo sin VM; compatibilidad Pro pendiente antes de entrega; T21–T59 Borrador | 12 / 59 |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T09 y T11–T14 completos; T10 aplazada; T15–T20 autorizadas en desarrollo sin VM; compatibilidad Pro pendiente antes de entrega; T21–T59 Borrador | 13 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -97,6 +97,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-11:** T14c/T14 completas: registro CLI y HTTPS/WSS reales con CA ajena rechazada, login/latidos/pausa/reconexión conservados y credencial falsa 401. PGlite/PostgreSQL pasan; guía del simulador añadida. Batería completa correcta: formato/lint/tipos/build y 1 619 tests (420 servidor, 54 simulador, 334 nativos). Siguiente T15, 13/59; T10 abierta, sin VM ni cambios de Windows.
 
 - **2026-10-11:** T14b completa: registro desde archivo, CLI con perfil privado, identidad asignada por nodo y canal v2 con cabecera/CA. Recuperación unknown cuando falta contexto, sin fabricar revisión/cierre; revocación detiene reintentos. 54 tests y formato/lint/tipos/build correctos. Siguiente T14c para TLS/login/pausa reales y batería; T10 abierta, sin VM.
 
@@ -115,5 +117,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-11:** T12a completa: revisados los cambios previos de contratos/eventos y concretado el registro sin secretos, con actor del personal al emitir y sistema al consumir. Continuación T12–T20 en desarrollo sin VM por instrucción del mantenedor; T10 abierta. Build/tests de shared y comprobaciones de dependientes registradas antes del commit; siguiente T12b.
 
 - **2026-10-09:** T11b/T11 completas: confianza/rotación TLS documentadas, arranque de desarrollo en loopback y LAN HTTPS/WSS. Batería completa: formato, lint, tipos, test y build correctos; 1 588 tests (398 servidor + 334 nativos). TLS se prueba con certificados efímeros sin internet ni cambios de Windows. Comprobación focalizada repetida tras ajustar limpieza de fixtures; sin repetir la batería de producto sin cambios. Siguiente T12; T10 aplazada, 10/59.
-
-- **2026-10-09:** T11a implementa TLS nativo de Fastify/Node sin dependencias nuevas. HTTPS/WSS reales y rechazo de certificados/nombre/PEM/clave/caducidad, TLS antiguo, cookies Secure y ausencia de credenciales en logs comprobados con fixtures efímeros. Build/tipos correctos; cierre de batería y guía en T11b. T10 aplazada, sin cambios de Windows.

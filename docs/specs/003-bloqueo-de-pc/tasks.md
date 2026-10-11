@@ -225,7 +225,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T13b (2026-10-11):** upgrade autenticado, hello v2 y adaptación de tests de sesiones/TLS. Sin v1 ni excepción anónima; identidad fija de cabecera, cola de entrada/salida acotada, cierre al sustituir credencial y limpieza tras trabajo pendiente. 27 regresiones de login/pausa/reconexión/TLS pasan; cierre de batería en T13c.
   - [x] **T13c (2026-10-11):** diez pruebas nuevas de identidad/ataques y límites pasan, además de 27 regresiones focalizadas. Batería general correcta: formato, lint, tipos, build y 1 612 tests (419 servidor en PostgreSQL real, 334 nativos). Copia desconocida no cierra la sesión autorizada; evidencia en `mediciones.md`. T10 abierta; siguiente T14, sin VM.
 
-- [ ] **T14: Simulador con registro autenticado**
+- [x] **T14: Simulador con registro autenticado**
   - **Cubre:** REQ-003-10, REQ-003-11, REQ-003-63.
   - **Hacer:** adaptar `tools/agent-sim` al registro, certificado y protocolo elegido; separar explícitamente credenciales de pruebas y configuración de producción.
   - **Verificar:** login/latidos/pausa existentes con autenticación, PC falsa rechazada y secretos omitidos de salida, argumentos y archivos versionados.
@@ -233,7 +233,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-11):** T14a registro/configuración privada y transporte TLS; T14b canal v2 y CLI; T14c integración real, guía y batería completa. Sin credenciales fijas en producción.
   - [x] **T14a (2026-10-11):** registro por archivo privado, perfil estricto exclusivo de simulación, escritura atómica con exclusión y transporte con CA/Bearer. Cuatro tests nuevos y 48 existentes pasan; lint/tipos/build correctos. Activación en CLI/canal en T14b.
   - [x] **T14b (2026-10-11):** CLI register/run/interactive/load con perfil registrado, CA explícita, hello/latidos v2 y parseo estricto. Sin secreto en argumentos ni salida de errores internos; revocación detiene reintentos y start repetido no duplica canal. 54 tests, formato/lint/tipos/build correctos; integración real y batería en T14c.
-  - [ ] **T14c:** login/latidos/pausa/TLS reales, ausencia de secretos y cierre de batería.
+  - [x] **T14c (2026-10-11):** CLI y nodo HTTPS/WSS reales: registro, confianza ajena rechazada en ambos transportes, login, latidos, pausa/reanudación, reconexión y credencial falsa 401. PGlite/PostgreSQL pasan; guía del simulador y dependencia de build solo de tests. Batería completa correcta: formato/lint/tipos/build y 1 619 tests (420 servidor, 54 simulador, 334 nativos). T10 abierta, siguiente T15 sin VM.
 
 - [ ] **T15: Ciclo de vida del servicio y custodia local**
   - **Cubre:** REQ-003-02, REQ-003-63.

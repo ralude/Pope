@@ -1,5 +1,25 @@
 # Mediciones 003 · cliente Windows
 
+## T14 · simulador autenticado (2026-10-11)
+
+REQ-003-10/11/63, REQ-002-30; mismo entorno Windows de T12/T13, sin VM ni cambios del sistema.
+
+- Registro real desde CLI con código por archivo y perfil `purpose: simulator`.
+  UUID/nombre vienen del nodo; secreto aleatorio solo en perfil privado ignorado por Git.
+  Ausencia de código/credencial en stdout/stderr de la CLI comprobada.
+- Certificado no confiable y CA ajena rechazados antes del consumo; WSS con CA ajena
+  también falla antes de hello. No se desactiva la validación ni se cambia confianza de Windows.
+- Login, latidos, pausa/reanudación y reconexión `unknown` conservando la pausa y sesión
+  del nodo verificados por el simulador real. Credencial falsa recibe 401.
+- Integración pasa en PGlite y PostgreSQL 18.6; 54 tests de la herramienta pasan.
+  Batería general completa: formato/lint/tipos/build y **1 619 tests**, incluidos
+  **420 del servidor**, **54 del simulador** y **334 nativos**, sin omitidos.
+  Logs ignorados `tmp/t14-real-{node,pglite}.log` y
+  `tmp/t14-final-{format,lint,typecheck,build,test-pg}.log`.
+- [Guía y comandos](../../../tools/agent-sim/README.md); `test:node` reproduce la integración.
+  La dependencia de build del simulador pertenece solo a tests del servidor, sin añadir
+  bibliotecas ni recursos de simulación al nodo entregado al local.
+
 ## T13 · canal autenticado en desarrollo (2026-10-11)
 
 REQ-003-11/63; ADR-0017. Mismo Windows 11 Pro 26H2/26300.9457 de T12;

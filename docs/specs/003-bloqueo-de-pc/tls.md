@@ -36,8 +36,8 @@ esta tarea configura el transporte directo del nodo local.
 ## Confianza del agente y renovación
 
 El administrador entrega el certificado/identidad pública verificada al instalador
-por un medio confiable. T14/T16 implementan la comprobación en simulador/agente;
-T11 aún no implementa ese cliente ni el registro/autenticación de T12/T13.
+por un medio confiable. T14 implementa la comprobación en el simulador;
+T16 la implementará en el agente. Registro T12 y admisión autenticada T13 ya están activos.
 La validación exige vigencia, SAN coincidente e identidad fijada; nunca
 `rejectUnauthorized=false`, aceptación universal ni confianza al primer uso.
 
