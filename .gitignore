@@ -20,6 +20,7 @@ obj/
 *.sim-secret.json
 *.sim-secret.json.*
 *.installation-code.txt
+*.staff-secret.txt
 
 # Logs y temporales
 *.log

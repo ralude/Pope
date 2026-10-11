@@ -3,9 +3,11 @@ import { formatMoney, type Micros } from '@pope/shared';
 import { SIM_PASSWORD, simUsername } from './args.js';
 import { clockTime, describeEvent } from './describe.js';
 import { SimulatedPc } from './simulated-pc.js';
+import { type SimulatorProfile, simulatorPcOptions } from './registration.js';
 
 export interface RunOptions {
-  url: string;
+  profile: SimulatorProfile;
+  ca: Buffer | undefined;
   pcs: number[];
   /** La PC N inicia sesión como `simNN`. */
   login: boolean;
@@ -36,8 +38,7 @@ export async function runPcs(
   const pcs = options.pcs.map((n) => {
     balances.set(n, { entered: null, last: null });
     const pc = new SimulatedPc({
-      number: n,
-      url: options.url,
+      ...simulatorPcOptions(options.profile, n, options.ca),
       onEvent: (event) => {
         const text = describeEvent(event);
         if (text !== null) {
@@ -67,7 +68,7 @@ export async function runPcs(
     if (options.login) {
       for (const pc of pcs) {
         if (!(await waitUntil(() => pc.snapshot().connected, 10_000))) {
-          log(`${pc.name} · no pudo conectar con ${options.url}`);
+          log(`${pc.name} · no pudo conectar con el nodo configurado`);
           continue;
         }
         const result = await pc

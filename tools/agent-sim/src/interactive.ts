@@ -3,20 +3,20 @@ import { createInterface } from 'node:readline';
 import { HELP, executeCommand, parseCommand } from './commands.js';
 import { clockTime, describeEvent } from './describe.js';
 import { SimulatedPc } from './simulated-pc.js';
+import { type SimulatorProfile, simulatorPcOptions } from './registration.js';
 
 /**
  * Consola para probar el panel a mano: las PCs arrancan bloqueadas y se controlan con
  * órdenes escritas (login, red, reinicio, apagón…). Sigue mostrando lo que les pasa.
  */
 export async function runInteractive(
-  options: { url: string; pcs: number[] },
+  options: { profile: SimulatorProfile; ca: Buffer | undefined; pcs: number[] },
   log: (line: string) => void,
 ): Promise<void> {
   const pcs = new Map<number, SimulatedPc>();
   for (const n of options.pcs) {
     const pc = new SimulatedPc({
-      number: n,
-      url: options.url,
+      ...simulatorPcOptions(options.profile, n, options.ca),
       onEvent: (event) => {
         const text = describeEvent(event);
         if (text !== null) {

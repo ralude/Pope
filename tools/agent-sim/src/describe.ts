@@ -41,6 +41,11 @@ export function describeEvent(event: PcEvent): string | null {
       return null;
     case 'error':
       return `error ${message.code}: ${message.message}`;
+    case 'pcAuthenticationError':
+      return `autenticación rechazada (${message.code})`;
+    default:
+      // T47 añade simulación de órdenes/mantenimiento; no afirmar un efecto de Windows.
+      return null;
   }
 }
 

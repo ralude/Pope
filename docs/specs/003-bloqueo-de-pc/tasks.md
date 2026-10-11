@@ -232,7 +232,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(tools): autentica las PCs del simulador`.
   - **División previa (2026-10-11):** T14a registro/configuración privada y transporte TLS; T14b canal v2 y CLI; T14c integración real, guía y batería completa. Sin credenciales fijas en producción.
   - [x] **T14a (2026-10-11):** registro por archivo privado, perfil estricto exclusivo de simulación, escritura atómica con exclusión y transporte con CA/Bearer. Cuatro tests nuevos y 48 existentes pasan; lint/tipos/build correctos. Activación en CLI/canal en T14b.
-  - [ ] **T14b:** identidad registrada, cabecera Bearer y mensajes v2 en run/interactive/load.
+  - [x] **T14b (2026-10-11):** CLI register/run/interactive/load con perfil registrado, CA explícita, hello/latidos v2 y parseo estricto. Sin secreto en argumentos ni salida de errores internos; revocación detiene reintentos y start repetido no duplica canal. 54 tests, formato/lint/tipos/build correctos; integración real y batería en T14c.
   - [ ] **T14c:** login/latidos/pausa/TLS reales, ausencia de secretos y cierre de batería.
 
 - [ ] **T15: Ciclo de vida del servicio y custodia local**

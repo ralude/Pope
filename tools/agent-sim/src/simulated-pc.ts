@@ -2,17 +2,15 @@
 // agente en el canal"). La usan la CLI del simulador y la prueba de carga; más adelante la
 // sustituye el agente real de la spec 003.
 import {
-  devPcId,
-  devPcName,
-  type NodeToPcMessage,
-  nodeToPcMessageSchema,
-  PROTOCOL_VERSION,
+  type NativeNodeToPcMessage,
+  nativeNodeToPcMessageSchema,
+  NATIVE_PC_PROTOCOL_VERSION,
+  type PcControlContext,
   type SessionPause,
 } from '@pope/shared';
 
 /**
- * Lo mínimo que la PC necesita de una conexión WebSocket. El `WebSocket` global de Node 24
- * lo cumple; los tests usan una conexión falsa.
+ * Interfaz mínima del WebSocket autenticado; los tests usan una conexión falsa.
  */
 export interface PcSocket {
   send(data: string): void;
@@ -24,7 +22,7 @@ export interface PcSocket {
 }
 
 /** Cómo se abre una conexión al nodo. */
-export type PcConnector = (url: string) => PcSocket;
+export type PcConnector = () => PcSocket;
 
 /** Espera entre reintentos de conexión: 1, 2, 4, 8, 16 y, como tope, 30 s. */
 export const RECONNECT_DELAYS_MS = [1000, 2000, 4000, 8000, 16_000, 30_000] as const;
@@ -33,16 +31,16 @@ export const RECONNECT_DELAYS_MS = [1000, 2000, 4000, 8000, 16_000, 30_000] as c
 export type PcEvent =
   | { kind: 'connected' }
   | { kind: 'disconnected' }
-  | { kind: 'message'; message: NodeToPcMessage }
+  | { kind: 'message'; message: NativeNodeToPcMessage }
   | { kind: 'invalid'; reason: string };
 
 export interface SimulatedPcOptions {
-  /** Número de la PC de ejemplo (1…99): "PC 05" es el 5. */
+  /** Número interno de simulación (1…99), independiente del nombre asignado por el nodo. */
   number: number;
-  /** URL del canal, p. ej. `ws://127.0.0.1:3000/pc`. */
-  url: string;
-  /** Cómo se abre la conexión; por defecto, el `WebSocket` global. */
-  connect?: PcConnector;
+  /** Identidad devuelta por registro; el número de simulación no determina el UUID. */
+  pc: { id: string; name: string };
+  /** Conector con cabecera/CA preparado desde el perfil privado; sin alternativa anónima. */
+  connect: PcConnector;
   onEvent?: (event: PcEvent) => void;
   /** Cada cuánto late; 10 s como el agente real. */
   heartbeatMs?: number;
@@ -55,7 +53,7 @@ export interface SimulatedPcOptions {
 /** Resultado de un login: lo que contestó el nodo y cuánto tardó. */
 export interface LoginResult {
   /** `state` activo si entró, o `error` con el motivo. */
-  message: NodeToPcMessage;
+  message: NativeNodeToPcMessage;
   ok: boolean;
   /** Milisegundos entre enviar `login` y recibir la respuesta. */
   ms: number;
@@ -105,6 +103,7 @@ export class SimulatedPc {
   private remainingBase: number | null = null;
   private remainingSyncedAt = 0;
   private pauseState: SessionPause | null = null;
+  private controlContext: PcControlContext | null = null;
 
   private attempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -113,9 +112,9 @@ export class SimulatedPc {
   private pendingLogin: PendingLogin | null = null;
 
   constructor(private readonly options: SimulatedPcOptions) {
-    this.name = devPcName(options.number);
-    this.pcId = devPcId(options.number);
-    this.connectFn = options.connect ?? ((url) => new WebSocket(url));
+    this.name = options.pc.name;
+    this.pcId = options.pc.id;
+    this.connectFn = options.connect;
     this.heartbeatMs = options.heartbeatMs ?? 10_000;
     this.now = options.now ?? (() => performance.now());
     this.loginTimeoutMs = options.loginTimeoutMs ?? 30_000;
@@ -195,10 +194,11 @@ export class SimulatedPc {
     }, seconds * 1000);
   }
 
-  /** Reinicio de la PC: pierde la sesión y vuelve a conectar sin ella (`sessionId: null`). */
+  /** Reinicio simulado: pierde la copia y pide recuperación unknown; no ordena cerrar al nodo. */
   reboot(): void {
     this.dropSocket();
     this.forgetSession();
+    this.controlContext = null;
     this.cut = false;
     this.clearTimer('cutTimer');
     this.clearTimer('reconnectTimer');
@@ -224,6 +224,7 @@ export class SimulatedPc {
     }
     this.failLogin('Se fue la luz');
     this.forgetSession();
+    this.controlContext = null;
     this.emit({ kind: 'disconnected' });
   }
 
@@ -254,7 +255,8 @@ export class SimulatedPc {
     if (!this.running || this.poweredOff) {
       return;
     }
-    const socket = this.connectFn(this.options.url);
+    if (this.socket) return;
+    const socket = this.connectFn();
     this.socket = socket;
     socket.onopen = () => {
       if (this.socket !== socket) {
@@ -263,12 +265,21 @@ export class SimulatedPc {
       this.connected = true;
       this.attempt = 0;
       this.emit({ kind: 'connected' });
+      const context = this.controlContext;
+      const known =
+        context &&
+        ((context.kind === 'free' && this.sessionId === null) ||
+          (context.kind === 'session' && context.sessionId === this.sessionId));
       this.send({
         type: 'hello',
-        protocolVersion: PROTOCOL_VERSION,
+        protocolVersion: NATIVE_PC_PROTOCOL_VERSION,
         pcId: this.pcId,
-        sessionId: this.sessionId,
-        ...(this.sessionId !== null &&
+        recoveryState: known ? 'known' : 'unknown',
+        controlContext: known ? context : null,
+        pendingMaintenanceExitId: null,
+        sessionId: known ? this.sessionId : null,
+        ...(known &&
+          this.sessionId !== null &&
           this.localRemaining !== null && { localRemainingSeconds: this.localRemaining }),
       });
       this.startHeartbeat();
@@ -280,6 +291,10 @@ export class SimulatedPc {
       if (this.socket === socket) {
         this.receive(event.data);
       }
+    };
+    // ws informa después el cierre; no imprimir errores con cabeceras/objetos internos.
+    socket.onerror = () => {
+      /* La reconexión se programa una vez desde onclose. */
     };
     socket.onclose = () => {
       if (this.socket !== socket) {
@@ -329,6 +344,7 @@ export class SimulatedPc {
         type: 'heartbeat',
         sessionId: this.sessionId,
         localRemainingSeconds: this.sessionId === null ? null : this.localRemaining,
+        controlContext: this.controlContext,
       });
     }, this.heartbeatMs);
   }
@@ -360,13 +376,19 @@ export class SimulatedPc {
       this.emit({ kind: 'invalid', reason: 'Mensaje que no es JSON' });
       return;
     }
-    const parsed = nodeToPcMessageSchema.safeParse(json);
+    const parsed = nativeNodeToPcMessageSchema.safeParse(json);
     if (!parsed.success) {
-      this.emit({ kind: 'invalid', reason: parsed.error.message });
+      this.emit({ kind: 'invalid', reason: 'Mensaje fuera del contrato v2' });
       return;
     }
     const message = parsed.data;
     switch (message.type) {
+      case 'controlState':
+        this.controlContext = message.context;
+        break;
+      case 'pcAuthenticationError':
+        this.stop();
+        break;
       case 'state':
         if (message.status === 'active') {
           this.sessionId = message.session.sessionId;
@@ -393,7 +415,7 @@ export class SimulatedPc {
     this.emit({ kind: 'message', message });
   }
 
-  private resolveLogin(result: { message: NodeToPcMessage; ok: boolean }): void {
+  private resolveLogin(result: { message: NativeNodeToPcMessage; ok: boolean }): void {
     const pending = this.pendingLogin;
     if (!pending) {
       return;
@@ -418,6 +440,7 @@ export class SimulatedPc {
     this.who = null;
     this.remainingBase = null;
     this.pauseState = null;
+    if (this.controlContext?.kind !== 'free') this.controlContext = null;
   }
 
   /** Tiempo restante según la PC: lo que dijo el nodo menos los segundos que han pasado. */

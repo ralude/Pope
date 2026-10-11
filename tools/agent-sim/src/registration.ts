@@ -242,3 +242,12 @@ export function simulatorConnector(
       headers: { Authorization: `Bearer ${identity.credential}` },
     });
 }
+
+export function simulatorPcOptions(
+  profile: SimulatorProfile,
+  number: number,
+  ca: Buffer | undefined,
+) {
+  const identity = simulatorIdentity(profile, number);
+  return { number, pc: identity.pc, connect: simulatorConnector(profile, identity, ca) };
+}

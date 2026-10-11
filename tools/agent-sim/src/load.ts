@@ -4,9 +4,11 @@ import { readFile, stat } from 'node:fs/promises';
 import { SIM_PASSWORD, simUsername } from './args.js';
 import { type LoadResult, summarize, summarizeMemory } from './load-report.js';
 import { SimulatedPc } from './simulated-pc.js';
+import { type SimulatorProfile, simulatorPcOptions } from './registration.js';
 
 export interface LoadOptions {
-  url: string;
+  profile: SimulatorProfile;
+  ca: Buffer | undefined;
   pcs: number[];
   /** Espera entre los logins de la fase 1: uno cada 1,5 s, como llegan los clientes. */
   staggerMs: number;
@@ -39,7 +41,9 @@ export async function runLoad(
   log: (line: string) => void,
 ): Promise<LoadResult> {
   const errors: string[] = [];
-  const pcs = options.pcs.map((n) => new SimulatedPc({ number: n, url: options.url }));
+  const pcs = options.pcs.map(
+    (n) => new SimulatedPc(simulatorPcOptions(options.profile, n, options.ca)),
+  );
   const startOffset = await logOffset(options.serverLog);
 
   const timedLogin = async (pc: SimulatedPc, phase: 1 | 2): Promise<number | null> => {

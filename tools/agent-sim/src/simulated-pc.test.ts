@@ -1,9 +1,19 @@
-import { devPcId, nodeToPcMessageSchema, PROTOCOL_VERSION } from '@pope/shared';
+import { devPcId, nativeNodeToPcMessageSchema, NATIVE_PC_PROTOCOL_VERSION } from '@pope/shared';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { type PcEvent, type PcSocket, RECONNECT_DELAYS_MS, SimulatedPc } from './simulated-pc.js';
 
 const SESSION_ID = '01900000-0000-7000-8000-000000000123';
+const CONTEXT = {
+  kind: 'session',
+  sessionId: SESSION_ID,
+  revision: '01900000-0000-7000-8000-000000000124',
+};
+const controlState = {
+  type: 'controlState',
+  context: CONTEXT,
+  serverTime: '2026-10-11T20:00:00.000Z',
+};
 
 /** Conexión falsa: guarda lo que se envía y deja que el test dispare open, message y close. */
 class FakeSocket implements PcSocket {
@@ -53,7 +63,7 @@ const activeState = (remainingSeconds = 7200) => {
     },
   };
   // Si el simulador acepta el mensaje, es porque cumple el protocolo real.
-  expect(nodeToPcMessageSchema.safeParse(message).success).toBe(true);
+  expect(nativeNodeToPcMessageSchema.safeParse(message).success).toBe(true);
   return message;
 };
 const LOCKED = { type: 'state', status: 'locked' };
@@ -101,7 +111,7 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
     fakeNow = 0;
     pc = new SimulatedPc({
       number: 5,
-      url: 'ws://nodo/pc',
+      pc: { id: devPcId(5), name: 'PC 05' },
       connect: () => {
         const socket = new FakeSocket();
         sockets.push(socket);
@@ -120,10 +130,47 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
   it('al conectar manda hello con su id y sin sesión', () => {
     const socket = boot();
     expect(socket.sent).toEqual([
-      { type: 'hello', protocolVersion: PROTOCOL_VERSION, pcId: devPcId(5), sessionId: null },
+      {
+        type: 'hello',
+        protocolVersion: NATIVE_PC_PROTOCOL_VERSION,
+        pcId: devPcId(5),
+        sessionId: null,
+        recoveryState: 'unknown',
+        controlContext: null,
+        pendingMaintenanceExitId: null,
+      },
     ]);
     expect(pc.name).toBe('PC 05');
     expect(events).toEqual([{ kind: 'connected' }]);
+  });
+
+  it('REQ-003-11/63: sin contexto del nodo recupera unknown aunque conserve una sesión local', () => {
+    const socket = boot();
+    socket.receive(activeState());
+    pc.networkCut(1);
+    advance(1000);
+    last().open();
+    expect(last().sent[0]).toMatchObject({
+      recoveryState: 'unknown',
+      sessionId: null,
+      controlContext: null,
+    });
+    expect(last().sent[0]).not.toHaveProperty('localRemainingSeconds');
+    expect(pc.snapshot().sessionId).toBe(SESSION_ID);
+  });
+
+  it('REQ-003-63: revocación autenticada detiene reintentos y el arranque repetido no duplica canal', () => {
+    const socket = boot();
+    pc.start();
+    expect(sockets).toHaveLength(1);
+    socket.receive({
+      type: 'pcAuthenticationError',
+      code: 'pc_credential_revoked',
+      message: 'Revocada',
+    });
+    expect(socket.closed).toBe(true);
+    advance(60_000);
+    expect(sockets).toHaveLength(1);
   });
 
   it('late cada 10 s aunque esté bloqueada, sin sesión ni restante', () => {
@@ -133,8 +180,8 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
     advance(1);
     advance(10_000);
     expect(socket.sent.slice(1)).toEqual([
-      { type: 'heartbeat', sessionId: null, localRemainingSeconds: null },
-      { type: 'heartbeat', sessionId: null, localRemainingSeconds: null },
+      { type: 'heartbeat', sessionId: null, localRemainingSeconds: null, controlContext: null },
+      { type: 'heartbeat', sessionId: null, localRemainingSeconds: null, controlContext: null },
     ]);
   });
 
@@ -150,8 +197,18 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
     advance(10_000);
     advance(10_000);
     expect(socket.sent.slice(1)).toEqual([
-      { type: 'heartbeat', sessionId: SESSION_ID, localRemainingSeconds: 7190 },
-      { type: 'heartbeat', sessionId: SESSION_ID, localRemainingSeconds: 7180 },
+      {
+        type: 'heartbeat',
+        sessionId: SESSION_ID,
+        localRemainingSeconds: 7190,
+        controlContext: null,
+      },
+      {
+        type: 'heartbeat',
+        sessionId: SESSION_ID,
+        localRemainingSeconds: 7180,
+        controlContext: null,
+      },
     ]);
   });
 
@@ -173,6 +230,7 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
   it('un corte de red: sigue contando y reconecta con su sesión y su restante', () => {
     const socket = boot();
     socket.receive(activeState(7200));
+    socket.receive(controlState);
     advance(5000);
 
     pc.networkCut(60);
@@ -187,10 +245,13 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
     // 5 s + 60 s de cuenta local desde los 7200 s.
     expect(last().sent[0]).toEqual({
       type: 'hello',
-      protocolVersion: PROTOCOL_VERSION,
+      protocolVersion: NATIVE_PC_PROTOCOL_VERSION,
       pcId: devPcId(5),
       sessionId: SESSION_ID,
       localRemainingSeconds: 7135,
+      recoveryState: 'known',
+      controlContext: CONTEXT,
+      pendingMaintenanceExitId: null,
     });
   });
 
@@ -333,6 +394,7 @@ describe('PC simulada (plan 001, comportamiento del agente)', () => {
   it('REQ-002-30: sin red conserva la pausa y reconecta con el restante detenido', () => {
     const socket = boot();
     socket.receive(pausedState());
+    socket.receive(controlState);
     pc.networkCut(1200);
     pc.resume();
     expect(socket.sent.at(-1)).not.toEqual({ type: 'resume' });
