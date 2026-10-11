@@ -8,7 +8,7 @@ namespace Pope.Native.Tests;
 
 public sealed class AgentConfigurationTests
 {
-    private static Dictionary<string, object> Fixture()
+    internal static Dictionary<string, object> Fixture()
     {
         using var key = RSA.Create(2048);
         var request = new CertificateRequest("CN=localhost", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);

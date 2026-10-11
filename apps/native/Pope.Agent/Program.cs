@@ -1,4 +1,6 @@
 using System.ServiceProcess;
+using System.Diagnostics;
+using System.Security.Principal;
 
 namespace Pope.Agent;
 
@@ -12,15 +14,25 @@ internal static class Program
             return 0;
         }
 
-        // T08 solo prepara el ejecutable. T15 implementará el ciclo de vida;
-        // impedir su uso como servicio vacío evita aparentar que ya protege la PC.
-        Console.Error.WriteLine("Servicio aún no implementado (T15).");
-        return 1;
+        try
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            if (!identity.IsSystem || Process.GetCurrentProcess().SessionId != 0)
+                throw new InvalidOperationException();
+            var (root, name) = args switch
+            {
+                [] or ["--service"] => (AgentService.Root, AgentService.Name),
+                ["--service-test", var id] => (AgentService.TestRoot(id), AgentService.TestName(id)),
+                _ => throw new InvalidOperationException()
+            };
+            using var service = new AgentService(root, name);
+            ServiceBase.Run(service);
+            return service.ExitCode;
+        }
+        catch
+        {
+            Console.Error.WriteLine("Pope.Agent requiere SCM, LocalSystem y configuración protegida válida.");
+            return 1;
+        }
     }
-}
-
-// ServiceBase es la API oficial del SCM; no instala ni arranca un servicio en T08.
-internal sealed class AgentService : ServiceBase
-{
-    public AgentService() => ServiceName = "Pope.Agent";
 }

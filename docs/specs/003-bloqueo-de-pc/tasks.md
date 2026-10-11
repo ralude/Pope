@@ -244,6 +244,9 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T15a (2026-10-11):** configuración JSON estricta de 64 KiB, UUIDv7/credencial canónicos, HTTPS y certificado vigente/SAN; buffer privado borrado al disponer. Logs de códigos cerrados y dos archivos de 64 KiB, también tras corrupción/tamaño previo excesivo. Tres tests nuevos, 337 nativos en total; build/formato correctos. Sin servicio instalado ni cambios del sistema; siguiente custodia T15b.
   - [x] **T15b (2026-10-11):** DPAPI de máquina, escritura atómica/exclusiva, límites, borrado de buffers y propietario/DACL SYSTEM/administración verificados antes de leer. Rechazo de reanálisis y privilegio de restauración temporal, sin cuentas nuevas. Tres pruebas locales nuevas (DPAPI/corrupción, fronteras token y ACL ordinaria); 340 nativas pasan, build/formato correctos. Custodia real como SYSTEM y parada/retirada se verifican en T15c antes de cerrar T15.
   - [ ] **T15c:** arranque/parada sin UI, configuración corrupta y custodia verificados como servicio temporal; retirada comprobada y batería general.
+    - [x] **T15c1 (2026-10-11):** envoltorio ServiceBase sin UI/AutoLog, frontera LocalSystem/sesión 0 y un único trabajo cancelable con límite de parada. Tres tests nuevos de parada/duplicados/fallo/deadline; 343 nativos pasan, build/formato correctos. No se instala servicio aún; ensayo temporal y batería pendientes.
+    - [ ] **T15c2:** preparar ensayo demand por GUID con publicación/custodia protegidas y retirada garantizada.
+    - [ ] **T15c3:** ejecutar en desarrollo, comprobar denegación del token medio/retirada y cerrar batería.
 
 - [ ] **T16: Conexión y reconexión del agente**
   - **Cubre:** REQ-003-02, REQ-003-04, REQ-003-63.
