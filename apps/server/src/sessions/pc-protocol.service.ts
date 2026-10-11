@@ -1,25 +1,24 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   type NodeToPcMessage,
-  type PcToNodeMessage,
-  pcToNodeMessageSchema,
+  type NativePcToNodeMessage,
+  nativePcToNodeMessageSchema,
+  NATIVE_PC_PROTOCOL_VERSION,
   type ProtocolErrorCode,
   requestIdSchema,
 } from '@pope/shared';
-import { eq } from 'drizzle-orm';
 
 import { CombosService } from '../combos/combos.service.js';
 import { Clock } from '../common/clock.js';
 import { CustomerAuthService } from '../customers/customer-auth.service.js';
-import { DATABASE, type Database } from '../db/database.js';
-import { pcs } from '../db/schema.js';
+import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
 import { PausesService } from './pauses.service.js';
 import { customerInactiveMessage, PcRequestRefused } from './session-state.js';
 import { SessionsService } from './sessions.service.js';
 
-type HelloMessage = Extract<PcToNodeMessage, { type: 'hello' }>;
-type LoginMessage = Extract<PcToNodeMessage, { type: 'login' }>;
+type HelloMessage = Extract<NativePcToNodeMessage, { type: 'hello' }>;
+type LoginMessage = Extract<NativePcToNodeMessage, { type: 'login' }>;
 
 /** Mensaje de error del protocolo, con el `requestId` de la petición si lo traía. */
 export function protocolError(
@@ -58,17 +57,26 @@ export class PcProtocolService {
   private readonly logger = new Logger('PcProtocol');
 
   constructor(
-    @Inject(DATABASE) private readonly db: Database,
     private readonly connections: PcConnections,
     private readonly sessions: SessionsService,
     private readonly pauses: PausesService,
     private readonly customerAuth: CustomerAuthService,
     private readonly combos: CombosService,
     private readonly clock: Clock,
+    private readonly authentication: PcAuthenticationService,
   ) {}
 
   /** Procesa un mensaje en crudo. Nunca lanza: los fallos se responden con `error`. */
   async receive(connection: PcConnection, raw: string): Promise<void> {
+    if (!(await this.authentication.current(connection.authentication))) {
+      connection.send({
+        type: 'pcAuthenticationError',
+        code: 'pc_credential_revoked',
+        message: 'Credencial de PC revocada',
+      });
+      connection.close(1008, 'Credencial de PC revocada');
+      return;
+    }
     let data: unknown;
     try {
       data = JSON.parse(raw);
@@ -76,7 +84,22 @@ export class PcProtocolService {
       connection.send(protocolError('invalid_message', 'Mensaje no válido'));
       return;
     }
-    const parsed = pcToNodeMessageSchema.safeParse(data);
+    if (
+      typeof data === 'object' &&
+      data !== null &&
+      'type' in data &&
+      data.type === 'hello' &&
+      (!('protocolVersion' in data) || data.protocolVersion !== NATIVE_PC_PROTOCOL_VERSION)
+    ) {
+      connection.send({
+        type: 'pcAuthenticationError',
+        code: 'unsupported_protocol_version',
+        message: 'Versión del agente no admitida',
+      });
+      connection.close(1008, 'Versión no admitida');
+      return;
+    }
+    const parsed = nativePcToNodeMessageSchema.safeParse(data);
     if (!parsed.success) {
       connection.send(protocolError('invalid_message', 'Mensaje no válido', requestIdOf(data)));
       return;
@@ -111,17 +134,24 @@ export class PcProtocolService {
 
   /** La PC se identifica: se registra y recibe su estado actual. */
   private async hello(connection: PcConnection, message: HelloMessage): Promise<void> {
-    const [pc] = await this.db
-      .select({ id: pcs.id, name: pcs.name })
-      .from(pcs)
-      .where(eq(pcs.id, message.pcId));
-    if (!pc) {
-      connection.send(protocolError('unknown_pc', 'Esta PC no está registrada en el nodo'));
-      connection.close(1008, 'PC desconocida');
+    const pc = connection.authentication.pc;
+    if (pc.id !== message.pcId) {
+      connection.send({
+        type: 'pcAuthenticationError',
+        code: 'pc_identity_mismatch',
+        message: 'La identidad no coincide con la PC autorizada',
+      });
+      connection.close(1008, 'Identidad de PC no válida');
+      return;
+    }
+    if (connection.pc) {
+      connection.send(protocolError('invalid_message', 'hello ya recibido'));
+      connection.close(1008, 'hello repetido');
       return;
     }
     this.connections.register(pc, connection);
-    await this.sessions.reconcile(pc.id, message);
+    if (message.recoveryState === 'known') await this.sessions.reconcile(pc.id, message);
+    else this.sessions.touch(pc.id);
     connection.send(await this.sessions.stateFor(pc.id));
   }
 
@@ -129,7 +159,7 @@ export class PcProtocolService {
   private async dispatch(
     connection: PcConnection,
     pc: PcIdentity,
-    message: Exclude<PcToNodeMessage, HelloMessage>,
+    message: Exclude<NativePcToNodeMessage, HelloMessage>,
   ): Promise<void> {
     // Cualquier mensaje prueba que la PC está viva: se puede cobrar hasta ahora.
     this.sessions.touch(pc.id);
@@ -164,6 +194,12 @@ export class PcProtocolService {
           ...(message.requestId !== undefined && { requestId: message.requestId }),
           combos: await this.combos.forSale(),
         });
+        return;
+      default:
+        // Las variantes de control/mantenimiento se activan en sus tareas posteriores.
+        connection.send(
+          protocolError('invalid_message', 'Operación aún no disponible', requestIdOf(message)),
+        );
         return;
     }
   }

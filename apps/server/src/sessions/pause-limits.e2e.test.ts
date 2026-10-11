@@ -1,4 +1,4 @@
-import { type NodeToPcMessage, usd } from '@pope/shared';
+import { type NativeNodeToPcMessage as NodeToPcMessage, usd } from '@pope/shared';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { loginAsStaff } from '../testing/auth.js';

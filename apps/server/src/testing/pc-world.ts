@@ -1,4 +1,4 @@
-import type { NodeToPcMessage, TemporarySession } from '@pope/shared';
+import type { NativeNodeToPcMessage as NodeToPcMessage, TemporarySession } from '@pope/shared';
 
 import { devPcId, seedDevPcs } from '../pcs/dev-pcs.js';
 import { SessionsService } from '../sessions/sessions.service.js';

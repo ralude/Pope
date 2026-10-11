@@ -254,6 +254,23 @@ No añadir migraciones/dependencias ni activar autenticación del WebSocket ante
 
 ## Flujo principal
 
+### Concreción T13 (2026-10-11)
+
+El nodo consulta SHA-256 de Bearer antes del upgrade `/pc`, sin excepciones anónimas
+ni parámetros en URL. Error HTTP 401 JSON del contrato T01 y `no-store`; nunca el
+secreto. Cada mensaje revalida la credencial por ID y PC. Hello estricto v2 debe
+coincidir con esa identidad; v1, identidad ajena y hello repetido cierran el canal.
+Una copia `unknown` no inventa un reinicio: toca la presencia y devuelve el estado
+autorizado; `known` mantiene la conciliación existente. T17 implementará su custodia
+y cuenta local. Los mensajes de sesión/pausa conservan su significado.
+
+Frames de texto de hasta 16 KiB, 32 trabajos pendientes por conexión y 256 KiB de
+salida; cierre al exceder. La limpieza espera al trabajo en curso para no registrar
+una conexión cerrada. La sustitución libre T12 cierra el canal de la credencial vieja;
+la revocación con sesión y sus intervalos siguen en T34. Control/mantenimiento no se
+ejecutan antes de sus tareas. Las fixtures se registran por T12 con secretos aleatorios
+y solo existen en `src/testing`; no conceden una excepción al nodo de producción.
+
 ### T03: fondo global
 
 Límites exactos: original **10 000 000 bytes** y **40 000 000 píxeles** (confirmados

@@ -222,7 +222,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(server): autentica el canal de PCs`.
   - **División previa (2026-10-11):** T13a valida hashes e identidad sin activar el canal; T13b activa admisión v2 y adapta fixtures; T13c amplía ataques/límites y cierra batería. No se conserva una excepción anónima de producción.
   - [x] **T13a (2026-10-11):** autenticación por cabecera y revalidación contra PC/credencial vigente. Tres tests de ausencia/formato/identidad/revocación pasan; solo hashes, sin credencial fija ni secreto en identidad ordinaria.
-  - [ ] **T13b:** upgrade autenticado, hello v2 y adaptación de tests de sesiones/TLS.
+  - [x] **T13b (2026-10-11):** upgrade autenticado, hello v2 y adaptación de tests de sesiones/TLS. Sin v1 ni excepción anónima; identidad fija de cabecera, cola de entrada/salida acotada, cierre al sustituir credencial y limpieza tras trabajo pendiente. 27 regresiones de login/pausa/reconexión/TLS pasan; cierre de batería en T13c.
   - [ ] **T13c:** suplantación, revocación, versión, tamaños/colas y batería completa.
 
 - [ ] **T14: Simulador con registro autenticado**

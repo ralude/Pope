@@ -1,4 +1,9 @@
-import { newId, type NodeToPcMessage, type PcMap, usd } from '@pope/shared';
+import {
+  newId,
+  type NativeNodeToPcMessage as NodeToPcMessage,
+  type PcMap,
+  usd,
+} from '@pope/shared';
 import { asc } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

@@ -1,4 +1,4 @@
-import { PROTOCOL_VERSION } from '@pope/shared';
+import { NATIVE_PC_PROTOCOL_VERSION, newId } from '@pope/shared';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { devPcId, seedDevPcs } from '../pcs/dev-pcs.js';
@@ -64,15 +64,21 @@ describe('canal WebSocket de las PCs (e2e, plan 001 "Contratos", ADR-0003)', () 
     });
   });
 
-  it('una PC desconocida recibe unknown_pc y se cierra la conexión', async () => {
+  it('REQ-003-63: hello de otra PC recibe identidad incorrecta y se cierra la conexión', async () => {
     const pc = await connect();
     pc.send({
       type: 'hello',
-      protocolVersion: PROTOCOL_VERSION,
+      protocolVersion: NATIVE_PC_PROTOCOL_VERSION,
       pcId: '0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a99',
       sessionId: null,
+      recoveryState: 'known',
+      controlContext: { kind: 'free', revision: newId() },
+      pendingMaintenanceExitId: null,
     });
-    expect(await pc.next()).toMatchObject({ type: 'error', code: 'unknown_pc' });
+    expect(await pc.next()).toMatchObject({
+      type: 'pcAuthenticationError',
+      code: 'pc_identity_mismatch',
+    });
     expect((await pc.closed).code).toBe(1008);
   });
 

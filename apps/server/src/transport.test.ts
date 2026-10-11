@@ -12,6 +12,7 @@ import { createNodeAdapter, loadNodeTls } from './transport.js';
 import { createTlsFixture } from './testing/tls.js';
 import { createTestApp, type TestApp } from './testing/app.js';
 import { loginAsStaff } from './testing/auth.js';
+import { testPcCredentials } from './testing/pc-credentials.js';
 
 const base = { POPE_MODE: 'local', HOST: '127.0.0.1', DATABASE_URL: 'postgres://test' };
 
@@ -67,7 +68,11 @@ describe('REQ-003-63: transporte LAN cifrado (ADR-0017)', () => {
   });
 
   it('REQ-003-63: WSS usa el mismo certificado y rechaza el ajeno', async () => {
-    const ws = new WebSocket(origin.replace('https:', 'wss:') + '/pc', { ca: fixture.cert });
+    const credential = (await testPcCredentials(testApp)).values().next().value;
+    const ws = new WebSocket(origin.replace('https:', 'wss:') + '/pc', {
+      ca: fixture.cert,
+      headers: { authorization: `Bearer ${credential ?? ''}` },
+    });
     try {
       await once(ws, 'open');
       expect(ws.readyState).toBe(WebSocket.OPEN);

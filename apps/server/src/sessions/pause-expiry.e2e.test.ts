@@ -1,4 +1,9 @@
-import { type DomainEvent, minutes, type NodeToPcMessage, usd } from '@pope/shared';
+import {
+  type DomainEvent,
+  minutes,
+  type NativeNodeToPcMessage as NodeToPcMessage,
+  usd,
+} from '@pope/shared';
 import { asc } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

@@ -1,5 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { type NodeToPcMessage, nodeToPcMessageSchema } from '@pope/shared';
+import { type NativeNodeToPcMessage, nativeNodeToPcMessageSchema } from '@pope/shared';
+
+import type { AuthenticatedPc } from '../pcs/pc-authentication.service.js';
 
 /** PC identificada con `hello` (id y nombre de la tabla `pcs`). */
 export interface PcIdentity {
@@ -9,9 +11,11 @@ export interface PcIdentity {
 
 /** Una conexión WebSocket de una PC, vista desde el dominio (sin detalles de `ws`). */
 export interface PcConnection {
+  /** Identidad fija comprobada antes del upgrade; no contiene el secreto. */
+  readonly authentication: AuthenticatedPc;
   /** PC identificada con `hello`; `null` hasta entonces. */
   pc: PcIdentity | null;
-  send(message: NodeToPcMessage): void;
+  send(message: NativeNodeToPcMessage): void;
   close(code: number, reason: string): void;
 }
 
@@ -70,12 +74,12 @@ export class PcConnections {
    * Envía un mensaje a la PC si está conectada; devuelve si se envió. Los mensajes se
    * validan con el protocolo antes de salir: un error aquí es un fallo del nodo.
    */
-  send(pcId: string, message: NodeToPcMessage): boolean {
+  send(pcId: string, message: NativeNodeToPcMessage): boolean {
     const connection = this.byPc.get(pcId);
     if (!connection) {
       return false;
     }
-    connection.send(nodeToPcMessageSchema.parse(message));
+    connection.send(nativeNodeToPcMessageSchema.parse(message));
     return true;
   }
 }
