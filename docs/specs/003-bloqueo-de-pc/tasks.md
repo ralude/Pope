@@ -245,7 +245,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T15b (2026-10-11):** DPAPI de máquina, escritura atómica/exclusiva, límites, borrado de buffers y propietario/DACL SYSTEM/administración verificados antes de leer. Rechazo de reanálisis y privilegio de restauración temporal, sin cuentas nuevas. Tres pruebas locales nuevas (DPAPI/corrupción, fronteras token y ACL ordinaria); 340 nativas pasan, build/formato correctos. Custodia real como SYSTEM y parada/retirada se verifican en T15c antes de cerrar T15.
   - [ ] **T15c:** arranque/parada sin UI, configuración corrupta y custodia verificados como servicio temporal; retirada comprobada y batería general.
     - [x] **T15c1 (2026-10-11):** envoltorio ServiceBase sin UI/AutoLog, frontera LocalSystem/sesión 0 y un único trabajo cancelable con límite de parada. Tres tests nuevos de parada/duplicados/fallo/deadline; 343 nativos pasan, build/formato correctos. No se instala servicio aún; ensayo temporal y batería pendientes.
-    - [ ] **T15c2:** preparar ensayo demand por GUID con publicación/custodia protegidas y retirada garantizada.
+    - [x] **T15c2 (2026-10-11):** ensayo demand por GUID preparado, publicación protegida/custodia ficticia y retirada en finally con verificación; UAC solo del instalador y token medio para denegación. Sintaxis PowerShell, build/formato, 343 tests y rechazo real de arranque no-SYSTEM/sin UAC correctos. Artefactos autocontenidos publicados; todavía no instalado/ejecutado como servicio. T15c3 pendiente.
     - [ ] **T15c3:** ejecutar en desarrollo, comprobar denegación del token medio/retirada y cerrar batería.
 
 - [ ] **T16: Conexión y reconexión del agente**

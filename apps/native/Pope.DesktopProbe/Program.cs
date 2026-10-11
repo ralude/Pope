@@ -9,6 +9,8 @@ internal static class Program
         if (args is ["--credential-check"]) return ProbeCredential.Check();
         if (args is ["--token-check"]) return ProbeToken.Check();
         if (args is ["--process-token-check"]) return ProbeToken.CheckProcess();
+        if (args is ["--agent-service-probe", var agentId]) return AgentScmProbe.Run(agentId);
+        if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);
         if (args is ["--session-window", var sessionId, "client" or "admin" or "elevated"])
             return SessionWindow.Run(Guid.ParseExact(sessionId, "N").ToString("N"), args[2]);
         if (args is ["--configure-maintenance", var id]) return ProbeCredential.Configure(id);

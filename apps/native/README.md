@@ -4,10 +4,11 @@ Servicio `Pope.Agent`, host WinForms `Pope.ShellHost` y tests de compatibilidad 
 contratos Zod exportados. REQ-003-02/60/62/63; ADR-0002/0006/0017/0019.
 
 **Estado:** T08/T09 completas; pruebas Home y prototipo del juego aceptados por el
-mantenedor el 2026-10-08. Compatibilidad Pro pendiente antes de entregar al local. No hay bloqueo,
-conexión, puente ni servicio operativos.
-El inicio ordinario de ambos ejecutables devuelve un error deliberado hasta sus tareas
-de implementación; `--check-build` solo comprueba que arranca el artefacto. No usar estos
+mantenedor el 2026-10-08. Compatibilidad Pro pendiente antes de entregar al local.
+T15 implementa configuración/custodia/ciclo de vida; su ensayo SCM y cierre aún pendientes.
+Conexión, puente y bloqueo de producto siguen pendientes. El agente exige SCM/LocalSystem
+y configuración protegida; el host aún devuelve error al inicio ordinario.
+`--check-build` solo comprueba que arranca el artefacto. No usar estos
 binarios como Shell de Windows ni instalarlos en el local. T08b verifica el inventario;
 T09/T10 prueban mecanismos nativos antes de integrar T11–T20.
 
@@ -62,6 +63,28 @@ dotnet test Pope.slnx -c Release --no-build --no-restore
 ```
 
 ## Contratos y límites de la evidencia
+
+### Ensayo temporal T15 en desarrollo
+
+Tras publicar `agent` y `probe`, ejecutar desde PowerShell **sin elevar**:
+
+```powershell
+./apps/native/probes/test-agent-service.ps1
+```
+
+UAC eleva solo el instalador temporal. El lanzador conserva el token medio para probar
+denegación de lectura/escritura de la configuración. Servicio `Pope.Agent.Test.<GUID>`
+bajo demanda y carpeta nueva `ProgramData/PopeAgentTest-<GUID>` protegida; binarios
+propios, certificado/credencial ficticios aleatorios, sin UI ni conexión al nodo en T15.
+Comprueba SYSTEM/sesión 0, arranque/parada, corrupción, recuperación del archivo y ausencia
+de secretos. Retira servicio/árbol propios en `finally` y registra si la retirada pasó.
+No modifica cuentas, shell, autologin, UAC, directivas ni servicios preexistentes.
+El ensayo no llama al mecanismo T10 ni cierra su gate.
+
+Evidencia/manifiesto con hashes en `tmp/agent-service-<GUID>/`; no guardar configuración
+plana, claves privadas ni credenciales en el informe. No inferir retirada si falta el
+informe: registrar el fallo y revisar solo el GUID propio. No sustituye Windows Pro del
+local ni la instalación de producto T50. El servicio todavía no mantiene WebSocket (T16).
 
 ### Prototipo T09
 
