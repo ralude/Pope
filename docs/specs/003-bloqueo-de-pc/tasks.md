@@ -248,7 +248,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - [x] **T15c2 (2026-10-11):** ensayo demand por GUID preparado, publicación protegida/custodia ficticia y retirada en finally con verificación; UAC solo del instalador y token medio para denegación. Sintaxis PowerShell, build/formato, 343 tests y rechazo real de arranque no-SYSTEM/sin UAC correctos. Artefactos autocontenidos publicados; todavía no instalado/ejecutado como servicio. T15c3 pendiente.
     - [ ] **T15c3:** ejecutar en desarrollo, comprobar denegación del token medio/retirada y cerrar batería. **2026-10-11:** batería general correcta (1 628 tests); lanzamiento del ensayo GUID `b3181fdb63634f5eb24eef508f365a79` cancelado por Windows/UAC antes de arrancar. Servicio inexistente (1060), carpeta protegida ausente; prueba funcional pendiente de aceptar UAC. No cerrar T15. El mantenedor autoriza después «ve con t16 hasta t20»: avanzar ese bloque sin repetir UAC y mantener esta prueba pendiente.
 
-- [ ] **T16: Conexión y reconexión del agente**
+- [x] **T16: Conexión y reconexión del agente**
   - **Cubre:** REQ-003-02, REQ-003-04, REQ-003-63.
   - **Hacer:** mantener un WebSocket autenticado con certificado verificado, `hello`, latidos y reintentos acotados; no conectar React directamente al nodo en producción.
   - **Verificar:** corte/reconexión, cambio de nodo no confiable, un solo canal/temporizador y memoria estable durante reintentos prolongados.
@@ -256,12 +256,14 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-11):** T16a validación de contratos exportados sin dependencia de producto nueva; T16b canal TLS/Bearer, hello/latidos y reconexión cancelable; T16c pruebas de transporte real, límites/reintentos y batería general. T15/T10 quedan abiertas por instrucción del mantenedor.
   - [x] **T16a (2026-10-11):** validador limitado al subconjunto JSON Schema exportado, embebido y sin dependencias nuevas; rechazo de campos duplicados, profundidad/tamaño y palabras clave futuras desconocidas. Fixtures v2 contrastan también el validador de producto; 343 tests nativos pasan. Siguiente T16b.
   - [x] **T16b (2026-10-11):** servicio conectado mediante ClientWebSocket/BCL, TLS 1.2/1.3 y certificado fijado vigente/SAN, sin proxy ni redirecciones; Bearer solo en cabecera. Hello unknown, único latido de 10 s, frames de 16 KiB y envío/recepción cancelables; backoff 1/2/4/8/16/30 s. Tres pruebas de WSS real/reconexión/certificado ajeno/backoff pasan; 346 nativas, build/formato correctos. T16c verifica ataques y estabilidad antes del cierre.
+  - [x] **T16c (2026-10-11):** binario/campos duplicados/16 KiB excedidos cierran canal; revocación autenticada bloquea reintentos. 150 reconexiones WSS reales: +16 344 bytes retenidos y −1 handle entre muestra 50/final, logs acotados. 348 nativas y batería general correctas: formato/lint/tipos/test/build, 1 633 tests. No sustituye la medición prolongada en equipos del local T57 ni la prueba SCM pendiente T15. T16 completa en desarrollo; siguiente T17, T10 abierta, sin VM.
 
 - [ ] **T17: Estado de sesión y cuenta local monotónica**
   - **Cubre:** REQ-003-04; REQ-002-30, REQ-002-31; ADR-0007.
   - **Hacer:** conservar el último estado autorizado y descontar solo el restante permitido, sin calcular tarifas; reconciliar identidad tras reinicio sin inventar un `hello` que cierre sesión.
   - **Verificar:** cambio de reloj, host reiniciado, corte en sesión/pausa, agotamiento offline y arranque bloqueado; el nodo sigue siendo fuente de verdad.
   - **Commit:** `feat(native): conserva el estado autorizado de la sesión`.
+  - **División previa (2026-10-11):** T17a copia autorizada/cuenta monotónica y pruebas de sesión/pausa/reloj/host; T17b recuperación durable ligada a PC y arranque bloqueado; T17c integración y batería general. No calcular dinero/tarifas ni aplicar políticas de pausa en C#.
 
 - [ ] **T18: Pipe seguro entre servicio y host**
   - **Cubre:** REQ-003-63; ADR-0017.

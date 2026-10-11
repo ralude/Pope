@@ -13,6 +13,7 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
     private readonly SemaphoreSlim sendGate = new(1, 1);
     private ClientWebSocket? connected;
     private int running;
+    private bool authenticationRejected;
     internal event Action<JsonElement>? Message;
     internal event Action<bool>? ConnectionChanged;
     internal Func<object> Hello { get; set; } = () => new
@@ -87,6 +88,11 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
                     ConnectionChanged?.Invoke(false);
                 }
                 log.Write(AgentLogCode.TransportDisconnected);
+                if (authenticationRejected)
+                {
+                    // Revocación autenticada: esperar nueva configuración, nunca confundir con fallo TLS.
+                    await Task.Delay(Timeout.InfiniteTimeSpan, token);
+                }
                 failures = Math.Min(failures + 1, 6);
                 await Delay(RetryDelay(failures), token);
             }
@@ -158,7 +164,11 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
                     ConnectionChanged?.Invoke(true);
                 }
                 Message?.Invoke(message);
-                if (message.GetProperty("type").GetString() == "pcAuthenticationError") throw new InvalidDataException();
+                if (message.GetProperty("type").GetString() == "pcAuthenticationError")
+                {
+                    authenticationRejected = true;
+                    throw new InvalidDataException();
+                }
             }
         }
         finally { CryptographicOperations.ZeroMemory(buffer); }

@@ -9,11 +9,85 @@ using System.Text;
 using System.Text.Json;
 using Pope.Agent;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Pope.Native.Tests;
 
-public sealed class AgentChannelTests
+public sealed class AgentChannelTests(ITestOutputHelper output)
 {
+    [Fact(DisplayName = "REQ-003-63: frames binarios, duplicados y grandes se cierran; revocación no reintenta")]
+    public async Task FramesAndRevocation()
+    {
+        using var peer = new Peer();
+        using var configuration = peer.Configuration();
+        var root = Temporary();
+        using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        var revoked = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var offline = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var channel = new AgentChannel(configuration, new AgentLog(root)) { Delay = (_, t) => Task.Delay(10, t) };
+        channel.Message += m => { if (m.GetProperty("type").GetString() == "pcAuthenticationError") revoked.TrySetResult(); };
+        channel.ConnectionChanged += online => { if (!online && revoked.Task.IsCompleted) offline.TrySetResult(); };
+        var run = channel.RunAsync(cancel.Token);
+        try
+        {
+            foreach (var (bytes, type) in new[] {
+                ("{}"u8.ToArray(), WebSocketMessageType.Binary),
+                ("{\"type\":\"state\",\"status\":\"locked\",\"status\":\"locked\"}"u8.ToArray(), WebSocketMessageType.Text),
+                (new byte[16_385], WebSocketMessageType.Text) })
+            {
+                using var socket = await peer.Accept(configuration.Authorization(), cancel.Token);
+                await Read(socket, cancel.Token);
+                await socket.SendAsync(bytes, type, true, cancel.Token);
+                var buffer = new byte[100];
+                try { var frame = await socket.ReceiveAsync(buffer.AsMemory(), cancel.Token); Assert.Equal(WebSocketMessageType.Close, frame.MessageType); }
+                catch (WebSocketException) { }
+            }
+            using var last = await peer.Accept(configuration.Authorization(), cancel.Token);
+            await Read(last, cancel.Token);
+            await last.SendAsync("{\"type\":\"pcAuthenticationError\",\"code\":\"pc_credential_revoked\",\"message\":\"Credencial revocada\"}"u8.ToArray(), WebSocketMessageType.Text, true, cancel.Token);
+            await offline.Task.WaitAsync(cancel.Token);
+            using var noRetry = new CancellationTokenSource(TimeSpan.FromMilliseconds(200));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => { using var unexpected = await peer.Listener.AcceptTcpClientAsync(noRetry.Token); });
+            Assert.False(run.IsCompleted);
+        }
+        finally { cancel.Cancel(); try { await run; } catch (OperationCanceledException) { } Directory.Delete(root, true); }
+    }
+
+    [Fact(DisplayName = "REQ-003-02/63: 150 reconexiones reales conservan memoria y handles acotados")]
+    public async Task ReconnectMemoryIsStable()
+    {
+        using var peer = new Peer();
+        using var configuration = peer.Configuration();
+        var root = Temporary();
+        using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+        var channel = new AgentChannel(configuration, new AgentLog(root)) { Delay = (_, t) => Task.Delay(1, t) };
+        var run = channel.RunAsync(cancel.Token);
+        long baseline = 0;
+        var handles = 0;
+        try
+        {
+            for (var index = 0; index < 150; index++)
+            {
+                using (var socket = await peer.Accept(configuration.Authorization(), cancel.Token))
+                {
+                    await Read(socket, cancel.Token);
+                    await socket.SendAsync("{}"u8.ToArray(), WebSocketMessageType.Text, true, cancel.Token);
+                    var buffer = new byte[100];
+                    try { await socket.ReceiveAsync(buffer.AsMemory(), cancel.Token); } catch (WebSocketException) { }
+                }
+                if (index == 49) { baseline = GC.GetTotalMemory(true); handles = System.Diagnostics.Process.GetCurrentProcess().HandleCount; }
+            }
+            cancel.Cancel();
+            try { await run; } catch (OperationCanceledException) { }
+            var growth = GC.GetTotalMemory(true) - baseline;
+            var handleGrowth = System.Diagnostics.Process.GetCurrentProcess().HandleCount - handles;
+            output.WriteLine($"REQ-003-63: 150 WSS, memoria retenida adicional={growth} bytes, handles adicionales={handleGrowth}.");
+            Assert.InRange(growth, long.MinValue, 10 * 1024 * 1024);
+            Assert.InRange(handleGrowth, int.MinValue, 20);
+            Assert.All(Directory.GetFiles(root), p => Assert.InRange(new FileInfo(p).Length, 1, AgentLog.MaximumBytes));
+        }
+        finally { cancel.Cancel(); try { await run; } catch (OperationCanceledException) { } Directory.Delete(root, true); }
+    }
     [Fact(DisplayName = "REQ-003-02/04/63: WSS real verifica Bearer, hello, latidos y reconexión única")]
     public async Task AuthenticatedReconnect()
     {

@@ -663,6 +663,13 @@ retención explícita, sin crecer con semanas de cortes de red.
   el respaldo WPF de ADR-0005 si el prototipo falla, previa revisión del plan.
 - **C# estándar:** WebSocket, pipe, JSON y temporización; APIs Win32/COM comentadas en
   español. Sin lógica de tarifas, saldos, límites de pausa ni decisión de cobro.
+  T16 usa ClientWebSocket con SocketsHttpHandler (TLS 1.2/1.3, sin proxy/redirecciones),
+  certificado DER fijado, vigencia/SAN y Bearer solo en cabecera. Un único loop de conexión,
+  latido de 10 s y backoff hasta 30 s; frames de 16 KiB, profundidad 32 y deadlines acotados.
+  El validador BCL interpreta solo las palabras clave del JSON Schema v2 exportado:
+  futuros keywords desconocidos fallan cerrados y los fixtures contrastan producto/tests.
+  No añade JsonSchema.Net al producto. La revocación recibida por el canal autenticado
+  detiene reintentos hasta sustituir configuración; fallos de TLS conservan backoff.
 - **Tests C#:** justificar framework de tests y validador JSON Schema (p. ej.
   JsonSchema.Net, solo en tests) antes de añadir paquetes; exportación draft 2020-12.
 - **Servidor:** reutilizar TLS y UDP de Node, `ws`, Fastify y el almacenamiento existente.
