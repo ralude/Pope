@@ -38,6 +38,11 @@ La **fase 2 de la spec 002** se implementa aquí en T23–T25 y se verifica en T
 regresiones de T17/T22/T27/T55. Sus 19 tareas de fase 1 permanecen aprobadas y completas.
 La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
 
+**Entorno vigente (mantenedor, 2026-10-11):** continuar T12–T20 en esta máquina,
+sin usar la VM. T10 permanece abierta hasta realizar ese bloque; conserva su gate
+funcional y no se integra el mantenimiento pendiente. Las pruebas que requieran
+alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
+
 ## Tareas
 
 ### Contratos y datos
@@ -205,6 +210,10 @@ La lista no implementa el catálogo ni restauración de perfiles de la spec 004.
   - **Hacer:** implementar endpoints de registro: encargado/administrador generan, un uso, 600 s; crear PC/nombre/credencial y evento atómicamente; definir recuperación si se pierde la respuesta.
   - **Verificar:** dueño rechazado, caducidad exacta, doble consumo concurrente y respuesta perdida sin duplicar PC ni reutilizar código consumido.
   - **Commit:** `feat(server): registra PCs con códigos de instalación`.
+  - **División previa (2026-10-09):** T12a contratos de auditoría sin secretos; T12b endpoints/transacciones y prueba inicial; T12c recuperación/caducidad/concurrencia en ambos motores y cierre de batería. T12 se marca tras completar las tres.
+  - [x] **T12a (2026-10-11):** eventos estrictos de emisión y consumo de instalación, actor del personal en emisión/sistema en consumo y vínculo mediante ID del código. Rechazo de secretos y actores incorrectos verificado; endpoints y consumo efectivo quedan en T12b/c.
+  - [ ] **T12b:** endpoints con roles, RNG/hash, asignación de PC/nombre y consumo atómico con evento; respuestas no-store.
+  - [ ] **T12c:** recuperación solo libre, límites temporales, concurrencia, respuesta perdida y validación completa.
 
 - [ ] **T13: Autenticación del WebSocket de PCs**
   - **Cubre:** REQ-003-11, REQ-003-63.

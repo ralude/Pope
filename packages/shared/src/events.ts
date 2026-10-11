@@ -20,6 +20,7 @@ import { pauseOverrunSchema, settingKeySchema } from './settings.js';
 import { staffRoleSchema, staffStatusSchema } from './staff.js';
 import { weekdaySchema } from './tariff.js';
 import { paymentMethodSchema } from './wallet.js';
+import { pcMacAddressSchema } from './pc-registration.js';
 
 const positiveSeconds = z.int().positive().brand<'Seconds'>();
 const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
@@ -69,6 +70,30 @@ function event<const Type extends string, Payload extends z.ZodType>(
 }
 
 // ─── Mantenimiento (REQ-003-41, REQ-003-44, REQ-003-45) ────────────────────────────────────
+
+/** Autorización de instalación: audita el ID, nunca el código ni su hash. */
+export const pcInstallationCodeIssuedEventSchema = event(
+  'pc.installation_code_issued',
+  1,
+  z.strictObject({
+    codeId: idSchema,
+    expiresAt: utcInstantSchema,
+    targetPc: pcRefSchema.nullable(),
+  }),
+).extend({ actor: actorSchema.options[1] });
+
+/** Consumo autorizado: el ID del código enlaza al personal que permitió el registro. */
+export const pcRegisteredEventSchema = event(
+  'pc.registered',
+  1,
+  z.strictObject({
+    codeId: idSchema,
+    credentialId: idSchema,
+    pc: pcRefSchema,
+    macAddress: pcMacAddressSchema,
+    recovery: z.boolean(),
+  }),
+).extend({ actor: actorSchema.options[2] });
 
 export const lockBackgroundChangedEventSchema = event(
   'lock_screen.background_changed',
@@ -808,6 +833,8 @@ export const saleVoidedEventSchema = event(
 // ─── Unión de todos los eventos ─────────────────────────────────────────────────────────
 
 export const domainEventSchema = z.discriminatedUnion('type', [
+  pcInstallationCodeIssuedEventSchema,
+  pcRegisteredEventSchema,
   lockBackgroundChangedEventSchema,
   pcMaintenanceStartedEventSchema,
   pcMaintenanceEndedEventSchema,

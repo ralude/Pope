@@ -235,6 +235,23 @@ ligado a la misma PC, solo libre y fuera de mantenimiento; al consumirlo reempla
 credencial sin crear otra PC. Se comprueba disponibilidad al emitir y consumir; un
 código nuevo sin consumir no invalida todavía una credencial vigente.
 
+**Concreción T12 (2026-10-09):** `POST /pcs/installation-codes` exige sesión de
+encargado/administrador; `POST /pcs/register` es público y valida el código aleatorio.
+Respuestas excepcionales con secretos llevan `Cache-Control: no-store`. Los errores
+de registro usan el contrato T01, sin devolver el código ni datos de credenciales.
+Cada operación usa `EventsService.inTransaction`: `pc.installation_code_issued`
+lleva actor del personal, ID/plazo/PC destino sin secreto; `pc.registered` lleva actor
+sistema, ID del código/credencial y ficha/nombre/MAC con indicador de recuperación.
+El actor del consumo no supone quién introdujo físicamente el código; su ID enlaza
+la autorización auditada del personal. Una única transacción consume código, actualiza
+PC, sustituye hash y emite el evento, devolviendo el secreto una sola vez.
+Bloquear la fila del código y la PC existente; comprobar disponibilidad al emitir y
+consumir (sesión activa, mantenimiento abierto o reserva rechazan recuperación).
+Un advisory lock de registro serializa asignación de nombres y consumos: elegir el
+primer `PC NN` libre con comparación sin mayúsculas, conservando nombres anteriores.
+Reloj del nodo después de adquirir los bloqueos: no consumir al alcanzar 600 s.
+No añadir migraciones/dependencias ni activar autenticación del WebSocket antes de T13.
+
 ## Flujo principal
 
 ### T03: fondo global

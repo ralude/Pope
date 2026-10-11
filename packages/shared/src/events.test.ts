@@ -26,6 +26,23 @@ const valid = (event: unknown) => domainEventSchema.safeParse(event).success;
 
 /** Un ejemplo válido de cada tipo de evento de las specs implementadas. */
 const examples = {
+  // Spec 003: REQ-003-10/11. El consumo no identifica a la persona que tecleó el código.
+  'pc.installation_code_issued': envelope('pc.installation_code_issued', {
+    codeId: id(30),
+    expiresAt: '2026-09-25T22:40:00Z',
+    targetPc: null,
+  }),
+  'pc.registered': envelope(
+    'pc.registered',
+    {
+      codeId: id(30),
+      credentialId: id(31),
+      pc: PC05,
+      macAddress: 'AA:BB:CC:DD:EE:FF',
+      recovery: false,
+    },
+    { kind: 'system' },
+  ),
   // Spec 003: REQ-003-71, vuelta al fondo por defecto.
   'lock_screen.background_changed': envelope('lock_screen.background_changed', {
     revision: 1,
@@ -640,6 +657,20 @@ describe('pausa de sesión (REQ-002-32)', () => {
 });
 
 describe('personal (REQ-001-40)', () => {
+  it('REQ-003-10/11: registro sin código/credencial/hash en auditoría y actores explícitos', () => {
+    for (const type of ['pc.installation_code_issued', 'pc.registered'] as const) {
+      const sample = examples[type];
+      for (const secret of ['code', 'codeHash', 'credential', 'credentialHash']) {
+        expect(valid({ ...sample, payload: { ...sample.payload, [secret]: 'secreto' } })).toBe(
+          false,
+        );
+      }
+    }
+    expect(valid({ ...examples['pc.registered'], actor: ANA })).toBe(false);
+    expect(valid({ ...examples['pc.installation_code_issued'], actor: { kind: 'system' } })).toBe(
+      false,
+    );
+  });
   it('staff.created solo admite los roles del personal y nunca la contraseña', () => {
     const created = examples['staff.created'];
     const withPayload = (payload: object) => ({
