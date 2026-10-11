@@ -230,6 +230,10 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** adaptar `tools/agent-sim` al registro, certificado y protocolo elegido; separar explícitamente credenciales de pruebas y configuración de producción.
   - **Verificar:** login/latidos/pausa existentes con autenticación, PC falsa rechazada y secretos omitidos de salida, argumentos y archivos versionados.
   - **Commit:** `feat(tools): autentica las PCs del simulador`.
+  - **División previa (2026-10-11):** T14a registro/configuración privada y transporte TLS; T14b canal v2 y CLI; T14c integración real, guía y batería completa. Sin credenciales fijas en producción.
+  - [x] **T14a (2026-10-11):** registro por archivo privado, perfil estricto exclusivo de simulación, escritura atómica con exclusión y transporte con CA/Bearer. Cuatro tests nuevos y 48 existentes pasan; lint/tipos/build correctos. Activación en CLI/canal en T14b.
+  - [ ] **T14b:** identidad registrada, cabecera Bearer y mensajes v2 en run/interactive/load.
+  - [ ] **T14c:** login/latidos/pausa/TLS reales, ausencia de secretos y cierre de batería.
 
 - [ ] **T15: Ciclo de vida del servicio y custodia local**
   - **Cubre:** REQ-003-02, REQ-003-63.

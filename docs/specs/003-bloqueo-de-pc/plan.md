@@ -271,6 +271,26 @@ la revocación con sesión y sus intervalos siguen en T34. Control/mantenimiento
 ejecutan antes de sus tareas. Las fixtures se registran por T12 con secretos aleatorios
 y solo existen en `src/testing`; no conceden una excepción al nodo de producción.
 
+### Concreción T14 (2026-10-11)
+
+El simulador recibe el código mediante archivo (sin secreto en argumentos) y consume
+el endpoint T12. Configuración estricta marcada `purpose: simulator`, identidad devuelta
+por el nodo y credencial aleatoria; nombre obligatorio `*.sim-secret.json`, ignorado por
+Git. No es la configuración del servicio Windows. Lecturas y respuestas acotadas,
+escritura atómica sin sobrescribir otra identidad por accidente, errores sin contenido.
+La CLI no imprime códigos, credenciales ni errores internos de transporte.
+
+HTTPS/WSS verifica nombre/cadena con certificado recibido por medio confiable;
+HTTP/WS solo para loopback literal de desarrollo. `ws` (ya usado por el servidor) permite
+Bearer en cabecera y una CA explícita, que el WebSocket global de Node no admite.
+Zod valida la configuración externa; son dependencias de la herramienta de desarrollo,
+sin añadir recursos al nodo/panel. Código/CA/configuración se suministran por rutas.
+
+Hello comunica `known` solo si conserva contexto emitido por el nodo y sesión compatible;
+en otro caso usa `unknown`, sin fabricar revisión ni cierre. Hasta la coordinación T28
+el nodo puede devolver solo `state`: conservar la sesión local para mostrar/latir y pedir
+la copia autorizada al reconectar. La simulación no prueba efectos nativos de Windows.
+
 ### T03: fondo global
 
 Límites exactos: original **10 000 000 bytes** y **40 000 000 píxeles** (confirmados

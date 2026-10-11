@@ -12,10 +12,13 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@pope/shared": "workspace:*"
+    "@pope/shared": "workspace:*",
+    "ws": "^8.22.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/node": "^24.13.6",
+    "@types/ws": "^8.18.1",
     "vitest": "~5.0.1"
   }
 }

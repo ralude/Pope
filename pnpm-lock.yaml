@@ -365,10 +365,19 @@ importers:
       '@pope/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      ws:
+        specifier: ^8.22.0
+        version: 8.22.0
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
     devDependencies:
       '@types/node':
         specifier: ^24.13.6
         version: 24.13.6
+      '@types/ws':
+        specifier: ^8.18.1
+        version: 8.18.1
       vitest:
         specifier: ~5.0.1
         version: 5.0.1(@types/node@24.13.6)(vite@8.3.1(@types/node@24.13.6)(esbuild@0.28.2)(tsx@4.23.15))

@@ -17,6 +17,9 @@ obj/
 .env
 .env.*
 !.env.example
+*.sim-secret.json
+*.sim-secret.json.*
+*.installation-code.txt
 
 # Logs y temporales
 *.log
