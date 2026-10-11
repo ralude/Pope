@@ -205,7 +205,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T11a:** PEM acotados/validados antes de abrir PostgreSQL, HTTPS/WSS en el mismo puerto, TLS ≥ 1.2, HTTP local solo loopback y cookies Secure con TLS. Pruebas reales con certificados efímeros (identidad ajena/nombre, caducidad, clave distinta y ausencia de secretos); tipos y build correctos. Cierre de batería/guía en T11b.
   - [x] **T11b (2026-10-09):** [guía TLS](tls.md), comandos HTTP loopback/HTTPS LAN y procedimiento de confianza/renovación. Formato, lint, tipos, tests y build completos pasan: 1 588 tests (398 servidor + 334 nativos), HTTPS/WSS reales comprobados; sin secretos versionados, cambios de Windows ni dependencias nuevas. T11 completa; T12 siguiente, T10 aplazada.
 
-- [ ] **T12: Emisión y consumo de códigos de instalación**
+- [x] **T12: Emisión y consumo de códigos de instalación**
   - **Cubre:** REQ-003-10, REQ-003-11; CA-003-11.
   - **Hacer:** implementar endpoints de registro: encargado/administrador generan, un uso, 600 s; crear PC/nombre/credencial y evento atómicamente; definir recuperación si se pierde la respuesta.
   - **Verificar:** dueño rechazado, caducidad exacta, doble consumo concurrente y respuesta perdida sin duplicar PC ni reutilizar código consumido.
@@ -213,7 +213,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-09):** T12a contratos de auditoría sin secretos; T12b endpoints/transacciones y prueba inicial; T12c recuperación/caducidad/concurrencia en ambos motores y cierre de batería. T12 se marca tras completar las tres.
   - [x] **T12a (2026-10-11):** eventos estrictos de emisión y consumo de instalación, actor del personal en emisión/sistema en consumo y vínculo mediante ID del código. Rechazo de secretos y actores incorrectos verificado; endpoints y consumo efectivo quedan en T12b/c.
   - [x] **T12b (2026-10-11):** endpoints con roles, RNG/hash, asignación de PC/nombre y consumo atómico con evento; respuestas no-store. Tres pruebas HTTP, formato, lint, tipos y build correctos; recuperación/concurrencia y cierre de batería en T12c.
-  - [ ] **T12c:** recuperación solo libre, límites temporales, concurrencia, respuesta perdida y validación completa.
+  - [x] **T12c (2026-10-11):** recuperación solo libre, límites temporales, concurrencia, respuesta perdida y rollback comprobados en PGlite/PostgreSQL real; once tests nuevos. Formato, lint, tipos, tests y build completos correctos (409 servidor, 334 nativos). Evidencia en `mediciones.md`; T12 completa, T13 siguiente, T10 abierta y sin VM.
 
 - [ ] **T13: Autenticación del WebSocket de PCs**
   - **Cubre:** REQ-003-11, REQ-003-63.

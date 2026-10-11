@@ -1,5 +1,31 @@
 # Mediciones 003 · cliente Windows
 
+## T12 · registro seguro en desarrollo (2026-10-11)
+
+REQ-003-10/11, CA-003-11; ADR-0017. Sin VM ni cambios del sistema.
+
+- Emisión solo con sesión de encargado/administrador; dueño y petición anónima
+  rechazados. Registro público validado y respuestas con secretos `no-store`.
+- Código RNG de 128 bits y credencial de 256 bits; solo SHA-256 en base de datos.
+  Auditoría estricta sin códigos, credenciales ni hashes, vinculada por ID del código.
+- Consumo/cambio de PC/credencial/evento en una transacción; doble consumo concurrente
+  produce un registro y un evento. Fallo de auditoría deshace los cambios.
+- Acepta a 599 999 ms; rechaza a 600 000 ms sin consumir. Asignación concurrente de
+  nombres respeta nombres anteriores sin distinguir mayúsculas.
+- Respuesta perdida: el código usado no se reutiliza; otro código ligado a la misma
+  PC conserva nombre/posición, cambia MAC y revoca el hash anterior solo al consumir.
+  Sesión activa (incluye pausa), mantenimiento abierto y reserva impiden recuperación.
+- Once pruebas nuevas pasan en PGlite y PostgreSQL real, con bases temporales migradas
+  y borradas por los tests; servidor PostgreSQL de desarrollo en `tmp/contracts003-pg`.
+  Logs ignorados: `tmp/t12b-tests.log`, `tmp/t12c-tests.log` y `tmp/t12-pg.log`.
+- Windows 11 Pro 26H2 **26300.9457**, PostgreSQL **18.6**, Node 24.21.0 y pnpm 12.4.2.
+- Formato/lint/tipos/build completos correctos; batería general completa correcta:
+  **409 tests del servidor** en PostgreSQL real y **334 nativos**, sin omitidos.
+  Las primeras ejecuciones se detuvieron
+  al detectar recreación lenta de PGlite y variables filtradas por Turborepo; ejecución
+  final: `pnpm test --env-mode=loose` con `TEST_DATABASE_URL` local y dos workers.
+  Logs completos en `tmp/t12-final-{format,lint,build-types,test-pg}.log`.
+
 ## T08a · preparación en desarrollo (2026-10-07)
 
 REQ-003-02/60/62/63; ADR-0002/0006/0017/0019.
