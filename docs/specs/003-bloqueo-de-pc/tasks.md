@@ -215,7 +215,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T12b (2026-10-11):** endpoints con roles, RNG/hash, asignación de PC/nombre y consumo atómico con evento; respuestas no-store. Tres pruebas HTTP, formato, lint, tipos y build correctos; recuperación/concurrencia y cierre de batería en T12c.
   - [x] **T12c (2026-10-11):** recuperación solo libre, límites temporales, concurrencia, respuesta perdida y rollback comprobados en PGlite/PostgreSQL real; once tests nuevos. Formato, lint, tipos, tests y build completos correctos (409 servidor, 334 nativos). Evidencia en `mediciones.md`; T12 completa, T13 siguiente, T10 abierta y sin VM.
 
-- [ ] **T13: Autenticación del WebSocket de PCs**
+- [x] **T13: Autenticación del WebSocket de PCs**
   - **Cubre:** REQ-003-11, REQ-003-63.
   - **Hacer:** autenticar antes del upgrade `/pc`, derivar identidad de la credencial y verificar `hello`; adaptar gateway/tests manteniendo límites de mensajes y conexión.
   - **Verificar:** agente desconocido, credencial revocada, `pcId` ajeno, mensajes malformados y conexión duplicada; sin acceso anónimo de producción.
@@ -223,7 +223,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-11):** T13a valida hashes e identidad sin activar el canal; T13b activa admisión v2 y adapta fixtures; T13c amplía ataques/límites y cierra batería. No se conserva una excepción anónima de producción.
   - [x] **T13a (2026-10-11):** autenticación por cabecera y revalidación contra PC/credencial vigente. Tres tests de ausencia/formato/identidad/revocación pasan; solo hashes, sin credencial fija ni secreto en identidad ordinaria.
   - [x] **T13b (2026-10-11):** upgrade autenticado, hello v2 y adaptación de tests de sesiones/TLS. Sin v1 ni excepción anónima; identidad fija de cabecera, cola de entrada/salida acotada, cierre al sustituir credencial y limpieza tras trabajo pendiente. 27 regresiones de login/pausa/reconexión/TLS pasan; cierre de batería en T13c.
-  - [ ] **T13c:** suplantación, revocación, versión, tamaños/colas y batería completa.
+  - [x] **T13c (2026-10-11):** diez pruebas nuevas de identidad/ataques y límites pasan, además de 27 regresiones focalizadas. Batería general correcta: formato, lint, tipos, build y 1 612 tests (419 servidor en PostgreSQL real, 334 nativos). Copia desconocida no cierra la sesión autorizada; evidencia en `mediciones.md`. T10 abierta; siguiente T14, sin VM.
 
 - [ ] **T14: Simulador con registro autenticado**
   - **Cubre:** REQ-003-10, REQ-003-11, REQ-003-63.

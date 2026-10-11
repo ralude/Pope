@@ -1,5 +1,25 @@
 # Mediciones 003 · cliente Windows
 
+## T13 · canal autenticado en desarrollo (2026-10-11)
+
+REQ-003-11/63; ADR-0017. Mismo Windows 11 Pro 26H2/26300.9457 de T12;
+sin VM ni cambios del sistema.
+
+- SHA-256 de Bearer verificado antes del upgrade; ausencia/formato/desconocida/revocada
+  reciben 401 sin secreto. Identidad de hello ligada a la credencial, v2 obligatoria;
+  identidad ajena y hello repetido cierran el canal.
+- Rotación libre de T12 cierra la conexión vieja y rechaza su reconexión. Revalidación
+  después del upgrade rechaza revocación previa al hello. La recuperación con copia
+  desconocida devuelve la sesión del nodo sin inventar un reinicio/cierre.
+- JSON/variantes malformadas y campos extra rechazados; secretos ausentes de logs.
+  Frames binarios: 1003; más de 16 KiB: 1009; más de 32 trabajos: 1008.
+  Salida limitada a 256 KiB y limpieza serializada al desconectar.
+- Diez pruebas nuevas pasan en PGlite; 27 regresiones de sesiones/pausa/TLS pasan.
+  Batería completa con PostgreSQL 18.6: **419 tests servidor**, **334 nativos**,
+  **1 612 totales**, sin omitidos; formato, lint, tipos y build correctos.
+  Logs ignorados: `tmp/t13-final-{format,lint,typecheck,build,test-pg}.log`.
+  Dos workers y `--env-mode=loose` conservan el entorno de la base temporal.
+
 ## T12 · registro seguro en desarrollo (2026-10-11)
 
 REQ-003-10/11, CA-003-11; ADR-0017. Sin VM ni cambios del sistema.

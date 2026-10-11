@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-11 · T13b completa; T10 abierta; siguiente T13c
+**Última actualización:** 2026-10-11 · T13 completa; T10 abierta; siguiente T14
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 y T11–T12 completos; T10 aplazada; T13–T20 autorizadas para continuación autónoma en esta máquina, sin VM; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T13c: pruebas de ataques/límites y cierre de batería; T13a/b completas. Continuar hasta T20 en esta máquina, sin VM (mantenedor, 2026-10-11). T10 abierta hasta realizar ese bloque. Cuenta temporal/observación/retirada VM pendientes al retomar T10; no volver a pedir la autorización ya concedida |
-| **Progreso** | Spec 003: 11 / 59 grupos; T01–T09 y T11–T12 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09 y T11–T13 completos; T10 aplazada; T14–T20 autorizadas para continuación autónoma en esta máquina, sin VM; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
+| **Siguiente tarea** | T14: adaptar el simulador al registro, TLS y canal autenticado v2. Continuar hasta T20 en esta máquina, sin VM (mantenedor, 2026-10-11). T10 abierta hasta realizar ese bloque. Cuenta temporal/observación/retirada VM pendientes al retomar T10; no volver a pedir la autorización ya concedida |
+| **Progreso** | Spec 003: 12 / 59 grupos; T01–T09 y T11–T13 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
@@ -87,7 +87,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T09 y T11–T12 completos; T10 aplazada; T13–T20 autorizadas en desarrollo sin VM; compatibilidad Pro pendiente antes de entrega; T21–T59 Borrador | 11 / 59 |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T09 y T11–T13 completos; T10 aplazada; T14–T20 autorizadas en desarrollo sin VM; compatibilidad Pro pendiente antes de entrega; T21–T59 Borrador | 12 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -97,6 +97,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-11:** T13c/T13 completas: diez pruebas nuevas de ataques/identidad y 27 regresiones focalizadas pasan. Batería general correcta: formato, lint, tipos, build y 1 612 tests (419 servidor PostgreSQL real, 334 nativos). Límites de frames/colas, revocación y recuperación desconocida comprobados. Siguiente T14, 12/59; T10 abierta, sin VM ni cambios de Windows.
 
 - **2026-10-11:** T13b completa: admisión antes del upgrade, hello v2 ligado a identidad de cabecera, revalidación de credencial y cierre de credencial sustituida. Frames/colas limitados, cierre/limpieza serializados y fixtures por registro T12; sin excepción anónima. 27 regresiones de login/pausa/reconexión/TLS pasan; formato/lint/tipos/build correctos. Siguiente T13c para ataques y batería completa; T10 abierta, sin VM.
 
@@ -115,9 +117,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-09:** mantenedor aplaza T10 y autoriza seguir las siguientes tareas aprobadas. Siguiente T11 (HTTPS/WSS); T10 y la observación/retirada de fixture VM quedan pendientes. Conservada la evidencia del observador publicada antes del cambio de orden. Sin cambios de Windows.
 
 - **2026-10-09:** observador transferido y preparado mediante UAC humano; manifiesto de despliegue, accesos/argumentos y hashes EXE/DLL coinciden. Tras aviso de ventana cliente abierta no hay proceso ni informe cliente; sin eventos Application 1000/1026 del prototipo en la consulta. Explorer sigue en sesiones 1 y 2; la sesión administrativa previa no consta cerrada. Mantenedor informa Windows preparando la cuenta y luego operativo. Pendiente confirmar arranque real, cerrar manualmente la sesión previa, observar y retirar la fixture; sin nuevos cambios de sistema ni código, T10 abierta.
-
-- **2026-10-09:** cuenta PopeT10Client creada por el asistente privado y verificada: SID/marcador correctos, Usuarios, no Administradores, grupo administrativo/UAC intactos. Observador nativo de sesión/token/perfil/Explorer/fixture preparado; alto solo con UAC manual, sin servicios ni cambios de sesión automáticos. Build/formato correctos y 334 tests pasan; nueva API de token solo lectura coincide con WindowsIdentity en host limitado. Publicación autocontenida correcta tras restaurar configuración de runtime; no repetir paquetes TS sin cambios. Transferencia/observación/retirada pendientes; T10 abierta, 9/59.
-
-- **2026-10-09:** ensayo mínimo autorizado («confirmo», 2026-10-08 local). Windows VM sin respuesta confirmado por mantenedor; reinicio forzado autorizado y ejecutado. Snapshot de recuperación 3f484244 guardado, luego snapshot operativo 0535d231 tras revalidar Home 22H2/19045.2965, único usuario habilitado administrador, UAC activo, cuenta temporal ausente. Preparador PowerShell privado listo: guard de UUID/modelo VM, ACL del manifiesto, SecureString, cuenta Usuarios y verificación de grupos/UAC; sintaxis y rechazo del Windows cotidiano comprobados. Sin cuenta nueva todavía ni cambio C#; no repetir pipeline de producto. T10 abierta, siguiente ejecutar preparación/observación.
-
-- **2026-10-08:** T10d2v documental completa: ensayo mínimo Propuesto para snapshot, cuenta estándar temporal `PopeT10Client`, inicio/cambio manual Windows, Explorer normal/UAC, continuidad y retirada por SID/GUID. La preparación de VM necesita autorización explícita; no se crea cuenta ni instala proveedor. Consulta actual Guest Control agota plazo; VM figura encendida y sin snapshots, inventario anterior sin revalidar. Documentadas restricciones COM/AOT y retorno como hipótesis. Diff/enlaces revisados sin repetir pipeline de producto; T10 abierta, 9/59, siguiente aprobación/preparación T10d2s.
