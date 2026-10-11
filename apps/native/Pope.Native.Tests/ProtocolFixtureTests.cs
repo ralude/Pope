@@ -1,5 +1,7 @@
 using System.Text.Json.Nodes;
 using Json.Schema;
+using Pope.Agent;
+using System.Text;
 using Xunit;
 
 namespace Pope.Native.Tests;
@@ -32,6 +34,13 @@ public sealed class ProtocolFixtureTests
 
         // No imprimir input ni errores del validador: un fixture futuro podría contener secretos.
         Assert.True(result.IsValid == expected, $"REQ-003-63: {id}, esperado {expected}, obtenido {result.IsValid}");
+        if (version == "v2")
+        {
+            var accepted = true;
+            try { ProtocolValidation.Parse(Encoding.UTF8.GetBytes(input?.ToJsonString() ?? "null"), contract); }
+            catch (InvalidDataException) { accepted = false; }
+            Assert.True(accepted == expected, $"REQ-003-63: validador de producto, {id}");
+        }
         if (fixture["normalizedUsername"] is JsonValue username)
             Assert.Equal(username.GetValue<string>(), input!["username"]!.GetValue<string>());
         if (original is JsonObject obj && obj.ContainsKey("password"))
