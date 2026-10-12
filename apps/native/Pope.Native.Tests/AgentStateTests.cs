@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Security.Cryptography;
 using Pope.Agent;
 using Xunit;
 
@@ -90,5 +91,30 @@ public sealed class AgentStateTests
         public override long TimestampFrequency => 1000;
         public override long GetTimestamp() => Ticks;
         public override DateTimeOffset GetUtcNow() => Utc;
+    }
+
+    [Fact(DisplayName = "REQ-002-31/003-63: copia protegida recupera contexto; corrupción nunca autoriza")]
+    public void ProtectedRecovery()
+    {
+        var original = new AgentState(Pc); byte[]? encrypted = null;
+        original.RecoveryChanged += bytes =>
+        {
+            if (encrypted != null) CryptographicOperations.ZeroMemory(encrypted);
+            try { encrypted = AgentCustody.Transform(bytes, protect: true); }
+            finally { CryptographicOperations.ZeroMemory(bytes); }
+        };
+        original.Apply(Active());
+        original.Apply(Message(new { type = "controlState", serverTime = "2026-10-11T00:00:00Z", context = new { kind = "session", revision = Pc, sessionId = Session } }));
+        var restored = AgentCustody.Transform(encrypted!, protect: false);
+        try
+        {
+            var rebooted = new AgentState(Pc); rebooted.Restore(restored);
+            Assert.True(rebooted.Blocked); Assert.Null(rebooted.RemainingSeconds);
+            Assert.Equal(Session, JsonSerializer.SerializeToElement(rebooted.Hello()).GetProperty("sessionId").GetString());
+            encrypted![0] ^= 255;
+            Assert.Throws<InvalidDataException>(() => AgentCustody.Transform(encrypted, protect: false));
+            Assert.True(new AgentState(Pc).Blocked);
+        }
+        finally { CryptographicOperations.ZeroMemory(restored); CryptographicOperations.ZeroMemory(encrypted!); }
     }
 }

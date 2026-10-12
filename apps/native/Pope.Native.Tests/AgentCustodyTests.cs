@@ -29,7 +29,12 @@ public sealed class AgentCustodyTests
     {
         using var identity = WindowsIdentity.GetCurrent();
         var root = Path.Combine(Path.GetTempPath(), "pope-no-custody-" + Guid.NewGuid().ToString("N"));
-        if (!identity.IsSystem) Assert.Throws<UnauthorizedAccessException>(() => AgentCustody.Read(root));
+        if (!identity.IsSystem)
+        {
+            Assert.Throws<UnauthorizedAccessException>(() => AgentCustody.Read(root));
+            Assert.Throws<UnauthorizedAccessException>(() => AgentCustody.ReadRecovery(root));
+            Assert.Throws<UnauthorizedAccessException>(() => AgentCustody.StoreRecovery(root, []));
+        }
         if (!identity.IsSystem && !new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator))
             Assert.Throws<UnauthorizedAccessException>(() => AgentCustody.Store(root, []));
         Assert.False(Directory.Exists(root));

@@ -16,11 +16,33 @@ internal static class AgentCustody
     {
         RequireAdministrator();
         using var configuration = AgentConfiguration.Parse(plain);
+        StoreProtected(root, plain, "configuration.bin", create: true);
+    }
+
+    internal static void StoreRecovery(string root, byte[] plain)
+    {
+        RequireSystem();
+        ValidateRecovery(plain);
+        StoreProtected(root, plain, "recovery.bin", create: false);
+    }
+
+    private static void ValidateRecovery(byte[] bytes)
+    {
+        var hello = ProtocolValidation.Parse(bytes, "pc-to-node");
+        if (hello.GetProperty("type").GetString() != "hello" ||
+            hello.GetProperty("pendingMaintenanceExitId").ValueKind != System.Text.Json.JsonValueKind.Null ||
+            (hello.TryGetProperty("localRemainingSeconds", out var seconds) && seconds.ValueKind != System.Text.Json.JsonValueKind.Null))
+            throw new InvalidDataException("Recuperación no válida.");
+    }
+
+    private static void StoreProtected(string root, byte[] plain, string name, bool create)
+    {
         using var privilege = new RestorePrivilege();
         var directory = new DirectoryInfo(Path.GetFullPath(root));
         RejectLinks(directory);
         if (!directory.Exists)
         {
+            if (!create) throw new DirectoryNotFoundException();
             var security = new DirectorySecurity();
             security.SetSecurityDescriptorSddlForm(Descriptor);
             directory.Create(security);
@@ -40,7 +62,7 @@ internal static class AgentCustody
                 file.Write(encrypted);
                 file.Flush(flushToDisk: true);
             }
-            var destination = Path.Combine(directory.FullName, "configuration.bin");
+            var destination = Path.Combine(directory.FullName, name);
             if (File.Exists(destination)) Verify(new FileInfo(destination));
             File.Move(temporary, destination, overwrite: true);
         }
@@ -53,25 +75,39 @@ internal static class AgentCustody
 
     internal static AgentConfiguration Read(string root)
     {
+        var plain = ReadProtected(root, "configuration.bin");
+        try { return AgentConfiguration.Parse(plain); }
+        finally { CryptographicOperations.ZeroMemory(plain); }
+    }
+
+    internal static byte[]? ReadRecovery(string root)
+    {
+        RequireSystem();
+        Verify(new DirectoryInfo(Path.GetFullPath(root)));
+        if (!File.Exists(Path.Combine(root, "recovery.bin"))) return null;
+        var plain = ReadProtected(root, "recovery.bin");
+        try { ValidateRecovery(plain); return plain; }
+        catch { CryptographicOperations.ZeroMemory(plain); throw; }
+    }
+
+    private static byte[] ReadProtected(string root, string name)
+    {
         RequireSystem();
         var directory = new DirectoryInfo(Path.GetFullPath(root));
         Verify(directory);
-        var file = new FileInfo(Path.Combine(directory.FullName, "configuration.bin"));
+        var file = new FileInfo(Path.Combine(directory.FullName, name));
         Verify(file);
         using var stream = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read);
         if (stream.Length is < 1 or > MaximumBlob) throw new InvalidDataException("Configuración protegida fuera de límites.");
         var encrypted = new byte[(int)stream.Length];
         stream.ReadExactly(encrypted);
-        byte[]? plain = null;
         try
         {
-            plain = Transform(encrypted, protect: false);
-            return AgentConfiguration.Parse(plain);
+            return Transform(encrypted, protect: false);
         }
         finally
         {
             CryptographicOperations.ZeroMemory(encrypted);
-            if (plain != null) CryptographicOperations.ZeroMemory(plain);
         }
     }
 

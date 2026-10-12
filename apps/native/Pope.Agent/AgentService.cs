@@ -1,4 +1,5 @@
 using System.ServiceProcess;
+using System.Security.Cryptography;
 
 namespace Pope.Agent;
 
@@ -19,8 +20,25 @@ internal sealed class AgentService : ServiceBase
         CanShutdown = true;
         var log = new AgentLog(root);
         lifetime = new AgentLifetime(log, () => AgentCustody.Read(root),
-            (configuration, token) => new AgentChannel(configuration, log).RunAsync(token));
+            (configuration, token) => RunChannel(root, configuration, log, token));
         lifetime.Failure += () => ThreadPool.QueueUserWorkItem(_ => Stop());
+    }
+
+    private static Task RunChannel(string root, AgentConfiguration configuration, AgentLog log, CancellationToken token)
+    {
+        var state = new AgentState(configuration.PcId);
+        byte[]? recovery = null;
+        try { recovery = AgentCustody.ReadRecovery(root); if (recovery != null) state.Restore(recovery); }
+        catch { log.Write(AgentLogCode.RecoveryRejected); } // Copia inválida: unknown, nunca cierre inventado.
+        finally { if (recovery != null) CryptographicOperations.ZeroMemory(recovery); }
+        state.RecoveryChanged += bytes =>
+        {
+            try { AgentCustody.StoreRecovery(root, bytes); }
+            finally { CryptographicOperations.ZeroMemory(bytes); }
+        };
+        var channel = new AgentChannel(configuration, log) { Hello = state.Hello, Heartbeat = state.Heartbeat };
+        channel.Message += state.Apply;
+        return channel.RunAsync(token);
     }
 
     protected override void OnStart(string[] args)

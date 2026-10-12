@@ -265,6 +265,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(native): conserva el estado autorizado de la sesión`.
   - **División previa (2026-10-11):** T17a copia autorizada/cuenta monotónica y pruebas de sesión/pausa/reloj/host; T17b recuperación durable ligada a PC y arranque bloqueado; T17c integración y batería general. No calcular dinero/tarifas ni aplicar políticas de pausa en C#.
   - [x] **T17a (2026-10-11):** copia validada y contador TimeProvider monotónico, bloqueo por agotamiento y pausa conservada sin inventar su vencimiento/billing. Snapshot con edad para un host nuevo; hello unknown salvo contexto real compatible, recuperación de identidad sin reutilizar autorización tras reinicio. Cuatro casos nuevos de reloj/pausa/host/recuperación; build/formato y 352 tests nativos correctos. Integración/custodia pendientes T17b/c.
+  - [x] **T17b (2026-10-11):** recuperación en `recovery.bin` con DPAPI/ACL/exclusión y sustitución atómica de la custodia existente, solo SYSTEM. Contiene hello sin tiempo reutilizable ni secretos; ligada a PC/contexto compatible y desconocida si corrupta/ausente. Servicio integra estado en hello/latidos; buffers descartados tras lectura/escritura. Frontera de token y restauración/corrupción DPAPI probadas; build/formato y 353 nativas correctos. Ensayo SCM sigue pendiente T15; integración WSS y batería en T17c.
 
 - [ ] **T18: Pipe seguro entre servicio y host**
   - **Cubre:** REQ-003-63; ADR-0017.

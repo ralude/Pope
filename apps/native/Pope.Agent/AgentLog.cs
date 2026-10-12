@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Pope.Agent;
 
-internal enum AgentLogCode { Started, Stopped, ConfigurationRejected, TransportDisconnected, TransportConnected, RuntimeFailed }
+internal enum AgentLogCode { Started, Stopped, ConfigurationRejected, TransportDisconnected, TransportConnected, RuntimeFailed, RecoveryRejected }
 
 // REQ-003-63: códigos cerrados, nunca cuerpo, excepción, cabecera o contraseña.
 internal sealed class AgentLog(string directory)
