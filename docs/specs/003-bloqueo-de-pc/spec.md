@@ -1,6 +1,6 @@
 # Spec 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Aprobada para T01–T20: T01–T07 (2026-10-04), continuación autónoma T08–T20 (mantenedor, 2026-10-07). T21–T59 y mecanismos aún abiertos siguen pendientes.
+- **Estado:** Aprobada para T01–T27: bloques anteriores T01–T20 y continuación T21–T27 por el mantenedor (2026-10-12). T28–T59 y mecanismos ajenos al bloque siguen pendientes.
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0005, ADR-0006, ADR-0007, ADR-0009, ADR-0010
 - **Seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), aceptado por el mantenedor el 2026-10-04.
@@ -179,6 +179,8 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 - Consolas, VR y otros dispositivos.
 
 ## Preguntas abiertas
+
+- [x] **Recuperación ordinaria de T27 (2026-10-12).** El mantenedor aprueba bloquear desde el host al perder el servicio y conservar el bloqueo tras reiniciar el agente hasta recibir estado nuevo del nodo. Sin entrada técnica offline ni reutilización de tiempo autorizado de otro arranque. La emergencia administrativa y su mecanismo siguen en T53/T54; esta aprobación no los implementa ni cierra T10/T15.
 
 - [x] **Cierre de T08 con las pruebas Home (mantenedor, 2026-10-08).** El mantenedor acepta las pruebas realizadas en Windows 10 Home 22H2 como válidas para cerrar T08b/T08 y continuar con T09. Sustituye la exigencia previa de verificar ambos Windows Pro antes de T09. Los dos artefactos autocontenidos arrancan y los 334 tests pasan en Home; no se declara probada la compatibilidad Pro ni cumplido REQ-003-62 para el inventario. Su verificación se conserva antes de la entrega al local (T48/T55/T59); no cambia el inventario ni ADR-0006.
 

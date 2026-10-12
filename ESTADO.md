@@ -4,20 +4,20 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-11 · T16–T20 completas en desarrollo; T15c3/T10 abiertas
+**Última actualización:** 2026-10-12 · T21–T27 autorizadas; inicio T21; T15c3/T10 abiertas
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09, T11–T14 y T16–T20 completos en desarrollo, sin VM; T10 aplazada y prueba SCM de T15 pendiente; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | Bloque solicitado T16–T20 terminado. Pendientes T15c3 (SCM/UAC) y T10 (mecanismo de mantenimiento); no repetir UAC ni usar VM sin retomar ese alcance. T21–T59 siguen en Borrador y necesitan aprobación antes de implementar |
+| **Siguiente tarea** | T21a: filtro/objetos de escritorio y prueba acotada, seguido de integración T21b/c. T21–T27 autorizadas el 2026-10-12, sin VM; T28–T59 Borrador. T15c3/T10 pendientes, sin repetir UAC |
 | **Progreso** | Spec 003: 18 / 59 grupos; T01–T09, T11–T14 y T16–T20 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | T15c3 espera aceptar UAC en Windows para ensayo SCM; cancelación previa sin servicio/carpeta creados. T15 abierta; T16–T20 completas en desarrollo; bloque solicitado terminado. Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
 
-**Entorno vigente (2026-10-11):** el mantenedor pide continuar T12–T20 en esta máquina,
+**Entorno vigente (2026-10-12):** el mantenedor pide continuar T21–T27 en esta máquina,
 sin usar la VM, y mantener T10 abierta hasta realizar ese bloque. Conservar las pruebas
 aisladas/reversibles; no alterar shell, autologin, cuentas, UAC ni directivas del Windows
 cotidiano. Las verificaciones que exijan entorno desechable se registran como pendientes.

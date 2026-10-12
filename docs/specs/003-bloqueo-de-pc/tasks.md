@@ -1,7 +1,7 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** T01–T09 completos; T10–T20 autorizadas para continuación autónoma, con sus verificaciones previas. ADR-0018 aceptado (mantenedor, 2026-10-08). T21–T59 en Borrador.
-- **Plan:** [plan.md](plan.md), autorizado hasta T20; decisiones técnicas abiertas y verificaciones previas pendientes.
+- **Estado:** Continuación autónoma autorizada hasta T27 (mantenedor, 2026-10-12), con sus verificaciones funcionales; T10 y SCM de T15 abiertas. ADR-0018 aceptado. T28–T59 en Borrador.
+- **Plan:** [plan.md](plan.md), autorizado hasta T27; decisiones técnicas ajenas al bloque y verificaciones previas pendientes.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
 actualiza `ESTADO.md`. Cada commit pasa las comprobaciones pertinentes; al cerrar una
@@ -310,6 +310,10 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** integrar el mecanismo demostrado en T09, escritorio de bloqueo y hook según estado/foco; Alt+Tab inhibido solo sin sesión, permitido con temporal/cuenta incluso al enfocar Pope (ADR-0023). Mantener aislamiento de pausa/revocación y liberar solo tras autorización del nodo.
   - **Verificar:** Win, Ctrl+Esc, Alt+F4, clics y monitores; Alt+Tab inhibido sin sesión, permitido ida/vuelta con temporal/cuenta y sin acceso al juego desde pausa/revocación. Fallo de cambio no confirma éxito ni abre el escritorio de uso.
   - **Commit:** `feat(native): aplica el bloqueo en un escritorio separado`.
+  - **División previa (2026-10-12):** T21a filtro de atajos y handles de escritorio con pruebas acotadas; T21b integración del host con escritorios/hilos fijos y estado autorizado; T21c ensayo real reversible de entrada/transiciones/fallo y batería general. Ninguna subparte por sí sola cierra T21.
+  - [ ] **T21a:** filtro por sesión/foco y objetos Win32 con custodia de handles.
+  - [ ] **T21b:** integración de ventana de uso/bloqueo con mensajes validados y edad monotónica.
+  - [ ] **T21c:** prueba funcional reversible y comprobaciones generales.
 
 - [ ] **T22: Supervisión y relanzamiento del host**
   - **Cubre:** REQ-003-32; CA-003-02.
@@ -347,6 +351,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** implementar la recuperación aprobada ante pérdida del agente, distinta de T22; proteger bloqueo y reconciliar estado sin conceder entrada técnica normal offline.
   - **Verificar:** matar servicio con PC bloqueada/activa/pausada, reinicio sin nodo, journal corrupto y ausencia de tiempo adicional; no sustituir el acceso de emergencia T53/T54.
   - **Commit:** `feat(native): recupera el control tras reiniciar el servicio`.
+  - **Alcance confirmado (mantenedor, 2026-10-12):** el host bloquea al perder el agente; el nuevo agente conserva el bloqueo hasta estado nuevo del nodo. Sin mantenimiento offline ni tiempo antiguo. T53/T54 conservan la emergencia administrativa; el ensayo SCM real pendiente no se declara probado.
 
 ### Control remoto y mantenimiento
 

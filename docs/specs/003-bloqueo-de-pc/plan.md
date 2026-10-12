@@ -1,6 +1,6 @@
 # Plan 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Aprobado para T01–T20: T01–T07 (2026-10-04), continuación autónoma T08–T20 (mantenedor, 2026-10-07). T21–T59 y mecanismos aún abiertos siguen pendientes.
+- **Estado:** Aprobado para T01–T27: bloques anteriores T01–T20 y continuación T21–T27 por el mantenedor (2026-10-12). T28–T59 y mecanismos ajenos al bloque siguen pendientes.
 - **Spec:** [spec.md](spec.md), aprobada para este bloque; resto pendiente.
 - **ADRs que aplican:** ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008,
   ADR-0009, ADR-0015 y ADR-0016. ADR-0010 sigue Propuesto y pertenece a la spec 004.
@@ -36,6 +36,8 @@ salida al reconectar. El mantenedor eligió reutilizar una cuenta administradora
 existente; ADR-0018 aceptado el 2026-10-08, pendiente de demostrar el mecanismo en T10.
 
 ## Componentes afectados
+
+**Continuación T21–T27 (mantenedor, 2026-10-12):** en esta máquina, sin VM; T10 y la prueba SCM/UAC de T15 permanecen abiertas. Primero integrar escritorios/hook y demostrar transiciones reversibles con apps propias. No cambiar shell, autologin, cuentas ni directivas del Windows cotidiano. T27 bloquea al perder el agente y solo admite estado nuevo del nodo tras reiniciarlo; no incorpora la emergencia T53/T54. Los criterios físicos de juegos/anticheat y las pruebas SCM pendientes no se sustituyen por dobles de tests.
 
 **Cambio de orden (mantenedor, 2026-10-09):** aplazar T10 y continuar las siguientes
 tareas aprobadas T11–T20. Sustituye las indicaciones históricas de detener T11 por el
