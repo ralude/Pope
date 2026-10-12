@@ -10,6 +10,8 @@ internal static class Program
         if (args is ["--token-check"]) return ProbeToken.Check();
         if (args is ["--process-token-check"]) return ProbeToken.CheckProcess();
         if (args is ["--desktop-attach-proof", var attachDirectory] && Path.IsPathFullyQualified(attachDirectory)) return DesktopAttachProof.Run(attachDirectory);
+        if (args is ["--lock-pipe", var lockPipe, "--host-pid", var parentValue, "--proof-profile", var lockProfile]
+            && int.TryParse(parentValue, out var parentId) && Path.IsPathFullyQualified(lockProfile)) return Pope.ShellHost.LockHost.Run(lockPipe, parentId, lockProfile);
         if (args is ["--agent-service-probe", var agentId]) return AgentScmProbe.Run(agentId);
         if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);
         if (args is ["--pipe-peer", var pipeName, var serverPid, var pipeMode]) return PipePeer.Run(pipeName, serverPid, pipeMode);

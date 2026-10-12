@@ -4,13 +4,16 @@ using Pope.Bridge;
 namespace Pope.ShellHost;
 
 // REQ-003-04/63: un pipe cancelable, reintentos acotados y ninguna petición almacenada para reenvío.
-internal sealed class HostBridge(string name, RetainedProcess server) : IDisposable
+internal sealed class HostBridge(string name, RetainedProcess server, bool desktopPeer = false) : IDisposable
 {
     private readonly CancellationTokenSource stopping = new();
     private PipeSession? current;
     private int started;
+    internal bool ServerAlive => server.Alive;
 
-    internal bool Send(JsonElement request) => Volatile.Read(ref current)?.TrySend(JsonSerializer.SerializeToUtf8Bytes(request)) == true;
+    internal bool Send(JsonElement request) => Volatile.Read(ref current)?.TrySend(JsonSerializer.SerializeToUtf8Bytes(desktopPeer
+        ? JsonSerializer.SerializeToElement(new { version = 1, kind = "request", request }) : request)) == true;
+    internal bool SendReady() => desktopPeer && Volatile.Read(ref current)?.TrySend(JsonSerializer.SerializeToUtf8Bytes(new { version = 1, kind = "ready" })) == true;
     internal void Stop() => stopping.Cancel();
 
     internal async Task RunAsync(Func<JsonElement, CancellationToken, Task> deliver, CancellationToken token)
@@ -27,7 +30,7 @@ internal sealed class HostBridge(string name, RetainedProcess server) : IDisposa
                 try
                 {
                     using var pipe = await PipeEndpoints.Connect(name, server, lifetime.Token);
-                    using var session = new PipeSession(pipe, "bridge-event", "shell-request", () => PipeEndpoints.IsServer(pipe, server), async (bytes, cancel) =>
+                    using var session = new PipeSession(pipe, "bridge-event", desktopPeer ? "bridge-request" : "shell-request", () => PipeEndpoints.IsServer(pipe, server), async (bytes, cancel) =>
                     {
                         var message = ProtocolValidation.Parse(bytes, "bridge-event");
                         attempt = 0;

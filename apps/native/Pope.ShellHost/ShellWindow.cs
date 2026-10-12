@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
+using System.ComponentModel;
 
 namespace Pope.ShellHost;
 
@@ -19,13 +20,17 @@ internal sealed class ShellWindow : Form
     private long stateAt;
     internal bool Failed { get; private set; }
     internal int? InitializationHResult { get; private set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal Func<JsonElement, CancellationToken, Task>? NativeDelivery { get; set; }
+    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+    internal Action? ReadyReceived { get; set; }
     internal TaskCompletionSource<CoreWebView2> Initialized { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal ShellWindow(string assets, string profile, HostBridge? bridge = null, bool fullscreen = true)
     {
         this.assets = assets; this.profile = profile; this.bridge = bridge;
         Text = "Pope"; BackColor = Color.FromArgb(20, 24, 36);
-        if (fullscreen) { FormBorderStyle = FormBorderStyle.None; WindowState = FormWindowState.Maximized; }
+        if (fullscreen) { FormBorderStyle = FormBorderStyle.None; StartPosition = FormStartPosition.Manual; Bounds = SystemInformation.VirtualScreen; }
         else { Size = new Size(1280, 800); StartPosition = FormStartPosition.CenterScreen; }
         Controls.Add(view);
         Shown += Initialize;
@@ -84,7 +89,7 @@ internal sealed class ShellWindow : Form
             var envelope = HostBoundary.ReadRequest(e.Source, e.WebMessageAsJson);
             if (envelope.GetProperty("kind").GetString() == "ready")
             {
-                ready = true; Post(status); ReplayState(); return;
+                ready = true; Post(status); ReplayState(); ReadyReceived?.Invoke(); return;
             }
             var request = envelope.GetProperty("request");
             if (bridge?.Send(request) == true) return;
@@ -95,13 +100,17 @@ internal sealed class ShellWindow : Form
         catch { /* Origen/tipo/tamaño inválido: descartar, nunca copiar datos a logs. */ }
     }
 
-    internal Task Deliver(JsonElement envelope, CancellationToken token) => InvokeAsync(() =>
+    internal async Task Deliver(JsonElement envelope, CancellationToken token)
+    {
+        if (NativeDelivery is { } native) await native(envelope, token);
+        await InvokeAsync(() =>
     {
         if (envelope.GetProperty("kind").GetString() == "status") status = envelope.Clone();
         else if (envelope.GetProperty("message").GetProperty("type").GetString() == "state")
         { state = envelope.Clone(); stateAt = Stopwatch.GetTimestamp(); }
         Post(envelope);
     }, token);
+    }
 
     private void ReplayState()
     {

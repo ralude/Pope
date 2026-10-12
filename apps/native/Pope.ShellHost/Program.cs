@@ -16,6 +16,8 @@ internal static class Program
         try
         {
             HostBoundary.RequireInteractiveUser();
+            if (args is ["--lock-pipe", var lockPipe, "--host-pid", var parentValue] && int.TryParse(parentValue, out var parentId) && parentId > 0)
+                return LockHost.Run(lockPipe, parentId);
             RetainedProcess? server = null;
             try
             {
@@ -34,6 +36,8 @@ internal static class Program
                     Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
                     var profile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Pope", "ShellProfile");
                     using var window = new ShellWindow(Path.Combine(AppContext.BaseDirectory, "shell"), profile, bridge);
+                    using var desktops = bridge == null ? null : new DesktopCoordinator(bridge);
+                    if (desktops != null) window.NativeDelivery = desktops.Apply;
                     Application.Run(window);
                     window.WaitForBridge();
                     return window.Failed ? 1 : 0;

@@ -39,6 +39,8 @@ existente; ADR-0018 aceptado el 2026-10-08, pendiente de demostrar el mecanismo 
 
 **Continuación T21–T27 (mantenedor, 2026-10-12):** en esta máquina, sin VM; T10 y la prueba SCM/UAC de T15 permanecen abiertas. Primero integrar escritorios/hook y demostrar transiciones reversibles con apps propias. No cambiar shell, autologin, cuentas ni directivas del Windows cotidiano. T27 bloquea al perder el agente y solo admite estado nuevo del nodo tras reiniciarlo; no incorpora la emergencia T53/T54. Los criterios físicos de juegos/anticheat y las pruebas SCM pendientes no se sustituyen por dobles de tests.
 
+**Concreción T21:** el ensayo real descarta WebView2 en un STA reasignado (0x80070057), aunque `SetThreadDesktop` pase fuera de xUnit. Usar instancias del mismo host nacidas en cada escritorio, como permite el plan y demuestra T09. La instancia de uso conserva el pipe SYSTEM; el hijo de bloqueo tiene un relay local acotado con identidad por proceso retenido y verificación del binario/logon/sesión del padre. Reutilizar envoltorios `bridge-request`/`bridge-event`, sin órdenes libres ni credenciales. La señal `ready` de origen validado precede al cambio inicial, evitando activar un escritorio cuya UI aún no existe. Guardar ventanas/hilos en su escritorio de nacimiento y cubrir el área virtual; estado/edad autorizan uso, pausa/revocación lo aíslan. Sin dependencias nuevas. T22 debe añadir supervisión y recuperación, no considerar dos instancias previstas como relanzamientos competidores.
+
 **Cambio de orden (mantenedor, 2026-10-09):** aplazar T10 y continuar las siguientes
 tareas aprobadas T11–T20. Sustituye las indicaciones históricas de detener T11 por el
 gate de T10. El mantenimiento sigue sin demostrar; no integrarlo hasta cerrar T10.

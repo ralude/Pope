@@ -58,6 +58,8 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
     private void OnMessage(JsonElement message)
     {
         var type = message.GetProperty("type").GetString();
+        // Conservar existencia de sesión para Alt+Tab aislado antes del snapshot de revocación.
+        if (type == "pcAuthenticationError") { PublishMessage(message, 0); PublishSnapshot(); return; }
         if (type is "state" or "sessionEnded" or "pcAuthenticationError") PublishSnapshot();
         if (type == "state") return;
         try { ProtocolValidation.Parse(JsonSerializer.SerializeToUtf8Bytes(message), "shell-notification"); }
