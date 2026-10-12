@@ -297,7 +297,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** solicitudes/respuestas correlacionadas, desconexión, reintentos y limpieza de listeners; solo el agente envía `hello` y latidos.
   - **Commit:** `feat(shell-ui): conecta el Shell con el puente de WebView2`.
   - **División previa (2026-10-11):** T20a adaptador tipado, edad/identidad y selección de producción; T20b transporte de desarrollo registrado sin secretos en React; T20c integración real y batería general.
-    - [ ] **T20a:** adaptador WebView2, requests correlacionados, validación/límites, limpieza y selección exclusiva en producción.
+    - [x] **T20a (2026-10-11):** PcChannel WebView2 valida envoltorios/límite, preserva requestId, nombre público y edad monotónica; ready con reintentos acotados, sin hello/latidos ni reenvío de solicitudes. Producción excluye DevSocketChannel; ausente WebView2 queda offline. Cinco tests nuevos (57 shell) y 374 nativos pasan, tipos/lint/build/formato correctos; ensayo WebView2 real repetido con el adaptador. Desarrollo registrado en T20b, integración completa en T20c.
     - [ ] **T20b:** desarrollo v2 mediante proxy de simulación registrado; credencial/CA solo en Vite.
     - [ ] **T20c:** integración de la interfaz real, desconexión/reconexión y batería general.
 

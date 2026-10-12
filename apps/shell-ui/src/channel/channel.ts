@@ -17,7 +17,8 @@ export type ShellRequest = Extract<
 export type ChannelStatus = 'connecting' | 'online' | 'offline';
 
 export type ChannelEvent =
-  { kind: 'status'; status: ChannelStatus } | { kind: 'message'; message: NodeToPcMessage };
+  | { kind: 'status'; status: ChannelStatus; pcName?: string }
+  | { kind: 'message'; message: NodeToPcMessage; elapsedSeconds?: number };
 
 export interface PcChannel {
   /** Empieza a conectar y avisa de cada cambio. Reintenta solo hasta `stop()`. */

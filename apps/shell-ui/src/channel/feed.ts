@@ -15,6 +15,8 @@ export interface Warning {
 
 export interface PcFeed {
   status: ChannelStatus;
+  /** Nombre público recibido del agente; nunca identifica ni autentica la PC. */
+  pcName?: string;
   /** Último estado que mandó el nodo; `null` hasta la primera respuesta. */
   state: StateMessage | null;
   /** Cuándo llegó `state` (`performance.now()`), para contar el tiempo desde ahí (T47). */
@@ -49,7 +51,11 @@ const WARNING_SLACK_SECONDS = 30;
 /** El estado tras un evento del canal; `now` es el `performance.now()` de su llegada. */
 export function applyEvent(feed: PcFeed, event: ChannelEvent, now: number): PcFeed {
   if (event.kind === 'status') {
-    return { ...feed, status: event.status };
+    return {
+      ...feed,
+      status: event.status,
+      ...(event.pcName !== undefined && { pcName: event.pcName }),
+    };
   }
   const message = event.message;
   switch (message.type) {
@@ -57,7 +63,7 @@ export function applyEvent(feed: PcFeed, event: ChannelEvent, now: number): PcFe
       return {
         ...feed,
         state: message,
-        stateAt: now,
+        stateAt: now - (event.elapsedSeconds ?? 0) * 1000,
         problem: null,
         warning: stillWarned(feed.warning, message),
         // Si se abre otra sesión (p. ej. una temporal del encargado), se deja de mostrar el fin.

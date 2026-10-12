@@ -6,28 +6,21 @@ import '@fontsource/nunito/latin-700.css';
 import '@fontsource/nunito/latin-800.css';
 import './theme.css';
 
-import { devPcId, devPcName, MAX_DEV_PCS } from '@pope/shared';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './App.js';
-import { DevSocketChannel, PC_CHANNEL_PATH } from './channel/dev-socket.js';
+import type { PcChannel } from './channel/channel.js';
+import { WebViewChannel } from './channel/webview.js';
 
-/**
- * PC de ejemplo que hace de esta en desarrollo: `?pc=5` es "PC 05" (por defecto, la 1). Con la
- * spec 003 la identidad la tendrá el agente, no el Shell.
- */
-function devPcNumber(search: string): number {
-  const n = Number(new URLSearchParams(search).get('pc') ?? '1');
-  return Number.isInteger(n) && n >= 1 && n <= MAX_DEV_PCS ? n : 1;
+let channel: PcChannel;
+let pcName = 'PC';
+if (import.meta.env.DEV) {
+  const { createDevChannel } = await import('./channel/dev-entry.js');
+  ({ channel, pcName } = createDevChannel());
+} else {
+  channel = new WebViewChannel(window.chrome?.webview);
 }
-
-const pcNumber = devPcNumber(location.search);
-const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
-const channel = new DevSocketChannel({
-  url: `${scheme}//${location.host}${PC_CHANNEL_PATH}`,
-  pcId: devPcId(pcNumber),
-});
 
 const root = document.getElementById('root');
 if (!root) {
@@ -35,6 +28,6 @@ if (!root) {
 }
 createRoot(root).render(
   <StrictMode>
-    <App channel={channel} pcName={devPcName(pcNumber)} />
+    <App channel={channel} pcName={pcName} />
   </StrictMode>,
 );

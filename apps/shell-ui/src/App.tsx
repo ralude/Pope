@@ -10,6 +10,7 @@ import { SessionScreen } from './session/SessionScreen.js';
 export function App({ channel, pcName }: { channel: PcChannel; pcName: string }) {
   const { feed, login, listCombos, buyCombo, logout, pause, resume, closeWarning, closeEnded } =
     usePcChannel(channel);
+  const displayPcName = feed.pcName ?? pcName;
   // En pausa manda la pantalla de pausa, también al recargar (reinicio de la PC, REQ-002-31).
   if (
     feed.state?.status === 'active' &&
@@ -22,7 +23,7 @@ export function App({ channel, pcName }: { channel: PcChannel; pcName: string })
         vesRate={feed.state.vesRate}
         stateAt={feed.stateAt}
         status={feed.status}
-        pcName={pcName}
+        pcName={displayPcName}
         warning={feed.warning?.minutesLeft ?? null}
         onCloseWarning={closeWarning}
         resume={resume}
@@ -36,7 +37,7 @@ export function App({ channel, pcName }: { channel: PcChannel; pcName: string })
         vesRate={feed.state.vesRate}
         stateAt={feed.stateAt}
         status={feed.status}
-        pcName={pcName}
+        pcName={displayPcName}
         warning={feed.warning?.minutesLeft ?? null}
         onCloseWarning={closeWarning}
         listCombos={listCombos}
@@ -47,7 +48,7 @@ export function App({ channel, pcName }: { channel: PcChannel; pcName: string })
     );
   }
   if (feed.ended) {
-    return <EndedScreen pcName={pcName} onDone={closeEnded} />;
+    return <EndedScreen pcName={displayPcName} onDone={closeEnded} />;
   }
-  return <LockScreen feed={feed} pcName={pcName} login={login} />;
+  return <LockScreen feed={feed} pcName={displayPcName} login={login} />;
 }
