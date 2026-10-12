@@ -311,7 +311,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** Win, Ctrl+Esc, Alt+F4, clics y monitores; Alt+Tab inhibido sin sesión, permitido ida/vuelta con temporal/cuenta y sin acceso al juego desde pausa/revocación. Fallo de cambio no confirma éxito ni abre el escritorio de uso.
   - **Commit:** `feat(native): aplica el bloqueo en un escritorio separado`.
   - **División previa (2026-10-12):** T21a filtro de atajos y handles de escritorio con pruebas acotadas; T21b integración del host con escritorios/hilos fijos y estado autorizado; T21c ensayo real reversible de entrada/transiciones/fallo y batería general. Ninguna subparte por sí sola cierra T21.
-  - [ ] **T21a:** filtro por sesión/foco y objetos Win32 con custodia de handles.
+  - [x] **T21a (2026-10-12):** filtro por sesión/foco, escritorio con DACL SYSTEM/logon y handles propios. Prueba en proceso nuevo demuestra React en escritorio de nacimiento; STA reasignado falla WebView2 (0x80070057). Adoptar instancias por escritorio según plan/T09. Build/formato y 378 tests nativos correctos; integración y entrada real en T21b/c.
   - [ ] **T21b:** integración de ventana de uso/bloqueo con mensajes validados y edad monotónica.
   - [ ] **T21c:** prueba funcional reversible y comprobaciones generales.
 

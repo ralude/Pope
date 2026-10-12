@@ -18,6 +18,7 @@ internal sealed class ShellWindow : Form
     private JsonElement? state;
     private long stateAt;
     internal bool Failed { get; private set; }
+    internal int? InitializationHResult { get; private set; }
     internal TaskCompletionSource<CoreWebView2> Initialized { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal ShellWindow(string assets, string profile, HostBridge? bridge = null, bool fullscreen = true)
@@ -66,8 +67,9 @@ internal sealed class ShellWindow : Form
             if (bridge != null) bridgeTask = bridge.RunAsync(Deliver, closing.Token);
             Initialized.TrySetResult(core);
         }
-        catch
+        catch (Exception error)
         {
+            InitializationHResult = error.HResult;
             Failed = true; Initialized.TrySetException(new InvalidOperationException("No se pudo cargar la interfaz local."));
             Controls.Remove(view); view.Dispose();
             Controls.Add(new Label { Dock = DockStyle.Fill, ForeColor = Color.White, TextAlign = ContentAlignment.MiddleCenter, Text = "No se pudo cargar la interfaz de Pope. Contacta al encargado." });
