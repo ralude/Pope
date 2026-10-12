@@ -11,13 +11,16 @@ internal static class PipeFrames
     internal static async Task<byte[]> ReadAsync(Stream stream, string contract, CancellationToken token)
     {
         var header = new byte[4];
-        await stream.ReadExactlyAsync(header, token);
+        await stream.ReadExactlyAsync(header.AsMemory(0, 1), token);
+        using var partial = CancellationTokenSource.CreateLinkedTokenSource(token);
+        partial.CancelAfter(TimeSpan.FromSeconds(5));
+        await stream.ReadExactlyAsync(header.AsMemory(1), partial.Token);
         var size = BinaryPrimitives.ReadInt32LittleEndian(header);
         if (size is < 1 or > ProtocolValidation.MaximumBytes) throw new InvalidDataException("Frame fuera de límites.");
         var bytes = new byte[size];
         try
         {
-            await stream.ReadExactlyAsync(bytes, token);
+            await stream.ReadExactlyAsync(bytes, partial.Token);
             var value = ProtocolValidation.Parse(bytes, contract);
             var normalized = JsonSerializer.SerializeToUtf8Bytes(value);
             if (normalized.Length <= ProtocolValidation.MaximumBytes) return normalized;
