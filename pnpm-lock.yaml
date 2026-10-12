@@ -325,6 +325,9 @@ importers:
         specifier: ^19.3.0
         version: 19.3.0(react@19.3.0)
     devDependencies:
+      '@pope/agent-sim':
+        specifier: workspace:*
+        version: link:../../tools/agent-sim
       '@types/react':
         specifier: ^19.3.0
         version: 19.3.0

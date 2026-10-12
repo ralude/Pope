@@ -192,6 +192,9 @@ de estado conserva su edad monotónica al recargar React. No se guardan/reenvía
 peticiones tras perder el pipe. Sin dependencias nuevas de producto; el transporte de
 desarrollo permanece separado y la credencial de simulación se usa solo en el proxy
 de Vite, nunca en el bundle. Lanzamiento/supervisión por el servicio siguen en T22.
+`@pope/agent-sim` se declara como dependencia de desarrollo del Shell para reutilizar
+su lector acotado de perfiles/CA y para que Turbo incluya esos inputs. No añade paquetes
+al producto ni copia el simulador o sus perfiles al artefacto del host.
 
 No se fijan rutas o nombres de eventos nuevos como contratos aprobados todavía.
 El diseño final enumerará cuerpos, respuestas, errores, roles, límites y eventos zod.

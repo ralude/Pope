@@ -299,6 +299,8 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-11):** T20a adaptador tipado, edad/identidad y selección de producción; T20b transporte de desarrollo registrado sin secretos en React; T20c integración real y batería general.
     - [x] **T20a (2026-10-11):** PcChannel WebView2 valida envoltorios/límite, preserva requestId, nombre público y edad monotónica; ready con reintentos acotados, sin hello/latidos ni reenvío de solicitudes. Producción excluye DevSocketChannel; ausente WebView2 queda offline. Cinco tests nuevos (57 shell) y 374 nativos pasan, tipos/lint/build/formato correctos; ensayo WebView2 real repetido con el adaptador. Desarrollo registrado en T20b, integración completa en T20c.
     - [ ] **T20b:** desarrollo v2 mediante proxy de simulación registrado; credencial/CA solo en Vite.
+      - [x] **T20b1 (2026-10-11):** helper privado del proxy y dependencia DEV explícita para reutilizar perfil/CA. Prueba con Vite/upgrade reales: Bearer solo para origen local, metadatos sin secreto y sin proxy anónimo cuando falta perfil. Tipos/lint/formato correctos; activación y canal v2 en T20b2.
+      - [ ] **T20b2:** activar el proxy registrado y adaptar canal de navegador a v2, pausa/revocación y guía.
     - [ ] **T20c:** integración de la interfaz real, desconexión/reconexión y batería general.
 
 ### Bloqueo y fase 2 de pausa
