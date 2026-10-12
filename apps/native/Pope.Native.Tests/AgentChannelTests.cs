@@ -15,6 +15,60 @@ namespace Pope.Native.Tests;
 
 public sealed class AgentChannelTests(ITestOutputHelper output)
 {
+    [Fact(DisplayName = "REQ-002-31/003-04: WSS concilia identidad recuperada antes de autorizar el nuevo arranque")]
+    public async Task RecoveredIdentityOverWss()
+    {
+        const string pc = "01900000-0000-7000-8000-000000000123";
+        const string session = "01900000-0000-7000-8000-000000000124";
+        using var peer = new Peer(); using var configuration = peer.Configuration();
+        var root = Temporary(); byte[]? saved = null;
+        var state = new AgentState(pc);
+        state.RecoveryChanged += bytes => { try { saved = AgentCustody.Transform(bytes, true); } finally { CryptographicOperations.ZeroMemory(bytes); } };
+        try
+        {
+            for (var boot = 0; boot < 2; boot++)
+            {
+                if (boot == 1)
+                {
+                    state = new AgentState(pc);
+                    var restored = AgentCustody.Transform(saved!, false);
+                    try { state.Restore(restored); } finally { CryptographicOperations.ZeroMemory(restored); }
+                    Assert.True(state.Blocked); Assert.Null(state.RemainingSeconds);
+                }
+                using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                var authorized = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                var contextReceived = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                var channel = new AgentChannel(configuration, new AgentLog(root)) { Hello = state.Hello, Heartbeat = state.Heartbeat, HeartbeatInterval = TimeSpan.FromMilliseconds(100) };
+                channel.Message += m => { state.Apply(m); if (m.GetProperty("type").GetString() == "state") authorized.TrySetResult(); else contextReceived.TrySetResult(); };
+                var run = channel.RunAsync(stop.Token);
+                try
+                {
+                    using var socket = await peer.Accept(configuration.Authorization(), stop.Token);
+                    var hello = await Read(socket, stop.Token);
+                    Assert.Equal(boot == 0 ? "unknown" : "known", hello.GetProperty("recoveryState").GetString());
+                    if (boot == 1) { Assert.Equal(session, hello.GetProperty("sessionId").GetString()); Assert.Equal(JsonValueKind.Null, hello.GetProperty("localRemainingSeconds").ValueKind); }
+                    var active = JsonSerializer.SerializeToUtf8Bytes(new
+                    {
+                        type = "state",
+                        status = "active",
+                        vesRate = (object?)null,
+                        session = new { kind = "temporary", sessionId = session, startedAt = "2026-10-11T00:00:00Z", name = "Temporal", purchasedSeconds = 100, remainingSeconds = 100 }
+                    });
+                    await socket.SendAsync(active, WebSocketMessageType.Text, true, stop.Token);
+                    await authorized.Task.WaitAsync(stop.Token);
+                    Assert.False(state.Blocked);
+                    await socket.SendAsync(JsonSerializer.SerializeToUtf8Bytes(new { type = "controlState", serverTime = "2026-10-11T00:00:00Z", context = new { kind = "session", revision = pc, sessionId = session } }), WebSocketMessageType.Text, true, stop.Token);
+                    await contextReceived.Task.WaitAsync(stop.Token);
+                    var heartbeat = await Read(socket, stop.Token);
+                    Assert.Equal(session, heartbeat.GetProperty("sessionId").GetString());
+                    Assert.Equal(session, heartbeat.GetProperty("controlContext").GetProperty("sessionId").GetString());
+                }
+                finally { stop.Cancel(); try { await run; } catch (OperationCanceledException) { } }
+            }
+        }
+        finally { if (saved != null) CryptographicOperations.ZeroMemory(saved); Directory.Delete(root, true); }
+    }
+
     [Fact(DisplayName = "REQ-003-63: frames binarios, duplicados y grandes se cierran; revocación no reintenta")]
     public async Task FramesAndRevocation()
     {

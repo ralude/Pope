@@ -258,7 +258,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T16b (2026-10-11):** servicio conectado mediante ClientWebSocket/BCL, TLS 1.2/1.3 y certificado fijado vigente/SAN, sin proxy ni redirecciones; Bearer solo en cabecera. Hello unknown, único latido de 10 s, frames de 16 KiB y envío/recepción cancelables; backoff 1/2/4/8/16/30 s. Tres pruebas de WSS real/reconexión/certificado ajeno/backoff pasan; 346 nativas, build/formato correctos. T16c verifica ataques y estabilidad antes del cierre.
   - [x] **T16c (2026-10-11):** binario/campos duplicados/16 KiB excedidos cierran canal; revocación autenticada bloquea reintentos. 150 reconexiones WSS reales: +16 344 bytes retenidos y −1 handle entre muestra 50/final, logs acotados. 348 nativas y batería general correctas: formato/lint/tipos/test/build, 1 633 tests. No sustituye la medición prolongada en equipos del local T57 ni la prueba SCM pendiente T15. T16 completa en desarrollo; siguiente T17, T10 abierta, sin VM.
 
-- [ ] **T17: Estado de sesión y cuenta local monotónica**
+- [x] **T17: Estado de sesión y cuenta local monotónica**
   - **Cubre:** REQ-003-04; REQ-002-30, REQ-002-31; ADR-0007.
   - **Hacer:** conservar el último estado autorizado y descontar solo el restante permitido, sin calcular tarifas; reconciliar identidad tras reinicio sin inventar un `hello` que cierre sesión.
   - **Verificar:** cambio de reloj, host reiniciado, corte en sesión/pausa, agotamiento offline y arranque bloqueado; el nodo sigue siendo fuente de verdad.
@@ -266,12 +266,14 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-11):** T17a copia autorizada/cuenta monotónica y pruebas de sesión/pausa/reloj/host; T17b recuperación durable ligada a PC y arranque bloqueado; T17c integración y batería general. No calcular dinero/tarifas ni aplicar políticas de pausa en C#.
   - [x] **T17a (2026-10-11):** copia validada y contador TimeProvider monotónico, bloqueo por agotamiento y pausa conservada sin inventar su vencimiento/billing. Snapshot con edad para un host nuevo; hello unknown salvo contexto real compatible, recuperación de identidad sin reutilizar autorización tras reinicio. Cuatro casos nuevos de reloj/pausa/host/recuperación; build/formato y 352 tests nativos correctos. Integración/custodia pendientes T17b/c.
   - [x] **T17b (2026-10-11):** recuperación en `recovery.bin` con DPAPI/ACL/exclusión y sustitución atómica de la custodia existente, solo SYSTEM. Contiene hello sin tiempo reutilizable ni secretos; ligada a PC/contexto compatible y desconocida si corrupta/ausente. Servicio integra estado en hello/latidos; buffers descartados tras lectura/escritura. Frontera de token y restauración/corrupción DPAPI probadas; build/formato y 353 nativas correctos. Ensayo SCM sigue pendiente T15; integración WSS y batería en T17c.
+  - [x] **T17c (2026-10-11):** dos arranques del canal WSS real conservan PC/sesión/contexto protegido, hello conocido sin restante antiguo y bloqueo hasta nuevo state; heartbeat usa contexto recibido. Batería general correcta: formato/lint/tipos/test/build, 1 639 tests (354 nativos). Hasta T28 el nodo no publica controlState: recuperación unknown segura, sin fabricar revisiones. SCM permanece pendiente T15; T17 completa en desarrollo, siguiente T18, T10 abierta, sin VM.
 
 - [ ] **T18: Pipe seguro entre servicio y host**
   - **Cubre:** REQ-003-63; ADR-0017.
   - **Hacer:** implementar mensajes enmarcados, límites, ACL y verificación de PID/sesión del host lanzado; separar solicitudes UI y acciones nativas permitidas.
   - **Verificar:** proceso impostor del mismo usuario, PID reutilizado, cliente remoto, frame truncado y exceso de cola; no registrar contraseñas.
   - **Commit:** `feat(native): protege el puente local con el host`.
+  - **División previa (2026-10-11):** T18a validación/frames compartidos y cola limitada; T18b pipe Windows con ACL/rechazo remoto e identidad por proceso retenido/PID/sesión; T18c puente agente y pruebas reales de impostor/truncado/límites más batería. La supervisión y relanzamiento automáticos del host siguen en T22.
 
 - [ ] **T19: Host de WebView2 con interfaz empaquetada**
   - **Cubre:** REQ-003-01, REQ-003-03, REQ-003-04, REQ-003-63.
