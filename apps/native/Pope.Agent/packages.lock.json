@@ -15,6 +15,9 @@
         "type": "Transitive",
         "resolved": "10.0.12",
         "contentHash": "sOZM+VyRj1pg/ItlHsvrSbjws6oGqZveTzTNBGZ9ziwRDyKsOF3ub6vhvOdxotCIqtlnyHAIwP5sLNvgiZC+pQ=="
+      },
+      "pope.bridge": {
+        "type": "Project"
       }
     },
     "net10.0-windows7.0/win-x64": {

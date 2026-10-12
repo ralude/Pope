@@ -4,6 +4,7 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../Pope.Bridge/Pope.Bridge.csproj" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
   </ItemGroup>
   <!-- El SDK añade WPF automáticamente; ADR-0019 elige solo WinForms.

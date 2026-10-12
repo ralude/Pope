@@ -1,9 +1,10 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
-namespace Pope.Agent;
+namespace Pope.Bridge;
 
 // REQ-003-63: interpreta únicamente el subconjunto exportado de shared, sin reglas de negocio.
 internal static class ProtocolValidation
@@ -12,6 +13,7 @@ internal static class ProtocolValidation
     private static readonly HashSet<string> Keywords = ["$schema", "type", "properties", "required", "additionalProperties",
         "anyOf", "oneOf", "const", "enum", "minimum", "maximum", "exclusiveMinimum", "minLength", "maxLength", "pattern", "format", "items", "minItems", "maxItems"];
     private static readonly JsonElement Contracts = Load();
+    private static readonly char[] TrimCharacters = LoadTrim();
 
     internal static JsonElement Parse(ReadOnlyMemory<byte> bytes, string contract)
     {
@@ -20,10 +22,37 @@ internal static class ProtocolValidation
             if (bytes.Length is < 1 or > MaximumBytes) throw new InvalidDataException();
             using var document = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = 32 });
             var value = document.RootElement;
+            if (!UniqueFields(value)) throw new InvalidDataException();
+            value = Normalize(value, contract);
             if (!Valid(Contracts.GetProperty(contract), value)) throw new InvalidDataException();
             return value.Clone();
         }
         catch { throw new InvalidDataException("Mensaje del protocolo no válido."); }
+    }
+
+    private static char[] LoadTrim()
+    {
+        using var stream = typeof(ProtocolValidation).Assembly.GetManifestResourceStream("protocol.normalization")!;
+        using var document = JsonDocument.Parse(stream);
+        return document.RootElement.GetProperty("codePoints").EnumerateArray().Select(p => checked((char)p.GetInt32())).ToArray();
+    }
+    private static bool UniqueFields(JsonElement value) => value.ValueKind switch
+    {
+        JsonValueKind.Object => value.EnumerateObject().Select(p => p.Name).Distinct().Count() == value.EnumerateObject().Count()
+            && value.EnumerateObject().All(p => UniqueFields(p.Value)),
+        JsonValueKind.Array => value.EnumerateArray().All(UniqueFields),
+        _ => true
+    };
+    private static JsonElement Normalize(JsonElement value, string contract)
+    {
+        if (contract is not ("pc-to-node" or "shell-request" or "bridge-request") || value.ValueKind != JsonValueKind.Object) return value;
+        var root = JsonNode.Parse(value.GetRawText())!;
+        var target = contract == "bridge-request" ? root["request"] : root;
+        if (target is not JsonObject obj || obj["type"] is not JsonValue type ||
+            !type.TryGetValue<string>(out var name) || name is not ("login" or "technicalLogin") ||
+            obj["username"] is not JsonValue username || !username.TryGetValue<string>(out var text)) return value;
+        obj["username"] = text.Trim(TrimCharacters); // Nunca recortar password.
+        return JsonSerializer.SerializeToElement(root);
     }
 
     private static JsonElement Load()

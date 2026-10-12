@@ -275,7 +275,9 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(native): protege el puente local con el host`.
   - **División previa (2026-10-11):** T18a validación/frames compartidos y cola limitada; T18b pipe Windows con ACL/rechazo remoto e identidad por proceso retenido/PID/sesión; T18c puente agente y pruebas reales de impostor/truncado/límites más batería. La supervisión y relanzamiento automáticos del host siguen en T22.
     - [x] **T18a1 (2026-10-11):** contratos estrictos bridge-request/bridge-event (ready, petición UI, estado/conectividad y edad de copia), exportación y ocho fixtures válidos/inválidos. Sin órdenes nativas, credenciales ni hello de React; recorte anidado del usuario preparado. 657 shared y 362 nativas correctas; formato/lint/tipos/build de consumidores pasan.
-    - [ ] **T18a2:** reutilizar validador entre servicio/host, aplicar normalización exportada, framing de 16 KiB y cola de 32 con descarte de buffers.
+    - [x] **T18a2 (2026-10-11):** biblioteca Pope.Bridge solo BCL reutiliza contratos/validador para servicio y host, con recorte ECMAScript de usuario directo/anidado y rechazo previo de campos duplicados. Frames de 16 KiB, lectura fragmentada/truncada y cola de 32; buffers rechazados/drenados borrados. Fixtures prueban producto desde entrada original; tres tests nuevos, 365 nativos correctos, build/formato pasan. Sin paquetes nuevos; siguiente T18b.
+    - [ ] **T18b1:** creación de pipe con ACL/rechazo remoto y referencia retenida al proceso esperado.
+    - [ ] **T18b2:** conexión/framing/colas cancelables y cliente que contrasta el servidor.
 
 - [ ] **T19: Host de WebView2 con interfaz empaquetada**
   - **Cubre:** REQ-003-01, REQ-003-03, REQ-003-04, REQ-003-63.

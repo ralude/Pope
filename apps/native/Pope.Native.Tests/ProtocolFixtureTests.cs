@@ -1,3 +1,4 @@
+using Pope.Bridge;
 using System.Text.Json.Nodes;
 using Json.Schema;
 using Pope.Agent;
@@ -37,7 +38,7 @@ public sealed class ProtocolFixtureTests
         if (version == "v2")
         {
             var accepted = true;
-            try { ProtocolValidation.Parse(Encoding.UTF8.GetBytes(input?.ToJsonString() ?? "null"), contract); }
+            try { ProtocolValidation.Parse(Encoding.UTF8.GetBytes(original?.ToJsonString() ?? "null"), contract); }
             catch (InvalidDataException) { accepted = false; }
             Assert.True(accepted == expected, $"REQ-003-63: validador de producto, {id}");
         }

@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <EmbeddedResource Include="../../../packages/shared/protocol/v2/schemas.json" LogicalName="protocol.v2" />
+    <ProjectReference Include="../Pope.Bridge/Pope.Bridge.csproj" />
     <PackageReference Include="System.ServiceProcess.ServiceController" Version="10.0.12" />
   </ItemGroup>
 </Project>

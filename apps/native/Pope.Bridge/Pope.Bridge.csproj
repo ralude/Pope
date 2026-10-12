@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <EmbeddedResource Include="../../../packages/shared/protocol/v2/schemas.json" LogicalName="protocol.v2" />
+    <EmbeddedResource Include="../../../packages/shared/protocol/normalization.json" LogicalName="protocol.normalization" />
+  </ItemGroup>
+</Project>

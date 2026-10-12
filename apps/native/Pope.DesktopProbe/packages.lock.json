@@ -15,13 +15,18 @@
       "pope.agent": {
         "type": "Project",
         "dependencies": {
+          "Pope.Bridge": "[1.0.0, )",
           "System.ServiceProcess.ServiceController": "[10.0.12, )"
         }
+      },
+      "pope.bridge": {
+        "type": "Project"
       },
       "pope.shellhost": {
         "type": "Project",
         "dependencies": {
-          "Microsoft.Web.WebView2": "[1.0.4191.47, )"
+          "Microsoft.Web.WebView2": "[1.0.4191.47, )",
+          "Pope.Bridge": "[1.0.0, )"
         }
       }
     },

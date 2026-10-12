@@ -137,8 +137,12 @@
       "pope.agent": {
         "type": "Project",
         "dependencies": {
+          "Pope.Bridge": "[1.0.0, )",
           "System.ServiceProcess.ServiceController": "[10.0.12, )"
         }
+      },
+      "pope.bridge": {
+        "type": "Project"
       }
     },
     "net10.0-windows7.0/win-x64": {
