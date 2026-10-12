@@ -291,7 +291,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - [x] **T19b (2026-10-11):** ventana local WinForms/WebView2 con origen virtual, perfil separado y puente tipado; navegación/subframes/popups/descargas/permisos/recursos externos limitados. CSP del paquete prohíbe conexiones JS; assets incluidos en build/publicación con dependencia Turbo explícita. Snapshot conserva edad tras ready y peticiones no se repiten. 374 nativos y 52 shell pasan; tipos/lint/build/formato correctos. Prueba real y cierre en T19c.
     - [x] **T19c (2026-10-11):** ventana de producto real en escritorio cotidiano con assets empaquetados y token medio; pantalla sin nodo, error correlacionado, mensajes inválidos, navegación/popup/descarga cancelados y cero conexiones al receptor local. Snapshot conserva edad. Captura revisada, WebView2 154.0.4258.62; batería general correcta, 1 667 tests (374 nativos). Sin instalación/cambios de Windows; T19 completa en desarrollo, adaptador React en T20; T15/T10 abiertas.
 
-- [ ] **T20: Transporte WebView2 de PcChannel**
+- [x] **T20: Transporte WebView2 de PcChannel**
   - **Cubre:** REQ-003-03, REQ-003-04, REQ-003-63.
   - **Hacer:** implementar el adaptador de `PcChannel` en `apps/shell-ui`; mantener transporte de desarrollo separado y todas las pantallas sobre la interfaz existente.
   - **Verificar:** solicitudes/respuestas correlacionadas, desconexión, reintentos y limpieza de listeners; solo el agente envía `hello` y latidos.
@@ -301,7 +301,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - [x] **T20b:** desarrollo v2 mediante proxy de simulación registrado; credencial/CA solo en Vite.
       - [x] **T20b1 (2026-10-11):** helper privado del proxy y dependencia DEV explícita para reutilizar perfil/CA. Prueba con Vite/upgrade reales: Bearer solo para origen local, metadatos sin secreto y sin proxy anónimo cuando falta perfil. Tipos/lint/formato correctos; activación y canal v2 en T20b2.
       - [x] **T20b2 (2026-10-11):** Vite loopback activa perfil registrado; identidad pública validada, sin pc ficticia/query ni credencial en React. Canal v2 unknown, latidos/contexto validado, cuenta monotónica, pausa sin cambio local de billing, revocación detiene reintentos y stop limpia handlers. 60 shell/tipos/lint/formato/build correctos; bundle de producción idéntico al comprobado en T20a. Guía/AGENTS actualizadas; integración completa en T20c.
-    - [ ] **T20c:** integración de la interfaz real, desconexión/reconexión y batería general.
+    - [x] **T20c (2026-10-11):** React real envía login por host/pipe/WSS autenticado; respuesta con otro requestId ignorada, error correcto y sesión autorizada mostrados. Pipe cortado/reconectado conserva sesión/edad sin repetir login; captura revisada. Broker ordinario de pruebas, sin credencial en WebView2 ni SCM/VM. Batería general correcta: formato/lint/tipos/test/build, 1 676 tests (375 nativos, 60 shell; servidor PostgreSQL reutilizado sin cambios). PostgreSQL temporal detenido. T16–T20 completas en desarrollo; T15/T10 abiertas, T21–T59 Borrador.
 
 ### Bloqueo y fase 2 de pausa
 

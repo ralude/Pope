@@ -13,6 +13,8 @@ internal static class Program
         if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);
         if (args is ["--pipe-peer", var pipeName, var serverPid, var pipeMode]) return PipePeer.Run(pipeName, serverPid, pipeMode);
         if (args is ["--shell-host-proof", var hostProofDirectory] && Path.IsPathFullyQualified(hostProofDirectory)) return ShellHostProof.Run(hostProofDirectory);
+        if (args is ["--shell-channel-proof", var channelProofDirectory, var channelPipe, var channelParent]
+            && Path.IsPathFullyQualified(channelProofDirectory)) return ShellChannelProof.Run(channelProofDirectory, channelPipe, channelParent);
         if (args is ["--session-window", var sessionId, "client" or "admin" or "elevated"])
             return SessionWindow.Run(Guid.ParseExact(sessionId, "N").ToString("N"), args[2]);
         if (args is ["--configure-maintenance", var id]) return ProbeCredential.Configure(id);

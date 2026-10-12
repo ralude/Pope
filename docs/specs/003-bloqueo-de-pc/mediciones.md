@@ -454,3 +454,27 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
 - Formato/lint/tipos/test/build completos correctos: 1 667 tests (374 nativos).
   Build incluye shell-ui/dist en host/probe. No demuestra instalación/autologin T54,
   supervisión T22, SCM T15 ni compatibilidad en las versiones Pro del local.
+
+### T20 · PcChannel por WebView2 y cadena nativa (2026-10-11)
+
+- Producción usa solo el adaptador tipado de WebView2, sin WebSocket de React ni
+  hello/latidos. Preserva requestId, nombre público y edad del estado; ready acotado,
+  stop limpia timers/listeners y desconexión no reenvía peticiones. Ocho tests nuevos
+  del Shell (60 totales): incluye proxy Vite real con origen ajeno rechazado y
+  metadatos sin credencial, pausa sin billing/revocación; perfil/CA solo en Node DEV.
+- Prueba real `ShellUiBridgeTests`: receptor WSS TLS/Bearer efímero, AgentChannel,
+  AgentState, AgentHostBridge, pipe Windows, HostBridge, ShellWindow y React de
+  producto. Login mediante inputs/form; error con otro requestId ignorado, error
+  correlacionado mostrado y sesión autorizada recibida. Cierre/recreación del pipe
+  produce offline/online, conserva sesión/edad y no repite login.
+- El proceso padre del ensayo es un broker ordinario retenido, permitido solo por
+  DesktopProbe. El EXE de producción sigue exigiendo servidor SYSTEM/sesión 0. No
+  sustituye SCM T15; sin UAC, servicios, cuentas, cambios de shell o VM. Credencial
+  de PC permanece en el padre; JavaScript solo recibe mensajes públicos tipados.
+- Informe Passed=true y captura de sesión revisada en
+  `tmp/t20-chain-4f8243a9ae884c17a0dcd1ab43f32bb5` (ignorado); perfil temporal del
+  ensayo retirado. Windows 11 Pro 26H2/26300.9457, WebView2 154.0.4258.62.
+- Formato/lint/tipos/test/build completos pasan: 1 676 tests (375 nativos, 60 Shell).
+  Se reutiliza el resultado de 420 servidor sobre PostgreSQL real cuando no cambian
+  sus inputs. Cluster temporal detenido, sin conexiones ni bases de tests sobrantes.
+  T16–T20 completas en desarrollo; T10/T15 permanecen abiertas. T21–T59 Borrador.

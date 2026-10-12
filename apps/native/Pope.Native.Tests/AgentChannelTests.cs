@@ -234,7 +234,7 @@ public sealed class AgentChannelTests(ITestOutputHelper output)
         var root = Path.Combine(Path.GetTempPath(), "pope-channel-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(root); return root;
     }
-    private static async Task<JsonElement> Read(WebSocket socket, CancellationToken token)
+    internal static async Task<JsonElement> Read(WebSocket socket, CancellationToken token)
     {
         var buffer = new byte[16_384];
         var frame = await socket.ReceiveAsync(buffer.AsMemory(), token);
@@ -242,7 +242,7 @@ public sealed class AgentChannelTests(ITestOutputHelper output)
         return ProtocolValidation.Parse(buffer.AsMemory(0, frame.Count), "pc-to-node");
     }
 
-    private sealed class Peer : IDisposable
+    internal sealed class Peer : IDisposable
     {
         internal TcpListener Listener { get; } = new(IPAddress.Loopback, 0);
         internal X509Certificate2 Certificate { get; }
