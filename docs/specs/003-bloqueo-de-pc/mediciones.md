@@ -437,3 +437,20 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
 - Formato, lint, tipos, test y build completos pasan: 1 666 tests, incluidos 373
   nativos y 420 servidor sobre PostgreSQL real. Logs ignorados `tmp/t18-*.log`.
   Lanzamiento/supervisión quedan en T22; salida durable en T40; SCM pendiente T15.
+
+### T19 · interfaz local de producto en WebView2 (2026-10-11)
+
+- `Pope.DesktopProbe --shell-host-proof` instancia la misma ShellWindow de producto,
+  en ventana aislada del escritorio cotidiano: token medio, sin SCM ni cambios del
+  shell de Windows. WebView2 Evergreen 154.0.4258.62, Windows 11 Pro 26H2/26300.9457.
+- Assets/fuentes del paquete cargan sin nodo; captura `shell.png` revisada en
+  `tmp/t19-host-718c6a9f37164863ad15c86adf9bc6d1` (ignorado), informe Passed=true.
+  Error offline correlacionado; hello/campo credential de JS rechazados. Navegación,
+  popup y descarga reales cancelados; receptor TCP local no acepta conexiones del
+  fetch bloqueado. Herramientas/autorrelleno/host objects/atajos desactivados.
+- Snapshot de edad 7 s se entrega con al menos 8 s tras otro ready. La credencial de
+  PC nunca se proporciona a la ventana. El adaptador React definitivo queda en T20;
+  el canal provisional del bundle no puede salir a red por CSP.
+- Formato/lint/tipos/test/build completos correctos: 1 667 tests (374 nativos).
+  Build incluye shell-ui/dist en host/probe. No demuestra instalación/autologin T54,
+  supervisión T22, SCM T15 ni compatibilidad en las versiones Pro del local.

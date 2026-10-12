@@ -281,7 +281,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - [x] **T18c1 (2026-10-11):** runtime integra estado/canal y puente que recibe el proceso lanzado; publicador filtra órdenes/ACK, envía snapshot con edad y devuelve error offline correlacionado sin copiar contraseñas/credenciales. Salida técnica no se reenvía al nodo antes del journal T40; lanzamiento/supervisión siguen en T22. Prueba real de despacho y 370 nativas/build/formato correctos.
     - [x] **T18c2 (2026-10-11):** impostor con SID/logon iguales rechazado antes de recibir estado; handle muerto no coincide aunque conserve el PID. Remoto loopback y frame truncado rechazados en pipes reales; overflow/correlación pasan. Batería general correcta: formato/lint/tipos/test/build, 1 666 tests (373 nativos, 420 servidor en PostgreSQL real). T18 completa en desarrollo; T19 siguiente, T15/T10 abiertas, sin VM.
 
-- [ ] **T19: Host de WebView2 con interfaz empaquetada**
+- [x] **T19: Host de WebView2 con interfaz empaquetada**
   - **Cubre:** REQ-003-01, REQ-003-03, REQ-003-04, REQ-003-63.
   - **Hacer:** alojar `shell-ui` local con origen virtual permitido y puente tipado; limitar navegación, ventanas nuevas, descargas y herramientas de desarrollo de producción.
   - **Verificar:** pantalla sin nodo, origen/mensaje falsificado rechazado, host sin elevación y credencial de PC inaccesible a JavaScript.
@@ -289,13 +289,17 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-11):** T19a frontera de usuario/origen y cliente del pipe; T19b ventana WebView2/paquete local y permisos; T19c prueba aislada de la interfaz real y batería general. No cambiar el shell de Windows ni lanzar el host desde el servicio antes de T22.
     - [x] **T19a (2026-10-11):** frontera interactiva no-SYSTEM/no-elevación, origen HTTPS fijo sin usuario/puerto ajeno y envoltorios estrictos limitados a 16 KiB. Cliente cancelable, reintentos 1–30 s, identidad de servicio y sin reenvío de solicitudes. Ataques de origen/campos/hello rechazados; 374 nativos pasan, build/formato correctos sin avisos. Ventana y prueba real en T19b/c.
     - [x] **T19b (2026-10-11):** ventana local WinForms/WebView2 con origen virtual, perfil separado y puente tipado; navegación/subframes/popups/descargas/permisos/recursos externos limitados. CSP del paquete prohíbe conexiones JS; assets incluidos en build/publicación con dependencia Turbo explícita. Snapshot conserva edad tras ready y peticiones no se repiten. 374 nativos y 52 shell pasan; tipos/lint/build/formato correctos. Prueba real y cierre en T19c.
-    - [ ] **T19c:** pantalla sin nodo y ataques al origen/mensajes probados en WebView2 real; batería general.
+    - [x] **T19c (2026-10-11):** ventana de producto real en escritorio cotidiano con assets empaquetados y token medio; pantalla sin nodo, error correlacionado, mensajes inválidos, navegación/popup/descarga cancelados y cero conexiones al receptor local. Snapshot conserva edad. Captura revisada, WebView2 154.0.4258.62; batería general correcta, 1 667 tests (374 nativos). Sin instalación/cambios de Windows; T19 completa en desarrollo, adaptador React en T20; T15/T10 abiertas.
 
 - [ ] **T20: Transporte WebView2 de PcChannel**
   - **Cubre:** REQ-003-03, REQ-003-04, REQ-003-63.
   - **Hacer:** implementar el adaptador de `PcChannel` en `apps/shell-ui`; mantener transporte de desarrollo separado y todas las pantallas sobre la interfaz existente.
   - **Verificar:** solicitudes/respuestas correlacionadas, desconexión, reintentos y limpieza de listeners; solo el agente envía `hello` y latidos.
   - **Commit:** `feat(shell-ui): conecta el Shell con el puente de WebView2`.
+  - **División previa (2026-10-11):** T20a adaptador tipado, edad/identidad y selección de producción; T20b transporte de desarrollo registrado sin secretos en React; T20c integración real y batería general.
+    - [ ] **T20a:** adaptador WebView2, requests correlacionados, validación/límites, limpieza y selección exclusiva en producción.
+    - [ ] **T20b:** desarrollo v2 mediante proxy de simulación registrado; credencial/CA solo en Vite.
+    - [ ] **T20c:** integración de la interfaz real, desconexión/reconexión y batería general.
 
 ### Bloqueo y fase 2 de pausa
 
