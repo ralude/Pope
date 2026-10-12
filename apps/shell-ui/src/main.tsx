@@ -17,7 +17,7 @@ let channel: PcChannel;
 let pcName = 'PC';
 if (import.meta.env.DEV) {
   const { createDevChannel } = await import('./channel/dev-entry.js');
-  ({ channel, pcName } = createDevChannel());
+  ({ channel, pcName } = await createDevChannel());
 } else {
   channel = new WebViewChannel(window.chrome?.webview);
 }

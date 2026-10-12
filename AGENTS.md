@@ -236,12 +236,13 @@ Panel (`apps/panel`, React + Vite + wouter):
 
 Shell (`apps/shell-ui`, React + Vite, sin router):
 
-- Desarrollo: con el nodo arrancado en el puerto 3000 y las PCs de ejemplo creadas
-  (`dev:seed-pcs`), `pnpm --filter @pope/shell-ui dev` y abrir `http://localhost:5174/?pc=1`
-  (`?pc=N` es la PC de ejemplo "PC 0N"). En desarrollo el Shell hace también de agente: envía
-  `hello` y los latidos por el WebSocket `/pc`, a través del proxy de Vite. Las pantallas solo
-  ven la interfaz `PcChannel` (`src/channel/channel.ts`); con la spec 003 se añadirá el puente de
-  WebView2 y la conexión la mantendrá el agente.
+- Desarrollo: registrar una PC mediante el [simulador](tools/agent-sim/README.md), fijar
+  `POPE_SIM_PROFILE` a su archivo privado `*.sim-secret.json` y `POPE_SIM_PC` al índice
+  registrado; ejecutar `pnpm --filter @pope/shell-ui dev` y abrir `http://127.0.0.1:5174`.
+  Vite usa credencial/CA únicamente en su proxy Node y publica solo identidad pública.
+  No hay conexión anónima ni selección de identidad mediante `?pc=`. El canal DEV envía
+  hello/latidos v2; el paquete de producción solo usa WebView2, donde los mantiene el
+  agente. Todas las pantallas siguen sobre `PcChannel` (`src/channel/channel.ts`).
 - Diseño de referencia: el lienzo "Shell Pope · Fase 9 (estilo SENET)", a 1920×1080. Aquí sí hay
   vidrio y desenfoques (las PCs de los clientes tienen gráfica dedicada). Estilos en
   `src/theme.css`. Tests solo de la lógica (`src/**/*.test.ts`); las pantallas se verifican a mano.

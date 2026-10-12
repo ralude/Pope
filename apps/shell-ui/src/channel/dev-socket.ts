@@ -2,7 +2,14 @@
 // también de agente: se identifica con `hello`, late cada 10 s y reconecta si se corta (plan
 // 001, "Comportamiento del agente en el canal"). En la PC real esto lo hará el agente en C#
 // (spec 003) y el Shell usará el puente de WebView2.
-import { nodeToPcMessageSchema, PROTOCOL_VERSION, type NodeToPcMessage } from '@pope/shared';
+import {
+  nativeNodeToPcMessageSchema,
+  nativePcToNodeMessageSchema,
+  nodeToPcMessageSchema,
+  NATIVE_PC_PROTOCOL_VERSION,
+  type NativeNodeToPcMessage,
+  type PcControlContext,
+} from '@pope/shared';
 
 import type { ChannelEvent, PcChannel, ShellRequest } from './channel.js';
 
@@ -24,17 +31,17 @@ export interface DevSocket {
 export interface DevSocketChannelOptions {
   /** URL del canal, p. ej. `ws://127.0.0.1:5174/pc`. */
   url: string;
-  /** Id de la PC de ejemplo con la que se identifica (`devPcId`). */
+  /** UUID público registrado que entrega el proxy de Vite. */
   pcId: string;
   connect?: (url: string) => DevSocket;
   heartbeatMs?: number;
 }
 
 /** Lee un mensaje del nodo; `null` si no es JSON o no cumple el protocolo. */
-export function parseNodeMessage(data: unknown): NodeToPcMessage | null {
-  if (typeof data !== 'string') return null;
+export function parseNodeMessage(data: unknown): NativeNodeToPcMessage | null {
+  if (typeof data !== 'string' || new TextEncoder().encode(data).length > 16_384) return null;
   try {
-    const parsed = nodeToPcMessageSchema.safeParse(JSON.parse(data));
+    const parsed = nativeNodeToPcMessageSchema.safeParse(JSON.parse(data));
     return parsed.success ? parsed.data : null;
   } catch {
     return null;
@@ -56,6 +63,9 @@ export class DevSocketChannel implements PcChannel {
   private sessionId: string | null = null;
   private remainingBase = 0;
   private remainingSyncedAt = 0;
+  private billing = true;
+  private context: PcControlContext | null = null;
+  private revoked = false;
 
   constructor(private readonly options: DevSocketChannelOptions) {
     this.connectFn = options.connect ?? ((url) => new WebSocket(url) as unknown as DevSocket);
@@ -63,6 +73,7 @@ export class DevSocketChannel implements PcChannel {
   }
 
   start(listener: (event: ChannelEvent) => void): void {
+    this.stop();
     this.listener = listener;
     this.emit({ kind: 'status', status: 'connecting' });
     this.connect();
@@ -76,6 +87,12 @@ export class DevSocketChannel implements PcChannel {
     const socket = this.socket;
     this.socket = null;
     this.open = false;
+    this.revoked = false;
+    if (socket) {
+      socket.onopen = null;
+      socket.onmessage = null;
+      socket.onclose = null;
+    }
     socket?.close();
   }
 
@@ -89,14 +106,14 @@ export class DevSocketChannel implements PcChannel {
     socket.onopen = () => {
       if (this.socket !== socket) return;
       this.open = true;
-      this.attempt = 0;
-      const remaining = this.localRemaining();
       this.write({
         type: 'hello',
-        protocolVersion: PROTOCOL_VERSION,
+        protocolVersion: NATIVE_PC_PROTOCOL_VERSION,
         pcId: this.options.pcId,
-        sessionId: this.sessionId,
-        ...(remaining !== null && { localRemainingSeconds: remaining }),
+        recoveryState: 'unknown',
+        sessionId: null,
+        controlContext: null,
+        pendingMaintenanceExitId: null,
       });
       this.startHeartbeat();
     };
@@ -115,12 +132,31 @@ export class DevSocketChannel implements PcChannel {
     };
   }
 
-  private receive(message: NodeToPcMessage): void {
+  private receive(message: NativeNodeToPcMessage): void {
+    if (message.type === 'pcAuthenticationError') {
+      this.revoked = true;
+      this.open = false;
+      this.stopHeartbeat();
+      this.emit({ kind: 'message', message: { type: 'state', status: 'locked' } });
+      this.emit({ kind: 'status', status: 'offline' });
+      this.socket?.close();
+      return;
+    }
+    if (message.type === 'controlState') {
+      this.context = message.context;
+      return;
+    }
     if (message.type === 'state') {
+      this.attempt = 0;
       if (message.status === 'active') {
         this.sessionId = message.session.sessionId;
         this.remainingBase = message.session.remainingSeconds;
-        this.remainingSyncedAt = Date.now();
+        this.remainingSyncedAt = performance.now();
+        this.billing = !(
+          message.session.kind === 'account' &&
+          message.session.pause &&
+          !message.session.pause.billing
+        );
       } else {
         this.sessionId = null;
       }
@@ -129,11 +165,12 @@ export class DevSocketChannel implements PcChannel {
     } else if (message.type === 'sessionEnded') {
       this.sessionId = null;
     }
-    this.emit({ kind: 'message', message });
+    const uiMessage = nodeToPcMessageSchema.safeParse(message);
+    if (uiMessage.success) this.emit({ kind: 'message', message: uiMessage.data });
   }
 
   private scheduleReconnect(): void {
-    if (!this.listener) return;
+    if (!this.listener || this.revoked) return;
     const delay =
       RECONNECT_DELAYS_MS[Math.min(this.attempt, RECONNECT_DELAYS_MS.length - 1)] ?? 30_000;
     this.attempt += 1;
@@ -150,6 +187,7 @@ export class DevSocketChannel implements PcChannel {
         type: 'heartbeat',
         sessionId: this.sessionId,
         localRemainingSeconds: this.localRemaining(),
+        controlContext: this.context,
       });
     }, this.heartbeatMs);
   }
@@ -162,13 +200,17 @@ export class DevSocketChannel implements PcChannel {
   /** Restante según la PC: lo que dijo el nodo menos el tiempo pasado (REQ-001-63). */
   private localRemaining(): number | null {
     if (this.sessionId === null) return null;
-    const elapsed = Math.floor((Date.now() - this.remainingSyncedAt) / 1000);
+    const elapsed = this.billing
+      ? Math.floor((performance.now() - this.remainingSyncedAt) / 1000)
+      : 0;
     return Math.max(0, this.remainingBase - elapsed);
   }
 
   private write(message: object): boolean {
     if (!this.open || !this.socket) return false;
-    this.socket.send(JSON.stringify(message));
+    const parsed = nativePcToNodeMessageSchema.safeParse(message);
+    if (!parsed.success) return false;
+    this.socket.send(JSON.stringify(parsed.data));
     return true;
   }
 

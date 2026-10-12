@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { devPcId, PROTOCOL_VERSION } from '@pope/shared';
+import { devPcId, NATIVE_PC_PROTOCOL_VERSION } from '@pope/shared';
 
 import type { ChannelEvent } from './channel.js';
 import { type DevSocket, DevSocketChannel, parseNodeMessage } from './dev-socket.js';
@@ -48,7 +48,9 @@ describe('DevSocketChannel (T46)', () => {
   let channel: DevSocketChannel;
 
   beforeEach(() => {
-    vi.useFakeTimers();
+    vi.useFakeTimers({
+      toFake: ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'Date', 'performance'],
+    });
     sockets = [];
     events = [];
     channel = new DevSocketChannel({
@@ -81,9 +83,12 @@ describe('DevSocketChannel (T46)', () => {
     socket(0).onopen?.();
     expect(socket(0).sent[0]).toEqual({
       type: 'hello',
-      protocolVersion: PROTOCOL_VERSION,
+      protocolVersion: NATIVE_PC_PROTOCOL_VERSION,
       pcId: PC,
       sessionId: null,
+      recoveryState: 'unknown',
+      controlContext: null,
+      pendingMaintenanceExitId: null,
     });
     expect(statuses()).toEqual(['connecting']);
     socket(0).receive({ type: 'state', status: 'locked' });
@@ -102,6 +107,7 @@ describe('DevSocketChannel (T46)', () => {
       type: 'heartbeat',
       sessionId: SESSION,
       localRemainingSeconds: 590,
+      controlContext: null,
     });
   });
 
@@ -113,7 +119,7 @@ describe('DevSocketChannel (T46)', () => {
     expect(socket(0).sent.at(-1)).toEqual(request);
   });
 
-  it('si se corta, avisa y reconecta con la sesión que tenía', () => {
+  it('si se corta, reconecta con recuperación desconocida sin cerrar una sesión del nodo', () => {
     socket(0).onopen?.();
     socket(0).receive(activeState(600));
     socket(0).onclose?.();
@@ -121,7 +127,12 @@ describe('DevSocketChannel (T46)', () => {
     vi.advanceTimersByTime(1000);
     expect(sockets).toHaveLength(2);
     socket(1).onopen?.();
-    expect(socket(1).sent[0]).toMatchObject({ type: 'hello', sessionId: SESSION });
+    expect(socket(1).sent[0]).toMatchObject({
+      type: 'hello',
+      recoveryState: 'unknown',
+      sessionId: null,
+      controlContext: null,
+    });
   });
 
   it('olvida la sesión cuando termina', () => {
@@ -133,6 +144,7 @@ describe('DevSocketChannel (T46)', () => {
       type: 'heartbeat',
       sessionId: null,
       localRemainingSeconds: null,
+      controlContext: null,
     });
   });
 
@@ -142,6 +154,57 @@ describe('DevSocketChannel (T46)', () => {
     expect(socket(0).closed).toBe(true);
     vi.advanceTimersByTime(60_000);
     expect(sockets).toHaveLength(1);
+  });
+
+  it('REQ-003-63: revocación detiene latidos/reintentos y bloquea la pantalla', () => {
+    socket(0).onopen?.();
+    socket(0).receive({
+      type: 'pcAuthenticationError',
+      code: 'pc_credential_revoked',
+      message: 'Credencial revocada',
+    });
+    socket(0).onclose?.();
+    vi.advanceTimersByTime(120_000);
+    expect(sockets).toHaveLength(1);
+    expect(socket(0).sent).toHaveLength(1);
+    expect(channel.send({ type: 'logout' })).toBe(false);
+    expect(events).toContainEqual({
+      kind: 'message',
+      message: { type: 'state', status: 'locked' },
+    });
+  });
+
+  it('REQ-002-30: pausa sin billing conserva restante aunque venza su contador local', () => {
+    socket(0).onopen?.();
+    socket(0).receive({
+      type: 'state',
+      status: 'active',
+      vesRate: null,
+      session: {
+        kind: 'account',
+        sessionId: SESSION,
+        startedAt: '2026-10-01T22:00:00.000Z',
+        username: 'juan',
+        ratePerHour: { micros: 1_000_000, currency: 'USD' },
+        money: { micros: 0, currency: 'USD' },
+        comboSeconds: 600,
+        moneySeconds: 0,
+        remainingSeconds: 600,
+        pause: {
+          startedAt: '2026-10-01T22:00:00.000Z',
+          maxUntil: '2026-10-01T22:01:00.000Z',
+          secondsLeft: 60,
+          billing: false,
+        },
+      },
+    });
+    vi.setSystemTime(new Date('2030-01-01T00:00:00Z'));
+    vi.advanceTimersByTime(120_000);
+    expect(socket(0).sent.at(-1)).toMatchObject({
+      type: 'heartbeat',
+      sessionId: SESSION,
+      localRemainingSeconds: 600,
+    });
   });
 });
 
