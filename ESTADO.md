@@ -11,7 +11,7 @@
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09, T11–T14 y T16–T17 completos; T10 aplazada; T15–T20 autorizadas para continuación autónoma en esta máquina, sin VM; T21–T59 en Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T18a: frames y contratos compartidos del puente; T17 completa. Después T17–T20, por instrucción directa del mantenedor «ve con t16 hasta t20» (2026-10-11). T15c3 conserva su prueba SCM pendiente y T10 sigue abierta; trabajar en esta máquina sin VM |
+| **Siguiente tarea** | T18a2: framing/cola y validación compartida; T18a1 completa. Después T18b/c y T19–T20, por instrucción directa del mantenedor «ve con t16 hasta t20» (2026-10-11). T15c3 conserva su prueba SCM pendiente y T10 sigue abierta; trabajar en esta máquina sin VM |
 | **Progreso** | Spec 003: 15 / 59 grupos; T01–T09, T11–T14 y T16–T17 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T20 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | T15c3 espera aceptar UAC en Windows para ensayo SCM; cancelación previa sin servicio/carpeta creados. T15 abierta; T16/T17 completas; T18–T20 autorizadas. Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
@@ -28,7 +28,7 @@ de Windows. Reabrir [el lanzador](apps/native/probes/test-agent-service.ps1) y a
 para la verificación funcional cuando se retome T15. El mantenedor pide ahora avanzar
 T16–T20; no repetir el lanzamiento UAC durante este bloque. No marcar T15 completa por los
 tests automáticos. Batería general correcta, 1 628 tests; repetir solo si cambian entradas.
-PostgreSQL temporal `tmp/contracts003-pg` detenido; reiniciarlo si hacen falta más tests.
+PostgreSQL temporal `tmp/contracts003-pg` activo para las pruebas del bloque; detenerlo al terminar.
 
 **Orden vigente (2026-10-09):** T10 aplazada por instrucción directa del mantenedor;
 seguir T11–T20. Sustituye el límite histórico de no avanzar T11. T10 no se marca completa
@@ -106,6 +106,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-11:** T18a1 completa: envoltorios estrictos del puente, estado/edad y solicitudes UI separadas de órdenes/credenciales/hello. Ocho fixtures nuevos; 657 shared y 362 nativos correctos, consumidores compilan y lint/tipos/formato pasan. Siguiente T18a2; T15/T10 abiertas, sin VM.
+
 - **2026-10-11:** T17c/T17 completas: recuperación de identidad por WSS real con arranque bloqueado hasta nuevo state y restante antiguo desconocido. Batería general correcta, 1 639 tests (354 nativos). El nodo aún no emite controlState hasta T28: unknown seguro. Siguiente T18, 15/59; SCM T15 y T10 abiertas, sin VM.
 
 - **2026-10-11:** T17b completa: recuperación durable en DPAPI/ACL solo SYSTEM, sustitución atómica/exclusión y buffers borrados; servicio integra hello/latidos con copia autorizada. PC/contexto contrastados, arranque bloqueado y corrupción sin cierre inventado. 353 nativas/build/formato correctos; T17c siguiente, SCM sigue pendiente T15, T10 abierta.
@@ -123,5 +125,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-11:** T15c2 completa: ensayo SCM demand por GUID preparado con binarios/custodia protegidos, comprobación SYSTEM/sesión 0, token medio denegado, corrupción y retirada verificada. Lanzador UAC separado y acotado; no modifica cuentas/shell/directivas. Build/formato/sintaxis, 343 tests y guardas reales sin instalar pasan; artefactos autocontenidos publicados. Ejecución de servicio/retirada/batería pendientes T15c3; T15/T10 abiertas, sin VM.
 
 - **2026-10-11:** T15c1 completa: ServiceBase sin UI/log automático, solo SCM/LocalSystem/sesión 0; trabajo único, cancelación, fallos sanitizados y parada con límite. Tres tests nuevos y 343 nativas pasan, solución compila y formato correcto. Sin servicio instalado; preparar ensayo demand por GUID en T15c2 y ejecutar/retirar/batería en T15c3. T15 y T10 abiertas, sin VM.
-
-- **2026-10-11:** T15b completa: DPAPI de máquina con borrado, lectura acotada y sustitución atómica/exclusiva; propietario/DACL protegida SYSTEM/administración y rechazo de reanálisis. Tres pruebas locales nuevas pasan; 340 nativas, compilación/formato correctos. No se instala servicio ni se modifica Windows todavía; custodia real/SCM/denegación y batería quedan en T15c. T10 abierta, sin VM.

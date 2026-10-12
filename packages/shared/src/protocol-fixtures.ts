@@ -54,6 +54,43 @@ export function protocolFixtures(): ProtocolFixture[] {
       });
   };
   const incoming = ['pc-to-node', 'shell-request'];
+  add('v2', ['bridge-request'], 'ready', true, { version: 1, kind: 'ready' });
+  add('v2', ['bridge-request'], 'logout', true, {
+    version: 1,
+    kind: 'request',
+    request: { type: 'logout', requestId: id },
+  });
+  add('v2', ['bridge-request'], 'hello-forbidden', false, {
+    version: 1,
+    kind: 'request',
+    request: { type: 'hello' },
+  });
+  add('v2', ['bridge-request'], 'extra-field', false, { version: 1, kind: 'ready', credential });
+  add('v2', ['bridge-event'], 'status', true, {
+    version: 1,
+    kind: 'status',
+    status: 'offline',
+    pcName: 'PC de prueba',
+  });
+  add('v2', ['bridge-event'], 'snapshot', true, {
+    version: 1,
+    kind: 'message',
+    message: { type: 'state', status: 'locked' },
+    elapsedSeconds: 10,
+  });
+  add('v2', ['bridge-event'], 'negative-age', false, {
+    version: 1,
+    kind: 'message',
+    message: { type: 'state', status: 'locked' },
+    elapsedSeconds: -1,
+  });
+  add('v2', ['bridge-event'], 'extra-field', false, {
+    version: 1,
+    kind: 'status',
+    status: 'offline',
+    pcName: 'PC',
+    credential,
+  });
   const outgoing = ['node-to-pc', 'shell-notification'];
   const clients = [
     { type: 'login', username: 'Ana', password: ' contraseña ' },

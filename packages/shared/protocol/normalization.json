@@ -41,6 +41,9 @@
     65279
   ],
   "passwordOperation": "none",
+  "wrappedRequestContracts": [
+    "bridge-request"
+  ],
   "instructions": [
     "Antes de validar JSON Schema, recortar solo username en los mensajes y contratos indicados.",
     "C#: construir char[] con codePoints y aplicar username.Trim(chars); no usar Trim() sin argumentos.",

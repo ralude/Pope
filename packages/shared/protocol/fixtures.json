@@ -1,5 +1,108 @@
 [
   {
+    "id": "v2/bridge-request/ready",
+    "version": "v2",
+    "contract": "bridge-request",
+    "valid": true,
+    "input": {
+      "version": 1,
+      "kind": "ready"
+    }
+  },
+  {
+    "id": "v2/bridge-request/logout",
+    "version": "v2",
+    "contract": "bridge-request",
+    "valid": true,
+    "input": {
+      "version": 1,
+      "kind": "request",
+      "request": {
+        "type": "logout",
+        "requestId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b"
+      }
+    }
+  },
+  {
+    "id": "v2/bridge-request/hello-forbidden",
+    "version": "v2",
+    "contract": "bridge-request",
+    "valid": false,
+    "input": {
+      "version": 1,
+      "kind": "request",
+      "request": {
+        "type": "hello"
+      }
+    }
+  },
+  {
+    "id": "v2/bridge-request/extra-field",
+    "version": "v2",
+    "contract": "bridge-request",
+    "valid": false,
+    "input": {
+      "version": 1,
+      "kind": "ready",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
+    "id": "v2/bridge-event/status",
+    "version": "v2",
+    "contract": "bridge-event",
+    "valid": true,
+    "input": {
+      "version": 1,
+      "kind": "status",
+      "status": "offline",
+      "pcName": "PC de prueba"
+    }
+  },
+  {
+    "id": "v2/bridge-event/snapshot",
+    "version": "v2",
+    "contract": "bridge-event",
+    "valid": true,
+    "input": {
+      "version": 1,
+      "kind": "message",
+      "message": {
+        "type": "state",
+        "status": "locked"
+      },
+      "elapsedSeconds": 10
+    }
+  },
+  {
+    "id": "v2/bridge-event/negative-age",
+    "version": "v2",
+    "contract": "bridge-event",
+    "valid": false,
+    "input": {
+      "version": 1,
+      "kind": "message",
+      "message": {
+        "type": "state",
+        "status": "locked"
+      },
+      "elapsedSeconds": -1
+    }
+  },
+  {
+    "id": "v2/bridge-event/extra-field",
+    "version": "v2",
+    "contract": "bridge-event",
+    "valid": false,
+    "input": {
+      "version": 1,
+      "kind": "status",
+      "status": "offline",
+      "pcName": "PC",
+      "credential": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    }
+  },
+  {
     "id": "v1/pc-to-node/login",
     "version": "v1",
     "contract": "pc-to-node",

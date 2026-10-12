@@ -2,6 +2,7 @@
 import { z } from 'zod';
 import * as background from './lock-background.js';
 import * as native from './native-protocol.js';
+import * as bridge from './shell-bridge.js';
 import * as control from './pc-control.js';
 import * as registration from './pc-registration.js';
 import * as legacy from './protocol.js';
@@ -17,6 +18,8 @@ export const protocolContractSchemas = {
     'node-to-pc': native.nativeNodeToPcMessageSchema,
     'shell-request': native.nativeShellRequestSchema,
     'shell-notification': native.nativeShellNotificationSchema,
+    'bridge-request': bridge.nativeBridgeRequestSchema,
+    'bridge-event': bridge.nativeBridgeEventSchema,
     'installation-code-request': registration.pcInstallationCodeRequestSchema,
     'installation-code-response': registration.pcInstallationCodeResponseSchema,
     'registration-request': registration.pcRegistrationRequestSchema,
@@ -52,6 +55,17 @@ export function trimProtocolUsername(username: string): string {
 
 /** Aplicar antes de JSON Schema; Zod ya hace este recorte en los contratos originales. */
 export function normalizeProtocolInput(contract: string, input: unknown): unknown {
+  if (
+    contract === 'bridge-request' &&
+    input !== null &&
+    typeof input === 'object' &&
+    !Array.isArray(input)
+  ) {
+    const value = input as Record<string, unknown>;
+    return value.kind === 'request'
+      ? { ...value, request: normalizeProtocolInput('shell-request', value.request) }
+      : input;
+  }
   if (!['pc-to-node', 'shell-request'].includes(contract)) return input;
   if (input === null || typeof input !== 'object' || Array.isArray(input)) return input;
   const value = input as Record<string, unknown>;
@@ -82,6 +96,7 @@ export function protocolJsonArtifacts(): Record<string, unknown> {
     operation: 'trim-edges-before-validation',
     codePoints: usernameTrimCodePoints,
     passwordOperation: 'none',
+    wrappedRequestContracts: ['bridge-request'],
     instructions: [
       'Antes de validar JSON Schema, recortar solo username en los mensajes y contratos indicados.',
       'C#: construir char[] con codePoints y aplicar username.Trim(chars); no usar Trim() sin argumentos.',
