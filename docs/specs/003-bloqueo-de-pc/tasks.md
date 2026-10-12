@@ -313,6 +313,9 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-12):** T21a filtro de atajos y handles de escritorio con pruebas acotadas; T21b integración del host con escritorios/hilos fijos y estado autorizado; T21c ensayo real reversible de entrada/transiciones/fallo y batería general. Ninguna subparte por sí sola cierra T21.
   - [x] **T21a (2026-10-12):** filtro por sesión/foco, escritorio con DACL SYSTEM/logon y handles propios. Prueba en proceso nuevo demuestra React en escritorio de nacimiento; STA reasignado falla WebView2 (0x80070057). Adoptar instancias por escritorio según plan/T09. Build/formato y 378 tests nativos correctos; integración y entrada real en T21b/c.
   - [ ] **T21b:** integración de ventana de uso/bloqueo con mensajes validados y edad monotónica.
+    - **División previa:** T21b1 interpreta la autorización y confirma solo efectos Win32 correctos; T21b2 enlaza las instancias/pipe y la interfaz lista.
+    - [x] **T21b1 (2026-10-12):** autorización validada con edad monotónica, pausa/revocación conservan aislamiento; intento de cambio fallido no confirma éxito ni abre uso. Cuatro casos nuevos, formato/build y 382 tests nativos correctos. Integración de las instancias en T21b2.
+    - [ ] **T21b2:** instancia por escritorio y relay autenticado por proceso retenido, con señal de interfaz lista antes de activar bloqueo.
   - [ ] **T21c:** prueba funcional reversible y comprobaciones generales.
 
 - [ ] **T22: Supervisión y relanzamiento del host**

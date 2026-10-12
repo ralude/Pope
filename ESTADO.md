@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-12 · T21a completa; integración T21 pendiente; T15c3/T10 abiertas
+**Última actualización:** 2026-10-12 · T21a/b1 completas; integración T21 pendiente; T15c3/T10 abiertas
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09, T11–T14 y T16–T20 completos en desarrollo, sin VM; T10 aplazada y prueba SCM de T15 pendiente; T21–T27 autorizadas, T28–T59 Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T21b: integrar instancias del host nacidas en cada escritorio; T21a completa con 378 tests nativos. T21–T27 autorizadas el 2026-10-12, sin VM; T28–T59 Borrador. T15c3/T10 pendientes, sin repetir UAC |
+| **Siguiente tarea** | T21b2: integrar instancias del host nacidas en cada escritorio; T21a/b1 completas con 382 tests nativos. T21–T27 autorizadas el 2026-10-12, sin VM; T28–T59 Borrador. T15c3/T10 pendientes, sin repetir UAC |
 | **Progreso** | Spec 003: 18 / 59 grupos; T01–T09, T11–T14 y T16–T20 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T27 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | T15c3 espera aceptar UAC en Windows para ensayo SCM; cancelación previa sin servicio/carpeta creados. T15 abierta; T16–T20 completas en desarrollo; bloque T21–T27 en curso. Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
@@ -106,6 +106,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-12:** T21b1 completa: autorización/edad monotónicas, pausa y revocación aisladas, cambio fallido sin confirmación. Formato/build y 382 nativas correctos. Siguiente T21b2/c; bloque T21–T27 en curso, T10/T15 abiertas, sin VM.
+
 - **2026-10-12:** T21a completa: escritorio SYSTEM/logon y filtro por sesión/foco. Prueba real aislada confirma host nacido en escritorio alterno; WebView2 no inicia en STA reasignado (0x80070057). 378 nativas/build/formato correctos. T21b/c pendientes; T21–T27 autorizadas y alcance ordinario T27 confirmado; T10/T15 abiertas, sin VM.
 
 - **2026-10-11:** T20c/T20 completas: login React real cruza host/pipe/WSS autenticado, correlación equivocada ignorada y reconexión del pipe conserva sesión sin repetir login. Captura revisada; batería general correcta, 1 676 tests (375 nativos/60 shell), formato/lint/tipos/build. PostgreSQL temporal detenido. Bloque T16–T20 terminado, 18/59; T15/T10 abiertas y T21–T59 Borrador, sin VM.
@@ -123,5 +125,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-11:** T19a completa: token interactivo/origen fijo, mensajes estrictos y cliente del pipe con identidad retenida/reintentos acotados. 374 nativos/build/formato correctos; referencia WPF transitiva eliminada sin ocultar avisos. Siguiente T19b/c; T15/T10 abiertas, sin VM.
 
 - **2026-10-11:** T18c2/T18 completas: impostor del mismo SID/logon, handle muerto, remoto y truncado rechazados en pipe real. Batería general correcta, 1 666 tests (373 nativos/420 servidor PostgreSQL), formato/lint/tipos/build. Siguiente T19a, 16/59; T15/T10 abiertas, sin VM.
-
-- **2026-10-11:** T18c1 completa: runtime enlaza estado/canal con bridge; filtra órdenes/ACK y entrega copia con edad, errores correlacionados offline sin secretos. Prueba de pipe real y 370 nativas/build/formato correctos. Lanzamiento/supervisión siguen en T22, salida durable en T40. Siguiente T18c2; T15/T10 abiertas, sin VM.
