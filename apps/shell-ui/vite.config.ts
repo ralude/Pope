@@ -6,7 +6,27 @@ import { defineConfig } from 'vite';
 const NODE = 'http://127.0.0.1:3000';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: 'pope-shell-policy',
+      apply: 'build',
+      transformIndexHtml: {
+        order: 'post',
+        handler: () => [
+          {
+            tag: 'meta',
+            attrs: {
+              'http-equiv': 'Content-Security-Policy',
+              content:
+                "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'",
+            },
+            injectTo: 'head-prepend',
+          },
+        ],
+      },
+    },
+  ],
   // Rutas relativas: en la PC el host sirve el Shell desde una carpeta local (spec 003).
   base: './',
   server: {

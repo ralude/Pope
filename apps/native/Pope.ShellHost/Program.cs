@@ -1,4 +1,4 @@
-using Microsoft.Web.WebView2.WinForms;
+using Pope.Bridge;
 
 namespace Pope.ShellHost;
 
@@ -13,17 +13,34 @@ internal static class Program
             return 0;
         }
 
-        // T09 prueba el escritorio; T19 inicializa la interfaz local y sus permisos.
-        Console.Error.WriteLine("Host aún no implementado (T09/T19).");
-        return 1;
-    }
-}
-
-internal sealed class ShellWindow : Form
-{
-    public ShellWindow()
-    {
-        Text = "Pope";
-        Controls.Add(new WebView2 { Dock = DockStyle.Fill });
+        try
+        {
+            HostBoundary.RequireInteractiveUser();
+            RetainedProcess? server = null;
+            try
+            {
+                HostBridge? bridge = null;
+                if (args is ["--pipe", var name, "--agent-pid", var value] && int.TryParse(value, out var pid) && pid > 0)
+                {
+                    PipeEndpoints.ValidateName(name);
+                    server = RetainedProcess.ForService(pid);
+                    bridge = new HostBridge(name, server);
+                }
+                else if (args.Length != 0) return 1;
+                using (bridge)
+                {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
+                    var profile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Pope", "ShellProfile");
+                    using var window = new ShellWindow(Path.Combine(AppContext.BaseDirectory, "shell"), profile, bridge);
+                    Application.Run(window);
+                    window.WaitForBridge();
+                    return window.Failed ? 1 : 0;
+                }
+            }
+            finally { server?.Dispose(); }
+        }
+        catch { Console.Error.WriteLine("No se pudo iniciar el Shell de Pope."); return 1; }
     }
 }

@@ -288,7 +288,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(native): aloja el Shell local en WebView2`.
   - **División previa (2026-10-11):** T19a frontera de usuario/origen y cliente del pipe; T19b ventana WebView2/paquete local y permisos; T19c prueba aislada de la interfaz real y batería general. No cambiar el shell de Windows ni lanzar el host desde el servicio antes de T22.
     - [x] **T19a (2026-10-11):** frontera interactiva no-SYSTEM/no-elevación, origen HTTPS fijo sin usuario/puerto ajeno y envoltorios estrictos limitados a 16 KiB. Cliente cancelable, reintentos 1–30 s, identidad de servicio y sin reenvío de solicitudes. Ataques de origen/campos/hello rechazados; 374 nativos pasan, build/formato correctos sin avisos. Ventana y prueba real en T19b/c.
-    - [ ] **T19b:** WebView2 local, navegación/recursos/ventanas/descargas/permisos limitados y empaquetado de assets.
+    - [x] **T19b (2026-10-11):** ventana local WinForms/WebView2 con origen virtual, perfil separado y puente tipado; navegación/subframes/popups/descargas/permisos/recursos externos limitados. CSP del paquete prohíbe conexiones JS; assets incluidos en build/publicación con dependencia Turbo explícita. Snapshot conserva edad tras ready y peticiones no se repiten. 374 nativos y 52 shell pasan; tipos/lint/build/formato correctos. Prueba real y cierre en T19c.
     - [ ] **T19c:** pantalla sin nodo y ataques al origen/mensajes probados en WebView2 real; batería general.
 
 - [ ] **T20: Transporte WebView2 de PcChannel**
