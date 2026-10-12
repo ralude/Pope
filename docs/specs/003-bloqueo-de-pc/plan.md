@@ -182,6 +182,17 @@ pantallas; solo el agente envía `hello` y latidos.
 | React ↔ host | JSON tipado por el puente, validación del origen virtual; sin credencial de PC ni ejecución de rutas o comandos libres |
 | Fondo | Endpoints de la propuesta de la spec: subir, quitar, consultar y descargar por SHA-256; PC registrada para la descarga |
 
+**Concreción T19/T20 (2026-10-11):** origen fijo `https://shell.pope.invalid/`, assets
+locales junto al host y perfil WebView2 separado de la custodia del agente. El host
+rechaza SYSTEM, sesión 0 y elevación; la identidad del servidor del pipe exige SYSTEM
+en sesión 0. La ventana limita navegación, subframes, recursos externos, descargas,
+popups, permisos y herramientas del navegador. CSP del paquete impide conexiones
+directas desde JavaScript; solo admite los envoltorios tipados del puente. La copia
+de estado conserva su edad monotónica al recargar React. No se guardan/reenvían
+peticiones tras perder el pipe. Sin dependencias nuevas de producto; el transporte de
+desarrollo permanece separado y la credencial de simulación se usa solo en el proxy
+de Vite, nunca en el bundle. Lanzamiento/supervisión por el servicio siguen en T22.
+
 No se fijan rutas o nombres de eventos nuevos como contratos aprobados todavía.
 El diseño final enumerará cuerpos, respuestas, errores, roles, límites y eventos zod.
 Las órdenes peligrosas no se repiten ciegamente tras reconectar; el agente conserva
@@ -670,6 +681,13 @@ retención explícita, sin crecer con semanas de cortes de red.
   futuros keywords desconocidos fallan cerrados y los fixtures contrastan producto/tests.
   No añade JsonSchema.Net al producto. La revocación recibida por el canal autenticado
   detiene reintentos hasta sustituir configuración; fallos de TLS conservan backoff.
+  T18 comparte validación/framing en Pope.Bridge (BCL, sin paquetes nuevos). El pipe usa
+  primera instancia, cliente único, PIPE_REJECT_REMOTE_CLIENTS y DACL por SID de logon;
+  el host recibe derechos concretos sin FILE_CREATE_PIPE_INSTANCE. Handles duplicados
+  conservan el objeto de proceso y contrastan PID/sesión antes de cada frame/acción.
+  Ambas colas tienen 32 frames; parcial/escritura vence a los 5 s y los buffers se borran.
+  Bridge recibe el proceso lanzado; lanzamiento/relanzamiento automáticos quedan en T22,
+  sin utilizar el SID o la ruta por sí solos como identidad ni anticipar el journal T40.
 - **Tests C#:** justificar framework de tests y validador JSON Schema (p. ej.
   JsonSchema.Net, solo en tests) antes de añadir paquetes; exportación draft 2020-12.
 - **Servidor:** reutilizar TLS y UDP de Node, `ws`, Fastify y el almacenamiento existente.

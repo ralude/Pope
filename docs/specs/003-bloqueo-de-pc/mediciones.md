@@ -423,3 +423,17 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   Pruebas repetidas solo para el helper corregido; logs en `tmp/t11-*.log` (ignorados).
 - Sin dependencias nuevas, claves versionadas, cambios de Windows ni integración
   del mantenimiento T10. Registro/autenticación y confianza del agente en T12–T16.
+
+### T18 · pipe real en Windows de desarrollo (2026-10-11)
+
+- Windows 11 Pro 26H2, build 26300.9457; sin VM, servicio instalado ni cambios de
+  cuentas, shell, autologin, UAC o directivas. Procesos de ensayo propios cerrados.
+- Impostor con el mismo SID/logon rechazado antes de recibir estado. El handle retenido
+  de un proceso terminado rechaza su PID; no se fuerza la reutilización del número,
+  la comparación exige además el objeto de kernel vivo. Cliente remoto loopback,
+  frame truncado y cola de 32 excedida rechazados en pipes Windows reales.
+- Correlación de requestId preservada; buffers de cola descartados y borrados. El
+  bridge filtra órdenes/ACK, publica estado con edad y no expone credenciales.
+- Formato, lint, tipos, test y build completos pasan: 1 666 tests, incluidos 373
+  nativos y 420 servidor sobre PostgreSQL real. Logs ignorados `tmp/t18-*.log`.
+  Lanzamiento/supervisión quedan en T22; salida durable en T40; SCM pendiente T15.

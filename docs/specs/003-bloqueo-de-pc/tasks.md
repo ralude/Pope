@@ -268,7 +268,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T17b (2026-10-11):** recuperación en `recovery.bin` con DPAPI/ACL/exclusión y sustitución atómica de la custodia existente, solo SYSTEM. Contiene hello sin tiempo reutilizable ni secretos; ligada a PC/contexto compatible y desconocida si corrupta/ausente. Servicio integra estado en hello/latidos; buffers descartados tras lectura/escritura. Frontera de token y restauración/corrupción DPAPI probadas; build/formato y 353 nativas correctos. Ensayo SCM sigue pendiente T15; integración WSS y batería en T17c.
   - [x] **T17c (2026-10-11):** dos arranques del canal WSS real conservan PC/sesión/contexto protegido, hello conocido sin restante antiguo y bloqueo hasta nuevo state; heartbeat usa contexto recibido. Batería general correcta: formato/lint/tipos/test/build, 1 639 tests (354 nativos). Hasta T28 el nodo no publica controlState: recuperación unknown segura, sin fabricar revisiones. SCM permanece pendiente T15; T17 completa en desarrollo, siguiente T18, T10 abierta, sin VM.
 
-- [ ] **T18: Pipe seguro entre servicio y host**
+- [x] **T18: Pipe seguro entre servicio y host**
   - **Cubre:** REQ-003-63; ADR-0017.
   - **Hacer:** implementar mensajes enmarcados, límites, ACL y verificación de PID/sesión del host lanzado; separar solicitudes UI y acciones nativas permitidas.
   - **Verificar:** proceso impostor del mismo usuario, PID reutilizado, cliente remoto, frame truncado y exceso de cola; no registrar contraseñas.
@@ -279,13 +279,17 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - [x] **T18b1 (2026-10-11):** pipe local GUID/primera instancia/cliente único con PIPE_REJECT_REMOTE_CLIENTS y DACL por logon; cliente sin permiso de crear instancias. PID/sesión de ambos extremos contrastados con handle de proceso duplicado/retendido; el host solicita solo consulta limitada/sincronización del servicio. Dos pruebas de Windows reales pasan; 367 nativas, build/formato correctos. Impostor/handle muerto y flujo en T18b2/c.
     - [x] **T18b2 (2026-10-11):** sesión duplex con lector/procesador/escritor únicos, dos colas de 32, identidad contrastada antes de cada frame/acción y cancelación con borrado. Deadline de 5 s desde primer byte o al escribir, sin desconectar un host inactivo. Petición/respuesta correlacionadas y desbordamiento probados en pipes reales; 369 nativas/build/formato correctos. Siguiente T18c para impostor/handle muerto e integración agente.
     - [x] **T18c1 (2026-10-11):** runtime integra estado/canal y puente que recibe el proceso lanzado; publicador filtra órdenes/ACK, envía snapshot con edad y devuelve error offline correlacionado sin copiar contraseñas/credenciales. Salida técnica no se reenvía al nodo antes del journal T40; lanzamiento/supervisión siguen en T22. Prueba real de despacho y 370 nativas/build/formato correctos.
-    - [ ] **T18c2:** proceso impostor del mismo logon, handle muerto, remoto/truncado y batería general.
+    - [x] **T18c2 (2026-10-11):** impostor con SID/logon iguales rechazado antes de recibir estado; handle muerto no coincide aunque conserve el PID. Remoto loopback y frame truncado rechazados en pipes reales; overflow/correlación pasan. Batería general correcta: formato/lint/tipos/test/build, 1 666 tests (373 nativos, 420 servidor en PostgreSQL real). T18 completa en desarrollo; T19 siguiente, T15/T10 abiertas, sin VM.
 
 - [ ] **T19: Host de WebView2 con interfaz empaquetada**
   - **Cubre:** REQ-003-01, REQ-003-03, REQ-003-04, REQ-003-63.
   - **Hacer:** alojar `shell-ui` local con origen virtual permitido y puente tipado; limitar navegación, ventanas nuevas, descargas y herramientas de desarrollo de producción.
   - **Verificar:** pantalla sin nodo, origen/mensaje falsificado rechazado, host sin elevación y credencial de PC inaccesible a JavaScript.
   - **Commit:** `feat(native): aloja el Shell local en WebView2`.
+  - **División previa (2026-10-11):** T19a frontera de usuario/origen y cliente del pipe; T19b ventana WebView2/paquete local y permisos; T19c prueba aislada de la interfaz real y batería general. No cambiar el shell de Windows ni lanzar el host desde el servicio antes de T22.
+    - [ ] **T19a:** token interactivo sin elevación, origen local estricto y puente cancelable con identidad del servicio.
+    - [ ] **T19b:** WebView2 local, navegación/recursos/ventanas/descargas/permisos limitados y empaquetado de assets.
+    - [ ] **T19c:** pantalla sin nodo y ataques al origen/mensajes probados en WebView2 real; batería general.
 
 - [ ] **T20: Transporte WebView2 de PcChannel**
   - **Cubre:** REQ-003-03, REQ-003-04, REQ-003-63.

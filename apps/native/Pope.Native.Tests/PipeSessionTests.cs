@@ -7,6 +7,22 @@ namespace Pope.Native.Tests;
 
 public sealed class PipeSessionTests
 {
+    [Fact(DisplayName = "REQ-003-63: frame truncado en pipe real se rechaza antes de despachar")]
+    public async Task TruncatedRealPipe()
+    {
+        using var retained = new RetainedProcess(Process.GetCurrentProcess());
+        var name = PipeEndpoints.NewName(); using var server = PipeEndpoints.Create(name, retained);
+        using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var waiting = server.WaitForConnectionAsync(stop.Token);
+        using var client = await PipeEndpoints.Connect(name, retained, stop.Token); await waiting;
+        var dispatched = 0;
+        using var session = new PipeSession(server, "shell-request", "bridge-event", () => PipeEndpoints.IsHost(server, retained), (_, _) => { dispatched++; return Task.CompletedTask; });
+        var running = session.RunAsync(stop.Token);
+        await client.WriteAsync(new byte[] { 32, 0, 0, 0, 123 }, stop.Token);
+        client.Dispose();
+        await Assert.ThrowsAsync<EndOfStreamException>(() => running.WaitAsync(stop.Token));
+        Assert.Equal(0, dispatched);
+    }
     [Fact(DisplayName = "REQ-003-63: petición y notificación reales del pipe preservan correlación")]
     public async Task RoundTrip()
     {
