@@ -12,6 +12,9 @@ internal static class Program
         if (args is ["--desktop-attach-proof", var attachDirectory] && Path.IsPathFullyQualified(attachDirectory)) return DesktopAttachProof.Run(attachDirectory);
         if (args is ["--lock-pipe", var lockPipe, "--host-pid", var parentValue, "--proof-profile", var lockProfile]
             && int.TryParse(parentValue, out var parentId) && Path.IsPathFullyQualified(lockProfile)) return Pope.ShellHost.LockHost.Run(lockPipe, parentId, lockProfile);
+        if (args is ["--desktop-session-host", var sessionDirectory, var sessionPipe, var sessionParent] && Path.IsPathFullyQualified(sessionDirectory)
+            && int.TryParse(sessionParent, out var sessionParentId)) return DesktopSessionProof.Host(sessionDirectory, sessionPipe, sessionParentId);
+        if (args is ["--desktop-session-proof", var desktopProof] && Path.IsPathFullyQualified(desktopProof)) return DesktopSessionProof.Run(desktopProof);
         if (args is ["--agent-service-probe", var agentId]) return AgentScmProbe.Run(agentId);
         if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);
         if (args is ["--pipe-peer", var pipeName, var serverPid, var pipeMode]) return PipePeer.Run(pipeName, serverPid, pipeMode);

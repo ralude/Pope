@@ -66,6 +66,12 @@ internal static class ProbeInput
         Send([Key(0x12), Key(0x09), Key(0x09, 2), Key(0x12, 2)]);
         Thread.Sleep(700);
     }
+    internal static void RestrictedShortcuts()
+    {
+        Send([Key(0x5b), Key(0x5b, 2), Key(0x11), Key(0x1b), Key(0x1b, 2), Key(0x11, 2),
+            Key(0x12), Key(0x73), Key(0x73, 2), Key(0x12, 2)]);
+        Thread.Sleep(300);
+    }
 
     internal static void Hold(ushort key, int milliseconds, bool click = false)
     {
@@ -79,7 +85,7 @@ internal static class ProbeInput
     internal static extern bool ShowWindow(nint window, int command);
 
     // SDL identifica teclas por scan code; un VK sin scan no prueba entrada del juego.
-    private static Input Key(ushort key, uint flags = 0) => new() { Type = 1, Data = new() { Keyboard = new() { Scan = (ushort)MapVirtualKey(key, 0), Flags = flags | 8 } } };
+    private static Input Key(ushort key, uint flags = 0) => new() { Type = 1, Data = new() { Keyboard = new() { Scan = (ushort)MapVirtualKey(key, 0), Flags = flags | 8 | (key is 0x5b or 0x5c ? 1u : 0) } } };
     private static void Send(Input[] input)
     {
         if (SendInput((uint)input.Length, input, Marshal.SizeOf<Input>()) != input.Length) throw new Win32Exception("No se inyectó toda la entrada de prueba");

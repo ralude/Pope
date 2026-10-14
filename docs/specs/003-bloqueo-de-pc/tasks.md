@@ -305,7 +305,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
 
 ### Bloqueo y fase 2 de pausa
 
-- [ ] **T21: Bloqueo nativo y atajos restringidos**
+- [x] **T21: Bloqueo nativo y atajos restringidos**
   - **Cubre:** REQ-003-03, REQ-003-30, REQ-003-33.
   - **Hacer:** integrar el mecanismo demostrado en T09, escritorio de bloqueo y hook según estado/foco; Alt+Tab inhibido solo sin sesión, permitido con temporal/cuenta incluso al enfocar Pope (ADR-0023). Mantener aislamiento de pausa/revocación y liberar solo tras autorización del nodo.
   - **Verificar:** Win, Ctrl+Esc, Alt+F4, clics y monitores; Alt+Tab inhibido sin sesión, permitido ida/vuelta con temporal/cuenta y sin acceso al juego desde pausa/revocación. Fallo de cambio no confirma éxito ni abre el escritorio de uso.
@@ -316,7 +316,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - **División previa:** T21b1 interpreta la autorización y confirma solo efectos Win32 correctos; T21b2 enlaza las instancias/pipe y la interfaz lista.
     - [x] **T21b1 (2026-10-12):** autorización validada con edad monotónica, pausa/revocación conservan aislamiento; intento de cambio fallido no confirma éxito ni abre uso. Cuatro casos nuevos, formato/build y 382 tests nativos correctos. Integración de las instancias en T21b2.
     - [x] **T21b2 (2026-10-12):** instancia por escritorio y relay con SID/logon/sesión/binario/objeto retenido; ready tipado antes de activar bloqueo, hook por estado/foco y cobertura virtual de dos monitores. Copia conserva edad, revocación mantiene selector aislado; 382 nativas/build/formato correctos. Ensayo físico/batería general en T21c; recuperación del host aún T22.
-  - [ ] **T21c:** prueba funcional reversible y comprobaciones generales.
+  - [x] **T21c (2026-10-14):** ensayo real reversible `--desktop-session-proof` en el Windows de desarrollo (sin VM): sin sesión el escritorio de bloqueo recibe la entrada, sin Explorer, y Win/Ctrl+Esc/Alt+F4/Alt+Tab no escapan; con cuenta y con temporal Alt+Tab va y vuelve entre Pope y la app sin que Alt+F4 cierre Pope; la pausa y la revocación aíslan teclas/clics y Alt+Tab, el proceso sigue vivo con latidos y, al reanudar, es el mismo proceso. Escritorio original restaurado. Batería general: formato/lint/tipos/build correctos, 382 nativos y 420 de servidor (un fallo puntual del servidor en la primera pasada, no reproducido). Límites: el equipo tiene **1 monitor**, así que la cobertura de dos monitores sigue demostrada solo por tests (T21b2); el fallo de cambio de escritorio, solo por tests (T21b1). Pendiente para T25/T56: juegos reales y anticheat, y monitores físicos múltiples. El ensayo requirió instalar el SDK .NET 10.0.402 (winget) en esta máquina.
 
 - [ ] **T22: Supervisión y relanzamiento del host**
   - **Cubre:** REQ-003-32; CA-003-02.
