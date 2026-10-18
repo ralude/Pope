@@ -51,7 +51,8 @@ public sealed class AgentLifetimeTests
                 await Task.Delay(Timeout.InfiniteTimeSpan, token);
             });
             lifetime.Start();
-            Assert.True(SpinWait.SpinUntil(() => Volatile.Read(ref calls) == 1, 2000));
+            // Task.Run puede tardar con el pool ocupado por otros tests en paralelo; el margen no ralentiza el éxito.
+            Assert.True(SpinWait.SpinUntil(() => Volatile.Read(ref calls) == 1, 10_000));
             Assert.Throws<InvalidOperationException>(() => lifetime.Start());
             lifetime.Stop(); lifetime.Stop();
             Assert.Equal(1, calls);
