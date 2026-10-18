@@ -324,7 +324,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** matar/colgar host y renderer, recuperación total < 3 s y ningún acceso al juego bloqueado durante el hueco; medir detección y relanzamiento.
   - **Commit:** `feat(native): recupera el host cuando falla`.
 
-- [ ] **T23: Pausa y reanudación en escritorios reales**
+- [x] **T23: Pausa y reanudación en escritorios reales**
   - **Cubre:** REQ-002-04, REQ-002-05, REQ-002-10, REQ-002-13, REQ-002-30, REQ-002-31.
   - **Hacer:** aplicar pausa del nodo en el escritorio separado; conservar juegos, confirmar reanudación y mantener bloqueo si la pausa vence cobrando o pierde LAN.
   - **Verificar:** ninguna entrada al juego, procesos sin suspender/cerrar, pausa vencida, opción de cierre y reanudación desde panel; sin decisión local de cobro.
@@ -332,6 +332,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Orden del mantenedor (2026-10-18):** «ve desde t23 hasta t27». T22 queda abierta, sin implementar; T23–T27 no la dan por hecha ni la sustituyen. Los ensayos usan el broker ordinario de pruebas, no la supervisión del servicio.
   - **División previa (2026-10-18):** T23a reintento seguro de transiciones y matriz de autorización de pausa; T23b ensayo real con agente, doble WSS del nodo, host, escritorios y app, más batería general.
     - [x] **T23a (2026-10-18):** un `SwitchDesktop` rechazado (escritorio seguro de Ctrl+Alt+Supr/UAC) ya no lanza excepciones en el temporizador ni en la entrega del puente: queda sin confirmar y se reintenta cada 100 ms; la interfaz lista de bloqueo ya no fuerza un cambio previo. Tests: pausa vencida cobrando y pausa sin red siguen aisladas aunque se agote el restante, reanudar desde el panel abre uso, y cerrar en pausa (`sessionEnded`/`locked`) deja bloqueo sin sesión. 386 nativos, build sin avisos y formato correctos.
+    - [x] **T23b (2026-10-18):** ensayo `--pause-proof` en el Windows de desarrollo (sin VM): agente real contra doble WSS del nodo, host de producto y app en escritorio temporal sin Explorer. Pausa pedida desde React, vencida cobrando, corte de red, reanudación desde panel, reanudación con teclado real y «¿Eres…?», y cierre en pausa: ninguna entrada llega a la app, que sigue viva con el mismo PID. Confirmar «Pausar» → bloqueo ≤ 39,7 ms en loopback (dos ejecuciones). Batería general correcta: 1 687 tests (386 nativos). Pendiente en PC real (T56): juegos/anticheat, audio y varios monitores. Detalle en [mediciones](mediciones.md).
 
 - [ ] **T24: Silencio y restauración de audio de pausa**
   - **Cubre:** REQ-002-07.

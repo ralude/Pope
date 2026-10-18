@@ -478,3 +478,32 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   Se reutiliza el resultado de 420 servidor sobre PostgreSQL real cuando no cambian
   sus inputs. Cluster temporal detenido, sin conexiones ni bases de tests sobrantes.
   T16–T20 completas en desarrollo; T10/T15 permanecen abiertas. T21–T59 Borrador.
+
+### T23 · pausa en escritorios reales (2026-10-18)
+
+- `Pope.DesktopProbe --pause-proof <carpeta nueva>` en el Windows de desarrollo, sin VM:
+  Windows 11 Pro 26H2 (26300.9711), WebView2 155.0.4283.62, **1 monitor**, token medio.
+  El ensayo es el broker ordinario: `AgentChannel`, `AgentState` y `AgentHostBridge` reales
+  contra un doble WSS del nodo (TLS con certificado fijado y Bearer, en loopback), que
+  responde como el nodo: estado tras cada latido y `pause`/`resume` con su `requestId`.
+  Host de producto (`ShellWindow` + `DesktopCoordinator` + hijo de bloqueo) y app de prueba
+  en un escritorio de uso temporal, sin Explorer. No es el SCM (T15) ni la supervisión (T22).
+- Recorrido: sesión con cuenta → «Pausar» en React → petición por pipe/WSS → `state` en
+  pausa → escritorio de bloqueo. Teclas, clic y Alt+Tab no llegan a la app; su latido sigue
+  y conserva el PID. Pausa vencida cobrando (`billing: true`) y corte de red de 4 s (hello
+  `unknown` al reconectar) mantienen el bloqueo. Reanudar desde el panel (`state` sin pausa
+  no solicitado) abre uso. Reanudar con teclado real en el bloqueo («Reanudar» → «¿Eres
+  Cliente?» → «Sí, reanudar») envía `resume` al nodo y vuelve al uso. Cerrar en pausa
+  (`sessionEnded` + `locked`) deja el bloqueo sin sesión, Alt+Tab inhibido y la app viva
+  (su cierre es T26).
+- Latencia desde confirmar «Pausar» hasta que el escritorio de bloqueo recibe la entrada,
+  con nodo en loopback: 39,7 / 13,5 / 12,8 ms en la primera ejecución y máximo 28,6 ms en
+  la segunda. No incluye la red del local; la medición de REQ-002-50 con juegos es T25/T56.
+- Dos ejecuciones `Passed=true`, `Restored=true`; capturas de la pausa normal y de la
+  vencida revisadas (`tmp/t23-pause-*`, ignorado). Pendiente en la PC real (T56): juegos
+  exclusivos/anticheat, audio (T24) y varios monitores.
+- Batería general: formato, lint, tipos, build y 1 687 tests (386 nativos, 420 servidor en
+  PGlite, 60 Shell). En la primera pasada fallaron un test nativo de temporización
+  (`StopIsClean`, corregido en un commit aparte) y dos del servidor que no se reprodujeron
+  ni solos ni al repetir la batería; sus nombres no quedaron registrados. El servidor no
+  cambia en T23, así que no se repite `test:pg`.

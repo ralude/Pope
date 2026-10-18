@@ -61,6 +61,23 @@ internal static class ProbeInput
         return $"window={window}; expected=({point.X},{point.Y}); cursor=({actual.X},{actual.Y}); target={target}; targetPid={targetPid}";
     }
 
+    // Clic en una fracción del área cliente: la esquina de la pausa no tiene botones.
+    internal static void ClickAt(double x, double y)
+    {
+        var window = GetForegroundWindow();
+        if (!GetClientRect(window, out var bounds)) throw new Win32Exception();
+        var point = new CursorPoint { X = (int)(bounds.Right * x), Y = (int)(bounds.Bottom * y) };
+        if (!ClientToScreen(window, ref point) || !SetCursorPos(point.X, point.Y)) throw new Win32Exception();
+        Thread.Sleep(100);
+        Send([new() { Type = 0, Data = new() { Mouse = new() { Flags = 2 } } }, new() { Type = 0, Data = new() { Mouse = new() { Flags = 4 } } }]);
+    }
+
+    // Pulsa y suelta cada tecla en orden, con una pausa para que React procese el foco.
+    internal static void Tap(params ushort[] keys)
+    {
+        foreach (var key in keys) { Send([Key(key), Key(key, 2)]); Thread.Sleep(250); }
+    }
+
     internal static void AltTab()
     {
         Send([Key(0x12), Key(0x09), Key(0x09, 2), Key(0x12, 2)]);
