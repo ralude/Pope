@@ -329,6 +329,9 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** aplicar pausa del nodo en el escritorio separado; conservar juegos, confirmar reanudación y mantener bloqueo si la pausa vence cobrando o pierde LAN.
   - **Verificar:** ninguna entrada al juego, procesos sin suspender/cerrar, pausa vencida, opción de cierre y reanudación desde panel; sin decisión local de cobro.
   - **Commit:** `feat(native): aplica la pausa sin cerrar los juegos`.
+  - **Orden del mantenedor (2026-10-18):** «ve desde t23 hasta t27». T22 queda abierta, sin implementar; T23–T27 no la dan por hecha ni la sustituyen. Los ensayos usan el broker ordinario de pruebas, no la supervisión del servicio.
+  - **División previa (2026-10-18):** T23a reintento seguro de transiciones y matriz de autorización de pausa; T23b ensayo real con agente, doble WSS del nodo, host, escritorios y app, más batería general.
+    - [x] **T23a (2026-10-18):** un `SwitchDesktop` rechazado (escritorio seguro de Ctrl+Alt+Supr/UAC) ya no lanza excepciones en el temporizador ni en la entrega del puente: queda sin confirmar y se reintenta cada 100 ms; la interfaz lista de bloqueo ya no fuerza un cambio previo. Tests: pausa vencida cobrando y pausa sin red siguen aisladas aunque se agote el restante, reanudar desde el panel abre uso, y cerrar en pausa (`sessionEnded`/`locked`) deja bloqueo sin sesión. 386 nativos, build sin avisos y formato correctos.
 
 - [ ] **T24: Silencio y restauración de audio de pausa**
   - **Cubre:** REQ-002-07.

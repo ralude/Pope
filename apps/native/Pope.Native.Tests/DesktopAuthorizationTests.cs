@@ -18,7 +18,51 @@ public sealed class DesktopAuthorizationTests
         fail = true; Assert.Throws<System.ComponentModel.Win32Exception>(() => transition.Apply(true));
         Assert.False(transition.Confirmed); Assert.Equal(4, calls);
     }
-    private static JsonElement State(bool paused = false, long age = 0) => JsonSerializer.SerializeToElement(new
+    [Fact(DisplayName = "REQ-002-04/30: SwitchDesktop rechazado no cierra el host y se reintenta hasta aplicar la pausa")]
+    public void RejectedSwitchIsRetried()
+    {
+        var rejected = 2; var applied = new List<bool>();
+        var transition = new DesktopTransition(blocked =>
+        {
+            if (blocked && rejected-- > 0) throw new System.ComponentModel.Win32Exception(5);
+            applied.Add(blocked);
+        });
+        Assert.True(transition.TryApply(false)); Assert.False(transition.Blocked);
+        Assert.False(transition.TryApply(true)); Assert.False(transition.TryApply(true));
+        Assert.False(transition.Blocked); Assert.False(transition.Confirmed); Assert.Equal(2, transition.Failures);
+        Assert.True(transition.TryApply(true)); Assert.True(transition.Blocked); Assert.True(transition.Confirmed);
+        Assert.Equal(0, transition.Failures); Assert.Equal([false, true], applied);
+        Assert.True(transition.TryApply(true)); Assert.Equal(2, applied.Count);
+    }
+    [Theory(DisplayName = "REQ-002-04/22/30: pausa vencida cobrando o sin red sigue aislada aunque se agote el restante")]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void PauseStaysIsolated(bool billing)
+    {
+        var clock = new Clock(); var state = new DesktopAuthorization(clock);
+        state.Apply(State(paused: true, billing: billing));
+        state.Apply(JsonSerializer.SerializeToElement(new { version = 1, kind = "status", status = "offline", pcName = "PC ensayo" }));
+        clock.Ticks = 150_000;
+        Assert.True(state.Blocked); Assert.True(state.HasSession);
+        var snapshot = state.Snapshot();
+        Assert.Equal(billing, snapshot.GetProperty("message").GetProperty("session").GetProperty("pause").GetProperty("billing").GetBoolean());
+        Assert.Equal(150, snapshot.GetProperty("elapsedSeconds").GetInt64());
+    }
+    [Fact(DisplayName = "REQ-002-13: reanudar desde el panel abre uso; cerrar desde el panel en pausa deja bloqueo sin sesión")]
+    public void PanelResumeAndClose()
+    {
+        var state = new DesktopAuthorization();
+        state.Apply(State(paused: true)); Assert.True(state.Blocked);
+        state.Apply(State()); Assert.False(state.Blocked); Assert.True(state.HasSession);
+        state.Apply(State(paused: true));
+        state.Apply(JsonSerializer.SerializeToElement(new { version = 1, kind = "message", elapsedSeconds = 0, message = new { type = "sessionEnded", sessionId = "01900000-0000-7000-8000-000000000124", reason = "staff" } }));
+        Assert.True(state.Blocked); Assert.False(state.HasSession);
+        Assert.Equal("locked", state.Snapshot().GetProperty("message").GetProperty("status").GetString());
+        state.Apply(State(paused: true));
+        state.Apply(JsonSerializer.SerializeToElement(new { version = 1, kind = "message", elapsedSeconds = 0, message = new { type = "state", status = "locked" } }));
+        Assert.True(state.Blocked); Assert.False(state.HasSession);
+    }
+    private static JsonElement State(bool paused = false, long age = 0, bool billing = false) => JsonSerializer.SerializeToElement(new
     {
         version = 1,
         kind = "message",
@@ -39,7 +83,7 @@ public sealed class DesktopAuthorizationTests
                 moneySeconds = 100,
                 comboSeconds = 0,
                 remainingSeconds = 100,
-                pause = paused ? new { startedAt = "2026-10-12T00:00:00Z", maxUntil = "2026-10-12T00:00:10Z", secondsLeft = 10, billing = false } : null
+                pause = paused ? new { startedAt = "2026-10-12T00:00:00Z", maxUntil = "2026-10-12T00:00:10Z", secondsLeft = billing ? 0 : 10, billing } : null
             }
         }
     });

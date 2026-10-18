@@ -4,14 +4,14 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-14 · T21 completa; siguiente T22; T15c3/T10 abiertas
+**Última actualización:** 2026-10-18 · T23a completa; siguiente T23b; T22 aplazada por el mantenedor; T15c3/T10 abiertas
 
 ## Ahora
 
 | | |
 |---|---|
 | **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09, T11–T14 y T16–T21 completos en desarrollo, sin VM; T10 aplazada y prueba SCM de T15 pendiente; T22–T27 autorizadas, T28–T59 Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | T22: supervisión y relanzamiento del host (REQ-003-32, CA-003-02). T21 completa con 382 tests nativos; T22–T27 autorizadas el 2026-10-12, sin VM; T28–T59 Borrador. T15c3/T10 pendientes, sin repetir UAC |
+| **Siguiente tarea** | T23b: ensayo real de la pausa en escritorios (REQ-002-04/05/10/13/30/31). El mantenedor pide (2026-10-18) «ve desde t23 hasta t27»: T22 (supervisión del host) queda abierta y sin implementar. T28–T59 Borrador. T15c3/T10 pendientes, sin repetir UAC |
 | **Progreso** | Spec 003: 19 / 59 grupos; T01–T09, T11–T14 y T16–T21 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T27 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | T15c3 espera aceptar UAC en Windows para ensayo SCM; cancelación previa sin servicio/carpeta creados. T15 abierta; T16–T21 completas en desarrollo; bloque T22–T27 en curso. Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
@@ -106,6 +106,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
 
+- **2026-10-18:** T23a completa: un cambio de escritorio rechazado por Windows se reintenta sin tumbar el host; tests de pausa vencida cobrando, sin red, reanudación y cierre desde el panel. 386 nativos. Orden del mantenedor: T23–T27, T22 aplazada. Siguiente T23b.
+
 - **2026-10-14:** T21c/T21 completas: ensayo real reversible en el Windows de desarrollo (bloqueo sin Explorer, Win/Ctrl+Esc/Alt+F4/Alt+Tab contenidos, Alt+Tab ida/vuelta con cuenta y temporal, pausa y revocación aisladas, escritorio restaurado). Batería correcta: 382 nativos, 420 de servidor (un fallo puntual no reproducido). Solo 1 monitor físico: dos monitores y fallo de cambio quedan demostrados por tests. Se instaló el SDK .NET 10.0.402 con winget; publicar el probe autocontenido ensucia `bin/Release` (limpiarlo antes de los tests). Siguiente T22; T10/T15 abiertas, sin VM.
 
 - **2026-10-12:** T21b2/T21b completas: instancias fijas de uso/bloqueo, relay por objeto retenido, ready validado antes del cambio, hook y área virtual. Revocación notificada antes del snapshot para conservar Alt+Tab aislado. 382 nativas/build/formato correctos; ensayo físico completo y batería en T21c, sin VM.
@@ -125,5 +127,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-11:** T19c/T19 completas: interfaz real sin nodo en WebView2 154/token medio, origen/mensajes/popups/descargas y red rechazados, edad conservada; captura revisada. Batería general correcta, 1 667 tests (374 nativos), formato/lint/tipos/build. Siguiente T20a, 17/59; T15/T10 abiertas, sin VM.
 
 - **2026-10-11:** T19b preparada: ventana local, perfil separado, permisos/origen/CSP y empaquetado. 374 nativos/52 shell, tipos/lint/build/formato correctos. Interfaz real y ataques pendientes en T19c; T19 permanece abierta, T15/T10 abiertas, sin VM.
-
-- **2026-10-11:** T19a completa: token interactivo/origen fijo, mensajes estrictos y cliente del pipe con identidad retenida/reintentos acotados. 374 nativos/build/formato correctos; referencia WPF transitiva eliminada sin ocultar avisos. Siguiente T19b/c; T15/T10 abiertas, sin VM.

@@ -57,7 +57,8 @@ internal sealed class DesktopCoordinator : IDisposable
             // Una desconexión LAN conserva autorización monotónica; perder el agente no.
             if (!childReady) return;
             var desired = authorization.Blocked || child.HasExited || !bridge.ServerAlive;
-            transition.Apply(desired);
+            // Un cambio rechazado no confirma nada: el temporizador de 100 ms lo reintenta.
+            transition.TryApply(desired);
         }
     }
     private async Task Relay(string name)
@@ -77,7 +78,7 @@ internal sealed class DesktopCoordinator : IDisposable
                     {
                         lock (gate)
                         {
-                            if (!childReady) { transition.Apply(true); childReady = true; Reconcile(); }
+                            if (!childReady) { childReady = true; Reconcile(); }
                         }
                         return Task.CompletedTask;
                     }
