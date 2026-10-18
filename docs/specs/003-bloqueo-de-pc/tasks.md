@@ -339,6 +339,8 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** silenciar dispositivos/sesiones de audio conforme al mecanismo probado y conservar estado previo; restaurarlo al reanudar sin duplicar capturas tras reconexión.
   - **Verificar:** juego exclusivo, varios dispositivos, cambio de salida, mute previo y host reiniciado; recuperación conserva volumen/mute originales.
   - **Commit:** `feat(native): silencia y restaura el audio durante la pausa`.
+  - **División previa (2026-10-18):** T24a lógica de captura/diario/restauración con dobles; T24b Core Audio por COM (sin paquetes), integración en el host y ensayo real en el Windows de desarrollo, más batería general.
+    - [x] **T24a (2026-10-18):** `PauseAudio` silencia todas las salidas activas y solo cambia el mute, nunca el volumen. Guarda el mute original de cada salida en un diario antes de silenciar, con escritura atómica, 64 salidas como máximo y JSON estricto. Así un host reiniciado o una reconexión no recapturan el silencio de Pope. Al reanudar devuelve a cada salida su mute previo. Una salida nueva durante la pausa se silencia, una desconectada se restaura al volver y un fallo de una salida no detiene el resto. Un diario corrupto se descarta sin inventar originales. 9 tests nuevos.
 
 - [ ] **T25: Acceso a Pausar durante el juego**
   - **Cubre:** REQ-003-30, CA-003-12; REQ-002-01, REQ-002-02, REQ-002-11, REQ-002-50.
