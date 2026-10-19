@@ -68,7 +68,7 @@ public sealed class ShellUiBridgeTests
             }
             for (var attempt = 0; attempt < 20 && Directory.Exists(root); attempt++)
             {
-                try { Directory.Delete(root, true); } catch (IOException) { await Task.Delay(100); }
+                try { Directory.Delete(root, true); } catch (Exception error) when (error is IOException or UnauthorizedAccessException) { await Task.Delay(100); }
             }
         }
     }

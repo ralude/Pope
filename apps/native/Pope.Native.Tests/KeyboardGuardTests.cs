@@ -52,7 +52,7 @@ public sealed class KeyboardGuardTests
         {
             if (!process.HasExited) { process.Kill(true); await process.WaitForExitAsync(); }
             for (var attempt = 0; attempt < 30 && Directory.Exists(directory); attempt++)
-            { try { Directory.Delete(directory, true); } catch (IOException) { await Task.Delay(100); } }
+            { try { Directory.Delete(directory, true); } catch (Exception error) when (error is IOException or UnauthorizedAccessException) { await Task.Delay(100); } }
         }
     }
 }
