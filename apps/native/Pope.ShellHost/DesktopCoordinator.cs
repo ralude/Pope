@@ -15,6 +15,7 @@ internal sealed class DesktopCoordinator : IDisposable
     private readonly Process child;
     private readonly Task pipeTask;
     private readonly KeyboardGuard hook;
+    private readonly PauseAudioWorker audio;
     private readonly System.Windows.Forms.Timer timer = new() { Interval = 100 };
     private PipeSession? current;
     private JsonElement status = HostBridge.Offline();
@@ -24,10 +25,12 @@ internal sealed class DesktopCoordinator : IDisposable
     internal bool Blocked => transition.Blocked;
     internal string LockName => locked.Name;
 
-    internal DesktopCoordinator(HostBridge bridge, string? proofProfile = null)
+    internal DesktopCoordinator(HostBridge bridge, string? proofProfile = null, string? audioJournal = null)
     {
         this.bridge = bridge;
         transition = new DesktopTransition(blocked => { if (blocked) locked.Activate(); else use.Activate(); });
+        audioJournal ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Pope", "PauseAudio.json");
+        audio = new PauseAudioWorker(new PauseAudio(new CoreAudioEndpoints(), audioJournal));
         try
         {
             var name = PipeEndpoints.NewName();
@@ -38,7 +41,7 @@ internal sealed class DesktopCoordinator : IDisposable
             hook = new KeyboardGuard(() => (transition.Blocked, authorization.HasSession), install: true);
             timer.Tick += (_, _) => Reconcile(); timer.Start();
         }
-        catch { locked.Dispose(); use.Dispose(); closing.Dispose(); throw; }
+        catch { audio.Dispose(); locked.Dispose(); use.Dispose(); closing.Dispose(); throw; }
     }
     internal Task Apply(JsonElement envelope, CancellationToken token)
     {
@@ -54,6 +57,8 @@ internal sealed class DesktopCoordinator : IDisposable
     {
         lock (gate)
         {
+            // REQ-002-07: el silencio sigue a la pausa del nodo, también sin red ni hijo listo.
+            if (authorization.Known) audio.Update(authorization.Paused);
             // Una desconexión LAN conserva autorización monotónica; perder el agente no.
             if (!childReady) return;
             var desired = authorization.Blocked || child.HasExited || !bridge.ServerAlive;
@@ -105,7 +110,7 @@ internal sealed class DesktopCoordinator : IDisposable
     }
     public void Dispose()
     {
-        timer.Stop(); timer.Dispose(); hook.Dispose(); closing.Cancel();
+        timer.Stop(); timer.Dispose(); hook.Dispose(); audio.Dispose(); closing.Cancel();
         // Retirar solo el hijo creado: nunca cerrar apps de cliente durante bloqueo/pausa.
         if (!child.HasExited) { child.Kill(true); child.WaitForExit(5000); }
         try { pipeTask.WaitAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult(); } catch (OperationCanceledException) { }

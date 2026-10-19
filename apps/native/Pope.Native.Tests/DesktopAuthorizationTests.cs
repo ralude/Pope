@@ -62,6 +62,21 @@ public sealed class DesktopAuthorizationTests
         state.Apply(JsonSerializer.SerializeToElement(new { version = 1, kind = "message", elapsedSeconds = 0, message = new { type = "state", status = "locked" } }));
         Assert.True(state.Blocked); Assert.False(state.HasSession);
     }
+    [Fact(DisplayName = "REQ-002-07: el silencio sigue solo a la pausa del nodo y espera a la primera copia")]
+    public void AudioFollowsNodePause()
+    {
+        var state = new DesktopAuthorization();
+        Assert.False(state.Known); Assert.False(state.Paused);
+        state.Apply(JsonSerializer.SerializeToElement(new { version = 1, kind = "status", status = "online", pcName = "PC ensayo" }));
+        Assert.False(state.Known);
+        state.Apply(State(paused: true, billing: true)); Assert.True(state.Known); Assert.True(state.Paused);
+        state.Apply(JsonSerializer.SerializeToElement(new { version = 1, kind = "status", status = "offline", pcName = "PC ensayo" }));
+        Assert.True(state.Paused);
+        state.Apply(State()); Assert.False(state.Paused);
+        state.Apply(State(paused: true));
+        state.Apply(JsonSerializer.SerializeToElement(new { version = 1, kind = "message", elapsedSeconds = 0, message = new { type = "state", status = "locked" } }));
+        Assert.False(state.Paused);
+    }
     private static JsonElement State(bool paused = false, long age = 0, bool billing = false) => JsonSerializer.SerializeToElement(new
     {
         version = 1,

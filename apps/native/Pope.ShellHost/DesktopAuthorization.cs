@@ -10,8 +10,11 @@ internal sealed class DesktopAuthorization(TimeProvider? timeProvider = null)
     private readonly object gate = new();
     private JsonElement? saved;
     private long at, age, remaining;
-    private bool active, paused, session, revoked;
+    private bool active, paused, session, revoked, known;
     internal bool HasSession { get { lock (gate) return session; } }
+    // REQ-002-07: silencio solo con pausa del nodo; Known evita actuar antes de la primera copia.
+    internal bool Known { get { lock (gate) return known; } }
+    internal bool Paused { get { lock (gate) return active && paused; } }
     internal bool Blocked { get { lock (gate) return !active || paused || remaining <= Age(); } }
     private long Age() => age + (long)Math.Max(0, clock.GetElapsedTime(at).TotalSeconds);
     internal void Apply(JsonElement envelope)
@@ -21,6 +24,7 @@ internal sealed class DesktopAuthorization(TimeProvider? timeProvider = null)
         var message = envelope.GetProperty("message");
         lock (gate)
         {
+            known |= message.GetProperty("type").GetString() is "pcAuthenticationError" or "sessionEnded" or "state";
             if (message.GetProperty("type").GetString() == "pcAuthenticationError") { active = false; revoked = true; return; }
             if (message.GetProperty("type").GetString() == "sessionEnded") { active = false; session = false; saved = null; return; }
             if (message.GetProperty("type").GetString() != "state") return;
