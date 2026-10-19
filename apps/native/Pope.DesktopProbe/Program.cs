@@ -15,8 +15,9 @@ internal static class Program
         if (args is ["--desktop-session-host", var sessionDirectory, var sessionPipe, var sessionParent] && Path.IsPathFullyQualified(sessionDirectory)
             && int.TryParse(sessionParent, out var sessionParentId)) return DesktopSessionProof.Host(sessionDirectory, sessionPipe, sessionParentId);
         if (args is ["--desktop-session-proof", var desktopProof] && Path.IsPathFullyQualified(desktopProof)) return DesktopSessionProof.Run(desktopProof);
-        if (args is ["--pause-host", var pauseDirectory, var pausePipe, var pauseParent] && Path.IsPathFullyQualified(pauseDirectory)
-            && int.TryParse(pauseParent, out var pauseParentId)) return PauseProof.Host(pauseDirectory, pausePipe, pauseParentId);
+        if (args is ["--pause-host", var pauseDirectory, var pausePipe, var pauseParent, var pauseJournal] && Path.IsPathFullyQualified(pauseDirectory)
+            && Path.IsPathFullyQualified(pauseJournal) && int.TryParse(pauseParent, out var pauseParentId))
+            return PauseProof.Host(pauseDirectory, pausePipe, pauseParentId, pauseJournal);
         if (args is ["--pause-proof", var pauseProof] && Path.IsPathFullyQualified(pauseProof)) return PauseProof.Run(pauseProof);
         if (args is ["--agent-service-probe", var agentId]) return AgentScmProbe.Run(agentId);
         if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);

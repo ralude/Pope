@@ -15,7 +15,7 @@ internal static class PauseProof
     private const string SessionId = "01900000-0000-7000-8000-000000000124";
 
     // Host de uso del ensayo: igual que el de producto, más un disparador para pulsar «Pausar».
-    internal static int Host(string directory, string pipe, int parentId)
+    internal static int Host(string directory, string pipe, int parentId, string journal)
     {
         HostBoundary.RequireInteractiveUser();
         using var parent = Process.GetProcessById(parentId);
@@ -23,7 +23,8 @@ internal static class PauseProof
         using var bridge = new HostBridge(pipe, retained);
         ApplicationConfiguration.Initialize();
         using var window = new ShellWindow(Path.Combine(AppContext.BaseDirectory, "shell"), Path.Combine(directory, "use-profile"), bridge);
-        using var desktops = new DesktopCoordinator(bridge, Path.Combine(directory, "lock-profile"));
+        // El diario de audio del ensayo vive en su carpeta, no en el perfil del usuario.
+        using var desktops = new DesktopCoordinator(bridge, Path.Combine(directory, "lock-profile"), journal);
         window.NativeDelivery = desktops.Apply;
         window.ReadyReceived = () => File.WriteAllText(Path.Combine(directory, "parent-ready.json"), JsonSerializer.Serialize(new { LockName = desktops.LockName }));
         using var trigger = new System.Windows.Forms.Timer { Interval = 50 };
@@ -32,7 +33,10 @@ internal static class PauseProof
         {
             var request = Path.Combine(directory, "click-pause");
             if (busy || !File.Exists(request)) return;
-            busy = true; File.Delete(request);
+            // Una excepción en este temporizador async abriría el diálogo de WinForms y dejaría
+            // la orden sin consumir: si el archivo sigue abierto, se reintenta en el siguiente tick.
+            try { File.Delete(request); } catch (IOException) { return; } catch (UnauthorizedAccessException) { return; }
+            busy = true;
             try
             {
                 var core = await window.Initialized.Task;
@@ -69,7 +73,7 @@ internal static class PauseProof
         var nodeDouble = new NodeDouble(node, stop.Token);
         var name = PipeEndpoints.NewName();
         using var app = use.Start(Environment.ProcessPath!, "--window", "app", directory);
-        using var host = use.Start(Environment.ProcessPath!, "--pause-host", directory, name, Environment.ProcessId.ToString());
+        using var host = use.Start(Environment.ProcessPath!, "--pause-host", directory, name, Environment.ProcessId.ToString(), Path.Combine(directory, "PauseAudio.json"));
         var channelTask = channel.RunAsync(stop.Token);
         var pipeTask = agent.RunForHostAsync(host, name, stop.Token);
         var nodeTask = nodeDouble.RunAsync();
@@ -151,7 +155,7 @@ internal static class PauseProof
         }
         finally
         {
-            original.Activate(); report["Restored"] = InputName() == original.Name;
+            report["Restored"] = Restore(original);
             stop.Cancel();
             foreach (var task in new[] { channelTask, pipeTask, nodeTask }) { try { task.Wait(5000); } catch (AggregateException) { } }
             foreach (var child in new[] { host, app }) { if (!child.HasExited) child.Kill(true); child.WaitForExit(); }
@@ -162,13 +166,21 @@ internal static class PauseProof
     }
 
     // REQ-002-50 (medición previa de T25): desde confirmar «Pausar» hasta que el bloqueo recibe la entrada.
-    private static double PauseByClient(string directory, string lockName, NodeDouble node, CancellationToken token, Process host)
+    internal static double PauseByClient(string directory, string lockName, NodeDouble node, CancellationToken token, Process host)
     {
         var clicked = Path.Combine(directory, "pause-clicked.json");
         File.Delete(clicked);
         var pauses = node.Pauses;
-        File.WriteAllText(Path.Combine(directory, "click-pause"), "1");
-        while (InputName() != lockName) { token.ThrowIfCancellationRequested(); ProbeRun.Require(!host.HasExited, "Host terminado"); Thread.Sleep(5); }
+        // Escritura atómica: el host nunca ve la orden a medio escribir.
+        File.WriteAllText(Path.Combine(directory, "click-pause.tmp"), "1");
+        File.Move(Path.Combine(directory, "click-pause.tmp"), Path.Combine(directory, "click-pause"));
+        var limit = Stopwatch.StartNew();
+        while (InputName() != lockName)
+        {
+            token.ThrowIfCancellationRequested(); ProbeRun.Require(!host.HasExited, "Host terminado");
+            ProbeRun.Require(limit.Elapsed < TimeSpan.FromSeconds(10), File.Exists(clicked) ? "Pausa sin bloqueo: " + File.ReadAllText(clicked) : "Host sin pulsar Pausar");
+            Thread.Sleep(5);
+        }
         var locked = Stopwatch.GetTimestamp();
         Until(() => File.Exists(clicked), token, host);
         var click = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(clicked));
@@ -231,7 +243,7 @@ internal static class PauseProof
         return state;
     }
 
-    private static void Until(Func<bool> condition, CancellationToken token, Process? host)
+    internal static void Until(Func<bool> condition, CancellationToken token, Process? host)
     {
         while (!condition()) { token.ThrowIfCancellationRequested(); ProbeRun.Require(host is null || !host.HasExited, "Host terminado"); Thread.Sleep(50); }
     }
@@ -240,17 +252,24 @@ internal static class PauseProof
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         while (await core.ExecuteScriptAsync($"Boolean({condition})") != "true") await Task.Delay(20, deadline.Token);
     }
-    private static string InputName()
+    // Vuelve al escritorio original sin interrumpir la limpieza: si Windows rechaza el cambio
+    // (p. ej. pantalla bloqueada), el vigilante --restore lo reintenta al recibir «stop».
+    internal static bool Restore(NativeDesktop original)
+    {
+        try { original.Activate(); } catch (System.ComponentModel.Win32Exception) { return false; }
+        return InputName() == original.Name;
+    }
+    internal static string InputName()
     {
         var handle = DesktopNative.OpenInputDesktop(0, false, 0x20101);
         if (handle == 0) return "error:" + System.Runtime.InteropServices.Marshal.GetLastWin32Error();
         try { return DesktopNative.Name(handle); } finally { DesktopNative.CloseDesktop(handle); }
     }
     // El mismo nombre abre el objeto de bloqueo existente, con el mismo logon.
-    private static NativeDesktop Open(string name) => NativeDesktop.Create(name);
+    internal static NativeDesktop Open(string name) => NativeDesktop.Create(name);
 
     // Responde como el nodo: estado tras cada latido, pausa/reanudación con su requestId.
-    private sealed class NodeDouble(ProofNode node, CancellationToken token)
+    internal sealed class NodeDouble(ProofNode node, CancellationToken token)
     {
         private readonly object gate = new();
         private WebSocket? socket;

@@ -16,7 +16,7 @@ internal static class DesktopSessionProof
         using var bridge = new HostBridge(pipe, retained);
         ApplicationConfiguration.Initialize();
         using var window = new ShellWindow(Path.Combine(AppContext.BaseDirectory, "shell"), Path.Combine(directory, "use-profile"), bridge);
-        using var desktops = new DesktopCoordinator(bridge, Path.Combine(directory, "lock-profile"));
+        using var desktops = new DesktopCoordinator(bridge, Path.Combine(directory, "lock-profile"), Path.Combine(directory, "PauseAudio.json"));
         window.NativeDelivery = desktops.Apply;
         window.ReadyReceived = () => File.WriteAllText(Path.Combine(directory, "parent-ready.json"), JsonSerializer.Serialize(new { LockName = desktops.LockName, Window = window.Handle.ToInt64() }));
         Application.Run(window); window.WaitForBridge(); return window.Failed ? 1 : 0;
