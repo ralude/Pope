@@ -49,9 +49,35 @@ internal static class PauseProof
             catch (Exception error) { File.WriteAllText(Path.Combine(directory, "pause-clicked.json"), JsonSerializer.Serialize(new { Error = error.GetType().Name })); }
             finally { busy = false; }
         };
+        // T25: solo localiza botones para que el ensayo los pulse con un clic real de Windows.
+        var locating = false;
+        trigger.Tick += async (_, _) =>
+        {
+            if (locating) return;
+            foreach (var (name, selector) in Targets)
+            {
+                var request = Path.Combine(directory, "locate-" + name);
+                if (!File.Exists(request)) continue;
+                try { File.Delete(request); } catch (IOException) { return; } catch (UnauthorizedAccessException) { return; }
+                locating = true;
+                try
+                {
+                    var core = await window.Initialized.Task;
+                    var found = await core.ExecuteScriptAsync($"(()=>{{const e=document.querySelector('{selector}');if(!e||e.disabled)return null;const r=e.getBoundingClientRect();return {{x:(r.left+r.width/2)/innerWidth,y:(r.top+r.height/2)/innerHeight}};}})()");
+                    File.WriteAllText(Path.Combine(directory, name + ".tmp"), found);
+                    File.Move(Path.Combine(directory, name + ".tmp"), Path.Combine(directory, name + ".json"), overwrite: true);
+                }
+                catch (Exception error) { File.WriteAllText(Path.Combine(directory, name + ".json"), JsonSerializer.Serialize(new { Error = error.GetType().Name })); }
+                finally { locating = false; }
+                return;
+            }
+        };
         trigger.Start();
         Application.Run(window); window.WaitForBridge(); return window.Failed ? 1 : 0;
     }
+
+    private static readonly (string Name, string Selector)[] Targets =
+        [("pause", ".pause-btn"), ("confirm", ".dialog.pausing .btn-primary"), ("cancel", ".dialog.pausing .btn-ghost")];
 
     internal static int Run(string directory)
     {

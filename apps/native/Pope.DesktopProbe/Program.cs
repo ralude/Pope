@@ -20,6 +20,8 @@ internal static class Program
             return PauseProof.Host(pauseDirectory, pausePipe, pauseParentId, pauseJournal);
         if (args is ["--pause-proof", var pauseProof] && Path.IsPathFullyQualified(pauseProof)) return PauseProof.Run(pauseProof);
         if (args is ["--audio-proof", var audioProof] && Path.IsPathFullyQualified(audioProof)) return AudioProof.Run(audioProof);
+        if (args is ["--game-access-proof", var accessProof, var accessGame] && Path.IsPathFullyQualified(accessProof) && Path.IsPathFullyQualified(accessGame))
+            return GameAccessProof.Run(accessProof, accessGame);
         if (args is ["--agent-service-probe", var agentId]) return AgentScmProbe.Run(agentId);
         if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);
         if (args is ["--pipe-peer", var pipeName, var serverPid, var pipeMode]) return PipePeer.Run(pipeName, serverPid, pipeMode);

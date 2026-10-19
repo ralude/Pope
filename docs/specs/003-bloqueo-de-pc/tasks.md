@@ -343,12 +343,19 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - [x] **T24a (2026-10-18):** `PauseAudio` silencia todas las salidas activas y solo cambia el mute, nunca el volumen. Guarda el mute original de cada salida en un diario antes de silenciar, con escritura atómica, 64 salidas como máximo y JSON estricto. Así un host reiniciado o una reconexión no recapturan el silencio de Pope. Al reanudar devuelve a cada salida su mute previo. Una salida nueva durante la pausa se silencia, una desconectada se restaura al volver y un fallo de una salida no detiene el resto. Un diario corrupto se descarta sin inventar originales. 9 tests nuevos.
     - [x] **T24b (2026-10-18):** Core Audio por COM (sin paquetes) en un hilo MTA del host. Sigue solo la pausa del nodo y no actúa antes de la primera copia del estado. Ensayo `--audio-proof` en el Windows de desarrollo, con 5 salidas reales: la pausa pedida desde React silencia todas en ≈ 75 ms. Un corte de red y un host matado y relanzado en plena pausa no recapturan, y reanudar restaura el mute original sin cambiar el volumen. Un mute previo sigue puesto tras reanudar. Al terminar, cada salida vuelve a su estado original. Batería general correcta: 1 697 tests (396 nativos). Pendiente en PC real (T56): juego con audio exclusivo y comprobación audible. Detalle en [mediciones](mediciones.md).
 
-- [ ] **T25: Acceso a Pausar durante el juego**
+- [x] **T25: Acceso a Pausar durante el juego**
   - **Cubre:** REQ-003-30, CA-003-12; REQ-002-01, REQ-002-02, REQ-002-11, REQ-002-50.
   - **Hacer:** implementar Alt+Tab entre Pope y apps autorizadas con sesión activa temporal/cuenta, también al enfocar Pope (ADR-0023); conservar confirmación/límites de pausa y aislamiento al bloquear/pausar.
   - **Verificar:** ida/vuelta sin Explorer con cada modo de juego/anticheat; cambiar ventana no pausa, cancelar no pausa, temporal sin botón y desde confirmar Pausar hasta bloquear entrada < 1 s. Atajo no permite escapar desde pausa/revocación; sin sesión queda inhibido.
   - **Commit:** `feat(native): permite acceder a Pope durante el juego`.
   - **Decisión confirmada (mantenedor, 2026-10-07):** Alt+Tab como acceso, sin fijar Ctrl+Shift+P/F10. Compatibilidad/selector sin probar; T25 sigue en Borrador, sin autorización de implementación por esta decisión.
+  - **Completa en desarrollo (2026-10-19):** el mecanismo ya lo entregó T21 (filtro por sesión y aislamiento por escritorio); T25 no añade código de producto. Ensayo `--game-access-proof` con la cadena real (agente, doble WSS del nodo, host) y Chocolate Doom 3.1.1 + Freedoom 0.13.0 en pantalla completa exclusiva a la resolución actual, sin Explorer, con clics y teclas reales:
+    - sin sesión, Alt+Tab no sale del bloqueo;
+    - con cuenta, Alt+Tab va del juego a Pope y vuelve sin pausar;
+    - «Seguir jugando» no pausa, y la temporal va y vuelve sin botón Pausar;
+    - de clic en «Pausar» a bloqueo de la entrada: 8 muestras de 15,2 a 32 ms (p50 16,1);
+    - la demo del juego registra 0 tics de movimiento o disparo en los 179 tics de pausa, y Alt+Tab no alcanza el juego en pausa ni en revocación.
+    Batería general correcta: 1 697 tests. **Sin probar:** los juegos del local, los anticheat y varios monitores. No se declara compatible el mecanismo de ADR-0023 hasta T56.
 
 - [ ] **T26: Cierre de procesos del cliente**
   - **Cubre:** REQ-003-34; CA-003-08.

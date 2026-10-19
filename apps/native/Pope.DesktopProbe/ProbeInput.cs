@@ -62,14 +62,17 @@ internal static class ProbeInput
     }
 
     // Clic en una fracción del área cliente: la esquina de la pausa no tiene botones.
-    internal static void ClickAt(double x, double y)
+    // Devuelve el instante (QPC, común a todos los procesos) justo antes de inyectar el clic.
+    internal static long ClickAt(double x, double y)
     {
         var window = GetForegroundWindow();
         if (!GetClientRect(window, out var bounds)) throw new Win32Exception();
         var point = new CursorPoint { X = (int)(bounds.Right * x), Y = (int)(bounds.Bottom * y) };
         if (!ClientToScreen(window, ref point) || !SetCursorPos(point.X, point.Y)) throw new Win32Exception();
         Thread.Sleep(100);
+        var at = System.Diagnostics.Stopwatch.GetTimestamp();
         Send([new() { Type = 0, Data = new() { Mouse = new() { Flags = 2 } } }, new() { Type = 0, Data = new() { Mouse = new() { Flags = 4 } } }]);
+        return at;
     }
 
     // Pulsa y suelta cada tecla en orden, con una pausa para que React procese el foco.

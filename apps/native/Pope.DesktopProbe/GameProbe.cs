@@ -96,7 +96,7 @@ internal static class GameProbe
         report["GamePassed"] = true;
     }
 
-    private static void VerifyDemo(string path, Dictionary<string, object?> report)
+    internal static void VerifyDemo(string path, Dictionary<string, object?> report)
     {
         // Formato Doom 1.9 oficial: cabecera de 13 bytes, 4 bytes por tic, final 0x80.
         // g_game.c / G_BeginRecording y G_WriteDemoTiccmd (Chocolate Doom 3.1.1).

@@ -532,3 +532,29 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   comprueba el mute por la API de Windows. Pendiente en la PC real (T56).
 - Batería general: formato, lint, tipos, build y 1 697 tests (396 nativos, 420 servidor en
   PGlite), sin fallos. Logs `tmp/t24-*.log` (ignorados). El servidor no cambia.
+
+### T25 · Alt+Tab y Pausar desde un juego (2026-10-19)
+
+- `Pope.DesktopProbe --game-access-proof <carpeta nueva> <juego>`, mismo entorno que T23.
+  Juego: Chocolate Doom 3.1.1 + Freedoom 0.13.0 (ZIP con las SHA256 de T09c), E1M1 sin
+  monstruos ni sonido, `fullscreen 1` a **1920×1080**, la resolución actual: no cambia el
+  modo de pantalla del equipo (`ResolutionUnchanged=true`). Cadena real de T23 y entrada
+  real de Windows: `SendInput` para Alt+Tab, teclas y clics. Los botones de React se
+  localizan con un script del host del ensayo y se pulsan con un clic real.
+- Sin sesión: Alt+Tab en el bloqueo deja el foco en Pope. Con cuenta: juego → Pope → juego
+  sin ninguna petición `pause`. «Pausar» → «Seguir jugando» no pausa. Temporal: Alt+Tab en
+  ambos sentidos, sin botón Pausar en la interfaz y sin pausas.
+- Latencia desde el clic real en «Pausar» del diálogo hasta que el escritorio de bloqueo
+  recibe la entrada, en 8 ciclos desde el juego: 32 / 16,1 / 16,5 / 16 / 15,6 / 15,2 / 16,5 /
+  15,8 ms (p50 16,1, máximo 32). Nodo en loopback: falta medir la red y el nodo del local (T56).
+- Pausa con el juego: A + disparo durante 2 s y Alt+Tab en el bloqueo. La demo (1 205 tics)
+  registra **179** tics entre las marcas, con **0** de movimiento y **0** de disparo; hay
+  controles positivos antes y después. El juego sigue vivo con el mismo PID. Su CPU en
+  la pausa fue 0 ms: el propio juego queda en reposo minimizado al perder el foco; Pope
+  no lo suspende, y la demo sigue avanzando. Revocación: Alt+Tab no sale del bloqueo.
+- `Passed=true`, `Restored=true`, sin Explorer, 1 monitor. No prueba los juegos del local
+  (Valorant, CS2, CoD, Delta Force, LoL, Minecraft, Roblox, Blood Strike), sus anticheat
+  ni el modo exclusivo DirectX real: T56, en la PC de pruebas.
+- Batería general: 1 697 tests sin fallos tras corregir la limpieza de dos tests nativos.
+  Al borrar el perfil, WebView2 retenía un `.tmp` y Windows devolvía acceso denegado,
+  aunque la cadena React → host → WSS había pasado. Logs `tmp/t25-*.log` (ignorados).
