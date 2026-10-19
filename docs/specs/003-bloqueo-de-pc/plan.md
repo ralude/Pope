@@ -47,6 +47,16 @@ existente; ADR-0018 aceptado el 2026-10-08, pendiente de demostrar el mecanismo 
 
 **Concreción T25 (2026-10-19):** el acceso a Pausar con Alt+Tab ya lo implementa T21. El filtro inhibe Alt+Tab solo sin sesión, y la pausa o la revocación lo aíslan por escritorio. T25 no cambia código de producto: lo verifica con un juego en pantalla completa, entrada real y la cadena del agente. La compatibilidad con los juegos y anticheat del local sigue pendiente en T56, y hasta entonces no se declara compatible el mecanismo (ADR-0023).
 
+**Concreción T26 (2026-10-19):**
+
+- **Quién y cuándo.** El agente (SYSTEM) cierra los procesos del cliente cuando el nodo termina la sesión: `sessionEnded`, `locked` u otra sesión. No lo hace con pausa, revocación ni agotamiento local sin red, porque espera la confirmación del nodo.
+- **Pertenencia.** Cuentan los procesos que están en la sesión de Windows y con el usuario del host asociado y que se crearon entre el inicio de la sesión Pope y el corte. También sus descendientes posteriores, incluidos los hijos de un objetivo ya cerrado, siempre que el PID padre no lo haya reutilizado un proceso vivo.
+- **Qué se protege.** El host retenido (por PID y hora de creación) y sus hijos del mismo ejecutable o de WebView2, los procesos críticos, la sesión 0, otros usuarios y lo nacido después del corte sin ese parentesco (el cliente siguiente).
+- **Cómo cierra.** Terminación directa con `TerminateProcess` y la hora de creación verificada, en hasta 3 pasadas de 500 ms. Desde la sesión 0 no se pueden cerrar ventanas con mensajes, así que lo no guardado se pierde.
+- **Ámbito persistido.** Se guarda cifrado en la custodia del agente, con el arranque de Windows y el logon del cliente. Si no coincide con el arranque o el logon actuales, se descarta.
+- **Activación y dependencias.** Actúa cuando hay un host asociado al agente; hasta T22 eso solo ocurre en los ensayos con `RunForHostAsync`. Sin dependencias nuevas.
+- **Pendiente.** Anticheat y juegos reales (T56), y la restauración de perfiles (spec 004).
+
 **Cambio de orden (mantenedor, 2026-10-09):** aplazar T10 y continuar las siguientes
 tareas aprobadas T11–T20. Sustituye las indicaciones históricas de detener T11 por el
 gate de T10. El mantenimiento sigue sin demostrar; no integrarlo hasta cerrar T10.

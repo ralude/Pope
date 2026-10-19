@@ -357,7 +357,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
     - la demo del juego registra 0 tics de movimiento o disparo en los 179 tics de pausa, y Alt+Tab no alcanza el juego en pausa ni en revocación.
     Batería general correcta: 1 697 tests. **Sin probar:** los juegos del local, los anticheat y varios monitores. No se declara compatible el mecanismo de ADR-0023 hasta T56.
 
-- [ ] **T26: Cierre de procesos del cliente**
+- [x] **T26: Cierre de procesos del cliente**
   - **Cubre:** REQ-003-34; CA-003-08.
   - **Hacer:** controlar pertenencia de juegos/lanzadores/procesos auxiliares y cerrarlos al terminar; proteger Pope, servicios y otros usuarios, sin reiniciar ni restaurar perfiles de la 004.
   - **Verificar:** cierre, agotamiento, bloqueo y temporal; no cerrar apps en pausa ni procesos del cliente siguiente; ensayar anticheat en PC real.
@@ -365,6 +365,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División previa (2026-10-19):** T26a política pura de pertenencia; T26b enumeración/terminación Win32, ámbito de sesión persistido y conexión con el estado del agente; T26c ensayo real acotado a procesos propios del ensayo y batería general.
     - [x] **T26a (2026-10-19):** `ClientProcessPolicy` decide sin efectos qué procesos cerrar: sesión de Windows y usuario del cliente, creados entre el inicio de la sesión Pope y el corte, más sus descendientes posteriores (relanzamientos). Conserva lo anterior a la sesión, Pope (host retenido con su hora de creación, más sus hijos del mismo ejecutable o de WebView2), los procesos críticos, la sesión 0, otros usuarios y los procesos del cliente siguiente. 4 tests.
     - [x] **T26b (2026-10-19):** `ClientProcesses` enumera procesos (Toolhelp y consulta limitada) y termina cada uno solo si conserva su hora de creación. `ClientSessionCleanup` abre el ámbito al empezar una sesión Pope con el host asociado y lo persiste en la custodia del agente. Cuando el nodo la termina, cierra sus procesos en hasta 3 pasadas, incluidos los relanzados por un objetivo ya cerrado. No actúa con pausa, revocación, agotamiento local sin red, otro logon ni un ámbito de otro arranque de Windows. Hasta T22 solo actúa con el host asociado mediante `RunForHostAsync`. Logs con códigos cerrados. 407 nativos.
+    - [x] **T26c (2026-10-19):** ensayo `--cleanup-proof` en el Windows de desarrollo con la cadena real: agente, doble WSS, host asociado y `ClientSessionCleanup` de producto. Corre como el usuario de desarrollo: solo termina descendientes del propio ensayo y anota sin tocarlos los demás que elegiría la política (ninguno en dos ejecuciones). La pausa no cierra nada. Al cerrar la sesión en pausa se cierran el lanzador, sus dos auxiliares (con sus conhost) y la app en ≈ 110 ms. Se conservan el proceso previo a la sesión, Pope (host e hijo de bloqueo) y el proceso del cliente siguiente, abierto enseguida en una temporal. Al agotarse esa temporal se cierra su proceso. Corrigió además que un proceso terminado con un handle abierto pareciera vivo. Batería general correcta: 1 708 tests (407 nativos). **Sin probar:** anticheat y juegos reales (T56) y custodia del ámbito como SYSTEM (requiere el SCM de T15).
 
 - [ ] **T27: Fallo completo y reinicio del servicio**
   - **Cubre:** REQ-003-02, REQ-003-03, REQ-003-32; REQ-002-30, REQ-002-31.

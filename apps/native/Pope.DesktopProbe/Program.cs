@@ -20,6 +20,9 @@ internal static class Program
             return PauseProof.Host(pauseDirectory, pausePipe, pauseParentId, pauseJournal);
         if (args is ["--pause-proof", var pauseProof] && Path.IsPathFullyQualified(pauseProof)) return PauseProof.Run(pauseProof);
         if (args is ["--audio-proof", var audioProof] && Path.IsPathFullyQualified(audioProof)) return AudioProof.Run(audioProof);
+        if (args is ["--cleanup-proof", var cleanupProof] && Path.IsPathFullyQualified(cleanupProof)) return CleanupProof.Run(cleanupProof);
+        if (args is ["--idle", var idleDirectory] && Path.IsPathFullyQualified(idleDirectory)) return CleanupProof.Idle(idleDirectory);
+        if (args is ["--launcher", var launcherDirectory] && Path.IsPathFullyQualified(launcherDirectory)) return CleanupProof.Launcher(launcherDirectory);
         if (args is ["--game-access-proof", var accessProof, var accessGame] && Path.IsPathFullyQualified(accessProof) && Path.IsPathFullyQualified(accessGame))
             return GameAccessProof.Run(accessProof, accessGame);
         if (args is ["--agent-service-probe", var agentId]) return AgentScmProbe.Run(agentId);

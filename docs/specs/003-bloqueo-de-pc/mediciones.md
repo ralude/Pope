@@ -558,3 +558,27 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
 - Batería general: 1 697 tests sin fallos tras corregir la limpieza de dos tests nativos.
   Al borrar el perfil, WebView2 retenía un `.tmp` y Windows devolvía acceso denegado,
   aunque la cadena React → host → WSS había pasado. Logs `tmp/t25-*.log` (ignorados).
+
+### T26 · cierre de procesos del cliente (2026-10-19)
+
+- `Pope.DesktopProbe --cleanup-proof <carpeta nueva>`, mismo entorno que T23, con la cadena
+  real: agente, doble WSS, host asociado con `RunForHostAsync` y `ClientSessionCleanup`
+  de producto, con la política, Toolhelp y `TerminateProcess` reales. El usuario de
+  desarrollo hace de cliente, así que una guardia del ensayo solo termina descendientes
+  del propio ensayo y anota el resto. En las dos ejecuciones finales la política no
+  eligió **ningún** proceso ajeno al ensayo.
+- Proceso previo a la sesión, sesión con cuenta, un lanzador con dos auxiliares (más sus
+  `conhost.exe`) y una app con ventana. La pausa no cierra nada (1,5 s). Al cerrar la
+  sesión en pausa (`sessionEnded` + `locked`), el ensayo abre enseguida una temporal y
+  lanza su proceso: el lanzador, sus auxiliares y la app desaparecen en **103–115 ms**,
+  y se conservan el proceso previo, el host, su hijo de bloqueo y el proceso de la
+  temporal. Al agotarse la temporal se cierra su proceso en **101–111 ms**, con el bloqueo
+  activo. Se cerraron 10 procesos en total. `Passed=true`, `Restored=true`.
+- Primeras ejecuciones fallidas por el propio ensayo. Esperaba exactamente 3 procesos sin
+  contar los `conhost.exe` del ejecutable de consola. Además, un lanzador ya terminado
+  seguía «vivo» porque el ensayo retenía su objeto `Process`. Esto último también
+  afectaba a `ClientProcesses.Describe`: Windows conserva el objeto con la misma hora de
+  creación. Se corrigió en producto comprobando la señal de salida, con un test.
+- No probado: anticheat y juegos reales (T56), el ámbito persistido como SYSTEM en la
+  custodia del agente (requiere el SCM de T15) y el agente lanzando el host (T22).
+- Batería general: 1 708 tests sin fallos (407 nativos). Logs `tmp/t26-*.log` (ignorados).
