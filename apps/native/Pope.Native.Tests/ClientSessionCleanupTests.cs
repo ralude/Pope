@@ -146,6 +146,8 @@ public sealed class ClientSessionCleanupTests
             Assert.False(child.HasExited);
             Assert.True(ClientProcesses.Close(entry)); Assert.True(child.WaitForExit(2000));
             Assert.True(ClientProcesses.Close(entry));
+            // El objeto Process aún retiene el proceso terminado: no debe parecer vivo.
+            Assert.Null(ClientProcesses.Describe((uint)child.Id));
         }
         finally { if (!child.HasExited) child.Kill(true); }
     }

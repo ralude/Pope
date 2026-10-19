@@ -31,8 +31,12 @@ internal static class ClientProcesses
     // Datos de un proceso vivo; null si terminó o Windows no permite consultarlo (protegidos).
     internal static ProcessEntry? Describe(uint pid, uint parent = 0)
     {
-        using var process = OpenProcess(QueryLimited, false, pid);
-        if (process.IsInvalid) return null;
+        // Con SYNCHRONIZE se distingue un proceso ya terminado cuyo objeto sigue abierto por otro
+        // handle (misma hora de creación); si Windows lo deniega, basta la consulta limitada.
+        var process = OpenProcess(QueryLimited | Synchronize, false, pid);
+        if (process.IsInvalid) { process.Dispose(); process = OpenProcess(QueryLimited, false, pid); }
+        using var owned = process;
+        if (process.IsInvalid || WaitForSingleObject(process, 0) == 0) return null;
         if (!GetProcessTimes(process, out var created, out _, out _, out _) || !ProcessIdToSessionId(pid, out var session)) return null;
         string? user = null;
         if (OpenProcessToken(process, 8, out var token))
