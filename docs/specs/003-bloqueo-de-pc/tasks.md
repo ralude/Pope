@@ -362,6 +362,8 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** controlar pertenencia de juegos/lanzadores/procesos auxiliares y cerrarlos al terminar; proteger Pope, servicios y otros usuarios, sin reiniciar ni restaurar perfiles de la 004.
   - **Verificar:** cierre, agotamiento, bloqueo y temporal; no cerrar apps en pausa ni procesos del cliente siguiente; ensayar anticheat en PC real.
   - **Commit:** `feat(native): cierra los procesos del cliente al terminar`.
+  - **División previa (2026-10-19):** T26a política pura de pertenencia; T26b enumeración/terminación Win32, ámbito de sesión persistido y conexión con el estado del agente; T26c ensayo real acotado a procesos propios del ensayo y batería general.
+    - [x] **T26a (2026-10-19):** `ClientProcessPolicy` decide sin efectos qué procesos cerrar: sesión de Windows y usuario del cliente, creados entre el inicio de la sesión Pope y el corte, más sus descendientes posteriores (relanzamientos). Conserva lo anterior a la sesión, Pope (host retenido con su hora de creación, más sus hijos del mismo ejecutable o de WebView2), los procesos críticos, la sesión 0, otros usuarios y los procesos del cliente siguiente. 4 tests.
 
 - [ ] **T27: Fallo completo y reinicio del servicio**
   - **Cubre:** REQ-003-02, REQ-003-03, REQ-003-32; REQ-002-30, REQ-002-31.
