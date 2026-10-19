@@ -19,6 +19,7 @@ internal static class Program
             && Path.IsPathFullyQualified(pauseJournal) && int.TryParse(pauseParent, out var pauseParentId))
             return PauseProof.Host(pauseDirectory, pausePipe, pauseParentId, pauseJournal);
         if (args is ["--pause-proof", var pauseProof] && Path.IsPathFullyQualified(pauseProof)) return PauseProof.Run(pauseProof);
+        if (args is ["--audio-proof", var audioProof] && Path.IsPathFullyQualified(audioProof)) return AudioProof.Run(audioProof);
         if (args is ["--agent-service-probe", var agentId]) return AgentScmProbe.Run(agentId);
         if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);
         if (args is ["--pipe-peer", var pipeName, var serverPid, var pipeMode]) return PipePeer.Run(pipeName, serverPid, pipeMode);

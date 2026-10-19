@@ -507,3 +507,28 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   (`StopIsClean`, corregido en un commit aparte) y dos del servidor que no se reprodujeron
   ni solos ni al repetir la batería; sus nombres no quedaron registrados. El servidor no
   cambia en T23, así que no se repite `test:pg`.
+
+### T24 · silencio de pausa con Core Audio (2026-10-18/19)
+
+- `Pope.DesktopProbe --audio-proof <carpeta nueva>`, mismo entorno que T23 (Windows 11 Pro
+  26H2 26300.9711, WebView2 155.0.4283.62, sin VM), con la misma cadena real: agente, doble
+  WSS del nodo, host de producto y escritorio de uso temporal. Diario en la carpeta del
+  ensayo, no en el perfil del usuario.
+- Salidas activas reales: **5**, ninguna silenciada al empezar. Pausa pedida desde React →
+  las 5 silenciadas en **76 ms**; diario igual a los originales y volúmenes sin cambios.
+  Corte de red de 3 s y reconexión: diario idéntico, todo sigue silenciado. Host matado
+  en plena pausa: el silencio se mantiene sin host; el host nuevo recibe la pausa del
+  agente y no recaptura. Reanudar desde el panel restaura los originales en **4 ms** y
+  retira el diario. Con una salida silenciada antes de pausar, sigue silenciada tras
+  reanudar (74 ms para silenciar el resto). Al terminar, cada salida vuelve a su mute
+  original (`AudioRestored=true`) y al escritorio original (`Restored=true`).
+- Primer intento fallido: el host intentó borrar la orden «Pausar» del ensayo mientras
+  aún se escribía, y el temporizador quedó bloqueado. No llegó a silenciar nada: no
+  había diario. Al fallar también `SwitchDesktop`, la limpieza no se ejecutó y se cerraron
+  a mano solo el host, el hijo de bloqueo y el vigilante del ensayo. Corregido (orden atómica,
+  reintento en el host, límite de 10 s y limpieza que no depende del cambio de escritorio).
+  El ensayo de T23 se repitió con audio integrado: `Passed=true`, máximo 24,7 ms.
+- No demuestra el silencio audible ni el de un juego con audio en modo exclusivo: se
+  comprueba el mute por la API de Windows. Pendiente en la PC real (T56).
+- Batería general: formato, lint, tipos, build y 1 697 tests (396 nativos, 420 servidor en
+  PGlite), sin fallos. Logs `tmp/t24-*.log` (ignorados). El servidor no cambia.
