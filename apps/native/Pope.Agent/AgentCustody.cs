@@ -27,6 +27,31 @@ internal static class AgentCustody
         StoreProtected(root, plain, "recovery.bin", create: false);
     }
 
+    // REQ-003-34: ámbito de la sesión del cliente; protegido para que el usuario no amplíe el cierre.
+    internal static void StoreScope(string root, ClientScope? scope)
+    {
+        RequireSystem();
+        if (scope is null)
+        {
+            var path = Path.Combine(Path.GetFullPath(root), "client-scope.bin");
+            if (File.Exists(path)) { Verify(new FileInfo(path)); File.Delete(path); }
+            return;
+        }
+        var plain = ClientSessionCleanup.Serialize(scope);
+        try { StoreProtected(root, plain, "client-scope.bin", create: false); }
+        finally { CryptographicOperations.ZeroMemory(plain); }
+    }
+
+    internal static ClientScope? ReadScope(string root)
+    {
+        RequireSystem();
+        Verify(new DirectoryInfo(Path.GetFullPath(root)));
+        if (!File.Exists(Path.Combine(root, "client-scope.bin"))) return null;
+        var plain = ReadProtected(root, "client-scope.bin");
+        try { return ClientSessionCleanup.Parse(plain); }
+        finally { CryptographicOperations.ZeroMemory(plain); }
+    }
+
     private static void ValidateRecovery(byte[] bytes)
     {
         var hello = ProtocolValidation.Parse(bytes, "pc-to-node");

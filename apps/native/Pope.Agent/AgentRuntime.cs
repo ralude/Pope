@@ -21,6 +21,16 @@ internal sealed class AgentRuntime
         channel = new AgentChannel(configuration, log) { Hello = state.Hello, Heartbeat = state.Heartbeat };
         channel.Message += state.Apply;
         Bridge = new AgentHostBridge(channel, state, configuration.PcName);
+        // REQ-003-34: el ámbito del cliente necesita el host asociado (lanzamiento/supervisión en T22).
+        var cleanup = new ClientSessionCleanup(() => Bridge.Host, ClientProcesses.Snapshot, ClientProcesses.Close, scope =>
+        {
+            try { AgentCustody.StoreScope(root, scope); }
+            catch { log.Write(AgentLogCode.ClientScopeRejected); }
+        }, log);
+        try { cleanup.Restore(AgentCustody.ReadScope(root)); }
+        catch { log.Write(AgentLogCode.ClientScopeRejected); }
+        state.SessionStarted += cleanup.Started;
+        state.SessionFinished += id => _ = cleanup.Finished(id);
     }
     internal async Task RunAsync(CancellationToken token)
     {

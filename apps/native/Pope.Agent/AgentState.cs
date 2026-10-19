@@ -18,35 +18,50 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
     private bool rejected;
     private bool authorized;
     internal event Action<byte[]>? RecoveryChanged;
+    // REQ-003-34: solo el nodo abre o termina una sesión; pausa, revocación y el agotamiento
+    // local sin red no la terminan. Se avisan fuera del cerrojo, en orden: fin y luego inicio.
+    internal event Action<string>? SessionStarted;
+    internal event Action<string>? SessionFinished;
 
     internal void Apply(JsonElement message)
     {
         // Aunque llegue de otro componente interno, validar antes de conservar identidad.
         message = ProtocolValidation.Parse(JsonSerializer.SerializeToUtf8Bytes(message), "node-to-pc");
+        string? finished = null, started = null;
         lock (gate)
         {
-            switch (message.GetProperty("type").GetString())
-            {
-                case "state":
-                    state = message; timestamp = clock.GetTimestamp(); authorized = !rejected;
-                    sessionId = null; remaining = 0; paused = false; billing = true;
-                    if (message.GetProperty("status").GetString() == "active")
-                    {
-                        var session = message.GetProperty("session");
-                        sessionId = session.GetProperty("sessionId").GetString();
-                        remaining = session.GetProperty("remainingSeconds").GetInt64();
-                        paused = session.TryGetProperty("pause", out var pause) && pause.ValueKind != JsonValueKind.Null;
-                        if (paused) billing = pause.GetProperty("billing").GetBoolean();
-                    }
-                    PersistRecovery();
-                    break;
-                case "controlState":
-                    context = message.GetProperty("context"); PersistRecovery(); break;
-                case "sessionEnded":
-                    state = null; sessionId = null; remaining = 0; paused = false; PersistRecovery(); break;
-                case "pcAuthenticationError":
-                    rejected = true; authorized = false; break;
-            }
+            var previous = sessionId;
+            Track(message);
+            if (previous != null && previous != sessionId && message.GetProperty("type").GetString() is "state" or "sessionEnded") finished = previous;
+            if (sessionId != null && sessionId != previous) started = sessionId;
+        }
+        if (finished != null) SessionFinished?.Invoke(finished);
+        if (started != null) SessionStarted?.Invoke(started);
+    }
+
+    private void Track(JsonElement message)
+    {
+        switch (message.GetProperty("type").GetString())
+        {
+            case "state":
+                state = message; timestamp = clock.GetTimestamp(); authorized = !rejected;
+                sessionId = null; remaining = 0; paused = false; billing = true;
+                if (message.GetProperty("status").GetString() == "active")
+                {
+                    var session = message.GetProperty("session");
+                    sessionId = session.GetProperty("sessionId").GetString();
+                    remaining = session.GetProperty("remainingSeconds").GetInt64();
+                    paused = session.TryGetProperty("pause", out var pause) && pause.ValueKind != JsonValueKind.Null;
+                    if (paused) billing = pause.GetProperty("billing").GetBoolean();
+                }
+                PersistRecovery();
+                break;
+            case "controlState":
+                context = message.GetProperty("context"); PersistRecovery(); break;
+            case "sessionEnded":
+                state = null; sessionId = null; remaining = 0; paused = false; PersistRecovery(); break;
+            case "pcAuthenticationError":
+                rejected = true; authorized = false; break;
         }
     }
 

@@ -13,12 +13,16 @@ internal static class ClientProcessPolicy
     internal const string WebView = "msedgewebview2.exe";
 
     internal static IReadOnlyList<ProcessEntry> Targets(IReadOnlyList<ProcessEntry> all, ClientScope scope, long cutoff,
-        IReadOnlyCollection<(uint Pid, long Created)> popeRoots, string? popeImage)
+        IReadOnlyCollection<(uint Pid, long Created)> popeRoots, string? popeImage, IReadOnlyCollection<ProcessEntry>? closed = null)
     {
         var byPid = new Dictionary<uint, ProcessEntry>();
         foreach (var entry in all) byPid.TryAdd(entry.Pid, entry);
         bool ChildOf(ProcessEntry child, ISet<uint> parents) =>
             parents.Contains(child.ParentPid) && byPid.TryGetValue(child.ParentPid, out var parent) && parent.Created <= child.Created;
+        // Hijo de un objetivo ya cerrado en una pasada anterior, salvo que su PID padre lo tenga
+        // ahora un proceso vivo creado antes que el hijo (reutilización del PID).
+        bool ChildOfClosed(ProcessEntry child) => closed != null && closed.Any(dead => dead.Pid == child.ParentPid && dead.Created <= child.Created) &&
+            !(byPid.TryGetValue(child.ParentPid, out var live) && live.Created <= child.Created && closed.All(dead => dead.Created != live.Created));
 
         // Pope: el host retenido y sus hijos del mismo ejecutable o de WebView2, en cadena.
         var pope = new HashSet<uint>(all.Where(e => popeRoots.Contains((e.Pid, e.Created))).Select(e => e.Pid));
@@ -42,7 +46,7 @@ internal static class ClientProcessPolicy
         {
             changed = false;
             foreach (var entry in all)
-                if (!targets.Contains(entry.Pid) && Candidate(entry) && entry.Created > cutoff && ChildOf(entry, targets))
+                if (!targets.Contains(entry.Pid) && Candidate(entry) && entry.Created > cutoff && (ChildOf(entry, targets) || ChildOfClosed(entry)))
                     changed = targets.Add(entry.Pid) | changed;
         }
         return all.Where(e => targets.Contains(e.Pid)).ToList();

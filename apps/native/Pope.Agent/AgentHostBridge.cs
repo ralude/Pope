@@ -8,8 +8,11 @@ namespace Pope.Agent;
 internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, string pcName) : IDisposable
 {
     private PipeSession? current;
+    private ClientHost? client;
     private bool online;
     private int attached;
+    // REQ-003-34: identidad del host asociado (sesión, usuario, logon, PID y creación) mientras viva.
+    internal ClientHost? Host => Volatile.Read(ref client);
 
     internal void Subscribe()
     {
@@ -21,6 +24,8 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
         try
         {
             using var host = new RetainedProcess(launchedHost);
+            if (ClientProcesses.Describe(host.Id) is { } described && host.Alive)
+                Volatile.Write(ref client, new ClientHost(host.Session, host.UserSid, host.LogonSid, host.Id, described.Created, described.Image));
             using var pipe = PipeEndpoints.Create(pipeName, host);
             while (host.Alive && !token.IsCancellationRequested)
             {
@@ -37,7 +42,7 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
                 await Task.Delay(100, token);
             }
         }
-        finally { Volatile.Write(ref current, null); Volatile.Write(ref attached, 0); }
+        finally { Volatile.Write(ref current, null); Volatile.Write(ref client, null); Volatile.Write(ref attached, 0); }
     }
     private async Task Dispatch(byte[] bytes, CancellationToken token)
     {

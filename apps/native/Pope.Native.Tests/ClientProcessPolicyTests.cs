@@ -59,6 +59,20 @@ public sealed class ClientProcessPolicyTests
         Assert.Equal([30u, 60u], targets);
     }
 
+    [Fact(DisplayName = "REQ-003-34: el hijo relanzado de un objetivo ya cerrado se cierra, salvo PID padre reutilizado")]
+    public void ChildOfClosedTarget()
+    {
+        var closed = new[] { P(30, 1_100), P(35, 1_300) };
+        var all = new[]
+        {
+            P(31, 2_100, 30),                 // relanzado por el 30 antes de morir
+            P(35, 2_200, 20),                 // el PID 35 ya es de otro proceso (cliente siguiente)
+            P(36, 2_300, 35),                 // hijo de ese proceso vivo, no del 35 cerrado
+        };
+        var targets = ClientProcessPolicy.Targets(all, Scope, cutoff: 2_000, [], Pope, closed).Select(t => t.Pid);
+        Assert.Equal([31u], targets);
+    }
+
     [Fact(DisplayName = "REQ-003-34: un host de Pope con PID reutilizado no protege a un proceso ajeno")]
     public void PopeRootNeedsCreationTime()
     {
