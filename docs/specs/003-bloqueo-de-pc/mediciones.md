@@ -582,3 +582,26 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
 - No probado: anticheat y juegos reales (T56), el ámbito persistido como SYSTEM en la
   custodia del agente (requiere el SCM de T15) y el agente lanzando el host (T22).
 - Batería general: 1 708 tests sin fallos (407 nativos). Logs `tmp/t26-*.log` (ignorados).
+
+### T27 · caída y reinicio del agente (2026-10-19)
+
+- `Pope.DesktopProbe --agent-loss-proof <carpeta nueva>`, mismo entorno que T23. El agente
+  de ensayo es un proceso aparte (`--proof-agent`) con `AgentChannel`, `AgentState` y
+  `AgentHostBridge` reales. Lanza el host de producto en el escritorio de uso temporal y
+  guarda su recuperación en un archivo del ensayo, porque no corre como SYSTEM. El
+  doble WSS del nodo vive en el orquestador. Se mata solo el proceso del agente.
+- Bloqueada: el bloqueo sigue; las teclas, el clic y Alt+Tab no llegan a la app. Activa:
+  del `Kill` del agente al escritorio de bloqueo **24,1 ms**; olvida la sesión, Alt+Tab
+  queda inhibido y la captura muestra el login desactivado con «Sin conexión con el
+  servidor». Pausada: el bloqueo y el silencio de las 5 salidas siguen, con el diario
+  idéntico.
+- Reinicio sin nodo: un agente nuevo (el nodo rechaza 1 conexión) no conoce estado, no
+  tiene tiempo local y deja al host en su bloqueo inicial, sin devolver el sonido. Al
+  volver el nodo: hello `unknown` con `localRemainingSeconds` nulo, la pausa del nodo
+  mantiene el bloqueo sin recapturar el audio, y reanudar abre el uso y restaura el mute
+  original. Al terminar, el audio y el escritorio se restauran.
+- `Passed=true`, `AudioRestored=true`, `Restored=true`. No es el SCM: el reinicio real del
+  servicio (T15c3, UAC pendiente) y el arranque de Windows quedan sin probar. Cada caso
+  usa un host nuevo, porque el relevo del host lo implementa T22.
+- Batería general: 1 709 tests sin fallos (408 nativos). El ensayo de T23 se repitió con
+  el doble del nodo modificado: `Passed=true`. Logs `tmp/t27-*.log` (ignorados).

@@ -301,8 +301,8 @@ internal static class PauseProof
         private WebSocket? socket;
         private object current = new { type = "state", status = "locked" };
         private DateTime refuseUntil;
-        internal int Connections, Pauses, Resumes;
-        internal string? LastHello;
+        internal int Connections, Pauses, Resumes, Refused;
+        internal string? LastHello, LastHelloRemaining;
 
         internal async Task RunAsync()
         {
@@ -310,10 +310,19 @@ internal static class PauseProof
             {
                 var wait = refuseUntil - DateTime.UtcNow;
                 if (wait > TimeSpan.Zero) await Task.Delay(wait, token);
-                using var accepted = await node.Accept(token);
-                var hello = await ProofNode.Read(accepted, token);
+                WebSocket candidate; JsonElement hello;
+                try
+                {
+                    candidate = await node.Accept(token);
+                    // Nodo caído simulado: una conexión aceptada dentro de la ventana se corta.
+                    if (DateTime.UtcNow < refuseUntil) { candidate.Abort(); candidate.Dispose(); Interlocked.Increment(ref Refused); continue; }
+                    hello = await ProofNode.Read(candidate, token);
+                }
+                catch (Exception) when (!token.IsCancellationRequested) { continue; } // Agente muerto a mitad del saludo.
+                using var accepted = candidate;
                 if (hello.GetProperty("type").GetString() != "hello") throw new InvalidDataException();
                 LastHello = hello.GetProperty("recoveryState").GetString();
+                LastHelloRemaining = hello.TryGetProperty("localRemainingSeconds", out var local) ? local.ToString() : "ausente";
                 lock (gate) { socket = accepted; Connections++; }
                 await node.Send(accepted, Current(), token);
                 try

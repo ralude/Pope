@@ -57,6 +57,8 @@ existente; ADR-0018 aceptado el 2026-10-08, pendiente de demostrar el mecanismo 
 - **Activación y dependencias.** Actúa cuando hay un host asociado al agente; hasta T22 eso solo ocurre en los ensayos con `RunForHostAsync`. Sin dependencias nuevas.
 - **Pendiente.** Anticheat y juegos reales (T56), y la restauración de perfiles (spec 004).
 
+**Concreción T27 (2026-10-19):** el host detecta la muerte del agente por su proceso retenido (temporizador de 100 ms). Entonces bloquea, olvida la sesión, envía al hijo de bloqueo un `locked` sin sesión y congela el silencio de pausa. No intenta conectarse a otro agente: sustituir el host es T22. Un agente reiniciado parte de la recuperación de identidad (sin autorización ni tiempo) y no publica ninguna copia hasta oír al nodo, de modo que el host conserva su bloqueo inicial. El diario de audio mantiene el mute original hasta el estado nuevo. No hay mantenimiento ni tiempo offline: la emergencia sigue en T53/T54.
+
 **Cambio de orden (mantenedor, 2026-10-09):** aplazar T10 y continuar las siguientes
 tareas aprobadas T11–T20. Sustituye las indicaciones históricas de detener T11 por el
 gate de T10. El mantenimiento sigue sin demostrar; no integrarlo hasta cerrar T10.

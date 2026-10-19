@@ -36,7 +36,9 @@ internal sealed class ProofNode : IDisposable
         listener.Start();
     }
 
-    internal AgentConfiguration Configuration() => AgentConfiguration.Parse(JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object>
+    internal AgentConfiguration Configuration() => AgentConfiguration.Parse(ConfigurationJson());
+    // Para un agente de ensayo en otro proceso: solo identidad de prueba y credencial efímera.
+    internal byte[] ConfigurationJson() => JsonSerializer.SerializeToUtf8Bytes(new Dictionary<string, object>
     {
         ["version"] = 1,
         ["pcId"] = PcId,
@@ -44,7 +46,7 @@ internal sealed class ProofNode : IDisposable
         ["nodeUrl"] = $"https://127.0.0.1:{((IPEndPoint)listener.LocalEndpoint).Port}",
         ["nodeCertificate"] = Convert.ToBase64String(certificate.RawData),
         ["credential"] = credential
-    }));
+    });
 
     internal async Task<WebSocket> Accept(CancellationToken token)
     {
