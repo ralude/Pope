@@ -373,6 +373,8 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** matar servicio con PC bloqueada/activa/pausada, reinicio sin nodo, journal corrupto y ausencia de tiempo adicional; no sustituir el acceso de emergencia T53/T54.
   - **Commit:** `feat(native): recupera el control tras reiniciar el servicio`.
   - **Alcance confirmado (mantenedor, 2026-10-12):** el host bloquea al perder el agente; el nuevo agente conserva el bloqueo hasta estado nuevo del nodo. Sin mantenimiento offline ni tiempo antiguo. T53/T54 conservan la emergencia administrativa; el ensayo SCM real pendiente no se declara probado.
+  - **División previa (2026-10-19):** T27a comportamiento del host y del agente reiniciado; T27b ensayo real matando el proceso del agente (bloqueado, activo y pausado) y reiniciándolo sin nodo, más batería general.
+    - [x] **T27a (2026-10-19):** al perder el agente, el host bloquea como antes. Además olvida la sesión, con lo que Alt+Tab vuelve a inhibirse, envía al bloqueo la pantalla sin sesión y congela el silencio de pausa. Este host no se reconecta a otro agente; sustituirlo corresponde a T22. Un agente reiniciado no publica ningún «locked» sintético hasta oír al nodo, con lo que el host conserva su bloqueo inicial y no devuelve el sonido en plena pausa. Antes de oír al nodo no hay tiempo local en hello ni en latidos. 408 nativos.
 
 ### Control remoto y mantenimiento
 

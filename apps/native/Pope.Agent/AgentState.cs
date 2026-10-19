@@ -17,6 +17,7 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
     private bool billing;
     private bool rejected;
     private bool authorized;
+    private bool heard;
     internal event Action<byte[]>? RecoveryChanged;
     // REQ-003-34: solo el nodo abre o termina una sesión; pausa, revocación y el agotamiento
     // local sin red no la terminan. Se avisan fuera del cerrojo, en orden: fin y luego inicio.
@@ -41,6 +42,7 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
 
     private void Track(JsonElement message)
     {
+        heard |= message.GetProperty("type").GetString() is "state" or "sessionEnded" or "pcAuthenticationError";
         switch (message.GetProperty("type").GetString())
         {
             case "state":
@@ -68,6 +70,12 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
     internal long? RemainingSeconds
     {
         get { lock (gate) return Remaining(); }
+    }
+    // REQ-003-32 / T27: un agente recién arrancado no publica estado hasta oír al nodo; un
+    // «locked» sintético haría creer al host que ya no hay pausa y le devolvería el sonido.
+    internal bool Known
+    {
+        get { lock (gate) return heard; }
     }
     internal bool Blocked
     {

@@ -21,7 +21,7 @@ internal sealed class DesktopCoordinator : IDisposable
     private JsonElement status = HostBridge.Offline();
     private readonly DesktopTransition transition;
     private readonly object gate = new();
-    private bool childReady;
+    private bool childReady, agentLost;
     internal bool Blocked => transition.Blocked;
     internal string LockName => locked.Name;
 
@@ -57,8 +57,19 @@ internal sealed class DesktopCoordinator : IDisposable
     {
         lock (gate)
         {
+            if (!bridge.ServerAlive && !agentLost)
+            {
+                // T27 / REQ-003-32: sin agente no hay autoridad. Se olvida la sesión (Alt+Tab
+                // vuelve a inhibirse) y el bloqueo muestra la pantalla sin sesión, no botones
+                // que ya no pueden llegar al nodo. Este host no se reconecta a otro agente.
+                agentLost = true;
+                var locked = JsonSerializer.SerializeToElement(new { version = 1, kind = "message", message = new { type = "state", status = "locked" }, elapsedSeconds = 0 });
+                authorization.Apply(locked);
+                Volatile.Read(ref current)?.TrySend(JsonSerializer.SerializeToUtf8Bytes(locked));
+            }
             // REQ-002-07: el silencio sigue a la pausa del nodo, también sin red ni hijo listo.
-            if (authorization.Known) audio.Update(authorization.Paused);
+            // Sin agente se congela: el host que lo sustituya decide con el estado nuevo del nodo.
+            if (authorization.Known && !agentLost) audio.Update(authorization.Paused);
             // Una desconexión LAN conserva autorización monotónica; perder el agente no.
             if (!childReady) return;
             var desired = authorization.Blocked || child.HasExited || !bridge.ServerAlive;

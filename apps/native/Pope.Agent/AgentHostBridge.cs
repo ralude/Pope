@@ -74,6 +74,8 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
     private void PublishStatus() => Publish(new { version = 1, kind = "status", status = online ? "online" : "offline", pcName });
     private void PublishSnapshot()
     {
+        // T27: hasta oír al nodo el host se queda en su bloqueo inicial, sin copia sintética.
+        if (!state.Known) return;
         var snapshot = state.Snapshot(); PublishMessage(snapshot.Message, snapshot.ElapsedSeconds);
     }
     private void PublishMessage(JsonElement message, long elapsedSeconds) => Publish(new { version = 1, kind = "message", message, elapsedSeconds });

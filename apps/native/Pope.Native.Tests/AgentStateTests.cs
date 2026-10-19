@@ -86,6 +86,23 @@ public sealed class AgentStateTests
         Assert.True(restarted.Blocked); Assert.Equal("unknown", JsonSerializer.SerializeToElement(restarted.Hello()).GetProperty("recoveryState").GetString());
     }
 
+    [Fact(DisplayName = "REQ-003-32/002-31 (T27): un agente reiniciado no conoce nada ni concede tiempo hasta oír al nodo")]
+    public void RestartedAgentWaitsForNode()
+    {
+        var state = new AgentState(Pc); byte[]? saved = null;
+        state.RecoveryChanged += bytes => saved = bytes;
+        state.Apply(Active());
+        state.Apply(Message(new { type = "controlState", serverTime = "2026-10-11T00:00:00Z", context = new { kind = "session", revision = Pc, sessionId = Session } }));
+        Assert.True(state.Known);
+        var restarted = new AgentState(Pc); restarted.Restore(saved!);
+        Assert.False(restarted.Known); Assert.True(restarted.Blocked); Assert.Null(restarted.RemainingSeconds);
+        var hello = JsonSerializer.SerializeToElement(restarted.Hello());
+        Assert.Equal(JsonValueKind.Null, hello.GetProperty("localRemainingSeconds").ValueKind);
+        Assert.Equal(JsonValueKind.Null, JsonSerializer.SerializeToElement(restarted.Heartbeat()).GetProperty("localRemainingSeconds").ValueKind);
+        restarted.Apply(Message(new { type = "state", status = "locked" }));
+        Assert.True(restarted.Known); Assert.True(restarted.Blocked);
+    }
+
     private sealed class Clock : TimeProvider
     {
         internal long Ticks; internal DateTimeOffset Utc = DateTimeOffset.UtcNow;

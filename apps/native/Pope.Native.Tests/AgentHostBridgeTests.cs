@@ -9,7 +9,7 @@ namespace Pope.Native.Tests;
 
 public sealed class AgentHostBridgeTests
 {
-    [Fact(DisplayName = "REQ-003-63: puente del agente muestra bloqueo offline y conserva requestId sin secretos")]
+    [Fact(DisplayName = "REQ-003-63/T27: sin noticias del nodo solo hay estado offline (sin copia sintética) y conserva requestId sin secretos")]
     public async Task OfflineBridge()
     {
         using var configuration = AgentConfiguration.Parse(JsonSerializer.SerializeToUtf8Bytes(AgentConfigurationTests.Fixture()));
@@ -24,8 +24,7 @@ public sealed class AgentHostBridgeTests
             using var client = await PipeEndpoints.Connect(name, retained, stop.Token);
             var status = ProtocolValidation.Parse(await PipeFrames.ReadAsync(client, "bridge-event", stop.Token), "bridge-event");
             Assert.Equal("offline", status.GetProperty("status").GetString());
-            var snapshot = ProtocolValidation.Parse(await PipeFrames.ReadAsync(client, "bridge-event", stop.Token), "bridge-event");
-            Assert.Equal("locked", snapshot.GetProperty("message").GetProperty("status").GetString());
+            // El siguiente frame es la respuesta al login: ningún «locked» inventado antes del nodo.
             await PipeFrames.WriteAsync(client, "{\"type\":\"login\",\"requestId\":\"prueba\",\"username\":\"ana\",\"password\":\"secreto-ficticio\"}"u8.ToArray(), "shell-request", stop.Token);
             var response = await PipeFrames.ReadAsync(client, "bridge-event", stop.Token);
             var message = ProtocolValidation.Parse(response, "bridge-event").GetProperty("message");
