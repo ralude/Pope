@@ -152,6 +152,18 @@ export const pcCommandResponseSchema = z.strictObject({
   status: pcCommandStatusSchema,
   lastResult: pcCommandResultSchema.nullable(),
 });
+export type PcCommandResponse = z.infer<typeof pcCommandResponseSchema>;
+
+/**
+ * Nodo → panel (T28): contexto vigente que el panel devuelve en `expected`, si la PC está
+ * conectada y la orden que la reserva, si hay alguna.
+ */
+export const pcControlSnapshotSchema = z.strictObject({
+  context: pcControlContextSchema,
+  connected: z.boolean(),
+  reservation: pcCommandResponseSchema.nullable(),
+});
+export type PcControlSnapshot = z.infer<typeof pcControlSnapshotSchema>;
 
 /**
  * Elegibilidad de una orden nueva; la deduplicación durable corresponde al journal.

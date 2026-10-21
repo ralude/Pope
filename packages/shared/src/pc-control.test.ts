@@ -2,11 +2,19 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 
 import {
+  domainEventSchema,
+  pcCommandAcknowledgedEventSchema,
+  pcCommandEventKindSchema,
+} from './events.js';
+
+import {
   isPcCommandCurrent,
   pcCommandAckMessageSchema,
   pcCommandRequestSchema,
   pcCommandSchema,
   pcCommandErrorSchema,
+  pcCommandFailureCodeSchema,
+  pcCommandKindSchema,
   pcNativeActionSchema,
   STAFF_MESSAGE_DURATION_SECONDS,
   STAFF_MESSAGE_MAX_CHARACTERS,
@@ -157,5 +165,49 @@ describe('órdenes de PC', () => {
         message: 'Ese ID identifica otra orden',
       }).code,
     ).toBe('idempotency_conflict');
+  });
+});
+
+describe('eventos de órdenes (T28)', () => {
+  it('copian exactamente los tipos de orden y los fallos del contrato', () => {
+    expect(pcCommandEventKindSchema.options).toEqual(pcCommandKindSchema.options);
+    expect(
+      pcCommandAcknowledgedEventSchema.shape.payload.shape.failureCode.unwrap().options,
+    ).toEqual(pcCommandFailureCodeSchema.options);
+  });
+
+  it('solo el personal pide órdenes y solo el sistema registra acuses y vencimientos', () => {
+    const pc = { id: ID, name: 'PC 05' };
+    const base = { id: ID, version: 1, occurredAt: TIME };
+    const requested = {
+      ...base,
+      type: 'pc.command_requested',
+      actor: { kind: 'staff', staffId: ID, name: 'Ana' },
+      payload: {
+        commandId: ID,
+        pc,
+        kind: 'lock',
+        expected: { kind: 'free', revision: ID },
+        expiresAt: TIME,
+        replacesCommandId: null,
+      },
+    };
+    expect(domainEventSchema.safeParse(requested).success).toBe(true);
+    expect(domainEventSchema.safeParse({ ...requested, actor: { kind: 'system' } }).success).toBe(
+      false,
+    );
+    const expired = {
+      ...base,
+      type: 'pc.command_expired',
+      actor: { kind: 'system' },
+      payload: { commandId: ID, pc, kind: 'lock' },
+    };
+    expect(domainEventSchema.safeParse(expired).success).toBe(true);
+    expect(
+      domainEventSchema.safeParse({
+        ...expired,
+        actor: { kind: 'staff', staffId: ID, name: 'Ana' },
+      }).success,
+    ).toBe(false);
   });
 });

@@ -64,6 +64,39 @@ const examples = {
     endedAt: '2026-09-25T22:31:00Z',
     durationSeconds: 60,
   }),
+  // Spec 003: REQ-003-20, T28.
+  'pc.command_requested': envelope('pc.command_requested', {
+    commandId: id(40),
+    pc: PC05,
+    kind: 'restart',
+    expected: { kind: 'free', revision: id(41) },
+    expiresAt: '2026-09-25T22:30:30Z',
+    replacesCommandId: null,
+  }),
+  'pc.command_acknowledged': envelope(
+    'pc.command_acknowledged',
+    {
+      commandId: id(40),
+      pc: PC05,
+      kind: 'restart',
+      status: 'accepted',
+      failureCode: null,
+      reportedAt: '2026-09-25T22:30:01Z',
+      late: false,
+      reservationReleased: false,
+    },
+    { kind: 'system' },
+  ),
+  'pc.command_expired': envelope(
+    'pc.command_expired',
+    { commandId: id(40), pc: PC05, kind: 'lock' },
+    { kind: 'system' },
+  ),
+  'pc.reservation_released': envelope(
+    'pc.reservation_released',
+    { commandId: id(40), pc: PC05, kind: 'powerOff', reason: 'reconnected' },
+    { kind: 'system' },
+  ),
   'staff.technical_login_locked': envelope(
     'staff.technical_login_locked',
     {

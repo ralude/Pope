@@ -14,6 +14,7 @@ import { CustomerAuthService } from '../customers/customer-auth.service.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
+import { PcCommandsService } from './pc-commands.service.js';
 import { PcControlService } from './pc-control.service.js';
 import { PausesService } from './pauses.service.js';
 import { customerInactiveMessage, PcRequestRefused } from './session-state.js';
@@ -67,6 +68,7 @@ export class PcProtocolService {
     private readonly clock: Clock,
     private readonly authentication: PcAuthenticationService,
     private readonly control: PcControlService,
+    private readonly commands: PcCommandsService,
     @Inject(DATABASE) private readonly db: Database,
   ) {}
 
@@ -158,6 +160,7 @@ export class PcProtocolService {
     else this.sessions.touch(pc.id);
     connection.send(await this.sessions.stateFor(pc.id));
     await this.control.sync(pc.id, message.controlContext);
+    await this.commands.reconnected(pc.id);
   }
 
   /** Mensajes de una PC ya identificada. */
@@ -202,8 +205,12 @@ export class PcProtocolService {
           combos: await this.combos.forSale(),
         });
         return;
+      case 'commandAck':
+        // Sin respuesta: la PC no espera nada y el panel lo verá en el estado de la orden.
+        await this.commands.acknowledge(pc.id, message);
+        return;
       default:
-        // Las variantes de control/mantenimiento se activan en sus tareas posteriores.
+        // Las variantes de mantenimiento se activan en sus tareas posteriores.
         connection.send(
           protocolError('invalid_message', 'Operación aún no disponible', requestIdOf(message)),
         );

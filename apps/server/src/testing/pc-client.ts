@@ -43,6 +43,8 @@ export class PcTestClient {
   control: Extract<NodeToPcMessage, { type: 'controlState' }> | null = null;
   /** Cuántos `controlState` ha recibido, para comprobar que el nodo no los repite. */
   controls = 0;
+  /** Órdenes recibidas, en orden; también aparte, como las consume el agente en C#. */
+  readonly commands: Extract<NodeToPcMessage, { type: 'command' }>['command'][] = [];
 
   private constructor(private readonly ws: WebSocket) {
     ws.on('message', (data: Buffer) => {
@@ -50,6 +52,10 @@ export class PcTestClient {
       if (message.type === 'controlState') {
         this.control = message;
         this.controls++;
+        return;
+      }
+      if (message.type === 'command') {
+        this.commands.push(message.command);
         return;
       }
       if (this.waiting) {

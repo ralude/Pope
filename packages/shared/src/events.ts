@@ -140,6 +140,82 @@ export const staffTechnicalLoginLockedEventSchema = event(
   }),
 ).extend({ actor: z.strictObject({ kind: z.literal('system') }) });
 
+// ─── Órdenes a las PCs (REQ-003-20, T28) ──────────────────────────────────────────────────
+
+// Copias locales de los contratos de `pc-control.ts`, que depende de este módulo: importarlos
+// aquí crearía un ciclo. Los tests de `pc-control` comprueban que coinciden.
+export const pcCommandEventKindSchema = z.enum([
+  'lock',
+  'restart',
+  'powerOff',
+  'showMessage',
+  'startMaintenance',
+  'endMaintenance',
+]);
+const commandContextSchema = z.strictObject({
+  kind: z.enum(['free', 'session', 'maintenance']),
+  revision: idSchema,
+});
+const systemActorSchema = z.strictObject({ kind: z.literal('system') });
+
+/**
+ * El personal pidió una orden. No copia el texto de un mensaje: la auditoría registra quién
+ * envió qué tipo de orden y a qué PC. `replacesCommandId`: orden fallida o vencida cuya
+ * reserva toma esta.
+ */
+export const pcCommandRequestedEventSchema = event(
+  'pc.command_requested',
+  1,
+  z.strictObject({
+    commandId: idSchema,
+    pc: pcRefSchema,
+    kind: pcCommandEventKindSchema,
+    expected: commandContextSchema,
+    expiresAt: utcInstantSchema,
+    replacesCommandId: idSchema.nullable(),
+  }),
+).extend({ actor: actorSchema.options[1] });
+
+/**
+ * La PC respondió a una orden. `reportedAt` es la hora que dice la PC; `late`, que llegó
+ * después de vencer. Un acuse no demuestra un apagado físico.
+ */
+export const pcCommandAcknowledgedEventSchema = event(
+  'pc.command_acknowledged',
+  1,
+  z.strictObject({
+    commandId: idSchema,
+    pc: pcRefSchema,
+    kind: pcCommandEventKindSchema,
+    status: z.enum(['accepted', 'applied', 'failed']),
+    failureCode: z
+      .enum(['expired', 'stale_context', 'pc_unavailable', 'invalid_action', 'native_failure'])
+      .nullable(),
+    reportedAt: utcInstantSchema,
+    late: z.boolean(),
+    reservationReleased: z.boolean(),
+  }),
+).extend({ actor: systemActorSchema });
+
+/** Pasaron 30 s sin respuesta de la PC; la reserva se conserva porque el efecto es incierto. */
+export const pcCommandExpiredEventSchema = event(
+  'pc.command_expired',
+  1,
+  z.strictObject({ commandId: idSchema, pc: pcRefSchema, kind: pcCommandEventKindSchema }),
+).extend({ actor: systemActorSchema });
+
+/** La PC volvió a conectar tras aceptar un reinicio o apagado: deja de estar reservada. */
+export const pcReservationReleasedEventSchema = event(
+  'pc.reservation_released',
+  1,
+  z.strictObject({
+    commandId: idSchema,
+    pc: pcRefSchema,
+    kind: z.enum(['restart', 'powerOff']),
+    reason: z.literal('reconnected'),
+  }),
+).extend({ actor: systemActorSchema });
+
 // ─── Cuentas y saldo ────────────────────────────────────────────────────────────────────
 
 export const customerCreatedEventSchema = event(
@@ -839,6 +915,10 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   pcMaintenanceStartedEventSchema,
   pcMaintenanceEndedEventSchema,
   staffTechnicalLoginLockedEventSchema,
+  pcCommandRequestedEventSchema,
+  pcCommandAcknowledgedEventSchema,
+  pcCommandExpiredEventSchema,
+  pcReservationReleasedEventSchema,
   customerCreatedEventSchema,
   customerStatusChangedEventSchema,
   customerLoginLockedEventSchema,

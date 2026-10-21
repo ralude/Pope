@@ -4,15 +4,15 @@
 > agente de IA), empieza aquí. Este archivo se actualiza **en el mismo commit** que cada
 > tarea terminada.
 
-**Última actualización:** 2026-10-21 · T28a completa; siguiente T28b; T28–T42 autorizadas (T34 tras aprobar su diseño, T37 tras T10); T22 aplazada; T15c3/T10 abiertas
+**Última actualización:** 2026-10-21 · T28 completa en desarrollo; siguiente T29; T34 tras aprobar su diseño, T37 tras T10; T22 aplazada; T15c3/T10 abiertas
 
 ## Ahora
 
 | | |
 |---|---|
-| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09, T11–T14, T16–T21 y T23–T27 completos en desarrollo, sin VM; T22 aplazada (autorizada, sin implementar); T10 aplazada y prueba SCM de T15 pendiente; T28–T42 autorizadas (2026-10-21) con T34/T37 en espera; T43–T59 Borrador. La 005 mantiene su T07 de revisión |
-| **Siguiente tarea** | **T28b** (órdenes con acuses, caducidad y reserva; endpoints del panel). T28a hecha: contexto de control y rechazo de sesiones nuevas con reserva o mantenimiento. Después T29–T33, el diseño de T34 para aprobar, T35, T36, T38 y T40 en lo independiente de T10, T39, T41 y T42. T37 espera a T10; T22 sigue aplazada. Siguen abiertas T15c3 (aceptar UAC para el SCM) y T10 |
-| **Progreso** | Spec 003: 24 / 59 grupos; T01–T09, T11–T14, T16–T21 y T23–T27 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T42 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
+| **Spec en curso** | [003 · Arranque y bloqueo de PC](docs/specs/003-bloqueo-de-pc/spec.md): T01–T09, T11–T14, T16–T21, T23–T28 completos en desarrollo, sin VM; T22 aplazada (autorizada, sin implementar); T10 aplazada y prueba SCM de T15 pendiente; T28–T42 autorizadas (2026-10-21) con T34/T37 en espera; T43–T59 Borrador. La 005 mantiene su T07 de revisión |
+| **Siguiente tarea** | **T29** (bloquear mediante el cierre existente). T28 hecha: el nodo coordina órdenes y reservas, pero aún solo admite bloquear o reiniciar/apagar una PC libre. Después T30–T33, el diseño de T34 para aprobar, T35, T36, T38 y T40 en lo independiente de T10, T39, T41 y T42. T37 espera a T10; T22 sigue aplazada. Siguen abiertas T15c3 (aceptar UAC para el SCM) y T10 |
+| **Progreso** | Spec 003: 25 / 59 grupos; T01–T09, T11–T14, T16–T21 y T23–T28 completas. Pruebas Home aceptadas para T08b (2026-10-08); continuación hasta T42 autorizada. Spec 002: 19 / 19 tareas (fase 1), fase 2 en tasks 003. Spec 005: 41 / 42 |
 | **Bloqueos** | T15c3 espera aceptar UAC en Windows para ensayo SCM; cancelación previa sin servicio/carpeta creados. T15 abierta; T16–T21 y T23–T27 completas en desarrollo; T22 aplazada. El cierre de procesos (T26) y el relevo del host (T27) dependen de que el agente lance y asocie el host, cosa que hasta T22 solo ocurre en los ensayos. SCM y reinicio real del servicio sin probar (T15c3). Juegos/anticheat del local, audio exclusivo y varios monitores sin probar (T56): no se declara compatible ADR-0023. Compatibilidad Windows 10 Pro 22H2 y Windows 11 Pro 25H2 pendiente antes de entregar al local; ya no bloquea T09 por aprobación explícita del mantenedor (2026-10-08). Guest Control recuperado tras reinicio de VM autorizado el 2026-10-09; snapshot e inventario actuales en mediciones. Historial: en la VM Home 22H2 (19045.2965), 8192 MB y ahora 4 vCPU, ambos artefactos autocontenidos arrancan y pasan los 334 tests, sin omitidos. Home aceptado como evidencia para cerrar T08b/T08. T09 completa: escritorio/WebView2/entrada/Alt+Tab y juego exclusivo verificados en VM, aceptados por el mantenedor; pruebas físicas de juegos reales/anticheat en T25/T56 antes de entrega. T10 parcial con ADR-0018 Aceptado: custodia/token/perfil/ACL, WebView2 limitado y cierre de ventana/hijo pasan en VM, pero Explorer lanzado termina; Windows completo y muerte del broker pendientes. Revisar ruta antes de integrar mantenimiento; T11–T20 pueden avanzar por instrucción del mantenedor (2026-10-09). Retiro de credencial/servicio/árbol/procesos propios y retorno original comprobados. Ensayo previo usó vboxuser con token medio/alto; ahora cuenta estándar temporal creada/verificada, separación de sesión/perfiles aún pendiente. Contrato de T07 resuelto: opción A, recorte exterior solo del usuario con reglas exportadas para C#. Inventario confirmado: 12 PCs Windows 10 Pro 22H2 y una Windows 11 Pro 25H2, sin congelador. Compatibilidad y persistencia nativas pendientes de verificar. Revocación: consumo detenido, misma PC/sesión con credencial nueva, encargado/administrador, código local de un uso/10 min y vuelta al estado previo con pausa conservada confirmados (opciones A, ADR-0020/0021/0022, REQ-002-33). Contratos/prueba del asistente y confirmación temporal pendientes. Emergencia: reglas de uso cerradas en ADR-0024 a ADR-0028, con auditoría por cuenta Windows/PC/entrada/salida UTC sin nombre ni motivo; mecanismo, contratos/actor y pruebas pendientes |
 
 ## Cómo retomar
@@ -98,7 +98,7 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 |---|---|---|
 | [001 Cuentas y sesiones](docs/specs/001-cuentas-y-sesiones/spec.md) | Implementada (REQ-001-13, Bs, verificado en T07 de la 005; en revisión) | 69 / 69 |
 | [002 Pausa de sesión](docs/specs/002-pausa-de-sesion/spec.md) | Fase 1 implementada, verificada y aprobada. Fase 2 pendiente de la spec 003 | 19 / 19 |
-| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T09, T11–T14, T16–T21 y T23–T27 completos en desarrollo sin VM; T22 aplazada (autorizada); T10 y SCM T15 pendientes; compatibilidad Pro, juegos/anticheat y audio exclusivo pendientes antes de entrega (T56); T28–T59 Borrador | 24 / 59 |
+| [003 Arranque y bloqueo de la PC](docs/specs/003-bloqueo-de-pc/spec.md) | T01–T09, T11–T14, T16–T21 y T23–T28 completos en desarrollo sin VM; T22 aplazada (autorizada); T10 y SCM T15 pendientes; compatibilidad Pro, juegos/anticheat y audio exclusivo pendientes antes de entrega (T56); T28–T59 Borrador | 25 / 59 |
 | [004 Lista blanca de aplicaciones](docs/specs/004-lista-blanca-de-aplicaciones/spec.md) | Borrador | — |
 | [005 Inventario y caja](docs/specs/005-inventario-y-caja/spec.md) | En curso: partes 1 (tasa) y 2 (inventario y caja) aprobadas; parte 2 verificada; parte 1 en revisión (T07); parte 3 en borrador | 41 / 42 |
 | [006 Sincronización y web del dueño](docs/specs/006-sincronizacion-y-web-del-dueno/spec.md) | Borrador | — |
@@ -108,6 +108,8 @@ Cosas que no bloquean la tarea actual, pero que alguien tiene que hacer:
 ## Bitácora
 
 Las 10 entradas más recientes, la última arriba. El detalle está en `git log`.
+
+- **2026-10-21:** T28b/T28 completas en desarrollo: órdenes del panel idempotentes por ID, con eventos, vencimiento a los 30 s, acuses validados que no retroceden y reserva que impide abrir sesiones hasta confirmar el efecto. Un reinicio/apagado aceptado libera la PC cuando vuelve a conectar. Por ahora solo bloquear o reiniciar/apagar una PC libre; el resto se activa en T29–T40. Batería correcta: 1 733 tests. Pendiente: PostgreSQL real antes de entregar y la ejecución en el agente (T29–T31).
 
 - **2026-10-21:** T28a: el nodo calcula el contexto de control de cada PC por su ocupación (libre, sesión con su pausa o mantenimiento) y cambia la revisión solo si la ocupación cambia. Lo envía tras `hello` y cuando un latido trae otra copia. Login, temporal y restauración se rechazan (`pc_unavailable`) con una orden en curso o un mantenimiento. Migración 0029. Siguiente T28b.
 
@@ -126,5 +128,3 @@ Las 10 entradas más recientes, la última arriba. El detalle está en `git log`
 - **2026-10-19:** T24b/T24 completas: Core Audio por COM en el host; ensayo real con 5 salidas: la pausa las silencia en ≈ 75 ms, la reconexión y el host relanzado no recapturan y reanudar restaura mute y volumen originales, incluido un mute previo. Primer intento fallido por el disparador del ensayo (corregido; sin cambios de audio). Batería correcta, 1 697 tests. Pendiente en PC real: audio exclusivo y comprobación audible (T56). Siguiente T25.
 
 - **2026-10-18:** T24a completa: lógica del silencio de pausa con diario del mute original (sin recapturar tras reinicio/reconexión), salidas nuevas o desconectadas y diario corrupto; 9 tests. Siguiente T24b (Core Audio y ensayo real).
-
-- **2026-10-18:** T23b/T23 completas: ensayo real con agente, doble WSS del nodo, host y app en escritorio temporal: pausa desde React, vencida cobrando, sin red, reanudación desde el panel y con teclado («¿Eres…?») y cierre en pausa, sin entrada a la app ni cerrarla. Pausar → bloqueo ≤ 39,7 ms en loopback. Batería correcta, 1 687 tests; dos fallos puntuales del servidor en paralelo no reproducidos. Siguiente T24.
