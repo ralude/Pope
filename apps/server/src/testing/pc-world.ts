@@ -37,7 +37,20 @@ export class PcWorld {
   async pc(n: number, sessionId: string | null = null): Promise<PcTestClient> {
     const { pc } = await PcTestClient.hello(this.url, devPcId(n), sessionId);
     this.clients.push(pc);
+    await PcWorld.settle(pc);
     return pc;
+  }
+
+  /**
+   * Espera a que el nodo procese lo que la PC respondió a lo recibido hasta ahora, como el
+   * bloqueo pendiente tras un cierre (T29). El nodo atiende los mensajes de cada PC en orden:
+   * tras la primera respuesta la PC ya recibió la orden y contestó; tras la segunda, el nodo
+   * ya procesó esa contestación.
+   */
+  static async settle(pc: PcTestClient): Promise<void> {
+    for (let round = 0; round < 2; round++) {
+      await pc.request({ type: 'listCombos', requestId: 'settle' });
+    }
   }
 
   /**

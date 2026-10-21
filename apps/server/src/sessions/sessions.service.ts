@@ -15,6 +15,7 @@ import {
   type CustomerBalances,
   newId,
   type NodeToPcMessage,
+  type PcCommandRequest,
   pauseAllowance,
   pendingWarnings,
   seconds,
@@ -43,6 +44,7 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.j
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
 import { PcConnections, type PcIdentity } from './pc-connections.js';
+import { type CommandRow, PcCommandsService } from './pc-commands.service.js';
 import { PcControlService } from './pc-control.service.js';
 import {
   accountBalances,
@@ -95,6 +97,30 @@ function onHold(pause: PauseRow | null): boolean {
   return pause !== null && !pauseBilling(pause);
 }
 
+/** Opciones del cierre de una sesión (`SessionsService.close`). */
+export interface CloseOptions {
+  billToNow?: boolean;
+  ifNotBeatAfter?: Date;
+  onlyIfExhausted?: boolean;
+  /** Cómo termina su pausa abierta, si la tiene (spec 002). */
+  pauseEndReason?: PauseEndReason;
+  /**
+   * Se llama dentro de la transacción, con la sesión ya bloqueada y antes de cerrarla:
+   * puede emitir sus propios eventos, que quedan antes de `session.ended`, o devolver
+   * `false` para no cerrar (p. ej. el vencimiento de una pausa que ya se quitó).
+   */
+  within?: (tx: Transaction, emit: Emit, locked: SessionRow) => Promise<boolean>;
+  /** Petición «Bloquear» del panel: su ID identifica el bloqueo de este cierre (T29). */
+  lockRequest?: PcCommandRequest;
+}
+
+/** Sesión recién cerrada en una transacción, con el bloqueo que pidió para su PC. */
+export interface ClosedSession {
+  row: SessionRow;
+  reason: SessionEndReason;
+  lock: CommandRow | null;
+}
+
 /** Lo que la PC dice de su sesión en un `hello` o un `heartbeat`. */
 export interface SessionClaim {
   sessionId: string | null;
@@ -136,6 +162,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     private readonly settings: SettingsService,
     private readonly clock: Clock,
     private readonly control: PcControlService,
+    private readonly commands: PcCommandsService,
   ) {}
 
   /** El `state` de una sesión activa, con la tasa vigente (REQ-005-36) y su pausa. */
@@ -495,95 +522,122 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
    * pasa `billToNow: false` para cobrar solo hasta el último latido (REQ-001-27) y
    * `ifNotBeatAfter` para no cerrar una sesión que acaba de latir. Un cierre por
    * agotamiento pasa `onlyIfExhausted` para no cerrar una sesión a la que se acaba de
-   * añadir tiempo o saldo. Avisa a la PC con `sessionEnded`. Devuelve la sesión cerrada, o
-   * `null` si ya no estaba activa o no se cumplió alguna de esas condiciones.
+   * añadir tiempo o saldo. Avisa a la PC con `sessionEnded` y le pide bloquearse (T29).
+   * Devuelve la sesión cerrada, o `null` si ya no estaba activa o no se cumplió alguna de
+   * esas condiciones.
    */
   async close(
     sessionId: string,
     reason: SessionEndReason,
     actor: Actor,
-    options: {
-      billToNow?: boolean;
-      ifNotBeatAfter?: Date;
-      onlyIfExhausted?: boolean;
-      /** Cómo termina su pausa abierta, si la tiene (spec 002). */
-      pauseEndReason?: PauseEndReason;
-      /**
-       * Se llama dentro de la transacción, con la sesión ya bloqueada y antes de cerrarla:
-       * puede emitir sus propios eventos, que quedan antes de `session.ended`, o devolver
-       * `false` para no cerrar (p. ej. el vencimiento de una pausa que ya se quitó).
-       */
-      within?: (tx: Transaction, emit: Emit, locked: SessionRow) => Promise<boolean>;
-    } = {},
+    options: CloseOptions = {},
   ): Promise<SessionRow | null> {
+    const ended = await this.events.inTransaction((tx, emit) =>
+      this.closeIn(tx, emit, sessionId, reason, actor, options),
+    );
+    if (ended) this.afterClose(ended);
+    return ended?.row ?? null;
+  }
+
+  /**
+   * El cierre de `close` dentro de una transacción ya abierta; tras el commit, llamar a
+   * `afterClose`. Bloquea la PC, la sesión y la cuenta en ese orden, el mismo que el login y
+   * las órdenes, para no interbloquearse con ellos. En la misma transacción pide el bloqueo
+   * de la PC, que queda reservada hasta que el agente lo confirme (T29, mantenedor
+   * 2026-10-21): con el personal que cerró como actor o, si no, el sistema.
+   */
+  async closeIn(
+    tx: Transaction,
+    emit: Emit,
+    sessionId: string,
+    reason: SessionEndReason,
+    actor: Actor,
+    options: CloseOptions = {},
+  ): Promise<ClosedSession | null> {
     const billToNow = options.billToNow ?? true;
-    const ended = await this.events.inTransaction(async (tx, emit) => {
-      const [locked] = await tx
-        .select()
-        .from(sessions)
-        .where(eq(sessions.id, sessionId))
-        .for('update');
-      if (locked?.status !== 'active') {
-        return null;
-      }
-      // Un latido que llegó mientras se decidía cerrar por falta de latidos la salva.
-      if (options.ifNotBeatAfter && locked.lastHeartbeatAt > options.ifNotBeatAfter) {
-        return null;
-      }
-      if (locked.customerId) {
-        // Bloquea también la cuenta: una compra o una recarga a la vez esperan al cierre.
-        await tx
-          .select({ id: customers.id })
-          .from(customers)
-          .where(eq(customers.id, locked.customerId))
-          .for('update');
-      }
-      if (options.onlyIfExhausted) {
-        const account = await this.accountOf(locked, tx);
-        if (remainingSeconds(locked, account?.balances ?? null) > 0) {
-          return null;
-        }
-      }
-      if (options.within && !(await options.within(tx, emit, locked))) {
-        return null;
-      }
-      const { row } = billToNow ? await this.checkpoint(locked, tx) : { row: locked };
-      await this.settle(row, actor, tx);
-      const [closed] = await tx
-        .update(sessions)
-        .set({ status: 'ended', endedAt: this.clock.now(), endReason: reason })
-        .where(eq(sessions.id, row.id))
-        .returning();
-      if (!closed) {
-        throw new Error('No se pudo cerrar la sesión');
-      }
-      // Una sesión que se cierra en pausa termina también su pausa (spec 002).
-      await tx
-        .update(sessionPauses)
-        .set({
-          endedAt: this.clock.now(),
-          endReason: options.pauseEndReason ?? 'session_closed',
-          endedBy: actor,
-        })
-        .where(and(eq(sessionPauses.sessionId, closed.id), isNull(sessionPauses.endedAt)));
-      await this.emitEnded(closed, reason, actor, tx, emit);
-      return closed;
-    });
-    if (ended) {
-      this.unwatch(ended.id);
-      const endedId = ended.id;
-      this.ended.add(endedId);
-      this.clock.schedule(ENDED_MEMORY_MS, () => {
-        this.ended.delete(endedId);
-        return Promise.resolve();
-      });
-      this.connections.send(ended.pcId, {
-        type: 'sessionEnded',
-        sessionId: ended.id,
-        reason,
-      });
+    const [target] = await tx
+      .select({ pcId: sessions.pcId })
+      .from(sessions)
+      .where(eq(sessions.id, sessionId));
+    const pc = target ? await this.control.lockPc(tx, target.pcId) : undefined;
+    if (!pc) {
+      return null;
     }
-    return ended;
+    const [locked] = await tx
+      .select()
+      .from(sessions)
+      .where(eq(sessions.id, sessionId))
+      .for('update');
+    if (locked?.status !== 'active') {
+      return null;
+    }
+    // Un latido que llegó mientras se decidía cerrar por falta de latidos la salva.
+    if (options.ifNotBeatAfter && locked.lastHeartbeatAt > options.ifNotBeatAfter) {
+      return null;
+    }
+    if (locked.customerId) {
+      // Bloquea también la cuenta: una compra o una recarga a la vez esperan al cierre.
+      await tx
+        .select({ id: customers.id })
+        .from(customers)
+        .where(eq(customers.id, locked.customerId))
+        .for('update');
+    }
+    if (options.onlyIfExhausted) {
+      const account = await this.accountOf(locked, tx);
+      if (remainingSeconds(locked, account?.balances ?? null) > 0) {
+        return null;
+      }
+    }
+    if (options.within && !(await options.within(tx, emit, locked))) {
+      return null;
+    }
+    const { row } = billToNow ? await this.checkpoint(locked, tx) : { row: locked };
+    await this.settle(row, actor, tx);
+    const [closed] = await tx
+      .update(sessions)
+      .set({ status: 'ended', endedAt: this.clock.now(), endReason: reason })
+      .where(eq(sessions.id, row.id))
+      .returning();
+    if (!closed) {
+      throw new Error('No se pudo cerrar la sesión');
+    }
+    // Una sesión que se cierra en pausa termina también su pausa (spec 002).
+    await tx
+      .update(sessionPauses)
+      .set({
+        endedAt: this.clock.now(),
+        endReason: options.pauseEndReason ?? 'session_closed',
+        endedBy: actor,
+      })
+      .where(and(eq(sessionPauses.sessionId, closed.id), isNull(sessionPauses.endedAt)));
+    await this.emitEnded(closed, reason, actor, tx, emit);
+    const lock = await this.commands.insertLockIn(
+      tx,
+      emit,
+      pc,
+      actor.kind === 'staff' ? actor : { kind: 'system' },
+      options.lockRequest,
+    );
+    return { row: closed, reason, lock };
+  }
+
+  /** Después del commit de `closeIn`: deja de vigilar la sesión y avisa a la PC. */
+  afterClose({ row, reason, lock }: ClosedSession): void {
+    this.unwatch(row.id);
+    const endedId = row.id;
+    this.ended.add(endedId);
+    this.clock.schedule(ENDED_MEMORY_MS, () => {
+      this.ended.delete(endedId);
+      return Promise.resolve();
+    });
+    this.connections.send(row.pcId, {
+      type: 'sessionEnded',
+      sessionId: row.id,
+      reason,
+    });
+    // Primero el fin de la sesión y después el bloqueo, que la PC compara con el contexto libre.
+    if (lock) this.commands.dispatch(lock);
   }
 
   /**

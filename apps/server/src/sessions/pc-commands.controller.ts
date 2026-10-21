@@ -12,6 +12,7 @@ import { type PcCommandRequest, pcCommandRequestSchema, type StaffProfile } from
 
 import { CurrentStaff, Roles } from '../auth/decorators.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
+import { PcCommandRequestsService } from './pc-command-requests.service.js';
 import { PcCommandException, PcCommandsService } from './pc-commands.service.js';
 
 /** Una petición que no cumple el contrato responde con el error de órdenes (plan T02b). */
@@ -32,7 +33,10 @@ class CommandRequestPipe extends ZodValidationPipe<typeof pcCommandRequestSchema
 /** Órdenes del panel a las PCs (spec 003, T28). El dueño solo consulta. */
 @Controller('pcs/:pcId')
 export class PcCommandsController {
-  constructor(private readonly commands: PcCommandsService) {}
+  constructor(
+    private readonly commands: PcCommandsService,
+    private readonly requests: PcCommandRequestsService,
+  ) {}
 
   @Get('control')
   @Header('Cache-Control', 'no-store')
@@ -48,7 +52,7 @@ export class PcCommandsController {
     @Body(new CommandRequestPipe()) body: PcCommandRequest,
     @CurrentStaff() member: StaffProfile,
   ) {
-    return this.commands.issue(pcId, body, {
+    return this.requests.issue(pcId, body, {
       kind: 'staff',
       staffId: member.id,
       name: member.displayName,

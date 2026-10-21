@@ -35,6 +35,13 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
 
   const db = () => world.testApp.database.db;
 
+  /** PC cuyo agente no responde solo a los bloqueos: el test decide cada acuse. */
+  async function manual(n: number) {
+    const pc = await world.pc(n);
+    pc.autoLock = false;
+    return pc;
+  }
+
   async function snapshot(n: number, cookie = ana) {
     const response = await world.api('GET', `/pcs/${devPcId(n)}/control`, cookie);
     return response.json<PcControlSnapshot>();
@@ -86,7 +93,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   const applied = { status: 'applied', effect: { kind: 'lock' } } as const;
 
   it('REQ-003-20: la PC recibe la orden con su contexto y queda reservada para los clientes', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const response = await issue(4, 'restart');
     expect(response).toMatchObject({
       status: 'requested',
@@ -114,7 +121,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: doble clic con el mismo ID devuelve la misma orden y la envía una vez', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const { context } = await snapshot(4);
     const body = { id: newId(), kind: 'lock', expected: context };
     const [first, second] = await Promise.all([order(4, body), order(4, body)]);
@@ -133,7 +140,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: no admite otra orden mientras una sigue en curso', async () => {
-    await world.pc(4);
+    await manual(4);
     await issue(4, 'lock');
     const { context } = await snapshot(4);
     const second = await order(4, { id: newId(), kind: 'restart', expected: context });
@@ -142,7 +149,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: rechaza contexto viejo, PC desconectada o desconocida, dueño y tipos aún no disponibles', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const { context } = await snapshot(4);
     const stale = await order(4, {
       id: newId(),
@@ -196,7 +203,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: el efecto confirmado libera la PC; los acuses repetidos o contradictorios no cambian nada', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const { command } = await issue(4, 'lock');
     await received(pc);
     await ack(pc, command.id, { status: 'accepted', kind: 'lock' });
@@ -221,8 +228,8 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-63: una PC no puede responder por otra ni con un efecto distinto', async () => {
-    const pc4 = await world.pc(4);
-    const pc5 = await world.pc(5);
+    const pc4 = await manual(4);
+    const pc5 = await manual(5);
     const { command } = await issue(4, 'restart');
     await ack(pc5, command.id, { status: 'accepted', kind: 'restart' });
     await ack(pc4, command.id, { status: 'accepted', kind: 'lock' });
@@ -231,7 +238,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: a los 30 s sin respuesta vence y conserva la reserva; un acuse tardío se registra', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const { command } = await issue(4, 'lock');
     await world.clock.tick(30_000);
     expect((await snapshot(4)).reservation).toMatchObject({ status: 'expired' });
@@ -248,7 +255,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: una orden nueva toma la reserva de una vencida o fallida; un fallo sin efecto la libera', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const first = await issue(4, 'lock');
     await world.clock.tick(30_000);
     const second = await issue(4, 'lock');
@@ -274,7 +281,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: un reinicio aceptado mantiene la reserva hasta que la PC vuelve', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const { command } = await issue(4, 'restart');
     await ack(pc, command.id, { status: 'accepted', kind: 'restart' });
     await world.clock.tick(60_000);
@@ -283,7 +290,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
 
     pc.close();
     await pc.closed;
-    const back = await world.pc(4);
+    const back = await manual(4);
     expect((await snapshot(4)).reservation).toBeNull();
     expect((await eventsOf('pc.reservation_released'))[0]).toMatchObject({
       actor: { kind: 'system' },
@@ -293,7 +300,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: si la PC se reconecta antes de vencer, recibe otra vez la orden pendiente', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const { command } = await issue(4, 'powerOff');
     pc.close();
     await pc.closed;
@@ -307,7 +314,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
   });
 
   it('REQ-003-20: login y orden simultáneos en la misma PC: solo uno de los dos ocupa la PC', async () => {
-    const pc = await world.pc(4);
+    const pc = await manual(4);
     const { context } = await snapshot(4);
     const [state, response] = await Promise.all([
       login(pc, 'juan'),

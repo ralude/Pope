@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { events, ledger, sessions } from '../db/schema.js';
 import { devPcId } from '../pcs/dev-pcs.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
+import { withoutPcControl } from '../testing/events.js';
 import { activeSession, heartbeat, login, PcWorld, summary } from '../testing/pc-world.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
 import { WalletService } from '../wallet/wallet.service.js';
@@ -84,7 +85,7 @@ describe('avisos y agotamiento (e2e, REQ-001-24, REQ-001-25, REQ-001-62)', () =>
 
     // Se cobró exactamente lo que había y no queda saldo negativo.
     const all = await world.testApp.database.db.select().from(events).orderBy(asc(events.seq));
-    expect(all.at(-1)).toMatchObject({
+    expect(withoutPcControl(all).at(-1)).toMatchObject({
       type: 'session.ended',
       actor: { kind: 'system' },
       payload: {

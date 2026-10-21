@@ -403,7 +403,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Alcance confirmado (mantenedor, 2026-10-21):** todos los cierres (Bloquear, Cerrar desde el panel, salida del cliente, agotamiento, falta de latidos y reinicio detectado) dejan la PC reservada hasta que el agente confirma el bloqueo y la limpieza de procesos. Los que no hace el personal piden el bloqueo con actor «sistema» (contrato y migración nuevos). Si la limpieza falla, la PC no admite a nadie hasta otro Bloquear.
   - **División (2026-10-21):** T29a contrato; T29b nodo; T29c agente. Ver la concreción T29 del plan.
   - [x] **T29a:** órdenes de bloqueo con actor «sistema» en el contrato, el evento y la base de datos (migración 0030); el sistema no puede pedir otra cosa.
-  - [ ] **T29b:** todo cierre reserva la PC con un bloqueo en la misma transacción; «Bloquear» con sesión la cierra y bloquea; un bloqueo solo libera la reserva al aplicarse y se repite al reconectar si quedó pendiente.
+  - [x] **T29b:** todo cierre reserva la PC con un bloqueo en la misma transacción; «Bloquear» con sesión la cierra y bloquea; un bloqueo solo libera la reserva al aplicarse y se repite al reconectar si quedó pendiente.
   - [ ] **T29c:** el agente valida y ejecuta el bloqueo, espera la limpieza T26 y responde aplicado o fallido.
 
 - [ ] **T30: Reiniciar y apagar con confirmación de estado**

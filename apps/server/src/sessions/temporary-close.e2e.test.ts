@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { events, ledger, sessions, sessionTopups } from '../db/schema.js';
 import { PcWorld, logout } from '../testing/pc-world.js';
+import { withoutPcControl } from '../testing/events.js';
 
 const MINUTE = 60_000;
 // 18:00 en Caracas de un lunes: 1,50 USD/h.
@@ -24,7 +25,7 @@ describe('cierre anticipado de una sesión temporal (e2e, REQ-001-69)', () => {
 
   async function lastEvent() {
     const all = await world.testApp.database.db.select().from(events).orderBy(asc(events.seq));
-    return all.at(-1);
+    return withoutPcControl(all).at(-1);
   }
 
   /** "Carlos" con 30 min pagados, que ya usó 5 y tiene 25 min restantes. */

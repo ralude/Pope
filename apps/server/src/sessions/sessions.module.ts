@@ -14,6 +14,7 @@ import { PanelHub } from './panel-hub.js';
 import { PausesService } from './pauses.service.js';
 import { PcConnections } from './pc-connections.js';
 import { PcCommandsController } from './pc-commands.controller.js';
+import { PcCommandRequestsService } from './pc-command-requests.service.js';
 import { PcCommandsService } from './pc-commands.service.js';
 import { PcControlService } from './pc-control.service.js';
 import { PcMapController } from './pc-map.controller.js';
@@ -56,6 +57,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
     PcConnections,
     PcControlService,
     PcCommandsService,
+    PcCommandRequestsService,
     PcMapService,
     PcLayoutService,
     PanelHub,

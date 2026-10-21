@@ -9,6 +9,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { events, sessionPauses } from '../db/schema.js';
 import { loginAsStaff } from '../testing/auth.js';
+import { withoutPcControl } from '../testing/events.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import type { PcTestClient } from '../testing/pc-client.js';
 import { activeSession, heartbeat, login, PcWorld, summary } from '../testing/pc-world.js';
@@ -114,7 +115,9 @@ describe('vencimiento de la pausa (e2e, REQ-002-20, REQ-002-22)', () => {
     await world.run(5, 16 * MINUTE);
 
     expect(await pc.next()).toEqual({ type: 'sessionEnded', sessionId, reason: 'pause_expired' });
-    const all = (await db().select().from(events).orderBy(asc(events.seq))).map((e) => e.type);
+    const all = withoutPcControl(await db().select().from(events).orderBy(asc(events.seq))).map(
+      (e) => e.type,
+    );
     expect(all.slice(-2)).toEqual(['session.pause_expired', 'session.ended']);
     expect(await eventsOf('session.pause_expired')).toMatchObject([
       { payload: { sessionId, action: 'close' } },

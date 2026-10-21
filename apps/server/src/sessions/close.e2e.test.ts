@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { events, ledger, sessions } from '../db/schema.js';
 import { devPcId } from '../pcs/dev-pcs.js';
 import { loginAsStaff } from '../testing/auth.js';
+import { withoutPcControl } from '../testing/events.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import { heartbeat, login, logout, PcWorld } from '../testing/pc-world.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
@@ -50,7 +51,7 @@ describe('cierre de sesiones (e2e, REQ-001-26, REQ-001-31)', () => {
 
   async function lastEvent() {
     const all = await world.testApp.database.db.select().from(events).orderBy(asc(events.seq));
-    return all.at(-1);
+    return withoutPcControl(all).at(-1);
   }
 
   it('el cliente cierra desde el Shell: liquida combo y dinero en dos filas y bloquea la PC', async () => {

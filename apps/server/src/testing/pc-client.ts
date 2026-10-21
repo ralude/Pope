@@ -45,6 +45,22 @@ export class PcTestClient {
   controls = 0;
   /** Órdenes recibidas, en orden; también aparte, como las consume el agente en C#. */
   readonly commands: Extract<NodeToPcMessage, { type: 'command' }>['command'][] = [];
+  /**
+   * Como el agente tras limpiar los procesos del cliente (T29): responde enseguida que el
+   * bloqueo se aplicó, para que la PC vuelva a admitir clientes. Los tests del bloqueo lo
+   * desactivan para responder ellos.
+   */
+  autoLock = true;
+
+  private applyLock(commandId: string): void {
+    const occurredAt = new Date().toISOString();
+    for (const result of [
+      { status: 'accepted', kind: 'lock' },
+      { status: 'applied', effect: { kind: 'lock' } },
+    ]) {
+      this.send({ type: 'commandAck', commandId, occurredAt, result });
+    }
+  }
 
   private constructor(private readonly ws: WebSocket) {
     ws.on('message', (data: Buffer) => {
@@ -56,6 +72,8 @@ export class PcTestClient {
       }
       if (message.type === 'command') {
         this.commands.push(message.command);
+        if (this.autoLock && message.command.action.kind === 'lock')
+          this.applyLock(message.command.id);
         return;
       }
       if (this.waiting) {

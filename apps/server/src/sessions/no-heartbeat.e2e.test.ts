@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { events, ledger, sessions } from '../db/schema.js';
 import { devPcId } from '../pcs/dev-pcs.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
+import { withoutPcControl } from '../testing/events.js';
 import { PcTestClient } from '../testing/pc-client.js';
 import { activeSession, heartbeat, login, PcWorld } from '../testing/pc-world.js';
 import { assertBalancesMatchLedger } from '../testing/wallet.js';
@@ -34,7 +35,9 @@ describe('cierre sin latidos (e2e, REQ-001-27, REQ-001-66)', () => {
   }
 
   async function allEvents() {
-    return world.testApp.database.db.select().from(events).orderBy(asc(events.seq));
+    return withoutPcControl(
+      await world.testApp.database.db.select().from(events).orderBy(asc(events.seq)),
+    );
   }
 
   async function consumption() {
