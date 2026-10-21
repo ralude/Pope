@@ -257,14 +257,16 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
   }
 
   /**
-   * Después del commit: envía a la PC el contexto con el que comparará la orden y la orden,
-   * y programa su vencimiento. Sin conexión, la recibirá al reconectar si no venció.
+   * Después del commit: envía a la PC el contexto vigente y la orden, que la PC compara con
+   * él, y programa su vencimiento. Sin conexión, la recibirá al reconectar si no venció. Al
+   * guardar una orden su contexto es el vigente; al reenviarla hay que pasar el de ahora
+   * (`current`), o la PC recuperaría uno viejo y aceptaría una orden que ya no corresponde.
    */
-  dispatch(row: CommandRow): void {
+  dispatch(row: CommandRow, current: PcControlContext = row.expected): void {
     this.watch(row.id, row.expiresAt);
     this.connections.send(row.pcId, {
       type: 'controlState',
-      context: row.expected,
+      context: current,
       serverTime: this.clock.now().toISOString(),
     });
     this.connections.send(row.pcId, { type: 'command', command: commandOf(row) });
@@ -359,7 +361,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
   async reconnected(pcId: string): Promise<void> {
     const live = await this.events.inTransaction(async (tx, emit) => {
       const pc = await this.control.lockPc(tx, pcId);
-      if (!pc) return [];
+      if (!pc) return { pending: [], context: null };
       const holder = await this.holder(tx, pcId);
       // T31: un reinicio o apagado aceptado termina cuando la PC vuelve. Si cerró una sesión,
       // el bloqueo que sigue confirma que no queda nada del cliente antes de admitir otro.
@@ -390,7 +392,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
       ) {
         await this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' });
       }
-      return tx
+      const pending = await tx
         .select()
         .from(pcCommands)
         .where(
@@ -400,8 +402,9 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
             gt(pcCommands.expiresAt, this.clock.now()),
           ),
         );
+      return { pending, context: await this.control.contextIn(tx, pcId) };
     });
-    for (const row of live) this.dispatch(row);
+    for (const row of live.pending) if (live.context) this.dispatch(row, live.context);
   }
 
   /** Vence la orden si a los 30 s la PC no respondió (plan T02b). */

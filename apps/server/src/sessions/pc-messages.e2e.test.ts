@@ -117,6 +117,22 @@ describe('mensajes del encargado (e2e, REQ-003-20, T32)', () => {
     ]);
   });
 
+  it('REQ-003-20: al reenviarlo tras reconectar va con el contexto de ahora, no el de la sesión que ya terminó', async () => {
+    const pc = await world.pc(4);
+    const sessionId = activeSession(await login(pc, 'juan')).sessionId;
+    const { command } = (await send(4, 'Para Juan')).json<PcCommandResponse>();
+    expect(command.expected).toMatchObject({ kind: 'session', sessionId });
+    pc.close();
+    await pc.closed;
+    // El encargado cierra la sesión mientras la PC no está: el mensaje ya no es para nadie.
+    expect((await world.api('POST', `/sessions/${sessionId}/close`, ana)).statusCode).toBe(204);
+    const back = await world.pc(4);
+    const resent = back.commands.find((c) => c.id === command.id);
+    expect(resent).toBeDefined();
+    expect(back.control?.context.kind).toBe('free');
+    expect(back.control?.context).not.toEqual(command.expected);
+  });
+
   it('REQ-003-20: en mantenimiento se rechaza; el dueño no envía mensajes; el texto está acotado', async () => {
     await world.pc(4);
     expect((await send(4, 'a'.repeat(1_001))).json()).toMatchObject({ code: 'invalid_command' });
