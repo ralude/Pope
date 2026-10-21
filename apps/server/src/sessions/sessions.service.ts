@@ -15,7 +15,6 @@ import {
   type CustomerBalances,
   newId,
   type NodeToPcMessage,
-  type PcCommandRequest,
   pauseAllowance,
   pendingWarnings,
   seconds,
@@ -44,7 +43,7 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.j
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
 import { PcConnections, type PcIdentity } from './pc-connections.js';
-import { type CommandRow, PcCommandsService } from './pc-commands.service.js';
+import { type CloseOrder, type CommandRow, PcCommandsService } from './pc-commands.service.js';
 import { PcControlService } from './pc-control.service.js';
 import {
   accountBalances,
@@ -110,8 +109,11 @@ export interface CloseOptions {
    * `false` para no cerrar (p. ej. el vencimiento de una pausa que ya se quitó).
    */
   within?: (tx: Transaction, emit: Emit, locked: SessionRow) => Promise<boolean>;
-  /** Petición «Bloquear» del panel: su ID identifica el bloqueo de este cierre (T29). */
-  lockRequest?: PcCommandRequest;
+  /**
+   * Petición del panel que provoca el cierre (Bloquear, reiniciar o apagar confirmados) y la
+   * orden que lo sigue, con su ID (T29/T30). Sin ella, el cierre pide un bloqueo.
+   */
+  order?: CloseOrder;
 }
 
 /** Sesión recién cerrada en una transacción, con el bloqueo que pidió para su PC. */
@@ -612,12 +614,12 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       })
       .where(and(eq(sessionPauses.sessionId, closed.id), isNull(sessionPauses.endedAt)));
     await this.emitEnded(closed, reason, actor, tx, emit);
-    const lock = await this.commands.insertLockIn(
+    const lock = await this.commands.insertAfterCloseIn(
       tx,
       emit,
       pc,
       actor.kind === 'staff' ? actor : { kind: 'system' },
-      options.lockRequest,
+      options.order,
     );
     return { row: closed, reason, lock };
   }

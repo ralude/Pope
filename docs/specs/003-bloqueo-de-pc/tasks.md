@@ -412,6 +412,9 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** validar confirmación ligada al estado actual; cerrar sesión activa/pausada o terminar mantenimiento antes de emitir la orden, conservando actor y eventos.
   - **Verificar:** estado cambiado después de confirmar, temporal con aviso de pérdida, salida técnica registrada y orden no enviada si falla el cierre previo.
   - **Commit:** `feat(server): prepara reinicios y apagados confirmados`.
+  - **División (2026-10-21):** T30a con sesión; T30b con mantenimiento, que necesita registrar antes la salida técnica (T39/T40) y por eso sigue el aplazamiento de T37 que decidió el mantenedor. T30 queda abierta hasta T30b.
+  - [x] **T30a:** con sesión activa, pausada o temporal y `confirmed: true`, el nodo cierra la sesión con las reglas existentes y en la misma transacción guarda el reinicio o apagado (ID del panel) en lugar del bloqueo; sin confirmar responde `confirmation_required` y, si el cierre falla, no guarda ni envía nada. Si esa orden falla o vence sin respuesta, el nodo pide un bloqueo del sistema para confirmar la limpieza antes de admitir clientes. 8 tests e2e.
+  - [ ] **T30b:** con mantenimiento: terminarlo y registrar su salida antes de reiniciar o apagar. Pendiente de T39/T40; hasta entonces el nodo responde `invalid_command`.
 
 - [ ] **T31: Ejecución nativa de órdenes de energía**
   - **Cubre:** REQ-003-20, REQ-003-61.

@@ -25,6 +25,18 @@ class CommandRequestPipe extends ZodValidationPipe<typeof pcCommandRequestSchema
     try {
       return super.transform(value);
     } catch {
+      // REQ-003-20: reiniciar o apagar con una sesión o un mantenimiento exige confirmarlo.
+      const confirmed = pcCommandRequestSchema.safeParse({ ...(value as object), confirmed: true });
+      if (
+        confirmed.success &&
+        (confirmed.data.kind === 'restart' || confirmed.data.kind === 'powerOff')
+      ) {
+        throw new PcCommandException(
+          'confirmation_required',
+          'Confirma el cierre de la sesión antes de reiniciar o apagar',
+          400,
+        );
+      }
       throw new PcCommandException('invalid_command', 'Orden no válida', 400);
     }
   }

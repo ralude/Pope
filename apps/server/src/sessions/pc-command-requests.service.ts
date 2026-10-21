@@ -46,10 +46,11 @@ export class PcCommandRequestsService {
         }
         if (!pc) throw new PcCommandException('unknown_pc', 'No existe esa PC', 404);
         const kind = request.kind;
-        // Bloquear se admite libre o con sesión (T29); reiniciar y apagar, por ahora libres.
+        // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30). Con un
+        // mantenimiento hace falta registrar antes su salida (T39/T40): aún no disponible.
         if (
           (kind !== 'lock' && kind !== 'restart' && kind !== 'powerOff') ||
-          (kind !== 'lock' && request.expected.kind !== 'free')
+          request.expected.kind === 'maintenance'
         ) {
           throw new PcCommandException('invalid_command', 'Esta orden aún no está disponible', 400);
         }
@@ -71,12 +72,13 @@ export class PcCommandRequestsService {
           );
         }
         if (context.kind === 'session') {
-          // REQ-003-20: «Bloquear» cierra la sesión con las reglas existentes, también en
-          // pausa o temporal (REQ-001-69), y el bloqueo del cierre lleva el ID del panel.
+          // REQ-003-20: Bloquear, reiniciar y apagar cierran antes la sesión con las reglas
+          // existentes, también en pausa o temporal (REQ-001-69), y la orden que sigue al cierre
+          // lleva el ID del panel. Si el cierre falla, nada se envía (se deshace todo).
           const closed = await this.sessions.closeIn(tx, emit, context.sessionId, 'staff', actor, {
-            lockRequest: request,
+            order: { request, action: { kind } },
           });
-          if (!closed?.lock) throw new Error('No se pudo cerrar la sesión para bloquear');
+          if (!closed?.lock) throw new Error('No se pudo cerrar la sesión antes de la orden');
           return { row: closed.lock, closed, fresh: true };
         }
         const row = await this.commands.insertIn(tx, emit, {

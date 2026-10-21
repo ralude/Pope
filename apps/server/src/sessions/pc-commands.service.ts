@@ -59,6 +59,10 @@ const FAILURES_WITHOUT_EFFECT = new Set([
 /** Las de energía terminan en la aceptación de Windows; las demás, en su efecto. */
 const isPower = (kind: string) => kind === 'restart' || kind === 'powerOff';
 
+/** Reinicio o apagado que el personal confirmó con una sesión abierta, ya cerrada (T30). */
+const closedSession = (row: CommandRow) =>
+  isPower(row.action.kind) && row.request.expected.kind === 'session';
+
 /** Orden de las respuestas: un acuse nunca hace retroceder una orden. */
 function rank(status: CommandRow['status']): number {
   return status === 'accepted' ? 1 : status === 'applied' || status === 'failed' ? 2 : 0;
@@ -107,6 +111,12 @@ function matches(row: CommandRow, result: PcCommandResult): boolean {
   if (effect.kind === 'endMaintenance' && action.kind === 'endMaintenance')
     return effect.exit.maintenanceId === action.maintenanceId && effect.exit.id === action.exitId;
   return true;
+}
+
+/** Petición del panel que cierra la sesión y la orden que la sigue (T29/T30). */
+export interface CloseOrder {
+  request: PcCommandRequest;
+  action: { kind: 'lock' } | { kind: 'restart' } | { kind: 'powerOff' };
 }
 
 /** Lo que hace falta para guardar una orden nueva. */
@@ -219,23 +229,25 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
   }
 
   /**
-   * Bloqueo tras un cierre de sesión o al reconectar (T29), con actor del personal que
-   * cerró o del sistema. Nunca sobre un mantenimiento, que tiene su propia salida.
+   * Orden que sigue a un cierre de sesión (T29/T30): el bloqueo, o el reinicio o apagado que
+   * el personal confirmó. Actor del personal que cerró o del sistema; espera el contexto ya
+   * libre. Sin `order`, un bloqueo del sistema (también al reconectar). Nunca sobre un
+   * mantenimiento, que tiene su propia salida.
    */
-  async insertLockIn(
+  async insertAfterCloseIn(
     tx: Transaction,
     emit: Emit,
     pc: PcIdentity,
     actor: StaffActor | SystemActor,
-    request?: PcCommandRequest,
+    order?: CloseOrder,
   ): Promise<CommandRow | null> {
     const context = await this.control.contextIn(tx, pc.id);
     if (context.kind === 'maintenance') return null;
     return this.insertIn(tx, emit, {
       pc,
       actor,
-      request: request ?? { id: newId(), kind: 'lock', expected: context },
-      action: { kind: 'lock' },
+      request: order?.request ?? { id: newId(), kind: 'lock', expected: context },
+      action: order?.action ?? { kind: 'lock' },
       context,
     });
   }
@@ -278,7 +290,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
    * o no corresponde a la orden; repetida no cambia nada y nunca hace retroceder una orden.
    */
   async acknowledge(pcId: string, ack: PcCommandAckMessage): Promise<void> {
-    await this.events.inTransaction(async (tx, emit) => {
+    const lock = await this.events.inTransaction(async (tx, emit): Promise<CommandRow | null> => {
       const pc = await this.control.lockPc(tx, pcId);
       const [row] = await tx
         .select()
@@ -286,16 +298,16 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
         .where(and(eq(pcCommands.id, ack.commandId), eq(pcCommands.pcId, pcId)));
       if (!pc || !row || !matches(row, ack.result)) {
         this.logger.warn(`Acuse que no corresponde a una orden de ${pc?.name ?? 'una PC'}`);
-        return;
+        return null;
       }
       const status = ack.result.status;
       if (rank(row.status) === 2) {
         if (canonical(row.lastResult) !== canonical(ack.result)) {
           this.logger.warn(`${pc.name} contradice el resultado de la orden ${row.id}`);
         }
-        return;
+        return null;
       }
-      if (rank(status) <= rank(row.status)) return;
+      if (rank(status) <= rank(row.status)) return null;
       const now = this.clock.now();
       await tx
         .update(pcCommands)
@@ -323,7 +335,13 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
           reservationReleased,
         },
       });
+      // T30: si un reinicio o apagado que cerró una sesión no se ejecutó, la PC se bloquea
+      // como tras cualquier cierre, para confirmar la limpieza de los procesos del cliente.
+      return ack.result.status === 'failed' && closedSession(row)
+        ? this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' })
+        : null;
     });
+    if (lock) this.dispatch(lock);
   }
 
   /**
@@ -351,13 +369,17 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
           },
         });
       }
+      // Un reinicio o apagado que cerró una sesión y venció sin respuesta tampoco confirmó la
+      // limpieza (T30): se pide el bloqueo igual que si lo hubiera sido.
       if (
-        holder?.action.kind === 'lock' &&
-        (holder.status === 'expired' ||
-          holder.status === 'accepted' ||
-          (holder.lastResult?.status === 'failed' && holder.lastResult.code !== 'native_failure'))
+        (holder?.action.kind === 'lock' &&
+          (holder.status === 'expired' ||
+            holder.status === 'accepted' ||
+            (holder.lastResult?.status === 'failed' &&
+              holder.lastResult.code !== 'native_failure'))) ||
+        (holder && closedSession(holder) && holder.status === 'expired')
       ) {
-        await this.insertLockIn(tx, emit, pc, { kind: 'system' });
+        await this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' });
       }
       return tx
         .select()
