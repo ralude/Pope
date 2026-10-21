@@ -1,6 +1,6 @@
 # Spec 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Aprobada para T01–T27: bloques anteriores T01–T20 y continuación T21–T27 por el mantenedor (2026-10-12). T28–T59 y mecanismos ajenos al bloque siguen pendientes.
+- **Estado:** Aprobada para T01–T27 (bloques anteriores) y continuación T28–T42 por el mantenedor (2026-10-21), salvo T22, T34 y T37, aplazadas o pendientes de diseño. T43–T59 y mecanismos ajenos al bloque siguen pendientes.
 - **Fecha:** 2026-09-25
 - **ADRs relacionados:** ADR-0005, ADR-0006, ADR-0007, ADR-0009, ADR-0010
 - **Seguridad:** [ADR-0017](../../adr/0017-comunicacion-segura-del-cliente-windows.md), aceptado por el mantenedor el 2026-10-04.
@@ -179,6 +179,8 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 - Consolas, VR y otros dispositivos.
 
 ## Preguntas abiertas
+
+- [x] **Continuación T28–T42 (mantenedor, 2026-10-21).** «Deja para luego T22 si es posible y ve avanzando con T28 hasta T42; si hay dudas pregunta, no asumas». Respuestas a las dudas de ese bloque: **T34**, proponer primero el diseño de contratos, confirmación del bloqueo, corte de consumo y acuses perdidos, sin implementar hasta su aprobación; **T37**, aplazada hasta demostrar T10, y T38/T40 implementan solo lo independiente del mecanismo y quedan abiertas; **T31**, prueba real pidiendo a Windows un reinicio con margen y anulándolo (`AbortSystemShutdown`), sin reiniciar ni apagar el equipo de desarrollo; **T33**, paquete mágico comprobado capturándolo en local, con el encendido físico pendiente para T58. T22 sigue autorizada y aplazada.
 
 - [x] **Recuperación ordinaria de T27 (2026-10-12).** El mantenedor aprueba bloquear desde el host al perder el servicio y conservar el bloqueo tras reiniciar el agente hasta recibir estado nuevo del nodo. Sin entrada técnica offline ni reutilización de tiempo autorizado de otro arranque. La emergencia administrativa y su mecanismo siguen en T53/T54; esta aprobación no los implementa ni cierra T10/T15.
 

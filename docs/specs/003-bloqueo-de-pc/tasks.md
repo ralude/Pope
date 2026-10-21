@@ -1,7 +1,7 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Continuación autónoma autorizada hasta T27 (mantenedor, 2026-10-12), con sus verificaciones funcionales; T10 y SCM de T15 abiertas. ADR-0018 aceptado. T28–T59 en Borrador.
-- **Plan:** [plan.md](plan.md), autorizado hasta T27; decisiones técnicas ajenas al bloque y verificaciones previas pendientes.
+- **Estado:** Continuación T28–T42 autorizada (mantenedor, 2026-10-21), con sus verificaciones funcionales; T22 aplazada, T34 pendiente de aprobar su diseño y T37 hasta demostrar T10. T10 y SCM de T15 abiertas. ADR-0018 aceptado. T43–T59 en Borrador.
+- **Plan:** [plan.md](plan.md), autorizado hasta T42 con esas salvedades; decisiones técnicas ajenas al bloque y verificaciones previas pendientes.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
 actualiza `ESTADO.md`. Cada commit pasa las comprobaciones pertinentes; al cerrar una
@@ -382,6 +382,8 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
       Un agente nuevo con el nodo caído (conexión rechazada) no conoce nada, no concede tiempo, mantiene el bloqueo y el silencio. Al volver el nodo, hello `unknown` con tiempo local `null`; la pausa recuperada no recaptura y reanudar restaura el audio original. Cada caso usa un host nuevo, porque el relevo del host sin agente es T22. Archivos corruptos (recuperación, ámbito, diario de audio) cubiertos por tests. Batería general correcta: 1 709 tests (408 nativos). **Sin probar:** el SCM y el reinicio real del servicio (T15c3) y el arranque de Windows (T50/T54).
 
 ### Control remoto y mantenimiento
+
+**Continuación (mantenedor, 2026-10-21):** «deja para luego T22 si es posible y ve avanzando con T28 hasta T42; si hay dudas pregunta, no asumas». T34: proponer el diseño antes de implementar. T37: aplazada hasta T10; T38/T40 hacen solo lo independiente del mecanismo y quedan abiertas. T31: reinicio pedido con margen y anulado, sin reiniciar el equipo de desarrollo. T33: captura local del paquete mágico; encendido físico en T58.
 
 - [ ] **T28: Órdenes idempotentes y reserva de PC**
   - **Cubre:** REQ-003-20, REQ-003-41, REQ-003-43.
