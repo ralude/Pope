@@ -200,8 +200,10 @@ describe('bloquear mediante el cierre de la sesión (e2e, REQ-003-20, REQ-003-34
 
   it('REQ-003-34: al agotarse el saldo, el sistema bloquea y el encargado ve la reserva', async () => {
     const pc = await manual(4);
-    activeSession(await login(pc, 'juan'));
-    await world.run(4, 121 * MINUTE);
+    // Saldo para 2 min a 1,50 USD/h: se agota enseguida sin simular horas de latidos.
+    await createCustomerWithBalance(world.testApp, 'pepe', { moneyMicros: usd(0.05) });
+    activeSession(await login(pc, 'pepe'));
+    await world.run(4, 3 * MINUTE);
     expect((await snapshot(4)).reservation).toMatchObject({
       command: { actor: { kind: 'system' }, action: { kind: 'lock' } },
     });
