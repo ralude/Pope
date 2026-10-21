@@ -59,11 +59,32 @@ describe('T13c: admisión real del canal autenticado', () => {
     return ws;
   }
 
+  /**
+   * Envía y devuelve la respuesta. Como el agente, aparta `controlState` y las órdenes (T28),
+   * que el nodo envía después del `state` y pueden cruzarse con la respuesta siguiente.
+   */
   async function request(ws: WebSocket, message: object | string) {
-    const response = once(ws, 'message');
+    const response = next(ws);
     ws.send(typeof message === 'string' ? message : JSON.stringify(message));
-    const [raw] = (await response) as [Buffer];
-    return nativeNodeToPcMessageSchema.parse(JSON.parse(raw.toString('utf8')));
+    return response;
+  }
+
+  /** Siguiente mensaje que no sea `controlState` ni una orden. */
+  function next(ws: WebSocket) {
+    return new Promise<ReturnType<typeof nativeNodeToPcMessageSchema.parse>>((resolve, reject) => {
+      const listener = (raw: Buffer) => {
+        try {
+          const parsed = nativeNodeToPcMessageSchema.parse(JSON.parse(raw.toString('utf8')));
+          if (parsed.type === 'controlState' || parsed.type === 'command') return;
+          ws.off('message', listener);
+          resolve(parsed);
+        } catch (error) {
+          ws.off('message', listener);
+          reject(error instanceof Error ? error : new Error('Mensaje no válido'));
+        }
+      };
+      ws.on('message', listener);
+    });
   }
 
   function denied(authorization?: string, suffix = '') {
@@ -131,7 +152,7 @@ describe('T13c: admisión real del canal autenticado', () => {
   it('REQ-003-11: sustitución de credencial cierra el canal vivo y rechaza reconectar con la anterior', async () => {
     const ws = await open(3);
     await request(ws, hello(devPcId(3)));
-    const notification = once(ws, 'message');
+    const notification = next(ws);
     const closed = once(ws, 'close');
     const registration = node.app.get(PcRegistrationService);
     const [member] = await node.database.db.select().from(staff);
@@ -144,8 +165,7 @@ describe('T13c: admisión real del canal autenticado', () => {
       installationCode: code.code,
       macAddress: 'AA:BB:CC:DD:EE:FF',
     });
-    const [raw] = (await notification) as [Buffer];
-    expect(nativeNodeToPcMessageSchema.parse(JSON.parse(raw.toString('utf8')))).toMatchObject({
+    expect(await notification).toMatchObject({
       type: 'pcAuthenticationError',
       code: 'pc_credential_revoked',
     });
