@@ -190,6 +190,47 @@ describe('reiniciar y apagar con confirmación (e2e, REQ-003-20, T30)', () => {
     activeSession(await login(back, 'juan'));
   });
 
+  it('REQ-003-34/T31: tras un reinicio aceptado que cerró una sesión, la PC vuelve y se bloquea antes de admitir clientes', async () => {
+    const pc = await manual(4);
+    activeSession(await login(pc, 'juan'));
+    const { command } = (await power(4, 'restart')).json<PcCommandResponse>();
+    await pc.next();
+    await sync(pc);
+    pc.send({
+      type: 'commandAck',
+      commandId: command.id,
+      occurredAt: world.clock.now().toISOString(),
+      result: { status: 'accepted', kind: 'restart' },
+    });
+    await sync(pc);
+    pc.close();
+    await pc.closed;
+    await world.clock.tick(2 * MINUTE);
+    const back = await world.pc(4);
+    expect(await eventsOf('pc.reservation_released')).toEqual([]);
+    expect((await eventsOf('pc.command_requested')).at(-1)?.payload).toMatchObject({
+      kind: 'lock',
+      replacesCommandId: command.id,
+    });
+    expect((await snapshot(4)).reservation).toBeNull();
+    activeSession(await login(back, 'juan'));
+  });
+
+  it('REQ-003-20/T31: un reinicio de una PC libre cuyo acuse se perdió no la deja reservada al volver', async () => {
+    const pc = await manual(4);
+    const { command } = (await power(4, 'restart', {})).json<PcCommandResponse>();
+    // Windows reinicia antes de que salga el acuse: la orden vence sin respuesta.
+    pc.close();
+    await pc.closed;
+    await world.clock.tick(31_000);
+    const back = await world.pc(4);
+    expect((await eventsOf('pc.command_requested')).at(-1)?.payload).toMatchObject({
+      kind: 'lock',
+      replacesCommandId: command.id,
+    });
+    activeSession(await login(back, 'juan'));
+  });
+
   it('REQ-003-41: con un mantenimiento, reiniciar y apagar aún no están disponibles (T39/T40)', async () => {
     await manual(4);
     await db()

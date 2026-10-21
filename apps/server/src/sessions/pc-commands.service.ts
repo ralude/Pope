@@ -345,17 +345,21 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
   }
 
   /**
-   * La PC acaba de identificarse (`hello`). Si había aceptado reiniciar o apagar, ese
-   * arranque cierra la orden y libera la reserva. Un bloqueo que quedó sin aplicar (vencido,
-   * aceptado sin respuesta o fallido sin efecto) se pide de nuevo; uno que falló en Windows
-   * espera al personal. Las órdenes aún vigentes se reenvían: el agente las reconoce por ID.
+   * La PC acaba de identificarse (`hello`). Si había aceptado reiniciar o apagar con la PC
+   * libre, ese arranque cierra la orden y libera la reserva; si la orden cerró una sesión o
+   * venció sin respuesta, se pide un bloqueo que confirme la limpieza. Un bloqueo que quedó
+   * sin aplicar (vencido, aceptado sin respuesta o fallido sin efecto) se pide de nuevo; uno
+   * que falló en Windows espera al personal. Las órdenes aún vigentes se reenvían: el
+   * agente las reconoce por ID.
    */
   async reconnected(pcId: string): Promise<void> {
     const live = await this.events.inTransaction(async (tx, emit) => {
       const pc = await this.control.lockPc(tx, pcId);
       if (!pc) return [];
       const holder = await this.holder(tx, pcId);
-      if (holder?.status === 'accepted' && isPower(holder.action.kind)) {
+      // T31: un reinicio o apagado aceptado termina cuando la PC vuelve. Si cerró una sesión,
+      // el bloqueo que sigue confirma que no queda nada del cliente antes de admitir otro.
+      if (holder?.status === 'accepted' && isPower(holder.action.kind) && !closedSession(holder)) {
         await this.release(tx, pcId, holder.id);
         emit({
           type: 'pc.reservation_released',
@@ -369,15 +373,16 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
           },
         });
       }
-      // Un reinicio o apagado que cerró una sesión y venció sin respuesta tampoco confirmó la
-      // limpieza (T30): se pide el bloqueo igual que si lo hubiera sido.
+      // Un reinicio o apagado que venció sin respuesta (Windows pudo cortar la conexión antes
+      // del acuse) o que cerró una sesión no confirmó la limpieza (T30/T31): se pide un bloqueo.
       if (
         (holder?.action.kind === 'lock' &&
           (holder.status === 'expired' ||
             holder.status === 'accepted' ||
             (holder.lastResult?.status === 'failed' &&
               holder.lastResult.code !== 'native_failure'))) ||
-        (holder && closedSession(holder) && holder.status === 'expired')
+        (holder && isPower(holder.action.kind) && holder.status === 'expired') ||
+        (holder && closedSession(holder) && holder.status === 'accepted')
       ) {
         await this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' });
       }
