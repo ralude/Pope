@@ -303,6 +303,8 @@ internal static class PauseProof
         private DateTime refuseUntil;
         internal int Connections, Pauses, Resumes, Refused;
         internal string? LastHello, LastHelloRemaining;
+        // T29: acuses de órdenes recibidos del agente, en orden.
+        internal readonly List<JsonElement> Acks = [];
 
         internal async Task RunAsync()
         {
@@ -333,6 +335,7 @@ internal static class PauseProof
                         switch (message.GetProperty("type").GetString())
                         {
                             case "heartbeat": await node.Send(accepted, Current(), token); break;
+                            case "commandAck": lock (Acks) Acks.Add(message.Clone()); break;
                             case "pause":
                                 Interlocked.Increment(ref Pauses);
                                 await Reply(accepted, Account(paused: true, requestId: message.GetProperty("requestId").GetString())); break;

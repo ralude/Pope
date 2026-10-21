@@ -31,6 +31,9 @@ internal sealed class AgentRuntime
         catch { log.Write(AgentLogCode.ClientScopeRejected); }
         state.SessionStarted += cleanup.Started;
         state.SessionFinished += id => _ = cleanup.Finished(id);
+        // T29: después de state.Apply, que ya guardó el controlState con el que se compara la orden.
+        var commands = new AgentCommands(state, cleanup, channel.SendMessageAsync, log);
+        channel.Message += commands.OnMessage;
     }
     internal async Task RunAsync(CancellationToken token)
     {

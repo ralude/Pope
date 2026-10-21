@@ -10,6 +10,9 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
     private readonly object gate = new();
     private JsonElement? state;
     private JsonElement? context;
+    // T29: hora del nodo en el último controlState y su marca monotónica; nunca el reloj de Windows.
+    private DateTimeOffset? nodeTime;
+    private long nodeStamp;
     private string? sessionId;
     private long remaining;
     private long timestamp;
@@ -59,12 +62,35 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
                 PersistRecovery();
                 break;
             case "controlState":
-                context = message.GetProperty("context"); PersistRecovery(); break;
+                context = message.GetProperty("context");
+                nodeTime = DateTimeOffset.Parse(message.GetProperty("serverTime").GetString()!, System.Globalization.CultureInfo.InvariantCulture);
+                nodeStamp = clock.GetTimestamp();
+                PersistRecovery(); break;
             case "sessionEnded":
                 state = null; sessionId = null; remaining = 0; paused = false; PersistRecovery(); break;
             case "pcAuthenticationError":
                 rejected = true; authorized = false; break;
         }
+    }
+
+    // T29: contexto vigente y hora del nodo avanzada con el reloj monotónico, para validar órdenes.
+    internal (JsonElement? Context, DateTimeOffset? NodeNow) Control()
+    {
+        lock (gate) return (context, nodeTime?.Add(clock.GetElapsedTime(nodeStamp)));
+    }
+
+    // REQ-003-34 / T29: un bloqueo válido dice que el nodo ya no tiene sesión en esta PC; si el
+    // fin de sesión aún no llegó, se termina igual que con sessionEnded y se limpia.
+    internal void EndLocalSession()
+    {
+        string? finished;
+        lock (gate)
+        {
+            finished = sessionId;
+            if (finished is null) return;
+            state = null; sessionId = null; remaining = 0; paused = false; PersistRecovery();
+        }
+        SessionFinished?.Invoke(finished);
     }
 
     internal long? RemainingSeconds
@@ -130,7 +156,7 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
         lock (gate)
         {
             // Tras reiniciar nunca reutilizar autorización/tiempo de otro arranque.
-            authorized = false; state = null; remaining = 0; paused = false;
+            authorized = false; state = null; remaining = 0; paused = false; nodeTime = null;
             sessionId = hello.GetProperty("sessionId").GetString();
             context = hello.GetProperty("controlContext").ValueKind == JsonValueKind.Null ? null : hello.GetProperty("controlContext");
             if (hello.GetProperty("recoveryState").GetString() == "known" && !Compatible())

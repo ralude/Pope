@@ -395,7 +395,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T28b:** órdenes con eventos, acuses idempotentes, caducidad, reserva y reenvío tras `hello`; endpoints del panel.
   - **Implementada (2026-10-21):** contexto por ocupación y `controlState`; órdenes `lock`/`restart`/`powerOff` con la PC libre, idempotentes por ID, con eventos, vencimiento a los 30 s, acuses validados que no retroceden, reserva que bloquea login/temporal/restauración y reenvío tras `hello`. 18 tests e2e nuevos (doble clic, acuse duplicado/tardío/ajeno, vencida, desconexión, reconexión y login concurrente). Batería correcta: formato, lint, tipos, build y 1 733 tests (438 servidor, 408 nativos). Concurrencia comprobada con PGlite; contra PostgreSQL real queda para la entrega al local. Sin probar: el agente aún no ejecuta órdenes (T29–T31).
 
-- [ ] **T29: Bloquear mediante el cierre existente**
+- [x] **T29: Bloquear mediante el cierre existente**
   - **Cubre:** REQ-003-20, REQ-003-34; REQ-001-69.
   - **Hacer:** enlazar Bloquear/cerrar/agotamiento con cierre de negocio, bloqueo nativo y limpieza T26; liberar la reserva solo al confirmar el efecto.
   - **Verificar:** cuenta activa/pausada y temporal, sin cobro tras cierre; limpieza fallida mantiene reserva y no admite un cliente nuevo por accidente.
@@ -404,7 +404,8 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División (2026-10-21):** T29a contrato; T29b nodo; T29c agente. Ver la concreción T29 del plan.
   - [x] **T29a:** órdenes de bloqueo con actor «sistema» en el contrato, el evento y la base de datos (migración 0030); el sistema no puede pedir otra cosa.
   - [x] **T29b:** todo cierre reserva la PC con un bloqueo en la misma transacción; «Bloquear» con sesión la cierra y bloquea; un bloqueo solo libera la reserva al aplicarse y se repite al reconectar si quedó pendiente.
-  - [ ] **T29c:** el agente valida y ejecuta el bloqueo, espera la limpieza T26 y responde aplicado o fallido.
+  - [x] **T29c:** el agente valida y ejecuta el bloqueo, espera la limpieza T26 y responde aplicado o fallido.
+  - **Implementada (2026-10-21):** todos los cierres reservan la PC con un bloqueo (actor del personal o «sistema») hasta que el agente lo aplica tras la limpieza T26; Bloquear con sesión/pausa/temporal cierra con las reglas existentes y no se cobra después. Limpieza fallida: `native_failure`, la PC no admite clientes hasta otro Bloquear. Ensayo real ampliado de T26: bloqueo aplicado en 765–768 ms tras el cierre y 608–655 ms tras el agotamiento, sin procesos del cliente vivos. 447 tests del servidor en PostgreSQL 18.6. Batería correcta: 1 749 tests (414 nativos). **Sin probar:** confirmación del escritorio físico por el host (T22) y juegos/anticheat (T56). Ver [mediciones](mediciones.md).
 
 - [ ] **T30: Reiniciar y apagar con confirmación de estado**
   - **Cubre:** REQ-003-20, REQ-003-41; REQ-001-69.

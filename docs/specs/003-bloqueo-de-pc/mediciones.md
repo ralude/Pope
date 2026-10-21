@@ -605,3 +605,27 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   usa un host nuevo, porque el relevo del host lo implementa T22.
 - Batería general: 1 709 tests sin fallos (408 nativos). El ensayo de T23 se repitió con
   el doble del nodo modificado: `Passed=true`. Logs `tmp/t27-*.log` (ignorados).
+
+### T28–T29 · órdenes, reserva y bloqueo tras cerrar (2026-10-21)
+
+- Nodo: 18 tests e2e de T28 (contexto, doble clic, acuses duplicados, tardíos y ajenos,
+  vencimiento, reconexión y login concurrente) y 9 de T29 (Bloquear con sesión, pausa y
+  temporal; salida del cliente, agotamiento, falta de latidos y cierre desde el panel;
+  limpieza fallida). En PostgreSQL **18.6** real pasan los **447** tests del servidor; una
+  ejecución completa anterior, bajo carga, tuvo dos fallos intermitentes ajenos a las
+  órdenes (respaldo de temporales y mapa) que no se repitieron en tres repeticiones ni en
+  la siguiente ejecución completa. El cierre bloquea PC → sesión → cuenta, como el login,
+  para no interbloquearse; PGlite no lo puede comprobar porque usa una sola conexión.
+- Agente: 6 tests de `AgentCommands` (bloqueo aplicado tras la limpieza, limpieza fallida,
+  bloqueo antes del fin de sesión, contexto distinto o vencido y tipos aún no disponibles).
+- `Pope.DesktopProbe --cleanup-proof <carpeta nueva>` (ensayo de T26 ampliado), mismo entorno:
+  tras cada cierre el doble del nodo envía `controlState` libre y un bloqueo del sistema,
+  y el `AgentCommands` de producto responde por el canal WSS real. Tras cerrar la sesión
+  en pausa: `accepted` y `applied` en **765–768 ms**, sin ningún proceso del cliente vivo
+  (lanzador, auxiliares y app). Tras agotarse la temporal: **608–655 ms**. El tiempo es casi
+  todo la espera de la segunda pasada de la limpieza (500 ms). El cliente siguiente se
+  abre después del bloqueo aplicado y conserva su proceso. Dos ejecuciones con `Passed=true`
+  y `Restored=true`, sin procesos ajenos elegidos.
+- No probado: el host no confirma al agente el escritorio físico (queda para T22); el agente
+  real con el nodo NestJS en la PC del local; anticheat y juegos (T56).
+- Batería general: 1 749 tests sin fallos (447 servidor, 414 nativos).

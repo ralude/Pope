@@ -111,9 +111,15 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
         // La cadena autofirmada solo se admite para el certificado fijado por medio confiable.
     }
 
-    internal async Task<bool> SendRequestAsync(ReadOnlyMemory<byte> bytes, CancellationToken token)
+    internal Task<bool> SendRequestAsync(ReadOnlyMemory<byte> bytes, CancellationToken token)
     {
         ProtocolValidation.Parse(bytes, "shell-request");
+        return SendMessageAsync(bytes, token);
+    }
+
+    // T29: mensajes propios del agente (acuses de órdenes); Send los valida como pc-to-node.
+    internal async Task<bool> SendMessageAsync(ReadOnlyMemory<byte> bytes, CancellationToken token)
+    {
         var socket = Volatile.Read(ref connected);
         if (socket is null) return false;
         try { await Send(socket, bytes, token); return true; }
