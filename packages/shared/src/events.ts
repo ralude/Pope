@@ -159,7 +159,8 @@ const commandContextSchema = z.strictObject({
 const systemActorSchema = z.strictObject({ kind: z.literal('system') });
 
 /**
- * El personal pidió una orden. No copia el texto de un mensaje: la auditoría registra quién
+ * El personal pidió una orden, o el sistema un bloqueo tras cerrar una sesión sin personal
+ * (T29). No copia el texto de un mensaje: la auditoría registra quién
  * envió qué tipo de orden y a qué PC. `replacesCommandId`: orden fallida o vencida cuya
  * reserva toma esta.
  */
@@ -174,7 +175,7 @@ export const pcCommandRequestedEventSchema = event(
     expiresAt: utcInstantSchema,
     replacesCommandId: idSchema.nullable(),
   }),
-).extend({ actor: actorSchema.options[1] });
+).extend({ actor: z.union([actorSchema.options[1], systemActorSchema]) });
 
 /**
  * La PC respondió a una orden. `reportedAt` es la hora que dice la PC; `late`, que llegó

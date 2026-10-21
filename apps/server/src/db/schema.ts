@@ -385,7 +385,7 @@ export const pcCredentials = pgTable(
   ],
 );
 
-/** Órdenes idempotentes; validar JSON/transiciones con shared en T28 (REQ-003-20). */
+/** Órdenes idempotentes del personal o bloqueos del sistema (REQ-003-20, T28/T29). */
 export const pcCommands = pgTable(
   'pc_commands',
   {
@@ -413,7 +413,11 @@ export const pcCommands = pgTable(
       .on(t.expiresAt)
       .where(sql`${t.status} = 'requested'`),
     check('pc_commands_ttl_check', sql`${t.expiresAt} = ${t.issuedAt} + interval '30 seconds'`),
-    check('pc_commands_actor_check', sql`coalesce(${t.actor}->>'kind' = 'staff', false)`),
+    // El sistema solo pide bloqueos, tras un cierre de sesión sin personal (T29).
+    check(
+      'pc_commands_actor_check',
+      sql`coalesce(${t.actor}->>'kind' = 'staff' or (${t.actor}->>'kind' = 'system' and ${t.action}->>'kind' = 'lock'), false)`,
+    ),
     check(
       'pc_commands_action_check',
       sql`coalesce(${t.action}->>'kind' in ('lock', 'restart', 'powerOff', 'showMessage', 'startMaintenance', 'endMaintenance'), false)`,

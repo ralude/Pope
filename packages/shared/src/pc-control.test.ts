@@ -176,7 +176,7 @@ describe('eventos de órdenes (T28)', () => {
     ).toEqual(pcCommandFailureCodeSchema.options);
   });
 
-  it('solo el personal pide órdenes y solo el sistema registra acuses y vencimientos', () => {
+  it('piden órdenes el personal o el sistema tras un cierre; solo el sistema registra acuses', () => {
     const pc = { id: ID, name: 'PC 05' };
     const base = { id: ID, version: 1, occurredAt: TIME };
     const requested = {
@@ -194,8 +194,10 @@ describe('eventos de órdenes (T28)', () => {
     };
     expect(domainEventSchema.safeParse(requested).success).toBe(true);
     expect(domainEventSchema.safeParse({ ...requested, actor: { kind: 'system' } }).success).toBe(
-      false,
+      true,
     );
+    const customer = { kind: 'customer', customerId: ID, username: 'juan' };
+    expect(domainEventSchema.safeParse({ ...requested, actor: customer }).success).toBe(false);
     const expired = {
       ...base,
       type: 'pc.command_expired',
@@ -209,5 +211,21 @@ describe('eventos de órdenes (T28)', () => {
         actor: { kind: 'staff', staffId: ID, name: 'Ana' },
       }).success,
     ).toBe(false);
+  });
+});
+
+describe('bloqueo tras cerrar una sesión (T29)', () => {
+  it('el sistema solo puede pedir bloqueos; el cliente nunca pide órdenes', () => {
+    const system = { kind: 'system' } as const;
+    expect(pcCommandSchema.safeParse({ ...command, actor: system }).success).toBe(true);
+    for (const action of [
+      { kind: 'restart' },
+      { kind: 'powerOff' },
+      { kind: 'showMessage', text: 'Hola' },
+    ]) {
+      expect(pcCommandSchema.safeParse({ ...command, actor: system, action }).success).toBe(false);
+    }
+    const customer = { kind: 'customer', customerId: ID, username: 'juan' };
+    expect(pcCommandSchema.safeParse({ ...command, actor: customer }).success).toBe(false);
   });
 });

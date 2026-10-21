@@ -91,6 +91,14 @@ describe('órdenes y reservas persistidas (spec 003, T05a)', () => {
     await expect(handle.db.insert(pcCommands).values(first)).rejects.toThrow();
     for (const over of [
       { expiresAt: NOW },
+      // T29: el sistema solo pide bloqueos; el cliente nunca pide órdenes.
+      { actor: { kind: 'system' as const }, action: { kind: 'restart' as const } },
+      // Un actor que el tipo ya no admite: la base de datos también lo rechaza.
+      {
+        actor: { kind: 'customer', customerId: newId(), username: 'juan' } as unknown as {
+          kind: 'system';
+        },
+      },
       { status: 'applied' as const },
       { lastResultAt: NOW },
       { lastResult: { status: 'accepted' as const, kind: 'lock' as const } },
@@ -109,6 +117,7 @@ describe('órdenes y reservas persistidas (spec 003, T05a)', () => {
       lastResult: { status: 'accepted', kind: 'restart' },
     });
     await handle.db.insert(pcCommands).values(accepted);
+    await handle.db.insert(pcCommands).values(command({ id: newId(), actor: { kind: 'system' } }));
     expect(
       (await handle.db.select().from(pcCommands).where(eq(pcCommands.id, accepted.id)))[0]
         ?.issuedAt,

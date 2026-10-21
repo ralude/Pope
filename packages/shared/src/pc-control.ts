@@ -85,15 +85,26 @@ export const pcNativeActionSchema = z.discriminatedUnion('kind', [
   z.strictObject({ kind: z.literal('endMaintenance'), maintenanceId: idSchema, exitId: idSchema }),
 ]);
 
-export const pcCommandSchema = z.strictObject({
+const commandBase = {
   id: idSchema,
   pcId: idSchema,
-  actor: maintenanceActorSchema,
   expected: pcControlContextSchema,
   issuedAt: utcInstantSchema,
   expiresAt: utcInstantSchema,
-  action: pcNativeActionSchema,
-});
+};
+/**
+ * Orden del personal, o bloqueo que el nodo pide tras cualquier cierre de sesión (salida del
+ * cliente, agotamiento, falta de latidos): la PC queda reservada hasta que el agente
+ * confirma el bloqueo y la limpieza de procesos (T29, mantenedor 2026-10-21).
+ */
+export const pcCommandSchema = z.union([
+  z.strictObject({ ...commandBase, actor: maintenanceActorSchema, action: pcNativeActionSchema }),
+  z.strictObject({
+    ...commandBase,
+    actor: z.strictObject({ kind: z.literal('system') }),
+    action: z.strictObject({ kind: z.literal('lock') }),
+  }),
+]);
 export type PcCommand = z.infer<typeof pcCommandSchema>;
 export const pcCommandMessageSchema = z.strictObject({
   type: z.literal('command'),

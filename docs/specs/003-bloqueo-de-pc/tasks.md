@@ -400,6 +400,11 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** enlazar Bloquear/cerrar/agotamiento con cierre de negocio, bloqueo nativo y limpieza T26; liberar la reserva solo al confirmar el efecto.
   - **Verificar:** cuenta activa/pausada y temporal, sin cobro tras cierre; limpieza fallida mantiene reserva y no admite un cliente nuevo por accidente.
   - **Commit:** `feat(server): cierra la sesión antes de bloquear la PC`.
+  - **Alcance confirmado (mantenedor, 2026-10-21):** todos los cierres (Bloquear, Cerrar desde el panel, salida del cliente, agotamiento, falta de latidos y reinicio detectado) dejan la PC reservada hasta que el agente confirma el bloqueo y la limpieza de procesos. Los que no hace el personal piden el bloqueo con actor «sistema» (contrato y migración nuevos). Si la limpieza falla, la PC no admite a nadie hasta otro Bloquear.
+  - **División (2026-10-21):** T29a contrato; T29b nodo; T29c agente. Ver la concreción T29 del plan.
+  - [x] **T29a:** órdenes de bloqueo con actor «sistema» en el contrato, el evento y la base de datos (migración 0030); el sistema no puede pedir otra cosa.
+  - [ ] **T29b:** todo cierre reserva la PC con un bloqueo en la misma transacción; «Bloquear» con sesión la cierra y bloquea; un bloqueo solo libera la reserva al aplicarse y se repite al reconectar si quedó pendiente.
+  - [ ] **T29c:** el agente valida y ejecuta el bloqueo, espera la limpieza T26 y responde aplicado o fallido.
 
 - [ ] **T30: Reiniciar y apagar con confirmación de estado**
   - **Cubre:** REQ-003-20, REQ-003-41; REQ-001-69.

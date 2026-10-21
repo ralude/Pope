@@ -1,0 +1,2 @@
+ALTER TABLE "pc_commands" DROP CONSTRAINT "pc_commands_actor_check";--> statement-breakpoint
+ALTER TABLE "pc_commands" ADD CONSTRAINT "pc_commands_actor_check" CHECK (coalesce("pc_commands"."actor"->>'kind' = 'staff' or ("pc_commands"."actor"->>'kind' = 'system' and "pc_commands"."action"->>'kind' = 'lock'), false));

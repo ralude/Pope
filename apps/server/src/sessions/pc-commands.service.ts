@@ -14,6 +14,7 @@ import {
   type PcCommandRequest,
   type PcCommandResponse,
   pcCommandResponseSchema,
+  pcCommandSchema,
   type PcCommandResult,
   type PcControlContext,
   type PcControlSnapshot,
@@ -74,9 +75,9 @@ function sameContext(expected: PcControlContext, current: PcControlContext): boo
   return canonical(expected) === canonical(current);
 }
 
-/** Orden tal como viaja a la PC. */
+/** Orden tal como viaja a la PC; las columnas JSON se validan con el contrato. */
 function commandOf(row: CommandRow): PcCommand {
-  return {
+  return pcCommandSchema.parse({
     id: row.id,
     pcId: row.pcId,
     actor: row.actor,
@@ -84,7 +85,7 @@ function commandOf(row: CommandRow): PcCommand {
     issuedAt: row.issuedAt.toISOString(),
     expiresAt: row.expiresAt.toISOString(),
     action: row.action,
-  };
+  });
 }
 
 function responseOf(row: CommandRow): PcCommandResponse {

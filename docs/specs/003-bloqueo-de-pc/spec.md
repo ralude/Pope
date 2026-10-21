@@ -180,6 +180,8 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 
 ## Preguntas abiertas
 
+- [x] **Reserva tras cerrar una sesión (T29).** **Resuelta (mantenedor, 2026-10-21): todos los cierres** (Bloquear, Cerrar desde el panel, salida del cliente, agotamiento, falta de latidos y reinicio detectado) dejan la PC sin admitir clientes hasta que el agente confirma el bloqueo y la limpieza de procesos (REQ-003-34). Si la limpieza falla, la PC sigue sin admitir clientes hasta que el personal vuelva a pulsar Bloquear. Los cierres que no hace el personal piden el bloqueo como «sistema».
+
 - [x] **Continuación T28–T42 (mantenedor, 2026-10-21).** «Deja para luego T22 si es posible y ve avanzando con T28 hasta T42; si hay dudas pregunta, no asumas». Respuestas a las dudas de ese bloque: **T34**, proponer primero el diseño de contratos, confirmación del bloqueo, corte de consumo y acuses perdidos, sin implementar hasta su aprobación; **T37**, aplazada hasta demostrar T10, y T38/T40 implementan solo lo independiente del mecanismo y quedan abiertas; **T31**, prueba real pidiendo a Windows un reinicio con margen y anulándolo (`AbortSystemShutdown`), sin reiniciar ni apagar el equipo de desarrollo; **T33**, paquete mágico comprobado capturándolo en local, con el encendido físico pendiente para T58. T22 sigue autorizada y aplazada.
 
 - [x] **Recuperación ordinaria de T27 (2026-10-12).** El mantenedor aprueba bloquear desde el host al perder el servicio y conservar el bloqueo tras reiniciar el agente hasta recibir estado nuevo del nodo. Sin entrada técnica offline ni reutilización de tiempo autorizado de otro arranque. La emergencia administrativa y su mecanismo siguen en T53/T54; esta aprobación no los implementa ni cierra T10/T15.
