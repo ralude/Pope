@@ -629,3 +629,18 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
 - No probado: el host no confirma al agente el escritorio físico (queda para T22); el agente
   real con el nodo NestJS en la PC del local; anticheat y juegos (T56).
 - Batería general: 1 749 tests sin fallos (447 servidor, 414 nativos).
+
+### T31 · reinicio y apagado pedidos y anulados (2026-10-21)
+
+- `Pope.DesktopProbe --power-proof <carpeta nueva>`, con el usuario de desarrollo en el
+  Windows 11 de desarrollo. Cadena de producto: `AgentCommands` + `AgentPower` +
+  `WindowsPower.Initiate` con **60 s** de margen (en producto, 0). Diario guardado antes del
+  efecto (`accepted`), acuse `accepted` y `InitiateShutdownW` aceptado con código **0** para
+  reiniciar y para apagar; `AbortSystemShutdownW` anuló ambos y `shutdown /a` confirmó
+  después que no quedaba nada pendiente (1116). El equipo no se reinició.
+- Primera ejecución: el `TOKEN_PRIVILEGES` del producto tenía mal la alineación del LUID y
+  Windows respondió **1300** (sin permiso). El agente respondió `accepted` y después
+  `native_failure`, y el diario guardó el fallo. Corregido con el mismo LUID de dos campos
+  que la custodia.
+- No probado: el reinicio y el apagado reales (VM o PC de pruebas), el agente como SYSTEM
+  (SCM, T15c3) ni Wake-on-LAN tras el apagado (T33/T58).

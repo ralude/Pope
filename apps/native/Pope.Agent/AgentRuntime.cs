@@ -32,7 +32,12 @@ internal sealed class AgentRuntime
         state.SessionStarted += cleanup.Started;
         state.SessionFinished += id => _ = cleanup.Finished(id);
         // T29: después de state.Apply, que ya guardó el controlState con el que se compara la orden.
-        var commands = new AgentCommands(state, cleanup, channel.SendMessageAsync, log);
+        // T31: un diario corrupto se descarta; como mucho se repetiría una orden ya ejecutada.
+        IReadOnlyList<PowerEntry> journal = [];
+        try { journal = AgentCustody.ReadPowerJournal(root); }
+        catch { log.Write(AgentLogCode.PowerJournalRejected); }
+        var power = new AgentPower(kind => WindowsPower.Initiate(kind), journal, entries => AgentCustody.StorePowerJournal(root, entries));
+        var commands = new AgentCommands(state, cleanup, channel.SendMessageAsync, log, power);
         channel.Message += commands.OnMessage;
     }
     internal async Task RunAsync(CancellationToken token)

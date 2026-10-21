@@ -7,7 +7,7 @@ namespace Pope.Agent;
 // ejecutable, ruta o script. El agente las compara con su último controlState y con la hora
 // del nodo antes de ejecutar, y responde con un acuse que no impone actor.
 internal sealed class AgentCommands(AgentState state, ClientSessionCleanup cleanup,
-    Func<ReadOnlyMemory<byte>, CancellationToken, Task<bool>> send, AgentLog? log = null)
+    Func<ReadOnlyMemory<byte>, CancellationToken, Task<bool>> send, AgentLog? log = null, AgentPower? power = null)
 {
     private const int Remembered = 64;
     private static readonly TimeSpan Lifetime = TimeSpan.FromSeconds(30);
@@ -45,6 +45,12 @@ internal sealed class AgentCommands(AgentState state, ClientSessionCleanup clean
         var kind = command.GetProperty("action").GetProperty("kind").GetString()!;
         if (answered.TryGetValue(id, out var previous)) { await send(previous, token); return; }
         var (context, now) = state.Control();
+        // T31: tras reiniciar el equipo, la misma orden solo repite el resultado guardado.
+        if (IsPower(kind) && power?.Find(id) is { } done)
+        {
+            await Answer(id, done.Status == "accepted" ? new { status = "accepted", kind } : PowerFailed(kind, 0), now, token);
+            return;
+        }
         var refusal = Refusal(command, context, now);
         if (refusal != null)
         {
@@ -52,7 +58,8 @@ internal sealed class AgentCommands(AgentState state, ClientSessionCleanup clean
             await Answer(id, Failed(kind, refusal, "La orden no corresponde al estado de esta PC."), now, token);
             return;
         }
-        // Cada tipo se activa en su tarea: reiniciar/apagar (T31), mensajes (T32), mantenimiento (T37/T40).
+        if (IsPower(kind) && power != null) { await Power(id, kind, now, token); return; }
+        // Cada tipo se activa en su tarea: mensajes (T32), mantenimiento (T37/T40).
         if (kind != "lock")
         {
             log?.Write(AgentLogCode.CommandRejected);
@@ -87,6 +94,32 @@ internal sealed class AgentCommands(AgentState state, ClientSessionCleanup clean
         if (kind == "maintenance" && expected.GetProperty("maintenanceId").GetString() != current.GetProperty("maintenanceId").GetString()) return "stale_context";
         return null;
     }
+
+    // T31 · REQ-003-20: guarda la orden antes del efecto y avisa de que la acepta antes de pedir
+    // a Windows el reinicio o apagado, que puede cortar la conexión al instante. Si Windows lo
+    // rechaza, responde el fallo. Aceptar no demuestra el apagado: eso lo ve el nodo después.
+    private async Task Power(string id, string kind, DateTimeOffset? now, CancellationToken token)
+    {
+        try { power!.Record(new PowerEntry(id, kind, "accepted", null)); }
+        catch
+        {
+            log?.Write(AgentLogCode.PowerFailed);
+            await Answer(id, Failed(kind, "native_failure", "No se pudo guardar la orden antes de ejecutarla."), now, token);
+            return;
+        }
+        await Answer(id, new { status = "accepted", kind }, now, token);
+        var code = power.Initiate(kind);
+        if (code == 0) { log?.Write(AgentLogCode.PowerAccepted); return; }
+        try { power.Record(new PowerEntry(id, kind, "failed", "native_failure")); }
+        catch { /* El nodo ya tiene el fallo; el diario solo evita repetir la orden. */ }
+        log?.Write(AgentLogCode.PowerFailed);
+        await Answer(id, PowerFailed(kind, code), state.Control().NodeNow, token);
+    }
+
+    private static bool IsPower(string kind) => kind is "restart" or "powerOff";
+
+    private static object PowerFailed(string kind, int code) => Failed(kind, "native_failure",
+        code is 5 or WindowsPower.ErrorNotAllAssigned ? "Windows no concede permiso para reiniciar o apagar." : "Windows rechazó la orden.");
 
     private static DateTimeOffset Instant(JsonElement value) =>
         DateTimeOffset.Parse(value.GetString()!, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);

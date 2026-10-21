@@ -25,6 +25,7 @@ internal static class Program
             && Path.IsPathFullyQualified(agentDirectory) && Path.IsPathFullyQualified(agentHostDirectory))
             return AgentLossProof.Agent(agentDirectory, agentHostDirectory, agentUse, agentConfig, agentRecovery);
         if (args is ["--cleanup-proof", var cleanupProof] && Path.IsPathFullyQualified(cleanupProof)) return CleanupProof.Run(cleanupProof);
+        if (args is ["--power-proof", var powerProof] && Path.IsPathFullyQualified(powerProof)) return PowerProof.Run(powerProof);
         if (args is ["--idle", var idleDirectory] && Path.IsPathFullyQualified(idleDirectory)) return CleanupProof.Idle(idleDirectory);
         if (args is ["--launcher", var launcherDirectory] && Path.IsPathFullyQualified(launcherDirectory)) return CleanupProof.Launcher(launcherDirectory);
         if (args is ["--game-access-proof", var accessProof, var accessGame] && Path.IsPathFullyQualified(accessProof) && Path.IsPathFullyQualified(accessGame))

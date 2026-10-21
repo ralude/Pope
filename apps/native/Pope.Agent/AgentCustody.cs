@@ -42,6 +42,25 @@ internal static class AgentCustody
         finally { CryptographicOperations.ZeroMemory(plain); }
     }
 
+    // T31: diario de reinicios y apagados, protegido como la recuperación.
+    internal static void StorePowerJournal(string root, IReadOnlyList<PowerEntry> entries)
+    {
+        RequireSystem();
+        var plain = PowerJournal.Serialize(entries);
+        try { StoreProtected(root, plain, "power-journal.bin", create: false); }
+        finally { CryptographicOperations.ZeroMemory(plain); }
+    }
+
+    internal static IReadOnlyList<PowerEntry> ReadPowerJournal(string root)
+    {
+        RequireSystem();
+        Verify(new DirectoryInfo(Path.GetFullPath(root)));
+        if (!File.Exists(Path.Combine(root, "power-journal.bin"))) return [];
+        var plain = ReadProtected(root, "power-journal.bin");
+        try { return PowerJournal.Parse(plain); }
+        finally { CryptographicOperations.ZeroMemory(plain); }
+    }
+
     internal static ClientScope? ReadScope(string root)
     {
         RequireSystem();
