@@ -31,10 +31,11 @@ import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import { pcs, sessions, sessionTopups } from '../db/schema.js';
 import { CashRegisterService, deskPaymentOf } from '../cash/cash-register.service.js';
-import { EventsService } from '../events/events.service.js';
+import { EventsService, type Transaction } from '../events/events.service.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { PcConnections } from './pc-connections.js';
+import { PcControlService, pcUnavailableMessage } from './pc-control.service.js';
 import { actorName, type SessionRow, temporaryUsageOf } from './session-state.js';
 import { SessionsService } from './sessions.service.js';
 
@@ -74,7 +75,30 @@ export class TemporarySessionsService {
     private readonly sessions: SessionsService,
     private readonly cash: CashRegisterService,
     private readonly clock: Clock,
+    private readonly control: PcControlService,
   ) {}
+
+  /**
+   * Bloquea la PC destino y comprueba que admite una sesión temporal: sin otra sesión, sin
+   * orden del personal en curso ni mantenimiento (T28) y conectada al nodo.
+   */
+  private async freePc(tx: Transaction, pcId: string) {
+    const [pc] = await tx.select().from(pcs).where(eq(pcs.id, pcId)).for('update');
+    if (!pc) {
+      throw new NotFoundException('No existe esa PC');
+    }
+    if (await this.sessions.activeOnPc(pc.id, tx)) {
+      throw new ConflictException(`La ${pc.name} ya tiene una sesión abierta`);
+    }
+    const unavailable = await this.control.unavailableIn(tx, pc.id);
+    if (unavailable) {
+      throw new ConflictException(pcUnavailableMessage(unavailable, pc.name));
+    }
+    if (!this.connections.isConnected(pc.id)) {
+      throw new ConflictException(`La ${pc.name} no está conectada al nodo`);
+    }
+    return pc;
+  }
 
   /**
    * Abre una sesión temporal en una PC libre y conectada (REQ-001-22, REQ-001-60). El
@@ -88,16 +112,7 @@ export class TemporarySessionsService {
   ): Promise<TemporarySession> {
     const row = await this.events.inTransaction(async (tx, emit) => {
       // Bloquea la PC: un login o otra apertura a la vez en ella esperan a que termine.
-      const [pc] = await tx.select().from(pcs).where(eq(pcs.id, input.pcId)).for('update');
-      if (!pc) {
-        throw new NotFoundException('No existe esa PC');
-      }
-      if (await this.sessions.activeOnPc(pc.id, tx)) {
-        throw new ConflictException(`La ${pc.name} ya tiene una sesión abierta`);
-      }
-      if (!this.connections.isConnected(pc.id)) {
-        throw new ConflictException(`La ${pc.name} no está conectada al nodo`);
-      }
+      const pc = await this.freePc(tx, input.pcId);
 
       const now = this.clock.now();
       const rate = await this.tariffs.rateAt(now, tx);
@@ -316,16 +331,7 @@ export class TemporarySessionsService {
         throw new ConflictException('Esta sesión caducó: pasaron más de 48 horas desde el corte');
       }
 
-      const [pc] = await tx.select().from(pcs).where(eq(pcs.id, input.pcId)).for('update');
-      if (!pc) {
-        throw new NotFoundException('No existe esa PC');
-      }
-      if (await this.sessions.activeOnPc(pc.id, tx)) {
-        throw new ConflictException(`La ${pc.name} ya tiene una sesión abierta`);
-      }
-      if (!this.connections.isConnected(pc.id)) {
-        throw new ConflictException(`La ${pc.name} no está conectada al nodo`);
-      }
+      const pc = await this.freePc(tx, input.pcId);
 
       const now = this.clock.now();
       const name = original.tempName ?? defaultTemporaryName(pc.name, now);

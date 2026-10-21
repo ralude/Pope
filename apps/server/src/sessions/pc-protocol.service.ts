@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import {
   type NodeToPcMessage,
   type NativePcToNodeMessage,
@@ -11,11 +11,13 @@ import {
 import { CombosService } from '../combos/combos.service.js';
 import { Clock } from '../common/clock.js';
 import { CustomerAuthService } from '../customers/customer-auth.service.js';
+import { DATABASE, type Database } from '../db/database.js';
 import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
+import { PcControlService } from './pc-control.service.js';
 import { PausesService } from './pauses.service.js';
 import { customerInactiveMessage, PcRequestRefused } from './session-state.js';
-import { SessionsService } from './sessions.service.js';
+import { PC_UNAVAILABLE_FOR_CUSTOMER, SessionsService } from './sessions.service.js';
 
 type HelloMessage = Extract<NativePcToNodeMessage, { type: 'hello' }>;
 type LoginMessage = Extract<NativePcToNodeMessage, { type: 'login' }>;
@@ -64,6 +66,8 @@ export class PcProtocolService {
     private readonly combos: CombosService,
     private readonly clock: Clock,
     private readonly authentication: PcAuthenticationService,
+    private readonly control: PcControlService,
+    @Inject(DATABASE) private readonly db: Database,
   ) {}
 
   /** Procesa un mensaje en crudo. Nunca lanza: los fallos se responden con `error`. */
@@ -153,6 +157,7 @@ export class PcProtocolService {
     if (message.recoveryState === 'known') await this.sessions.reconcile(pc.id, message);
     else this.sessions.touch(pc.id);
     connection.send(await this.sessions.stateFor(pc.id));
+    await this.control.sync(pc.id, message.controlContext);
   }
 
   /** Mensajes de una PC ya identificada. */
@@ -166,6 +171,8 @@ export class PcProtocolService {
     switch (message.type) {
       case 'heartbeat':
         connection.send(await this.sessions.heartbeat(pc.id, message));
+        // El latido trae la copia del contexto de la PC: se corrige si cambió (T28).
+        await this.control.sync(pc.id, message.controlContext);
         return;
       case 'login':
         connection.send(await this.login(pc, message));
@@ -212,6 +219,9 @@ export class PcProtocolService {
     // Antes de comprobar la contraseña: así un intento en una PC ocupada no cuenta.
     if (await this.sessions.activeOnPc(pc.id)) {
       throw new PcRequestRefused('session_already_active', 'Esta PC ya tiene una sesión abierta');
+    }
+    if (await this.control.unavailableIn(this.db, pc.id)) {
+      throw new PcRequestRefused('pc_unavailable', PC_UNAVAILABLE_FOR_CUSTOMER);
     }
     const result = await this.customerAuth.verify(message.username, message.password);
     if (!result.ok) {

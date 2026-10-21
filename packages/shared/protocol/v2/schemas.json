@@ -1400,6 +1400,7 @@
               "no_active_session",
               "combo_unavailable",
               "pause_unavailable",
+              "pc_unavailable",
               "internal_error"
             ]
           },
@@ -2631,6 +2632,7 @@
               "no_active_session",
               "combo_unavailable",
               "pause_unavailable",
+              "pc_unavailable",
               "internal_error"
             ]
           },
@@ -3757,6 +3759,7 @@
                       "no_active_session",
                       "combo_unavailable",
                       "pause_unavailable",
+                      "pc_unavailable",
                       "internal_error"
                     ]
                   },

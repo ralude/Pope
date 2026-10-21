@@ -390,6 +390,9 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** implementar solicitud/acuse/resultado con eventos y reserva transaccional; serializar sobre la misma PC todos los caminos de login, temporal, restauración y mantenimiento.
   - **Verificar:** doble clic, ACK duplicado/tardío, orden vencida, desconexión y login concurrente; no ejecutar órdenes viejas sobre otra sesión.
   - **Commit:** `feat(server): coordina las órdenes y reservas de PCs`.
+  - **División (2026-10-21):** se divide para mantener commits revisables; ver la concreción T28 del plan.
+  - [x] **T28a:** contexto y revisión por ocupación, `controlState` tras `hello`/latido y rechazo `pc_unavailable` de login, temporal y restauración con reserva o mantenimiento.
+  - [ ] **T28b:** órdenes con eventos, acuses idempotentes, caducidad, reserva y reenvío tras `hello`; endpoints del panel.
 
 - [ ] **T29: Bloquear mediante el cierre existente**
   - **Cubre:** REQ-003-20, REQ-003-34; REQ-001-69.

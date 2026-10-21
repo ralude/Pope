@@ -445,6 +445,11 @@ export const pcControlStates = pgTable(
       .primaryKey()
       .references(() => pcs.id),
     revision: uuid('revision').notNull(),
+    /**
+     * Ocupación observada al emitir `revision` (libre, sesión con su pausa o mantenimiento).
+     * Si la de ahora es otra, la revisión cambia (T28).
+     */
+    occupancy: text('occupancy'),
     reservedCommandId: uuid('reserved_command_id'),
     reservedAt: timestamp('reserved_at', { withTimezone: true }),
   },

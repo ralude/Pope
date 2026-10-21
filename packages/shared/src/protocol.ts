@@ -266,6 +266,11 @@ export const protocolErrorCodeSchema = z.enum([
    * (REQ-002-11, REQ-002-21, REQ-002-23, REQ-002-24).
    */
   'pause_unavailable',
+  /**
+   * La PC no admite una sesión nueva: hay una orden del personal en curso o está en
+   * mantenimiento (REQ-003-20, REQ-003-43).
+   */
+  'pc_unavailable',
   /** Error inesperado del nodo. */
   'internal_error',
 ]);

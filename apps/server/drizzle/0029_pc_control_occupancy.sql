@@ -1,0 +1,1 @@
+ALTER TABLE "pc_control_states" ADD COLUMN "occupancy" text;

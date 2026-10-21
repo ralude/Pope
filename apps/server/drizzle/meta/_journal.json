@@ -204,6 +204,13 @@
       "when": 1791384817119,
       "tag": "0028_lock_screen_background",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792612900965,
+      "tag": "0029_pc_control_occupancy",
+      "breakpoints": true
     }
   ]
 }

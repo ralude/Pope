@@ -43,6 +43,7 @@ import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.j
 import { TariffsService } from '../tariffs/tariffs.service.js';
 import { InsufficientBalanceError, WalletService } from '../wallet/wallet.service.js';
 import { PcConnections, type PcIdentity } from './pc-connections.js';
+import { PcControlService } from './pc-control.service.js';
 import {
   accountBalances,
   activeState,
@@ -75,6 +76,10 @@ const WATCH_SLACK_MS = 20;
 const ALIVE_MS = 15_000;
 /** Cuánto recuerda el nodo que una sesión se cerró, para ignorar lo que llegue tarde. */
 const ENDED_MEMORY_MS = 60_000;
+
+/** El cliente intenta entrar en una PC con una orden en curso o en mantenimiento (T28). */
+export const PC_UNAVAILABLE_FOR_CUSTOMER =
+  'Esta PC no está disponible ahora. Pide ayuda al encargado';
 
 /** Usuario y saldos del cliente de una sesión con cuenta. */
 interface AccountView {
@@ -130,6 +135,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     private readonly rates: ExchangeRatesService,
     private readonly settings: SettingsService,
     private readonly clock: Clock,
+    private readonly control: PcControlService,
   ) {}
 
   /** El `state` de una sesión activa, con la tasa vigente (REQ-005-36) y su pausa. */
@@ -235,7 +241,11 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     const started = await this.events.inTransaction(async (tx, emit) => {
       // Bloquea la PC y la cuenta: un login simultáneo en otra PC, o una sesión temporal
       // abierta a la vez en esta, esperan a que termine.
-      await tx.select({ id: pcs.id }).from(pcs).where(eq(pcs.id, pc.id)).for('update');
+      await this.control.lockPc(tx, pc.id);
+      // Una orden del personal en curso o un mantenimiento no admiten clientes (T28).
+      if (await this.control.unavailableIn(tx, pc.id)) {
+        throw new PcRequestRefused('pc_unavailable', PC_UNAVAILABLE_FOR_CUSTOMER);
+      }
       const [current] = await tx
         .select({ status: customers.status })
         .from(customers)

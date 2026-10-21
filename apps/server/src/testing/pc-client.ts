@@ -36,10 +36,22 @@ export class PcTestClient {
   private readonly inbox: NodeToPcMessage[] = [];
   private waiting: ((message: NodeToPcMessage) => void) | null = null;
   readonly closed: Promise<{ code: number; reason: string }>;
+  /**
+   * Último `controlState` recibido. Como el agente, lo guarda aparte en lugar de ponerlo en
+   * la cola: así los tests de sesión siguen leyendo sus `state` con `next()` (T28).
+   */
+  control: Extract<NodeToPcMessage, { type: 'controlState' }> | null = null;
+  /** Cuántos `controlState` ha recibido, para comprobar que el nodo no los repite. */
+  controls = 0;
 
   private constructor(private readonly ws: WebSocket) {
     ws.on('message', (data: Buffer) => {
       const message = nativeNodeToPcMessageSchema.parse(JSON.parse(data.toString('utf8')));
+      if (message.type === 'controlState') {
+        this.control = message;
+        this.controls++;
+        return;
+      }
       if (this.waiting) {
         this.waiting(message);
         this.waiting = null;
