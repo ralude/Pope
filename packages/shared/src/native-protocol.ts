@@ -63,6 +63,14 @@ export const endMaintenanceRequestSchema = z.strictObject({
   requestId: idSchema,
   maintenanceId: idSchema,
 });
+/**
+ * Solo del host al servicio (T32): el host mostró el mensaje del encargado. React no puede
+ * enviarlo; el host lo rechaza si llega desde la interfaz.
+ */
+export const staffMessageShownSchema = z.strictObject({
+  type: z.literal('staffMessageShown'),
+  commandId: idSchema,
+});
 const clientRequests = [
   loginMessageSchema.strict(),
   logoutMessageSchema.strict(),
@@ -75,6 +83,7 @@ export const nativeShellRequestSchema = z.union([
   ...clientRequests,
   technicalLoginMessageSchema,
   endMaintenanceRequestSchema,
+  staffMessageShownSchema,
 ]);
 export type NativeShellRequest = z.infer<typeof nativeShellRequestSchema>;
 

@@ -430,6 +430,11 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** integrar envío, transporte y presentación elegida en nodo/host/Shell; validar texto, destinatario, vigencia y límites acordados, sin HTML ejecutable.
   - **Verificar:** foco/duración conforme a la decisión, contenido malicioso y estados permitidos; mensaje retrasado no aparece al siguiente cliente ni se marca entregado por enviarlo.
   - **Commit:** `feat(shell-ui): muestra los mensajes del encargado`.
+  - **Presentación confirmada (mantenedor, 2026-10-21):** ventana nativa del host siempre encima, sin foco y transparente a clics, centrada; en juegos DirectX exclusivos puede no verse y solo sonar (se comprueba en T56). Diseño propio con el estilo del Shell, para revisar. Sonido de aviso de Windows (en la pausa queda silenciado como todo lo demás).
+  - **División (2026-10-21):** T32a contrato y nodo; T32b agente y host (la ventana es nativa, así que el commit es `feat(native)` en vez de `shell-ui`); T32c ensayo real.
+  - [x] **T32a:** el nodo admite `showMessage` con la PC libre o en sesión (también en pausa), sin reservarla ni esperar a otras órdenes, y lo rechaza en mantenimiento. Se da por entregado solo con `applied` de la PC; si no, vence a los 30 s. El evento no copia el texto. Contrato: `staffMessage` del servicio al host y `staffMessageShown` del host al servicio, nunca al nodo; React no recibe el mensaje. 5 tests nuevos.
+  - [ ] **T32b:** el agente valida el mensaje con su contexto, lo pasa al host y responde `applied` cuando el host confirma que lo mostró; ventana nativa con sonido, 5 s, sin foco ni bloquear la entrada, en el escritorio activo (uso o bloqueo).
+  - [ ] **T32c:** ensayo real: foco y entrada intactos, duración, texto hostil como texto plano y descarte si cambia la sesión.
 
 - [ ] **T33: Wake-on-LAN y aviso de dos minutos**
   - **Cubre:** REQ-003-22; CA-003-06.

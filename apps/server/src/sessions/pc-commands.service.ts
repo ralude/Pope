@@ -128,6 +128,8 @@ export interface NewCommand {
   action: PcCommand['action'];
   /** Contexto vigente con la PC bloqueada: el que la PC comparará al recibirla. */
   context: PcControlContext;
+  /** Un mensaje (T32) no reserva la PC: no cambia su ocupación. Las demás órdenes, sí. */
+  reserve?: boolean;
 }
 
 /**
@@ -192,7 +194,8 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
    * la había. Llamar con la fila de la PC bloqueada; tras el commit, `dispatch`.
    */
   async insertIn(tx: Transaction, emit: Emit, input: NewCommand): Promise<CommandRow> {
-    const holder = await this.holder(tx, input.pc.id);
+    const reserve = input.reserve ?? true;
+    const holder = reserve ? await this.holder(tx, input.pc.id) : undefined;
     const now = this.clock.now();
     const [row] = await tx
       .insert(pcCommands)
@@ -208,10 +211,11 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
       })
       .returning();
     if (!row) throw new Error('No se pudo guardar la orden');
-    await tx
-      .update(pcControlStates)
-      .set({ reservedCommandId: row.id, reservedAt: now })
-      .where(eq(pcControlStates.pcId, input.pc.id));
+    if (reserve)
+      await tx
+        .update(pcControlStates)
+        .set({ reservedCommandId: row.id, reservedAt: now })
+        .where(eq(pcControlStates.pcId, input.pc.id));
     emit({
       type: 'pc.command_requested',
       version: 1,

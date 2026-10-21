@@ -45,11 +45,12 @@ export class PcCommandRequestsService {
           return { row: existing, fresh: false };
         }
         if (!pc) throw new PcCommandException('unknown_pc', 'No existe esa PC', 404);
-        const kind = request.kind;
-        // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30). Con un
-        // mantenimiento hace falta registrar antes su salida (T39/T40): aún no disponible.
+        // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30), y mensajes
+        // (T32). Con un mantenimiento hace falta registrar antes su salida (T39/T40) y los
+        // mensajes se rechazan (REQ-003-20): aún no disponible.
         if (
-          (kind !== 'lock' && kind !== 'restart' && kind !== 'powerOff') ||
+          request.kind === 'startMaintenance' ||
+          request.kind === 'endMaintenance' ||
           request.expected.kind === 'maintenance'
         ) {
           throw new PcCommandException('invalid_command', 'Esta orden aún no está disponible', 400);
@@ -64,6 +65,20 @@ export class PcCommandRequestsService {
             `La ${pc.name} cambió de estado. Revisa el mapa y vuelve a intentarlo`,
           );
         }
+        if (request.kind === 'showMessage') {
+          // Un mensaje no ocupa la PC ni espera a otras órdenes: no la reserva. Si la sesión
+          // o el estado cambian antes de mostrarse, la PC lo descarta por su contexto.
+          const row = await this.commands.insertIn(tx, emit, {
+            pc,
+            actor,
+            request,
+            action: { kind: 'showMessage', text: request.text },
+            context,
+            reserve: false,
+          });
+          return { row, fresh: true };
+        }
+        const kind = request.kind;
         const holder = await this.commands.holder(tx, pcId);
         if (holder && this.commands.inFlight(holder)) {
           throw new PcCommandException(

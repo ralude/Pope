@@ -74,6 +74,8 @@ export class WebViewChannel implements PcChannel {
       this.emit({ kind: 'status', status: envelope.status, pcName: envelope.pcName });
       return;
     }
+    // T32: el mensaje del encargado lo muestra el host en una ventana nativa, no React.
+    if (envelope.kind !== 'message') return;
     // Las pantallas existentes consumen este subconjunto. Órdenes/ACK no son notificaciones UI.
     const message = nodeToPcMessageSchema.safeParse(envelope.message);
     if (message.success)

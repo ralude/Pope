@@ -8,6 +8,7 @@ import {
   nativeShellRequestSchema,
 } from './native-protocol.js';
 import { pcToNodeMessageSchema } from './protocol.js';
+import { nativeBridgeEventSchema } from './shell-bridge.js';
 
 const ID = '0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b';
 const TIME = '2026-10-04T20:00:00Z';
@@ -157,5 +158,23 @@ describe('canal nativo v2', () => {
     ]) {
       expect(z.toJSONSchema(schema).anyOf).toBeDefined();
     }
+  });
+
+  it('REQ-003-20/T32: el mensaje del encargado va del servicio al host y la confirmación nunca al nodo', () => {
+    const shown = { type: 'staffMessageShown', commandId: ID };
+    expect(nativeShellRequestSchema.parse(shown)).toEqual(shown);
+    expect(nativePcToNodeMessageSchema.safeParse(shown).success).toBe(false);
+    expect(nativeShellRequestSchema.safeParse({ ...shown, requestId: ID }).success).toBe(false);
+    const message = { version: 1, kind: 'staffMessage', commandId: ID, text: '<b>Hola</b>' };
+    // Texto plano: se valida la longitud, no el contenido; el host lo muestra como texto.
+    expect(nativeBridgeEventSchema.parse(message)).toEqual(message);
+    for (const bad of [
+      { ...message, text: '' },
+      { ...message, text: 'a'.repeat(1_001) },
+      { ...message, sound: false },
+      { ...message, commandId: 'x' },
+    ])
+      expect(nativeBridgeEventSchema.safeParse(bad).success).toBe(false);
+    expect(nativeShellNotificationSchema.safeParse(message).success).toBe(false);
   });
 });

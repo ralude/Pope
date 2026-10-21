@@ -189,14 +189,13 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
     );
     expect(forbidden.statusCode).toBe(403);
 
-    const message = await order(5, {
+    const maintenance = await order(5, {
       id: newId(),
-      kind: 'showMessage',
+      kind: 'startMaintenance',
       expected: (await snapshot(5)).context,
-      text: 'Hola',
     });
-    expect(message.statusCode).toBe(400);
-    expect(message.json()).toMatchObject({ code: 'invalid_command' });
+    expect(maintenance.statusCode).toBe(400);
+    expect(maintenance.json()).toMatchObject({ code: 'invalid_command' });
     const malformed = await order(5, { id: 'x', kind: 'lock' });
     expect(malformed.json()).toMatchObject({ code: 'invalid_command' });
     expect(await db().select().from(pcCommands)).toEqual([]);
