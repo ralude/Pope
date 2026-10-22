@@ -83,6 +83,14 @@ export class PanelClient {
     }
   }
 
+  /** El siguiente aviso de bloqueo del login técnico, saltando lo demás (REQ-003-45). */
+  async nextTechnicalLock(): Promise<Extract<PanelMessage, { type: 'technicalLoginLocked' }>> {
+    for (;;) {
+      const message = await this.next();
+      if (message.type === 'technicalLoginLocked') return message;
+    }
+  }
+
   close(): void {
     this.ws.close();
   }

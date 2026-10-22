@@ -3,8 +3,10 @@ import { asc } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { events, pcMaintenances } from '../db/schema.js';
+import { devPcId } from '../pcs/dev-pcs.js';
 import { loginAsStaff } from '../testing/auth.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
+import { PanelClient } from '../testing/panel-client.js';
 import type { PcTestClient } from '../testing/pc-client.js';
 import { createStaffService } from '../testing/staff.js';
 import { activeSession, login, PcWorld } from '../testing/pc-world.js';
@@ -228,5 +230,48 @@ describe('login técnico desde la PC (e2e, REQ-003-40, T35c)', () => {
     expect(await free.request(technical('ana', 'mal'))).toMatchObject({
       code: 'invalid_credentials',
     });
+  });
+
+  it('REQ-003-45: el panel recibe un solo aviso por bloqueo, también si se conecta durante el minuto', async () => {
+    const beto = await loginAsStaff(world.testApp, 'beto', 'encargado', 'Beto');
+    const address = world.url.replace(/\/pc$/, '/panel');
+    const early = PanelClient.connect(address, beto);
+    await early.nextMap();
+    const pc = await world.pc(4);
+    for (let i = 0; i < 10; i++) await pc.request(technical('ana', 'mal'));
+    const lockedUntil = new Date(world.clock.now().getTime() + 60_000).toISOString();
+    expect(await early.nextTechnicalLock()).toEqual({
+      type: 'technicalLoginLocked',
+      staffName: 'Ana',
+      username: 'ana',
+      pc: { id: devPcId(4), name: 'PC 04' },
+      lockedUntil,
+    });
+
+    // Un panel que se conecta con el bloqueo vigente lo recibe una vez.
+    const late = PanelClient.connect(address, beto);
+    expect(await late.nextTechnicalLock()).toMatchObject({ staffName: 'Ana', lockedUntil });
+    for (let i = 0; i < 3; i++) await pc.request(technical('ana', 'mal'));
+    await pc.request({ type: 'listCombos', requestId: 'sync' });
+    early.close();
+    late.close();
+
+    // Pasado el minuto, quien se conecta ya no ve el aviso.
+    world.clock.advance(61_000);
+    const after = PanelClient.connect(address, beto);
+    await after.nextMap();
+    await after.nextPending();
+    await after.nextRate();
+    await expect(
+      Promise.race([
+        after.nextTechnicalLock(),
+        new Promise((resolve) =>
+          setTimeout(() => {
+            resolve('sin aviso');
+          }, 300),
+        ),
+      ]),
+    ).resolves.toBe('sin aviso');
+    after.close();
   });
 });

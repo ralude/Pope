@@ -140,5 +140,17 @@ export const panelMessageSchema = z.discriminatedUnion('type', [
   exchangeRateStatusSchema.extend({ type: z.literal('exchangeRate') }),
   /** Cambió el registro de caja o el stock: las pantallas abiertas vuelven a pedirlos. */
   z.object({ type: z.literal('cash') }),
+  /**
+   * Una cuenta del personal alcanzó diez fallos de login técnico y queda bloqueada hasta
+   * `lockedUntil` (REQ-003-45). Se envía una vez por bloqueo, a los paneles conectados y a los
+   * que se conectan mientras dura.
+   */
+  z.object({
+    type: z.literal('technicalLoginLocked'),
+    staffName: z.string(),
+    username: z.string(),
+    pc: z.strictObject({ id: idSchema, name: z.string() }),
+    lockedUntil: utcInstantSchema,
+  }),
 ]);
 export type PanelMessage = z.infer<typeof panelMessageSchema>;

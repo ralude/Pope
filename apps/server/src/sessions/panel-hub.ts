@@ -3,6 +3,7 @@ import type { Duplex } from 'node:stream';
 
 import {
   type BeforeApplicationShutdown,
+  Inject,
   Injectable,
   Logger,
   type OnApplicationBootstrap,
@@ -12,17 +13,29 @@ import {
   PANEL_UNAUTHORIZED_CLOSE,
   type PanelMessage,
   panelMessageSchema,
+  TECHNICAL_LOGIN_LOCK_SECONDS,
 } from '@pope/shared';
+import { and, eq, gt } from 'drizzle-orm';
 import { type WebSocket, WebSocketServer } from 'ws';
 
 import { AuthService } from '../auth/auth.service.js';
 import { STAFF_COOKIE } from '../auth/staff-cookie.js';
 import { Clock } from '../common/clock.js';
+import { DATABASE, type Database } from '../db/database.js';
+import { events as eventsTable, staff } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
 import { PcConnections } from './pc-connections.js';
 import { PcMapService } from './pc-map.service.js';
 import { TemporarySessionsService } from './temporary-sessions.service.js';
+
+/** Datos del evento `staff.technical_login_locked` que usa el aviso al panel. */
+interface LockPayload {
+  staffId: string;
+  username: string;
+  pc: { id: string; name: string };
+  lockedUntil: string;
+}
 
 /** Como mucho, un envío del mapa por segundo: el panel corre en la gráfica integrada. */
 export const PANEL_THROTTLE_MS = 1000;
@@ -89,6 +102,7 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
   private unsubscribe: (() => void)[] = [];
 
   constructor(
+    @Inject(DATABASE) private readonly db: Database,
     private readonly auth: AuthService,
     private readonly map: PcMapService,
     private readonly events: EventsService,
@@ -103,6 +117,9 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       this.events.subscribe((committed) => {
         if (committed.some((event) => CASH_EVENT_TYPES.has(event.type))) {
           this.broadcastCash();
+        }
+        for (const event of committed) {
+          if (event.type === 'staff.technical_login_locked') void this.broadcastLock(event.payload);
         }
         this.changed();
       }),
@@ -157,9 +174,55 @@ export class PanelHub implements OnApplicationBootstrap, BeforeApplicationShutdo
       const rate = this.rates.status();
       this.lastRate = JSON.stringify(rate);
       this.send(ws, { type: 'exchangeRate', ...rate });
+      for (const message of await this.activeLocks()) this.send(ws, message);
     } catch (error) {
       this.logger.error('No se pudo enviar el mapa al panel', error);
     }
+  }
+
+  /** Aviso de un bloqueo del login técnico a los paneles conectados (REQ-003-45). */
+  private async broadcastLock(payload: LockPayload): Promise<void> {
+    try {
+      const message = await this.lockMessage(payload);
+      for (const client of this.clients) this.send(client, message);
+    } catch (error) {
+      this.logger.error('No se pudo avisar del bloqueo técnico al panel', error);
+    }
+  }
+
+  /** Bloqueos del login técnico que siguen vigentes, para el panel que se acaba de conectar. */
+  private async activeLocks(): Promise<PanelMessage[]> {
+    const now = this.clock.now();
+    const recent = await this.db
+      .select({ payload: eventsTable.payload })
+      .from(eventsTable)
+      .where(
+        and(
+          eq(eventsTable.type, 'staff.technical_login_locked'),
+          gt(
+            eventsTable.occurredAt,
+            new Date(now.getTime() - TECHNICAL_LOGIN_LOCK_SECONDS * 1_000),
+          ),
+        ),
+      );
+    const locks = recent
+      .map(({ payload }) => payload as unknown as LockPayload)
+      .filter((payload) => new Date(payload.lockedUntil) > now);
+    return Promise.all(locks.map((payload) => this.lockMessage(payload)));
+  }
+
+  private async lockMessage(payload: LockPayload): Promise<PanelMessage> {
+    const [member] = await this.db
+      .select({ displayName: staff.displayName })
+      .from(staff)
+      .where(eq(staff.id, payload.staffId));
+    return {
+      type: 'technicalLoginLocked',
+      staffName: member?.displayName ?? payload.username,
+      username: payload.username,
+      pc: payload.pc,
+      lockedUntil: payload.lockedUntil,
+    };
   }
 
   /** Algo cambió: envía ya si hace más de un segundo del último envío, si no, al cumplirse. */

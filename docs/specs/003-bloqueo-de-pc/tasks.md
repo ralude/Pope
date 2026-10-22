@@ -477,14 +477,14 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T35b:** `PcMaintenanceService`, inicio registrado al confirmarse, `startMaintenance` desde el panel y `maintenanceState` tras `hello`.
   - [x] **T35c:** `technicalLogin` local desde la PC, con la PC libre comprobada antes de la contraseña.
 
-- [ ] **T36: Diez fallos técnicos y aviso al panel**
+- [x] **T36: Diez fallos técnicos y aviso al panel**
   - **Cubre:** REQ-003-45; CA-003-10.
   - **Hacer:** aplicar por cuenta 10 fallos consecutivos, bloqueo de 60 s, reset por éxito/vencimiento y un evento/aviso por bloqueo; mantener intacto login del panel.
   - **Verificar:** intentos desde varias PCs, concurrencia en décimo fallo, reinicio del nodo, éxito intermedio y un solo aviso; sin enumeración de cuentas ni contraseñas en logs.
   - **Commit:** `feat(server): limita los intentos del login técnico`.
   - **División (2026-10-22):** aviso a los paneles conectados y a los que se conectan durante el bloqueo. [Guía](guia-t33-t42.md#t36--diez-fallos-técnicos-y-aviso-al-panel).
   - [x] **T36a:** contador por cuenta, bloqueo de 60 s y evento único.
-  - [ ] **T36b:** mensaje `technicalLoginLocked` del canal del panel.
+  - [x] **T36b:** mensaje `technicalLoginLocked` del canal del panel.
 
 - [ ] **T37: Entrada administrativa nativa**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
