@@ -27,7 +27,17 @@ internal static class LockHost
             ready = true; bridge.SendReady();
             if (proofProfile != null) File.WriteAllText(Path.Combine(proofProfile, "ready.json"), System.Text.Json.JsonSerializer.Serialize(new { Pid = Environment.ProcessId, Window = window.Handle.ToInt64() }));
         };
-        window.NativeDelivery = (envelope, _) => { authorization.Apply(envelope); if (ready) bridge.SendReady(); return Task.CompletedTask; };
+        window.NativeDelivery = async (envelope, token) =>
+        {
+            // T32: en el escritorio de bloqueo el mensaje lo muestra y lo confirma este hijo.
+            if (envelope.GetProperty("kind").GetString() == "staffMessage")
+            {
+                if (await window.ShowStaffMessage(envelope.GetProperty("text").GetString()!, token))
+                    bridge.Send(System.Text.Json.JsonSerializer.SerializeToElement(new { type = "staffMessageShown", commandId = envelope.GetProperty("commandId").GetString() }));
+                return;
+            }
+            authorization.Apply(envelope); if (ready) bridge.SendReady();
+        };
         Application.Run(window); window.WaitForBridge();
         return window.Failed ? 1 : 0;
     }

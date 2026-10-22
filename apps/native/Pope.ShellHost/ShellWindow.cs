@@ -18,6 +18,7 @@ internal sealed class ShellWindow : Form
     private JsonElement status = HostBridge.Offline();
     private JsonElement? state;
     private long stateAt;
+    private StaffMessageWindow? staffMessage;
     internal bool Failed { get; private set; }
     internal int? InitializationHResult { get; private set; }
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -92,6 +93,8 @@ internal sealed class ShellWindow : Form
                 ready = true; Post(status); ReplayState(); ReadyReceived?.Invoke(); return;
             }
             var request = envelope.GetProperty("request");
+            // T32: solo el host confirma que mostró un mensaje del encargado; nunca la interfaz.
+            if (request.GetProperty("type").GetString() == "staffMessageShown") return;
             if (bridge?.Send(request) == true) return;
             var error = new Dictionary<string, object?> { ["type"] = "error", ["code"] = "internal_error", ["message"] = "Sin conexión con el servidor." };
             if (request.TryGetProperty("requestId", out var id)) error["requestId"] = id.GetString();
@@ -103,6 +106,8 @@ internal sealed class ShellWindow : Form
     internal async Task Deliver(JsonElement envelope, CancellationToken token)
     {
         if (NativeDelivery is { } native) await native(envelope, token);
+        // T32: el mensaje del encargado lo muestra el host en su ventana nativa; React no lo ve.
+        if (envelope.GetProperty("kind").GetString() == "staffMessage") return;
         await InvokeAsync(() =>
     {
         if (envelope.GetProperty("kind").GetString() == "status") status = envelope.Clone();
@@ -111,6 +116,20 @@ internal sealed class ShellWindow : Form
         Post(envelope);
     }, token);
     }
+
+    // T32: muestra el mensaje en este escritorio, sustituyendo al anterior si seguía visible.
+    // Devuelve si quedó visible; el llamador lo confirma entonces al servicio.
+    internal Task<bool> ShowStaffMessage(string text, CancellationToken token) => InvokeAsync(() =>
+    {
+        if (closing.IsCancellationRequested) return false;
+        staffMessage?.Close();
+        var window = new StaffMessageWindow(text, Screen.PrimaryScreen?.Bounds ?? Bounds);
+        window.FormClosed += (_, _) => { if (staffMessage == window) staffMessage = null; window.Dispose(); };
+        staffMessage = window;
+        window.Show();
+        window.PaintNow();
+        return window.Visible;
+    }, token);
 
     private void ReplayState()
     {

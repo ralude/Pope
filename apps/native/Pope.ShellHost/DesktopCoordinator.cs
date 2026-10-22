@@ -43,8 +43,12 @@ internal sealed class DesktopCoordinator : IDisposable
         }
         catch { audio.Dispose(); locked.Dispose(); use.Dispose(); closing.Dispose(); throw; }
     }
+    // T32: muestra un mensaje en el escritorio de uso (lo pone Program con la ventana de uso).
+    internal Func<string, CancellationToken, Task<bool>>? ShowOnUse { get; set; }
+
     internal Task Apply(JsonElement envelope, CancellationToken token)
     {
+        if (envelope.GetProperty("kind").GetString() == "staffMessage") return StaffMessage(envelope, token);
         lock (gate)
         {
             authorization.Apply(envelope);
@@ -53,6 +57,21 @@ internal sealed class DesktopCoordinator : IDisposable
             Reconcile(); return Task.CompletedTask;
         }
     }
+    // T32 · REQ-003-20: el mensaje se muestra en el escritorio que ve el cliente. En el de
+    // bloqueo (PC libre o pausa) lo muestra el hijo, que lo confirma por su puente; en el de
+    // uso, esta instancia, que lo confirma al servicio cuando la ventana ya es visible.
+    private async Task StaffMessage(JsonElement envelope, CancellationToken token)
+    {
+        PipeSession? child;
+        lock (gate) child = transition.Blocked && childReady ? Volatile.Read(ref current) : null;
+        if (child != null) { child.TrySend(JsonSerializer.SerializeToUtf8Bytes(envelope)); return; }
+        bool blocked; lock (gate) blocked = transition.Blocked;
+        if (blocked || ShowOnUse is not { } show) return; // Sin escritorio visible no se confirma: vence.
+        var id = envelope.GetProperty("commandId").GetString()!;
+        if (await show(envelope.GetProperty("text").GetString()!, token))
+            bridge.Send(JsonSerializer.SerializeToElement(new { type = "staffMessageShown", commandId = id }));
+    }
+
     private void Reconcile()
     {
         lock (gate)

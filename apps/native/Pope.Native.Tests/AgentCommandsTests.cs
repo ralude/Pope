@@ -95,10 +95,10 @@ public sealed class AgentCommandsTests
         }
 
         // Agente con el diario dado: otro proceso del agente tras reiniciar el equipo.
-        internal AgentCommands Agent(AgentPower power) => new(State, Cleanup, (bytes, _) =>
+        internal AgentCommands Agent(AgentPower power, Func<string, string, CancellationToken, Task<bool?>>? present = null) => new(State, Cleanup, (bytes, _) =>
         {
             Sent.Add(ProtocolValidation.Parse(bytes, "pc-to-node")); return Task.FromResult(true);
-        }, power: power);
+        }, power: power, present: present);
 
         internal void Free(string revision = Revision) =>
             State.Apply(Message(new { type = "controlState", serverTime = Issued, context = new { kind = "free", revision } }));
@@ -274,5 +274,58 @@ public sealed class AgentCommandsTests
         pc.Commands.OnMessage(Message(new { type = "command", command = JsonSerializer.Deserialize<object>(Command().GetRawText()) }));
         await pc.Commands.Idle();
         Assert.Equal(["accepted", "applied"], pc.Statuses());
+    }
+
+    private static JsonElement Note(string text, object expected, string id = Order) => Message(new
+    {
+        type = "command",
+        command = new
+        {
+            id,
+            pcId = Pc,
+            actor = new { kind = "staff", staffId = Pc, name = "Ana" },
+            expected,
+            issuedAt = Issued,
+            expiresAt = "2026-10-21T20:00:30.000Z",
+            action = new { kind = "showMessage", text }
+        }
+    }).GetProperty("command");
+
+    [Fact(DisplayName = "REQ-003-20/T32: el mensaje pasa al host tal cual y se da por entregado cuando el host lo muestra")]
+    public async Task MessageIsAppliedWhenShown()
+    {
+        var pc = new Pc04();
+        pc.Free();
+        var shown = new List<(string Id, string Text)>();
+        var agent = pc.Agent(pc.Power, (id, text, _) => { shown.Add((id, text)); return Task.FromResult<bool?>(true); });
+        await agent.HandleAsync(Note("<script>alert(1)</script> & sigue", new { kind = "free", revision = Revision }), CancellationToken.None);
+        Assert.Equal([(Order, "<script>alert(1)</script> & sigue")], shown);
+        Assert.Equal(["accepted", "applied"], pc.Statuses());
+        Assert.Equal("showMessage", pc.Sent[1].GetProperty("result").GetProperty("effect").GetProperty("kind").GetString());
+    }
+
+    [Theory(DisplayName = "REQ-003-20/T32: sin host responde pc_unavailable; sin confirmación, native_failure")]
+    [InlineData(null, "pc_unavailable")]
+    [InlineData(false, "native_failure")]
+    public async Task MessageNotShownFails(bool? result, string code)
+    {
+        var pc = new Pc04();
+        pc.Free();
+        var agent = pc.Agent(pc.Power, (_, _, _) => Task.FromResult(result));
+        await agent.HandleAsync(Note("Hola", new { kind = "free", revision = Revision }), CancellationToken.None);
+        Assert.Equal(["accepted", "failed"], pc.Statuses());
+        Assert.Equal(code, pc.Sent[1].GetProperty("result").GetProperty("code").GetString());
+    }
+
+    [Fact(DisplayName = "REQ-003-20/T32: un mensaje para otra sesión o estado no se muestra al cliente siguiente")]
+    public async Task MessageForAnotherSessionIsDiscarded()
+    {
+        var pc = new Pc04();
+        pc.Free();
+        var shown = 0;
+        var agent = pc.Agent(pc.Power, (_, _, _) => { shown++; return Task.FromResult<bool?>(true); });
+        await agent.HandleAsync(Note("Para Juan", new { kind = "session", revision = Revision, sessionId = Session }), CancellationToken.None);
+        Assert.Equal(0, shown);
+        Assert.Equal("stale_context", pc.Sent.Single().GetProperty("result").GetProperty("code").GetString());
     }
 }

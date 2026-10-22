@@ -37,7 +37,7 @@ internal static class Program
                     var profile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Pope", "ShellProfile");
                     using var window = new ShellWindow(Path.Combine(AppContext.BaseDirectory, "shell"), profile, bridge);
                     using var desktops = bridge == null ? null : new DesktopCoordinator(bridge);
-                    if (desktops != null) window.NativeDelivery = desktops.Apply;
+                    if (desktops != null) { window.NativeDelivery = desktops.Apply; desktops.ShowOnUse = window.ShowStaffMessage; }
                     Application.Run(window);
                     window.WaitForBridge();
                     return window.Failed ? 1 : 0;

@@ -11,6 +11,7 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
     private ClientHost? client;
     private bool online;
     private int attached;
+    private readonly Dictionary<string, TaskCompletionSource> pendingMessages = [];
     // REQ-003-34: identidad del host asociado (sesión, usuario, logon, PID y creación) mientras viva.
     internal ClientHost? Host => Volatile.Read(ref client);
 
@@ -44,9 +45,32 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
         }
         finally { Volatile.Write(ref current, null); Volatile.Write(ref client, null); Volatile.Write(ref attached, 0); }
     }
+    // T32 · REQ-003-20: pasa el mensaje al host y espera su confirmación de que lo mostró.
+    // Sin host conectado devuelve null (no hay pantalla); si no confirma a tiempo, false.
+    internal async Task<bool?> ShowStaffMessageAsync(string commandId, string text, TimeSpan timeout, CancellationToken token)
+    {
+        var shown = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        lock (pendingMessages) pendingMessages[commandId] = shown;
+        try
+        {
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(new { version = 1, kind = "staffMessage", commandId, text });
+            if (Volatile.Read(ref current)?.TrySend(bytes) != true) return null;
+            try { await shown.Task.WaitAsync(timeout, token); return true; }
+            catch (TimeoutException) { return false; }
+        }
+        finally { lock (pendingMessages) pendingMessages.Remove(commandId); }
+    }
+
     private async Task Dispatch(byte[] bytes, CancellationToken token)
     {
         var request = ProtocolValidation.Parse(bytes, "shell-request");
+        if (request.GetProperty("type").GetString() == "staffMessageShown")
+        {
+            // Confirmación del propio host (React no puede enviarla); nunca se reenvía al nodo.
+            lock (pendingMessages)
+                if (pendingMessages.TryGetValue(request.GetProperty("commandId").GetString()!, out var shown)) shown.TrySetResult();
+            return;
+        }
         var nativeAction = request.GetProperty("type").GetString() == "endMaintenance";
         // T40 añadirá el journal de salida: no reenviar una acción nativa como petición al nodo.
         if (!nativeAction && await channel.SendRequestAsync(bytes, token)) return;

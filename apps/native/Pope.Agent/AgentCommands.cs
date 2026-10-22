@@ -7,7 +7,8 @@ namespace Pope.Agent;
 // ejecutable, ruta o script. El agente las compara con su último controlState y con la hora
 // del nodo antes de ejecutar, y responde con un acuse que no impone actor.
 internal sealed class AgentCommands(AgentState state, ClientSessionCleanup cleanup,
-    Func<ReadOnlyMemory<byte>, CancellationToken, Task<bool>> send, AgentLog? log = null, AgentPower? power = null)
+    Func<ReadOnlyMemory<byte>, CancellationToken, Task<bool>> send, AgentLog? log = null, AgentPower? power = null,
+    Func<string, string, CancellationToken, Task<bool?>>? present = null)
 {
     private const int Remembered = 64;
     private static readonly TimeSpan Lifetime = TimeSpan.FromSeconds(30);
@@ -59,7 +60,8 @@ internal sealed class AgentCommands(AgentState state, ClientSessionCleanup clean
             return;
         }
         if (IsPower(kind) && power != null) { await Power(id, kind, now, token); return; }
-        // Cada tipo se activa en su tarea: mensajes (T32), mantenimiento (T37/T40).
+        if (kind == "showMessage" && present != null) { await Message(id, command, now, token); return; }
+        // Cada tipo se activa en su tarea: mantenimiento (T37/T40).
         if (kind != "lock")
         {
             log?.Write(AgentLogCode.CommandRejected);
@@ -114,6 +116,24 @@ internal sealed class AgentCommands(AgentState state, ClientSessionCleanup clean
         catch { /* El nodo ya tiene el fallo; el diario solo evita repetir la orden. */ }
         log?.Write(AgentLogCode.PowerFailed);
         await Answer(id, PowerFailed(kind, code), state.Control().NodeNow, token);
+    }
+
+    // T32 · REQ-003-20: el host lo muestra en el escritorio que ve el cliente. Solo se da por
+    // entregado cuando el host confirma que la ventana ya es visible; un mensaje que llega con
+    // otra sesión o estado ya se descartó en la validación del contexto.
+    private async Task Message(string id, JsonElement command, DateTimeOffset? now, CancellationToken token)
+    {
+        const string kind = "showMessage";
+        await send(Ack(id, new { status = "accepted", kind }, now), token);
+        var text = command.GetProperty("action").GetProperty("text").GetString()!;
+        var shown = await present!(id, text, token);
+        log?.Write(shown == true ? AgentLogCode.MessageShown : AgentLogCode.CommandRejected);
+        await Answer(id, shown switch
+        {
+            true => new { status = "applied", effect = new { kind } },
+            null => Failed(kind, "pc_unavailable", "Pope no está abierto en esta PC."),
+            false => Failed(kind, "native_failure", "No se pudo mostrar el mensaje."),
+        }, state.Control().NodeNow, token);
     }
 
     private static bool IsPower(string kind) => kind is "restart" or "powerOff";

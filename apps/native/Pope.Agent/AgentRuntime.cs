@@ -37,7 +37,9 @@ internal sealed class AgentRuntime
         try { journal = AgentCustody.ReadPowerJournal(root); }
         catch { log.Write(AgentLogCode.PowerJournalRejected); }
         var power = new AgentPower(kind => WindowsPower.Initiate(kind), journal, entries => AgentCustody.StorePowerJournal(root, entries));
-        var commands = new AgentCommands(state, cleanup, channel.SendMessageAsync, log, power);
+        // T32: el host muestra los mensajes; 10 s para confirmar que la ventana es visible.
+        var commands = new AgentCommands(state, cleanup, channel.SendMessageAsync, log, power,
+            (id, text, token) => Bridge.ShowStaffMessageAsync(id, text, TimeSpan.FromSeconds(10), token));
         channel.Message += commands.OnMessage;
     }
     internal async Task RunAsync(CancellationToken token)

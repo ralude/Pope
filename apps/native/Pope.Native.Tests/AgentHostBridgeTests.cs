@@ -36,4 +36,34 @@ public sealed class AgentHostBridgeTests
         }
         finally { stop.Cancel(); try { await running; } catch (OperationCanceledException) { } }
     }
+
+    [Fact(DisplayName = "REQ-003-20/T32: el host recibe el mensaje, su confirmación lo da por mostrado y nunca llega al nodo")]
+    public async Task StaffMessageConfirmedByHost()
+    {
+        using var configuration = AgentConfiguration.Parse(JsonSerializer.SerializeToUtf8Bytes(AgentConfigurationTests.Fixture()));
+        var channel = new AgentChannel(configuration, new AgentLog(Path.GetTempPath()));
+        var state = new AgentState(configuration.PcId);
+        using var bridge = new AgentHostBridge(channel, state, configuration.PcName); bridge.Subscribe();
+        const string id = "01900000-0000-7000-8000-000000000320";
+        Assert.Null(await bridge.ShowStaffMessageAsync(id, "Sin host", TimeSpan.FromSeconds(1), CancellationToken.None));
+        using var process = Process.GetCurrentProcess(); using var retained = new RetainedProcess(process);
+        var name = PipeEndpoints.NewName(); using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var running = bridge.RunForHostAsync(process, name, stop.Token);
+        try
+        {
+            using var client = await PipeEndpoints.Connect(name, retained, stop.Token);
+            await PipeFrames.ReadAsync(client, "bridge-event", stop.Token); // estado offline
+            var shown = bridge.ShowStaffMessageAsync(id, "<b>Hola</b>", TimeSpan.FromSeconds(4), stop.Token);
+            var message = ProtocolValidation.Parse(await PipeFrames.ReadAsync(client, "bridge-event", stop.Token), "bridge-event");
+            Assert.Equal("staffMessage", message.GetProperty("kind").GetString());
+            Assert.Equal("<b>Hola</b>", message.GetProperty("text").GetString());
+            await PipeFrames.WriteAsync(client, JsonSerializer.SerializeToUtf8Bytes(new { type = "staffMessageShown", commandId = id }), "shell-request", stop.Token);
+            Assert.True(await shown);
+            // Si la confirmación se hubiera reenviado al nodo (sin conexión), su error llegaría antes.
+            await PipeFrames.WriteAsync(client, "{\"type\":\"login\",\"requestId\":\"siguiente\",\"username\":\"ana\",\"password\":\"x\"}"u8.ToArray(), "shell-request", stop.Token);
+            var next = ProtocolValidation.Parse(await PipeFrames.ReadAsync(client, "bridge-event", stop.Token), "bridge-event");
+            Assert.Equal("siguiente", next.GetProperty("message").GetProperty("requestId").GetString());
+        }
+        finally { stop.Cancel(); try { await running; } catch (OperationCanceledException) { } }
+    }
 }
