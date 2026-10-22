@@ -621,3 +621,17 @@ a {
   display: block;
   font-weight: 400;
 }
+
+/* Avisos de bloqueo del login técnico (T42b). */
+.technical-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.technical-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}

@@ -531,14 +531,14 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T41b:** lógica de acciones, confirmaciones, errores y encendido, con tests.
   - [x] **T41c:** controles, diálogos, baldosa roja y aviso de encendido; prueba manual.
 
-- [ ] **T42: Registro de PCs y alertas técnicas en panel**
+- [x] **T42: Registro de PCs y alertas técnicas en panel**
   - **Cubre:** REQ-003-10, REQ-003-45.
   - **Hacer:** añadir generación/caducidad de códigos para encargado/administrador y aviso técnico de T36; presentar códigos solo en el flujo de instalación, sin guardarlos en logs.
   - **Verificar:** dueño sin generación, caducidad de 10 min y una alerta por bloqueo; prueba manual de pantallas y validación de respuestas.
   - **Commit:** `feat(panel): registra PCs y avisa de bloqueos técnicos`.
   - **División (2026-10-22):** «Añadir PC» en el mapa y «Volver a registrar» en el detalle (mantenedor). [Guía](guia-t33-t42.md#t42--registro-de-pcs-y-alertas-técnicas-panel).
   - [x] **T42a:** diálogo del código de instalación con cuenta atrás.
-  - [ ] **T42b:** aviso del bloqueo técnico.
+  - [x] **T42b:** aviso del bloqueo técnico.
 
 ### Fondo global
 

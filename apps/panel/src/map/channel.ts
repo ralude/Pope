@@ -12,6 +12,7 @@ import {
 import { createContext, createElement, type ReactNode, use, useEffect, useState } from 'react';
 
 import { useSession } from '../session.js';
+import { addLock, pruneLocks, type TechnicalLock } from './technical-locks.js';
 
 /** Espera antes de reconectar: el nodo puede estar reiniciándose tras un apagón. */
 export const RECONNECT_MS = 2000;
@@ -47,6 +48,8 @@ export interface PcMapFeed {
    * pantallas de Caja e Inventario vuelven a pedir lo que muestran cuando cambia.
    */
   cashVersion: number;
+  /** Bloqueos del login técnico avisados por el nodo (T42b, REQ-003-45). */
+  technicalLocks: TechnicalLock[];
 }
 
 const PcMapFeedContext = createContext<PcMapFeed | null>(null);
@@ -75,6 +78,7 @@ function useChannel(): PcMapFeed {
     pendingInterrupted: null,
     rate: null,
     cashVersion: 0,
+    technicalLocks: [],
   });
 
   useEffect(() => {
@@ -104,6 +108,11 @@ function useChannel(): PcMapFeed {
           setFeed((prev) => ({ ...prev, rate: { rate: message.rate, stale: message.stale } }));
         } else if (message?.type === 'cash') {
           setFeed((prev) => ({ ...prev, cashVersion: prev.cashVersion + 1 }));
+        } else if (message?.type === 'technicalLoginLocked') {
+          setFeed((prev) => ({
+            ...prev,
+            technicalLocks: addLock(pruneLocks(prev.technicalLocks, new Date()), message),
+          }));
         }
       };
       ws.onclose = (event: CloseEvent) => {

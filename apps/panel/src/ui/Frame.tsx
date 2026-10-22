@@ -5,6 +5,7 @@ import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 
 import { usePcMapFeed } from '../map/channel.js';
+import { lockKey, lockText, visibleLocks } from '../map/technical-locks.js';
 import { useSession, useStaff } from '../session.js';
 import { Icon, type IconName } from './Icon.js';
 import { RatePill } from './RatePill.js';
@@ -139,6 +140,34 @@ function Rail() {
   );
 }
 
+/** Avisos de bloqueo del login técnico: visibles en todas las pantallas hasta cumplirse el minuto. */
+function TechnicalLockAlerts() {
+  const { technicalLocks } = usePcMapFeed();
+  const [dismissed, setDismissed] = useState<ReadonlySet<string>>(new Set());
+  const now = useNow();
+  const visible = visibleLocks(technicalLocks, dismissed, now);
+  if (visible.length === 0) return null;
+  return (
+    <div className="technical-alerts">
+      {visible.map((lock) => (
+        <div key={lockKey(lock)} role="alert" className="alert-error technical-alert">
+          <span>{lockText(lock)}</span>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            style={{ height: 30, padding: '0 12px', fontSize: 13 }}
+            onClick={() => {
+              setDismissed((previous) => new Set(previous).add(lockKey(lock)));
+            }}
+          >
+            Entendido
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export function Frame({
   title,
   tabs,
@@ -156,6 +185,7 @@ export function Frame({
       <div className="app-body">
         <Rail />
         <main className="section">
+          <TechnicalLockAlerts />
           <div className="section-header">
             <h1 className="section-title">{title}</h1>
             {tabs}
