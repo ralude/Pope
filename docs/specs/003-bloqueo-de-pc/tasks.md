@@ -414,7 +414,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(server): prepara reinicios y apagados confirmados`.
   - **División (2026-10-21):** T30a con sesión; T30b con mantenimiento, que necesita registrar antes la salida técnica (T39/T40) y por eso sigue el aplazamiento de T37 que decidió el mantenedor. T30 queda abierta hasta T30b.
   - [x] **T30a:** con sesión activa, pausada o temporal y `confirmed: true`, el nodo cierra la sesión con las reglas existentes y en la misma transacción guarda el reinicio o apagado (ID del panel) en lugar del bloqueo; sin confirmar responde `confirmation_required` y, si el cierre falla, no guarda ni envía nada. Si esa orden falla o vence sin respuesta, el nodo pide un bloqueo del sistema para confirmar la limpieza antes de admitir clientes. 8 tests e2e.
-  - [ ] **T30b:** con mantenimiento: terminarlo y registrar su salida antes de reiniciar o apagar. Pendiente de T39/T40; hasta entonces el nodo responde `invalid_command`.
+  - [ ] **T30b:** con mantenimiento: terminarlo y registrar su salida antes de reiniciar o apagar. Pendiente de T39/T40; hasta entonces el nodo responde `invalid_command`. Se implementa como T39c ([guía](guia-t33-t42.md#t39c--reiniciar-o-apagar-durante-el-mantenimiento-t30b)).
 
 - [x] **T31: Ejecución nativa de órdenes de energía**
   - **Cubre:** REQ-003-20, REQ-003-61.
@@ -441,6 +441,10 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Hacer:** enviar paquete mágico desde el nodo a la NIC/MAC configurada; registrar actor y observar conexión, avisar a los 120 s y retirar aviso si conecta después.
   - **Verificar:** paquete/MAC correctos, dueño rechazado, temporizadores acotados y llegada tardía; no diagnosticar avería ni confirmar arranque por enviar UDP.
   - **Commit:** `feat(server): enciende PCs por Wake-on-LAN`.
+  - **División (2026-10-22):** pasos, contratos y tests en la [guía T33–T42](guia-t33-t42.md#t33--wake-on-lan-y-aviso-de-dos-minutos). Aviso guardado en el nodo hasta que la PC conecte o se pulse otra vez Encender (mantenedor).
+  - [ ] **T33a:** contrato `pc-wake.ts`, evento `pc.wake_requested` y columnas de la petición en `pc_control_states`.
+  - [ ] **T33b:** `WakeOnLanSender` (3 copias UDP, `POPE_WOL_ADDRESS`/`POPE_WOL_PORT`), falso para los tests y captura local.
+  - [ ] **T33c:** `POST /pcs/:pcId/wake`, limpieza al conectar y `wake` en el mapa.
 
 - [ ] **T34: Revocación conservando la sesión**
   - **Cubre:** REQ-003-11, REQ-003-63; REQ-002-33, CA-002-09.
@@ -452,54 +456,89 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Permisos confirmados (mantenedor, 2026-10-07):** opción A, encargado/administrador para revocar, revincular y autorizar continuar; dueño solo lee. ADR-0021, validación en nodo y eventos con actor; mecanismo pendiente.
   - **Entrega confirmada (mantenedor, 2026-10-07):** opción A, código ligado a la PC revocada, un uso y 600 s, generado en panel e introducido físicamente en su asistente. El servicio obtiene/custodia la credencial por TLS con nodo verificado, sin desbloquear ni abrir mantenimiento (ADR-0022). Desglosar contratos/nodo/asistente antes de implementar; probar caducidad, consumo concurrente, asociación, respuesta perdida según diseño aprobado y secreto ausente de panel/JavaScript. T12 conserva sus condiciones.
   - **Estado previo confirmado (mantenedor, 2026-10-07):** opción A, activa vuelve activa; pausada vuelve pausada con el tiempo que le quedaba. Durante bloqueo confirmado no se gasta ese tiempo ni otra pausa por sesión/día. Implementar y verificar REQ-002-33/CA-002-09, también con política de cierre al vencer y contadores diarios, después de diseñar intervalos en el nodo. No reanudar una pausa ni reiniciar sus límites por recuperar identidad.
+  - **Diseño aprobado (mantenedor, 2026-10-22):** [diseno-t34.md](diseno-t34.md). Apps abiertas y audio sin tocar durante la retención; el uso sin red no se cobra; no se revoca con mantenimiento u orden en curso. Se hace después de T42. Pasos en la [guía](guia-t33-t42.md#t34--revocación-conservando-la-sesión).
+  - [ ] **T34a:** contratos de revocar/continuar, eventos y `state: held`.
+  - [ ] **T34b:** tabla `session_holds`.
+  - [ ] **T34c:** `POST /pcs/:pcId/revoke` y cierre de la conexión viva.
+  - [ ] **T34d:** sin cobro, latidos ni vencimiento de pausa durante la retención.
+  - [ ] **T34e:** revincular con código de recuperación sin soltar la retención.
+  - [ ] **T34f:** `POST /pcs/:pcId/continue` y cierre de la sesión retenida.
+  - [ ] **T34g:** agente y host conservan la sesión retenida.
+  - [ ] **T34h:** pantalla de PC retenida en el Shell.
+  - [ ] **T34i:** revocar, código de recuperación y autorizar continuar en el panel.
 
 - [ ] **T35: Autorización técnica local y remota**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
   - **Hacer:** validar encargado/administrador en el nodo sin crear cookie del panel; reservar PC y emitir autorización específica; aplicar la regla de sesión previa que se apruebe para entrada local.
   - **Verificar:** dueño/inactivo/contraseña errónea, carreras con login y entrada remota con activa/pausada; fallo de preparación no registra mantenimiento iniciado.
   - **Commit:** `feat(server): autoriza el mantenimiento de PCs`.
+  - **División (2026-10-22):** solo el nodo; hasta T37 el agente real responde `invalid_action`. [Guía](guia-t33-t42.md#t35--autorización-técnica-local-y-remota).
+  - [ ] **T35a:** `TechnicalAuthService.verify` sin cookie (dueño, inactivo, contraseña).
+  - [ ] **T35b:** `PcMaintenanceService`, inicio registrado al confirmarse, `startMaintenance` desde el panel y `maintenanceState` tras `hello`.
+  - [ ] **T35c:** `technicalLogin` local desde la PC, con la PC libre comprobada antes de la contraseña.
 
 - [ ] **T36: Diez fallos técnicos y aviso al panel**
   - **Cubre:** REQ-003-45; CA-003-10.
   - **Hacer:** aplicar por cuenta 10 fallos consecutivos, bloqueo de 60 s, reset por éxito/vencimiento y un evento/aviso por bloqueo; mantener intacto login del panel.
   - **Verificar:** intentos desde varias PCs, concurrencia en décimo fallo, reinicio del nodo, éxito intermedio y un solo aviso; sin enumeración de cuentas ni contraseñas en logs.
   - **Commit:** `feat(server): limita los intentos del login técnico`.
+  - **División (2026-10-22):** aviso a los paneles conectados y a los que se conectan durante el bloqueo. [Guía](guia-t33-t42.md#t36--diez-fallos-técnicos-y-aviso-al-panel).
+  - [ ] **T36a:** contador por cuenta, bloqueo de 60 s y evento único.
+  - [ ] **T36b:** mensaje `technicalLoginLocked` del canal del panel.
 
 - [ ] **T37: Entrada administrativa nativa**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
   - **Hacer:** integrar el mecanismo demostrado en T10 y la autorización T35; iniciar entorno de la cuenta Windows existente y confirmar entrada física al nodo.
   - **Verificar:** elevación real, perfil/procesos separados, contraseña Windows cambiada, nodo ausente y preparación fallida; WebView2/cliente sin privilegios nuevos.
   - **Commit:** `feat(native): abre el mantenimiento autorizado de Windows`.
+  - **Bloqueada (2026-10-22):** espera a demostrar T10. Completará `closeSession` de T40b, el `applied` de `startMaintenance` y la prueba real de la pestaña de T38b.
 
 - [ ] **T38: Formulario y pestaña técnica**
   - **Cubre:** REQ-003-40, REQ-003-42, REQ-003-43.
   - **Hacer:** añadir login técnico local del Shell y pestaña plegada central del entorno de mantenimiento; mostrar PC/actor y Terminar y bloquear, sin tiempo transcurrido.
   - **Verificar:** roles/errores, paso del ratón, controles no tapados y salida local/remota; no introducir contraseñas Windows en React ni elevar WebView2.
   - **Commit:** `feat(shell-ui): muestra el acceso y los controles técnicos`.
+  - **División (2026-10-22):** se hace después de T40; queda abierta hasta probarla en la sesión real (T37). [Guía](guia-t33-t42.md#t38--formulario-y-pestaña-técnica-shell).
+  - [ ] **T38a:** enlace y formulario «Usuario técnico» en la pantalla de bloqueo.
+  - [ ] **T38b:** pestaña «Técnico» plegada con «Terminar y bloquear», sin tiempo.
 
 - [ ] **T39: Conciliación de salida técnica en el nodo**
   - **Cubre:** REQ-003-41, REQ-003-43, REQ-003-44; CA-003-09.
   - **Hacer:** validar reporte contra autorización/PC, persistir salida/actor/duración y emitir evento una vez; responder ACK idempotente y liberar reserva tras estado bloqueado confirmado.
   - **Verificar:** reportes falsificados, ACK perdido, duplicados/concurrencia y reconexión con salida pendiente; no conservar rojo ni reabrir mantenimiento por un snapshot obsoleto.
   - **Commit:** `feat(server): concilia la salida técnica pendiente`.
+  - **División (2026-10-22):** incluye T30b. [Guía](guia-t33-t42.md#t39--conciliación-de-la-salida-técnica-en-el-nodo).
+  - [ ] **T39a:** `maintenanceExit` local: registro único, duración acotada, ACK y bloqueo de sistema.
+  - [ ] **T39b:** `endMaintenance` desde el panel.
+  - [ ] **T39c:** reiniciar o apagar con mantenimiento (cierra T30b).
 
 - [ ] **T40: Salida técnica nativa durable**
   - **Cubre:** REQ-003-41, REQ-003-43, REQ-003-44; CA-003-09.
   - **Hacer:** terminar procesos propios de mantenimiento, bloquear localmente, persistir salida antes de perderla y reenviar al nodo hasta ACK; registrar actor/duración una sola vez.
   - **Verificar:** LAN perdida conserva mantenimiento, salida funciona offline, reinicio durante cada etapa, ACK perdido/duplicado y cola acotada sin descartar auditoría pendiente.
   - **Commit:** `feat(native): conserva la salida del mantenimiento sin red`.
+  - **División (2026-10-22):** solo lo independiente de T37; queda abierta hasta T37. [Guía](guia-t33-t42.md#t40--salida-técnica-nativa-durable).
+  - [ ] **T40a:** diario protegido de salidas (16 como mucho).
+  - [ ] **T40b:** terminar y bloquear sin red, reenvío hasta el ACK.
 
 - [ ] **T41: Controles y mantenimiento en el mapa**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-22, REQ-003-43; CA-003-07.
   - **Hacer:** activar controles existentes en `apps/panel`, resultados/errores/confirmaciones y rojo técnico con actor; mantener gris, verde, celeste, ámbar y morado según estado aprobado.
   - **Verificar:** permisos, doble clic, estado cambiado, pérdida de tiempo temporal y desconexión; comprobación manual del mapa y tests de la lógica/ApiClient.
   - **Commit:** `feat(panel): controla las PCs y muestra el mantenimiento`.
+  - **División (2026-10-22):** «Bloquear» pide confirmación siempre (mantenedor). [Guía](guia-t33-t42.md#t41--controles-y-mantenimiento-en-el-mapa-panel).
+  - [ ] **T41a:** `maintenance`, `canWake` y `order` en el mapa; `GET /pcs/:pcId/commands/:commandId`.
+  - [ ] **T41b:** lógica de acciones, confirmaciones, errores y encendido, con tests.
+  - [ ] **T41c:** controles, diálogos, baldosa roja y aviso de encendido; prueba manual.
 
 - [ ] **T42: Registro de PCs y alertas técnicas en panel**
   - **Cubre:** REQ-003-10, REQ-003-45.
   - **Hacer:** añadir generación/caducidad de códigos para encargado/administrador y aviso técnico de T36; presentar códigos solo en el flujo de instalación, sin guardarlos en logs.
   - **Verificar:** dueño sin generación, caducidad de 10 min y una alerta por bloqueo; prueba manual de pantallas y validación de respuestas.
   - **Commit:** `feat(panel): registra PCs y avisa de bloqueos técnicos`.
+  - **División (2026-10-22):** «Añadir PC» en el mapa y «Volver a registrar» en el detalle (mantenedor). [Guía](guia-t33-t42.md#t42--registro-de-pcs-y-alertas-técnicas-panel).
+  - [ ] **T42a:** diálogo del código de instalación con cuenta atrás.
+  - [ ] **T42b:** aviso del bloqueo técnico.
 
 ### Fondo global
 

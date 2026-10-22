@@ -622,6 +622,16 @@ bloqueo. El tratamiento de imagen se hace en el panel, sin procesador pesado en 
 El formato binario y los cuerpos/respuestas exactos se revisan al aprobar el plan;
 la propuesta anterior de multipart no es un contrato vigente.
 
+### Concreción T33–T42 (2026-10-22)
+
+Contratos, rutas, tablas y pasos de cada subtarea en la [guía T33–T42](guia-t33-t42.md):
+`POST /pcs/:pcId/wake` con la petición guardada en `pc_control_states`; login técnico sin
+cookie del panel que reserva la PC con una orden `startMaintenance`; inicio registrado con la
+hora del nodo al confirmarse; salida local idempotente con duración acotada y bloqueo de
+sistema posterior; aviso de bloqueo técnico por el canal del panel. Revocación conservando la
+sesión según el [diseño aprobado de T34](diseno-t34.md), con la tabla `session_holds`. Sin
+dependencias nuevas: el paquete mágico usa `node:dgram`.
+
 ## Casos límite y errores
 
 | Situación | Comportamiento o decisión pendiente |

@@ -180,6 +180,8 @@ el plan. La tabla anterior conserva la propuesta inicial, no un contrato aprobad
 
 ## Preguntas abiertas
 
+- [x] **Preparación de T33–T42 (mantenedor, 2026-10-22).** El aviso de Wake-on-LAN se guarda en el nodo y se quita cuando la PC conecta o se vuelve a pulsar Encender. Los códigos de instalación se generan con «Añadir PC» en el mapa y «Volver a registrar» en el detalle de una PC libre. «Bloquear» pide confirmación siempre en el panel, también con la PC libre. Pasos y contratos en la [guía T33–T42](guia-t33-t42.md).
+
 - [x] **Presentación del mensaje del encargado (T32).** **Resuelta (mantenedor, 2026-10-21):** ventana nativa siempre encima, sin foco y transparente a clics, también sobre juegos (en DirectX exclusivo puede no verse y solo sonar; se comprueba en T56); diseño propio con el estilo del Shell, para revisar; sonido de aviso de Windows.
 
 - [x] **Reserva tras cerrar una sesión (T29).** **Resuelta (mantenedor, 2026-10-21): todos los cierres** (Bloquear, Cerrar desde el panel, salida del cliente, agotamiento, falta de latidos y reinicio detectado) dejan la PC sin admitir clientes hasta que el agente confirma el bloqueo y la limpieza de procesos (REQ-003-34). Si la limpieza falla, la PC sigue sin admitir clientes hasta que el personal vuelva a pulsar Bloquear. Los cierres que no hace el personal piden el bloqueo como «sistema».
