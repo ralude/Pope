@@ -38,8 +38,23 @@ internal sealed class AgentRuntime
         catch { log.Write(AgentLogCode.PowerJournalRejected); }
         var power = new AgentPower(kind => WindowsPower.Initiate(kind), journal, entries => AgentCustody.StorePowerJournal(root, entries));
         // T32: el host muestra los mensajes; 10 s para confirmar que la ventana es visible.
+        // T40: salidas del mantenimiento pendientes de reconocer; un diario corrupto se descarta y el
+        // nodo ya no las pediría: como mucho se pierde una salida que él no llegó a ver.
+        IReadOnlyList<ExitEntry> exits = [];
+        try { exits = AgentCustody.ReadExitJournal(root); }
+        catch { log.Write(AgentLogCode.ExitJournalRejected); }
+        var maintenance = new AgentMaintenance(exits, entries => AgentCustody.StoreExitJournal(root, entries), channel.SendMessageAsync,
+            // T37 cerrará aquí la sesión de Windows de mantenimiento; hasta entonces no hay nada que cerrar.
+            _ => Task.FromResult(true),
+            async _ => { state.EndLocalSession(); return await cleanup.Settled() == 0; },
+            () => state.Control().NodeNow, log: log);
+        state.PendingExit = maintenance.FirstPending;
+        Bridge.EndMaintenance = maintenance.EndForShellAsync;
+        channel.Message += maintenance.OnMessage;
+        // Al reconectar se reenvían las salidas pendientes hasta que el nodo las reconozca.
+        channel.ConnectionChanged += online => { if (online) _ = maintenance.ResendPendingAsync(CancellationToken.None); };
         var commands = new AgentCommands(state, cleanup, channel.SendMessageAsync, log, power,
-            (id, text, token) => Bridge.ShowStaffMessageAsync(id, text, TimeSpan.FromSeconds(10), token));
+            (id, text, token) => Bridge.ShowStaffMessageAsync(id, text, TimeSpan.FromSeconds(10), token), maintenance);
         channel.Message += commands.OnMessage;
     }
     internal async Task RunAsync(CancellationToken token)

@@ -8,7 +8,7 @@ namespace Pope.Agent;
 // del nodo antes de ejecutar, y responde con un acuse que no impone actor.
 internal sealed class AgentCommands(AgentState state, ClientSessionCleanup cleanup,
     Func<ReadOnlyMemory<byte>, CancellationToken, Task<bool>> send, AgentLog? log = null, AgentPower? power = null,
-    Func<string, string, CancellationToken, Task<bool?>>? present = null)
+    Func<string, string, CancellationToken, Task<bool?>>? present = null, AgentMaintenance? maintenance = null)
 {
     private const int Remembered = 64;
     private static readonly TimeSpan Lifetime = TimeSpan.FromSeconds(30);
@@ -61,7 +61,8 @@ internal sealed class AgentCommands(AgentState state, ClientSessionCleanup clean
         }
         if (IsPower(kind) && power != null) { await Power(id, kind, now, token); return; }
         if (kind == "showMessage" && present != null) { await Message(id, command, now, token); return; }
-        // Cada tipo se activa en su tarea: mantenimiento (T37/T40).
+        if (kind == "endMaintenance" && maintenance != null) { await EndMaintenance(id, command, now, token); return; }
+        // Cada tipo se activa en su tarea: la entrada en mantenimiento llega con T37.
         if (kind != "lock")
         {
             log?.Write(AgentLogCode.CommandRejected);
@@ -134,6 +135,19 @@ internal sealed class AgentCommands(AgentState state, ClientSessionCleanup clean
             null => Failed(kind, "pc_unavailable", "Pope no está abierto en esta PC."),
             false => Failed(kind, "native_failure", "No se pudo mostrar el mensaje."),
         }, state.Control().NodeNow, token);
+    }
+
+    // T40 · REQ-003-43: «Terminar» pedido desde el panel. Cierra el entorno, bloquea y acusa con la
+    // salida durable (con el exitId de la orden); el nodo la registra con el actor de la orden.
+    private async Task EndMaintenance(string id, JsonElement command, DateTimeOffset? now, CancellationToken token)
+    {
+        const string kind = "endMaintenance";
+        await send(Ack(id, new { status = "accepted", kind }, now), token);
+        var action = command.GetProperty("action");
+        var (exit, failure) = await maintenance!.FinishAsync(action.GetProperty("exitId").GetString(), action.GetProperty("maintenanceId").GetString(), token);
+        await Answer(id, exit != null
+            ? new { status = "applied", effect = new { kind, exit = AgentMaintenance.Describe(exit) } }
+            : Failed(kind, "native_failure", failure!), state.Control().NodeNow, token);
     }
 
     private static bool IsPower(string kind) => kind is "restart" or "powerOff";

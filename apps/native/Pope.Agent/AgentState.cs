@@ -22,6 +22,8 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
     private bool authorized;
     private bool heard;
     internal event Action<byte[]>? RecoveryChanged;
+    // T40: primera salida del mantenimiento pendiente de reconocer; solo viaja en el hello.
+    internal Func<string?> PendingExit { get; set; } = () => null;
     // REQ-003-34: solo el nodo abre o termina una sesión; pausa, revocación y el agotamiento
     // local sin red no la terminan. Se avisan fuera del cerrojo, en orden: fin y luego inicio.
     internal event Action<string>? SessionStarted;
@@ -142,7 +144,8 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
         sessionId = Compatible() ? sessionId : null,
         localRemainingSeconds = Compatible() && includeRemaining ? Remaining() : null,
         controlContext = Compatible() ? context : null,
-        pendingMaintenanceExitId = (string?)null
+        // La recuperación guardada nunca lleva la salida pendiente: tiene su propio diario.
+        pendingMaintenanceExitId = includeRemaining ? PendingExit() : null
     };
     private void PersistRecovery() => RecoveryChanged?.Invoke(JsonSerializer.SerializeToUtf8Bytes(Recovery(includeRemaining: false)));
 

@@ -519,7 +519,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(native): conserva la salida del mantenimiento sin red`.
   - **División (2026-10-22):** solo lo independiente de T37; queda abierta hasta T37. [Guía](guia-t33-t42.md#t40--salida-técnica-nativa-durable).
   - [x] **T40a:** diario protegido de salidas (16 como mucho).
-  - [ ] **T40b:** terminar y bloquear sin red, reenvío hasta el ACK.
+  - [x] **T40b:** terminar y bloquear sin red, reenvío hasta el ACK.
 
 - [ ] **T41: Controles y mantenimiento en el mapa**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-22, REQ-003-43; CA-003-07.

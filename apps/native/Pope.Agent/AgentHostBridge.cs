@@ -12,6 +12,8 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
     private bool online;
     private int attached;
     private readonly Dictionary<string, TaskCompletionSource> pendingMessages = [];
+    // T40: «Terminar y bloquear» pulsado en la PC. Lo cablea el runtime; sin él no hay acción nativa.
+    internal Func<string, CancellationToken, Task<bool>>? EndMaintenance { get; set; }
     // REQ-003-34: identidad del host asociado (sesión, usuario, logon, PID y creación) mientras viva.
     internal ClientHost? Host => Volatile.Read(ref client);
 
@@ -72,7 +74,17 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
             return;
         }
         var nativeAction = request.GetProperty("type").GetString() == "endMaintenance";
-        // T40 añadirá el journal de salida: no reenviar una acción nativa como petición al nodo.
+        if (nativeAction && EndMaintenance != null)
+        {
+            // La salida se guarda en el diario y se bloquea sin esperar a la red; no es una petición al nodo.
+            var requestId = request.GetProperty("requestId").GetString();
+            var done = await EndMaintenance(request.GetProperty("maintenanceId").GetString()!, token);
+            PublishMessage(JsonSerializer.SerializeToElement(done
+                ? new Dictionary<string, object?> { ["type"] = "maintenanceState", ["maintenance"] = null, ["requestId"] = requestId }
+                : new Dictionary<string, object?> { ["type"] = "error", ["code"] = "internal_error", ["message"] = "No se pudo terminar el mantenimiento.", ["requestId"] = requestId }), 0);
+            return;
+        }
+        // Sin runtime que la atienda, una acción nativa no se reenvía como petición al nodo.
         if (!nativeAction && await channel.SendRequestAsync(bytes, token)) return;
         var error = new Dictionary<string, object?>
         {

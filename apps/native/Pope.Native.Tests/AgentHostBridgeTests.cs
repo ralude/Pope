@@ -66,4 +66,34 @@ public sealed class AgentHostBridgeTests
         }
         finally { stop.Cancel(); try { await running; } catch (OperationCanceledException) { } }
     }
+
+    [Theory(DisplayName = "REQ-003-44/T40: «Terminar y bloquear» del host se atiende en el agente sin pasar por el nodo")]
+    [InlineData(true, "maintenanceState")]
+    [InlineData(false, "error")]
+    public async Task EndMaintenanceFromHostIsHandledLocally(bool done, string expected)
+    {
+        using var configuration = AgentConfiguration.Parse(JsonSerializer.SerializeToUtf8Bytes(AgentConfigurationTests.Fixture()));
+        var channel = new AgentChannel(configuration, new AgentLog(Path.GetTempPath()));
+        var state = new AgentState(configuration.PcId);
+        using var bridge = new AgentHostBridge(channel, state, configuration.PcName); bridge.Subscribe();
+        string? ended = null;
+        bridge.EndMaintenance = (id, _) => { ended = id; return Task.FromResult(done); };
+        using var process = Process.GetCurrentProcess(); using var retained = new RetainedProcess(process);
+        var name = PipeEndpoints.NewName(); using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        var running = bridge.RunForHostAsync(process, name, stop.Token);
+        try
+        {
+            using var client = await PipeEndpoints.Connect(name, retained, stop.Token);
+            await PipeFrames.ReadAsync(client, "bridge-event", stop.Token); // estado offline
+            const string requestId = "01900000-0000-7000-8000-000000000160";
+            const string maintenanceId = "01900000-0000-7000-8000-0000000000aa";
+            await PipeFrames.WriteAsync(client, JsonSerializer.SerializeToUtf8Bytes(new { type = "endMaintenance", requestId, maintenanceId }), "shell-request", stop.Token);
+            var message = ProtocolValidation.Parse(await PipeFrames.ReadAsync(client, "bridge-event", stop.Token), "bridge-event").GetProperty("message");
+            Assert.Equal(expected, message.GetProperty("type").GetString());
+            Assert.Equal(requestId, message.GetProperty("requestId").GetString());
+            Assert.Equal(maintenanceId, ended);
+            if (done) Assert.Equal(JsonValueKind.Null, message.GetProperty("maintenance").ValueKind);
+        }
+        finally { stop.Cancel(); try { await running; } catch (OperationCanceledException) { } }
+    }
 }
