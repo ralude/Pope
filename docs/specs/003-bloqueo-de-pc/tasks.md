@@ -467,7 +467,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [ ] **T34h:** pantalla de PC retenida en el Shell.
   - [ ] **T34i:** revocar, código de recuperación y autorizar continuar en el panel.
 
-- [ ] **T35: Autorización técnica local y remota**
+- [x] **T35: Autorización técnica local y remota**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.
   - **Hacer:** validar encargado/administrador en el nodo sin crear cookie del panel; reservar PC y emitir autorización específica; aplicar la regla de sesión previa que se apruebe para entrada local.
   - **Verificar:** dueño/inactivo/contraseña errónea, carreras con login y entrada remota con activa/pausada; fallo de preparación no registra mantenimiento iniciado.
@@ -475,7 +475,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División (2026-10-22):** solo el nodo; hasta T37 el agente real responde `invalid_action`. [Guía](guia-t33-t42.md#t35--autorización-técnica-local-y-remota).
   - [x] **T35a:** `TechnicalAuthService.verify` sin cookie (dueño, inactivo, contraseña).
   - [x] **T35b:** `PcMaintenanceService`, inicio registrado al confirmarse, `startMaintenance` desde el panel y `maintenanceState` tras `hello`.
-  - [ ] **T35c:** `technicalLogin` local desde la PC, con la PC libre comprobada antes de la contraseña.
+  - [x] **T35c:** `technicalLogin` local desde la PC, con la PC libre comprobada antes de la contraseña.
 
 - [ ] **T36: Diez fallos técnicos y aviso al panel**
   - **Cubre:** REQ-003-45; CA-003-10.

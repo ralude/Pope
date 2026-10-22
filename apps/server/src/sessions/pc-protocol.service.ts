@@ -16,6 +16,7 @@ import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
 import { PcCommandsService } from './pc-commands.service.js';
 import { PcMaintenanceService } from './pc-maintenance.service.js';
+import { TechnicalLoginService } from './technical-login.service.js';
 import { PcWakeService } from './pc-wake.service.js';
 import { PcControlService } from './pc-control.service.js';
 import { PausesService } from './pauses.service.js';
@@ -73,6 +74,7 @@ export class PcProtocolService {
     private readonly commands: PcCommandsService,
     private readonly wakes: PcWakeService,
     private readonly maintenance: PcMaintenanceService,
+    private readonly technicalLogin: TechnicalLoginService,
     @Inject(DATABASE) private readonly db: Database,
   ) {}
 
@@ -216,6 +218,12 @@ export class PcProtocolService {
           combos: await this.combos.forSale(),
         });
         return;
+      case 'technicalLogin': {
+        // La respuesta llega con el acuse de la orden, salvo un rechazo inmediato.
+        const refused = await this.technicalLogin.login(pc, message);
+        if (refused) connection.send(refused);
+        return;
+      }
       case 'commandAck':
         // Sin respuesta: la PC no espera nada y el panel lo verá en el estado de la orden.
         await this.commands.acknowledge(pc.id, message);
