@@ -15,6 +15,7 @@ import { DATABASE, type Database } from '../db/database.js';
 import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
 import { PcCommandsService } from './pc-commands.service.js';
+import { MaintenanceExitService } from './maintenance-exit.service.js';
 import { PcMaintenanceService } from './pc-maintenance.service.js';
 import { TechnicalLoginService } from './technical-login.service.js';
 import { PcWakeService } from './pc-wake.service.js';
@@ -75,6 +76,7 @@ export class PcProtocolService {
     private readonly wakes: PcWakeService,
     private readonly maintenance: PcMaintenanceService,
     private readonly technicalLogin: TechnicalLoginService,
+    private readonly maintenanceExit: MaintenanceExitService,
     @Inject(DATABASE) private readonly db: Database,
   ) {}
 
@@ -224,6 +226,10 @@ export class PcProtocolService {
         if (refused) connection.send(refused);
         return;
       }
+      case 'maintenanceExit':
+        // Sin respuesta si no es de esta PC; si no, el nodo la reconoce una sola vez (T39a).
+        await this.maintenanceExit.receive(pc, message.exit);
+        return;
       case 'commandAck':
         // Sin respuesta: la PC no espera nada y el panel lo verá en el estado de la orden.
         await this.commands.acknowledge(pc.id, message);

@@ -508,7 +508,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** reportes falsificados, ACK perdido, duplicados/concurrencia y reconexión con salida pendiente; no conservar rojo ni reabrir mantenimiento por un snapshot obsoleto.
   - **Commit:** `feat(server): concilia la salida técnica pendiente`.
   - **División (2026-10-22):** incluye T30b. [Guía](guia-t33-t42.md#t39--conciliación-de-la-salida-técnica-en-el-nodo).
-  - [ ] **T39a:** `maintenanceExit` local: registro único, duración acotada, ACK y bloqueo de sistema.
+  - [x] **T39a:** `maintenanceExit` local: registro único, duración acotada, ACK y bloqueo de sistema.
   - [ ] **T39b:** `endMaintenance` desde el panel.
   - [ ] **T39c:** reiniciar o apagar con mantenimiento (cierra T30b).
 

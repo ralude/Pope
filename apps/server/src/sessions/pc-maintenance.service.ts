@@ -1,6 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { type PcMaintenance, pcMaintenanceSchema } from '@pope/shared';
-import { and, eq, isNull } from 'drizzle-orm';
+import {
+  type MaintenanceExit,
+  type PcMaintenance,
+  pcMaintenanceSchema,
+  seconds,
+} from '@pope/shared';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { DATABASE, type Database } from '../db/database.js';
 import { pcCommands, pcMaintenances } from '../db/schema.js';
@@ -79,6 +84,70 @@ export class PcMaintenanceService {
       source: action.source,
       startedAt: now.toISOString(),
     });
+  }
+
+  /**
+   * Registra la salida durable que informa la PC (REQ-003-41, REQ-003-44). Idempotente: una
+   * salida ya registrada es `duplicate` y no cambia nada; la de un mantenimiento que no es de
+   * esta PC, o con un ID de salida ya usado, es `unknown`. El actor es quien abrió el
+   * mantenimiento, salvo que exista una orden `endMaintenance` del panel con ese `exitId`:
+   * entonces es el actor de esa orden. La duración nunca supera el tiempo que el nodo vio
+   * abierto el mantenimiento. Llamar con la fila de la PC bloqueada.
+   */
+  async endIn(
+    tx: Transaction,
+    emit: Emit,
+    input: { pcId: string; pcName: string; exit: MaintenanceExit; now: Date },
+  ): Promise<'recorded' | 'duplicate' | 'unknown'> {
+    const { pcId, pcName, exit, now } = input;
+    const [row] = await tx
+      .select()
+      .from(pcMaintenances)
+      .where(and(eq(pcMaintenances.id, exit.maintenanceId), eq(pcMaintenances.pcId, pcId)))
+      .for('update');
+    if (!row) return 'unknown';
+    if (row.endedAt) return 'duplicate';
+    const [used] = await tx
+      .select({ id: pcMaintenances.id })
+      .from(pcMaintenances)
+      .where(eq(pcMaintenances.exitId, exit.id));
+    if (used) return 'unknown';
+    const [order] = await tx
+      .select({ actor: pcCommands.actor })
+      .from(pcCommands)
+      .where(
+        and(
+          eq(pcCommands.pcId, pcId),
+          sql`${pcCommands.action}->>'kind' = 'endMaintenance'`,
+          sql`${pcCommands.action}->>'exitId' = ${exit.id}`,
+        ),
+      );
+    const panelActor = order?.actor.kind === 'staff' ? order.actor : null;
+    const source = panelActor ? 'panel' : 'local';
+    const endedBy = panelActor ?? row.actor;
+    const seen = Math.max(0, Math.floor((now.getTime() - row.startedAt.getTime()) / 1_000));
+    const durationSeconds = Math.min(exit.durationSeconds, seen);
+    const reported = new Date(exit.endedAt).getTime();
+    const endedAt = new Date(Math.min(now.getTime(), Math.max(row.startedAt.getTime(), reported)));
+    await tx
+      .update(pcMaintenances)
+      .set({ exitId: exit.id, endedAt, durationSeconds, endedBy, exitSource: source })
+      .where(eq(pcMaintenances.id, row.id));
+    emit({
+      type: 'pc.maintenance_ended',
+      version: 1,
+      actor: endedBy,
+      payload: {
+        maintenanceId: row.id,
+        exitId: exit.id,
+        pc: { id: pcId, name: pcName },
+        source,
+        startedAt: row.startedAt.toISOString(),
+        endedAt: endedAt.toISOString(),
+        durationSeconds: seconds(durationSeconds),
+      },
+    });
+    return 'recorded';
   }
 
   /** Recuerda la petición del Shell que originó una entrada local (T35c). */
