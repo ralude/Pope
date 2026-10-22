@@ -8,7 +8,7 @@ import {
 import { asc, eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { events, pcCommands, pcMaintenances, sessions } from '../db/schema.js';
+import { events, pcCommands, sessions } from '../db/schema.js';
 import { devPcId } from '../pcs/dev-pcs.js';
 import { createCustomerWithBalance } from '../testing/customers.js';
 import type { PcTestClient } from '../testing/pc-client.js';
@@ -229,22 +229,5 @@ describe('reiniciar y apagar con confirmación (e2e, REQ-003-20, T30)', () => {
       replacesCommandId: command.id,
     });
     activeSession(await login(back, 'juan'));
-  });
-
-  it('REQ-003-41: con un mantenimiento, reiniciar y apagar aún no están disponibles (T39/T40)', async () => {
-    await manual(4);
-    await db()
-      .insert(pcMaintenances)
-      .values({
-        id: newId(),
-        pcId: devPcId(4),
-        pcName: 'PC 04',
-        actor: { kind: 'staff', staffId: newId(), name: 'Luis' },
-        source: 'panel',
-        startedAt: world.clock.now(),
-      });
-    const response = await power(4, 'restart');
-    expect(response.statusCode).toBe(400);
-    expect(response.json()).toMatchObject({ code: 'invalid_command' });
   });
 });

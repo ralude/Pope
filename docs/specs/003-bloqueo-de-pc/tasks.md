@@ -407,14 +407,14 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T29c:** el agente valida y ejecuta el bloqueo, espera la limpieza T26 y responde aplicado o fallido.
   - **Implementada (2026-10-21):** todos los cierres reservan la PC con un bloqueo (actor del personal o «sistema») hasta que el agente lo aplica tras la limpieza T26; Bloquear con sesión/pausa/temporal cierra con las reglas existentes y no se cobra después. Limpieza fallida: `native_failure`, la PC no admite clientes hasta otro Bloquear. Ensayo real ampliado de T26: bloqueo aplicado en 765–768 ms tras el cierre y 608–655 ms tras el agotamiento, sin procesos del cliente vivos. 447 tests del servidor en PostgreSQL 18.6. Batería correcta: 1 749 tests (414 nativos). **Sin probar:** confirmación del escritorio físico por el host (T22) y juegos/anticheat (T56). Ver [mediciones](mediciones.md).
 
-- [ ] **T30: Reiniciar y apagar con confirmación de estado**
+- [x] **T30: Reiniciar y apagar con confirmación de estado**
   - **Cubre:** REQ-003-20, REQ-003-41; REQ-001-69.
   - **Hacer:** validar confirmación ligada al estado actual; cerrar sesión activa/pausada o terminar mantenimiento antes de emitir la orden, conservando actor y eventos.
   - **Verificar:** estado cambiado después de confirmar, temporal con aviso de pérdida, salida técnica registrada y orden no enviada si falla el cierre previo.
   - **Commit:** `feat(server): prepara reinicios y apagados confirmados`.
   - **División (2026-10-21):** T30a con sesión; T30b con mantenimiento, que necesita registrar antes la salida técnica (T39/T40) y por eso sigue el aplazamiento de T37 que decidió el mantenedor. T30 queda abierta hasta T30b.
   - [x] **T30a:** con sesión activa, pausada o temporal y `confirmed: true`, el nodo cierra la sesión con las reglas existentes y en la misma transacción guarda el reinicio o apagado (ID del panel) en lugar del bloqueo; sin confirmar responde `confirmation_required` y, si el cierre falla, no guarda ni envía nada. Si esa orden falla o vence sin respuesta, el nodo pide un bloqueo del sistema para confirmar la limpieza antes de admitir clientes. 8 tests e2e.
-  - [ ] **T30b:** con mantenimiento: terminarlo y registrar su salida antes de reiniciar o apagar. Pendiente de T39/T40; hasta entonces el nodo responde `invalid_command`. Se implementa como T39c ([guía](guia-t33-t42.md#t39c--reiniciar-o-apagar-durante-el-mantenimiento-t30b)).
+  - [x] **T30b:** con mantenimiento: terminarlo y registrar su salida antes de reiniciar o apagar. Hecho con T39c (2026-10-22): la orden guardada es la salida del mantenimiento, con la petición del panel; al acusar la PC el nodo registra la salida y guarda el reinicio o apagado con el mismo actor. Si la salida falla o vence no se reinicia nada. Se implementa como T39c ([guía](guia-t33-t42.md#t39c--reiniciar-o-apagar-durante-el-mantenimiento-t30b)).
 
 - [x] **T31: Ejecución nativa de órdenes de energía**
   - **Cubre:** REQ-003-20, REQ-003-61.
@@ -502,7 +502,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [ ] **T38a:** enlace y formulario «Usuario técnico» en la pantalla de bloqueo.
   - [ ] **T38b:** pestaña «Técnico» plegada con «Terminar y bloquear», sin tiempo.
 
-- [ ] **T39: Conciliación de salida técnica en el nodo**
+- [x] **T39: Conciliación de salida técnica en el nodo**
   - **Cubre:** REQ-003-41, REQ-003-43, REQ-003-44; CA-003-09.
   - **Hacer:** validar reporte contra autorización/PC, persistir salida/actor/duración y emitir evento una vez; responder ACK idempotente y liberar reserva tras estado bloqueado confirmado.
   - **Verificar:** reportes falsificados, ACK perdido, duplicados/concurrencia y reconexión con salida pendiente; no conservar rojo ni reabrir mantenimiento por un snapshot obsoleto.
@@ -510,7 +510,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División (2026-10-22):** incluye T30b. [Guía](guia-t33-t42.md#t39--conciliación-de-la-salida-técnica-en-el-nodo).
   - [x] **T39a:** `maintenanceExit` local: registro único, duración acotada, ACK y bloqueo de sistema.
   - [x] **T39b:** `endMaintenance` desde el panel.
-  - [ ] **T39c:** reiniciar o apagar con mantenimiento (cierra T30b).
+  - [x] **T39c:** reiniciar o apagar con mantenimiento (cierra T30b).
 
 - [ ] **T40: Salida técnica nativa durable**
   - **Cubre:** REQ-003-41, REQ-003-43, REQ-003-44; CA-003-09.

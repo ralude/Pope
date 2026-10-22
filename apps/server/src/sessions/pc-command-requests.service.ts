@@ -45,13 +45,10 @@ export class PcCommandRequestsService {
           return { row: existing, fresh: false };
         }
         if (!pc) throw new PcCommandException('unknown_pc', 'No existe esa PC', 404);
-        // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30), mensajes (T32)
-        // entrar en mantenimiento con la PC libre (T35) y terminarlo (T39b). Reiniciar o apagar
-        // con un mantenimiento abierto necesita registrar antes su salida (T39c); los mensajes se
-        // rechazan en mantenimiento (REQ-003-20).
-        if (request.kind !== 'endMaintenance' && request.expected.kind === 'maintenance') {
-          throw new PcCommandException('invalid_command', 'Esta orden aún no está disponible', 400);
-        }
+        // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30), mensajes (T32),
+        // entrar en mantenimiento con la PC libre (T35), terminarlo (T39b) y reiniciar o apagar
+        // con un mantenimiento abierto (T39c). Los mensajes se rechazan en mantenimiento
+        // (REQ-003-20): su contrato solo admite una PC libre o con sesión.
         if (!this.connections.isConnected(pcId)) {
           throw new PcCommandException('pc_disconnected', `La ${pc.name} no está conectada`);
         }
@@ -91,6 +88,23 @@ export class PcCommandRequestsService {
               `La ${pc.name} ya no está en mantenimiento`,
             );
           }
+          const row = await this.commands.insertIn(tx, emit, {
+            pc,
+            actor,
+            request,
+            action: {
+              kind: 'endMaintenance',
+              maintenanceId: context.maintenanceId,
+              exitId: newId(),
+            },
+            context,
+          });
+          return { row, fresh: true };
+        }
+        if (context.kind === 'maintenance' && request.kind !== 'lock') {
+          // REQ-003-20: reiniciar o apagar con un mantenimiento primero lo termina. La orden que
+          // se guarda es la salida, con la petición del panel (el reintento con el mismo ID
+          // devuelve esta orden); al acusar la PC, el nodo registra la salida y pide la energía.
           const row = await this.commands.insertIn(tx, emit, {
             pc,
             actor,

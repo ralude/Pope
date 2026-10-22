@@ -351,6 +351,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
       const messages: NativeNodeToPcMessage[] = [];
       let started = false;
       let ended = false;
+      let power: CommandRow | null = null;
       // T35: la entrada en mantenimiento se registra al confirmarla la PC, con la hora del nodo.
       if (row.action.kind === 'startMaintenance' && status === 'applied') {
         const entered = await this.maintenance.startIn(tx, emit, row, pc.name, now);
@@ -375,6 +376,19 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
           maintenanceId: exit.maintenanceId,
         });
         ended = true;
+        // T39c: si la salida la pidió un reinicio o apagado, ahora que el mantenimiento terminó
+        // se guarda esa orden, con la PC ya libre y el mismo actor.
+        const { request } = row;
+        const free = await this.control.contextIn(tx, pcId);
+        if ((request.kind === 'restart' || request.kind === 'powerOff') && free.kind === 'free') {
+          power = await this.insertIn(tx, emit, {
+            pc,
+            actor: row.actor,
+            request: { id: newId(), kind: request.kind, expected: free },
+            action: { kind: request.kind },
+            context: free,
+          });
+        }
       } else if (row.action.kind === 'startMaintenance' && status === 'failed') {
         const requestId = this.maintenance.take(row.id);
         if (requestId !== undefined) messages.push(maintenanceUnavailable(requestId));
@@ -400,7 +414,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
         ack.result.status === 'failed' && closedSession(row)
           ? await this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' })
           : null;
-      return { lock, messages, started: started || ended };
+      return { lock: power ?? lock, messages, started: started || ended };
     });
     for (const message of after.messages) this.connections.send(pcId, message);
     if (after.started) await this.control.sync(pcId, null);
