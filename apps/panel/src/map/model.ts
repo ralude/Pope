@@ -17,6 +17,12 @@ import {
 /** Columnas del mapa: las mismas que acepta el nodo al guardar la distribución. */
 export const MAP_COLUMNS = PC_MAP_COLUMNS;
 
+/**
+ * El tiempo de la sesión corre en el panel: la PC conectada y sin retención. Con la sesión retenida
+ * por una revocación no se cobra (T34, REQ-003-11), aunque la PC se haya revinculado y conecte.
+ */
+export const ticking = (pc: PcMapItem): boolean => pc.connected && pc.hold === null;
+
 /** Estado que pinta la baldosa. */
 export type TileKind = 'account' | 'temporary' | 'paused' | 'free' | 'offline' | 'maintenance';
 
@@ -97,8 +103,10 @@ export function tileSub(pc: PcMapItem, now: Date): string {
     const left = Math.ceil((Date.parse(pc.wake.deadline) - now.getTime()) / 1000);
     return left > 0 ? countdown(left) : 'Sin respuesta';
   }
+  // La sesión retenida lo dice en lugar de contar un tiempo que no corre (T34).
+  if (pc.hold) return 'Retenida';
   if (onHold(session)) return pauseMinutes(pauseLeft(session, now));
-  return shortDuration(liveRemaining(session, pc.connected, now));
+  return shortDuration(liveRemaining(session, ticking(pc), now));
 }
 
 export interface PlacedPc {
@@ -313,6 +321,6 @@ export function legendOf(pcs: readonly PcMapItem[], now: Date): Legend {
  */
 export function isEnding(pc: PcMapItem, now: Date): boolean {
   const session = pc.session;
-  if (!session || onHold(session)) return false;
-  return liveRemaining(session, pc.connected, now) <= ENDING_SECONDS;
+  if (!session || onHold(session) || pc.hold) return false;
+  return liveRemaining(session, ticking(pc), now) <= ENDING_SECONDS;
 }

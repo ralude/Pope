@@ -4,6 +4,10 @@
 // probar sin navegador. El nodo valida todo de nuevo: ocultar un botón no autoriza nada.
 import {
   type PcCommandRequest,
+  type PcContinueResponse,
+  pcContinueResponseSchema,
+  type PcRevokeResponse,
+  pcRevokeResponseSchema,
   type PcCommandResponse,
   pcCommandResponseSchema,
   type PcControlContext,
@@ -21,7 +25,16 @@ import { countdown, liveRemaining } from './model.js';
 export { countdown };
 
 export type PcAction =
-  'wake' | 'lock' | 'message' | 'restart' | 'powerOff' | 'startMaintenance' | 'endMaintenance';
+  | 'wake'
+  | 'lock'
+  | 'message'
+  | 'restart'
+  | 'powerOff'
+  | 'startMaintenance'
+  | 'endMaintenance'
+  | 'revoke'
+  | 'recoveryCode'
+  | 'continue';
 
 export interface ActionState {
   action: PcAction;
@@ -39,6 +52,9 @@ const LABELS: Record<PcAction, string> = {
   powerOff: 'Apagar',
   startMaintenance: 'Iniciar como administrador',
   endMaintenance: 'Terminar mantenimiento',
+  revoke: 'Revocar PC',
+  recoveryCode: 'Código de recuperación',
+  continue: 'Autorizar continuar',
 };
 
 /** Qué estado de la PC decide sus acciones. */
@@ -52,6 +68,20 @@ function occupancyOf(item: PcMapItem): Occupancy {
 
 /** Cada acción en cada estado de la PC: `true` o el motivo por el que no se puede. */
 function availability(action: PcAction, item: PcMapItem, occupancy: Occupancy): true | string {
+  // Revocación conservando la sesión (T34, REQ-003-11): con la sesión retenida solo se genera el
+  // código de recuperación y, ya revinculada la PC y conectada, se autoriza continuar.
+  if (action === 'recoveryCode') return item.hold ? true : 'La PC no está revocada';
+  if (action === 'continue') {
+    if (!item.hold) return 'La sesión no está retenida';
+    if (!item.hold.relinked) return 'Introduce antes el código en la PC';
+    return item.connected ? true : 'La PC no está conectada';
+  }
+  if (action === 'revoke') {
+    if (item.hold) return 'Ya está revocada';
+    if (item.maintenance) return 'Termina antes el mantenimiento';
+    return item.order ? 'Orden en curso' : true;
+  }
+  if (item.hold) return 'La sesión está retenida: continúala o ciérrala';
   if (action === 'wake') {
     if (occupancy !== 'offline') return 'La PC ya está conectada';
     return item.canWake ? true : 'Sin tarjeta de red registrada';
@@ -151,6 +181,14 @@ export function confirmationFor(action: PcAction, item: PcMapItem, now: Date): C
       }
       return null;
     }
+    case 'revoke':
+      return {
+        title: `Revocar la ${pc}`,
+        body: item.session
+          ? `La ${pc} dejará de poder conectar con el nodo. La sesión de ${whoOf(item)} quedará retenida, sin cobro, hasta que la PC se registre de nuevo y autorices continuar.`
+          : `La ${pc} dejará de poder conectar con el nodo hasta que se registre de nuevo con un código.`,
+        confirm: 'Revocar',
+      };
     default:
       return null;
   }
@@ -173,6 +211,12 @@ export function commandErrorMessage(code: string | null, fallback: string): stri
       return 'Esa orden ya se usó. Vuelve a intentarlo.';
     case 'invalid_command':
       return 'La orden no es válida para esta PC.';
+    case 'pc_not_registered':
+      return 'La PC no tiene una credencial vigente.';
+    case 'pc_not_held':
+      return 'La sesión ya no está retenida. Revisa el mapa.';
+    case 'pc_not_relinked':
+      return 'La PC aún no tiene credencial nueva: introduce el código en la PC.';
     case 'pc_connected':
       return 'La PC ya está encendida y conectada.';
     case 'mac_unknown':
@@ -192,7 +236,7 @@ export function commandErrorMessage(code: string | null, fallback: string): stri
  * confirmado. Devuelve `null` si la acción no corresponde a ese contexto.
  */
 export function buildRequest(
-  action: Exclude<PcAction, 'wake'>,
+  action: Exclude<PcAction, 'wake' | 'revoke' | 'recoveryCode' | 'continue'>,
   context: PcControlContext,
   id: string,
   text = '',
@@ -309,4 +353,19 @@ export function getCommand(
 
 export function wakePc(api: ApiClient, pcId: string, id: string): Promise<PcWakeResponse> {
   return api.post(`/pcs/${pcId}/wake`, { id }, pcWakeResponseSchema);
+}
+
+/** Revoca la PC conservando su sesión (REQ-003-11); el ID hace idempotente el reintento. */
+export function revokePc(api: ApiClient, pcId: string, id: string): Promise<PcRevokeResponse> {
+  return api.post(`/pcs/${pcId}/revoke`, { id }, pcRevokeResponseSchema);
+}
+
+/** Autoriza continuar la sesión retenida tras revincular la PC (REQ-003-11). */
+export function continuePc(
+  api: ApiClient,
+  pcId: string,
+  id: string,
+  sessionId: string,
+): Promise<PcContinueResponse> {
+  return api.post(`/pcs/${pcId}/continue`, { id, sessionId }, pcContinueResponseSchema);
 }

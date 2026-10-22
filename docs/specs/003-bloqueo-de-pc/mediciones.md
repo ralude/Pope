@@ -684,3 +684,20 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   atrás del encendido). Queda para la revisión manual del mantenedor, junto con doble clic,
   cambio de estado entre abrir y confirmar, y dueño en solo lectura.
 - La lógica está cubierta por 23 tests de `controls.ts` y 2 de `model.ts` (135 del panel).
+
+### T34 · revocación conservando la sesión (2026-10-22)
+
+- Diseño aprobado ([diseno-t34.md](diseno-t34.md)) implementado en T34a–T34i. Probado en nodo
+  (PGlite), agente/host (xUnit) y lógica del panel y del Shell; sin PostgreSQL real ni PC real.
+- **CA-002-09** (e2e `pc-continue.e2e.test.ts`): pausa con 8 min restantes, 20 min de retención,
+  revinculación y autorizar continuar: sigue pausada con 8 min (se le suma lo que duró la
+  retención), una sola pausa en los contadores, vence a los 8 min según la política.
+- Durante la retención: 40 min con temporizadores y cierre por falta de latidos no cobran ni
+  cierran; la pausa no vence en 3 h; `PcConnections` nunca envía un estado activo ni avisos a la
+  PC retenida y recupera las retenciones al reiniciar el nodo.
+- Agente: el estado `held` conserva la sesión sin limpiar procesos ni contar atrás; el canal
+  reintenta con la credencial nueva cuando cambia la custodia (vigilancia de `configuration.bin`
+  cada 5 s mientras está revocada: **sin probar** como SYSTEM ni con el asistente real, T51).
+- **No verificado visualmente:** pantalla «PC bloqueada por el encargado» del Shell, baldosa con
+  marca de retenida y botones de revocar, código de recuperación y autorizar continuar (Chrome
+  sin conectar). **Sin probar:** el asistente de la PC que introduce el código (T51).

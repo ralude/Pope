@@ -345,3 +345,9 @@
   word-break: break-all;
   user-select: all;
 }
+
+/* Sesión retenida por una revocación (T34i): conserva su color y lleva un borde discontinuo rojo. */
+.tile-held {
+  outline: 3px dashed var(--red);
+  outline-offset: -3px;
+}

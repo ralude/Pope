@@ -15,11 +15,13 @@ import {
   buildRequest,
   commandErrorMessage,
   confirmationFor,
+  continuePc,
   countdown,
   getCommand,
   getControl,
   issueCommand,
   outcomeOf,
+  revokePc,
   wakePc,
   wakeStatus,
   wakeText,
@@ -75,7 +77,14 @@ const enabled = (item: PcMapItem, role: 'encargado' | 'administrador' | 'dueno' 
 
 describe('acciones disponibles según el estado (REQ-003-20, REQ-003-22, REQ-003-43)', () => {
   it('PC libre: bloquear, mensaje, reiniciar, apagar e iniciar como administrador', () => {
-    expect(enabled(pc())).toEqual(['lock', 'message', 'restart', 'powerOff', 'startMaintenance']);
+    expect(enabled(pc())).toEqual([
+      'lock',
+      'message',
+      'restart',
+      'powerOff',
+      'startMaintenance',
+      'revoke',
+    ]);
   });
 
   it('con sesión, activa, temporal o en pausa, no se puede iniciar como administrador', () => {
@@ -90,7 +99,13 @@ describe('acciones disponibles según el estado (REQ-003-20, REQ-003-22, REQ-003
         },
       }),
     ]) {
-      expect(enabled(pc({ session: s }))).toEqual(['lock', 'message', 'restart', 'powerOff']);
+      expect(enabled(pc({ session: s }))).toEqual([
+        'lock',
+        'message',
+        'restart',
+        'powerOff',
+        'revoke',
+      ]);
     }
     const blocked = availableActions(pc({ session: session() }), 'encargado').find(
       (state) => state.action === 'startMaintenance',
@@ -103,9 +118,12 @@ describe('acciones disponibles según el estado (REQ-003-20, REQ-003-22, REQ-003
   });
 
   it('desconectada: solo encender, y solo si tiene la MAC registrada', () => {
-    expect(enabled(pc({ connected: false }))).toEqual(['wake']);
+    // Revocar sí se puede con la PC apagada: su credencial sigue vigente (T34).
+    expect(enabled(pc({ connected: false }))).toEqual(['wake', 'revoke']);
     const withoutMac = availableActions(pc({ connected: false, canWake: false }), 'encargado');
-    expect(withoutMac.filter((state) => state.enabled)).toEqual([]);
+    expect(withoutMac.filter((state) => state.enabled).map((state) => state.action)).toEqual([
+      'revoke',
+    ]);
     expect(withoutMac.find((state) => state.action === 'wake')?.reason).toBe(
       'Sin tarjeta de red registrada',
     );
@@ -385,5 +403,92 @@ describe('llamadas al nodo', () => {
   it('una respuesta que no cumple el contrato se rechaza', async () => {
     const bad = fakeFetch(200, { context: { kind: 'otro' } });
     await expect(getControl(new ApiClient({ fetch: bad.fn }), ID(4))).rejects.toThrow();
+  });
+});
+
+describe('sesión retenida por una revocación (T34i, REQ-003-11)', () => {
+  const hold = (relinked: boolean) => ({
+    sessionId: ID(100),
+    since: '2026-10-22T19:40:00.000Z',
+    byName: 'Ana',
+    relinked,
+  });
+
+  it('retenida y sin credencial nueva: solo el código de recuperación', () => {
+    const item = pc({ connected: false, session: session(), hold: hold(false) });
+    expect(enabled(item)).toEqual(['recoveryCode']);
+    const states = availableActions(item, 'encargado');
+    expect(states.find((state) => state.action === 'continue')?.reason).toBe(
+      'Introduce antes el código en la PC',
+    );
+    expect(states.find((state) => state.action === 'revoke')?.reason).toBe('Ya está revocada');
+    expect(states.find((state) => state.action === 'lock')?.reason).toMatch(/retenida/);
+  });
+
+  it('revinculada pero sin conexión no se puede continuar; conectada, sí', () => {
+    const offline = pc({ connected: false, session: session(), hold: hold(true) });
+    expect(enabled(offline)).toEqual(['recoveryCode']);
+    expect(
+      availableActions(offline, 'encargado').find((state) => state.action === 'continue')?.reason,
+    ).toBe('La PC no está conectada');
+    expect(enabled(pc({ session: session(), hold: hold(true) }))).toEqual([
+      'recoveryCode',
+      'continue',
+    ]);
+  });
+
+  it('sin retención no hay código de recuperación ni continuar; el dueño nada', () => {
+    const states = availableActions(pc(), 'encargado');
+    expect(states.find((state) => state.action === 'recoveryCode')?.enabled).toBe(false);
+    expect(states.find((state) => state.action === 'continue')?.enabled).toBe(false);
+    expect(enabled(pc({ session: session(), hold: hold(true) }), 'dueno')).toEqual([]);
+  });
+
+  it('revocar confirma y avisa de que la sesión queda retenida, sin cobro', () => {
+    expect(confirmationFor('revoke', pc({ session: session() }), NOW)?.body).toBe(
+      'La PC 04 dejará de poder conectar con el nodo. La sesión de juan quedará retenida, sin cobro, hasta que la PC se registre de nuevo y autorices continuar.',
+    );
+    expect(confirmationFor('revoke', pc(), NOW)?.body).toMatch(/hasta que se registre de nuevo/);
+    expect(confirmationFor('continue', pc(), NOW)).toBeNull();
+  });
+
+  it('los códigos de revocación tienen su texto', () => {
+    expect(commandErrorMessage('pc_not_relinked', 'x')).toMatch(/introduce el código en la PC/);
+    expect(commandErrorMessage('pc_not_held', 'x')).toMatch(/ya no está retenida/);
+    expect(commandErrorMessage('pc_not_registered', 'x')).toMatch(/credencial vigente/);
+  });
+
+  it('revocar y continuar llaman al nodo con su ID y la sesión', async () => {
+    const calls: { url: string; body: unknown }[] = [];
+    const respond = (body: unknown) =>
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        calls.push({
+          url: typeof input === 'string' ? input : input instanceof URL ? input.href : input.url,
+          body: typeof init?.body === 'string' ? (JSON.parse(init.body) as unknown) : undefined,
+        });
+        return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
+      }) as unknown as typeof fetch;
+    const pcRef = { id: ID(4), name: 'PC 04' };
+    await revokePc(
+      new ApiClient({
+        fetch: respond({
+          pc: pcRef,
+          revokedAt: '2026-10-22T20:00:00.000Z',
+          heldSessionId: ID(100),
+        }),
+      }),
+      ID(4),
+      ID(10),
+    );
+    await continuePc(
+      new ApiClient({ fetch: respond({ sessionId: ID(100), heldSeconds: 1200 }) }),
+      ID(4),
+      ID(11),
+      ID(100),
+    );
+    expect(calls).toEqual([
+      { url: `/pcs/${ID(4)}/revoke`, body: { id: ID(10) } },
+      { url: `/pcs/${ID(4)}/continue`, body: { id: ID(11), sessionId: ID(100) } },
+    ]);
   });
 });

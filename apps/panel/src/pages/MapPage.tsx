@@ -38,11 +38,13 @@ import {
   commandErrorMessage,
   type Confirmation,
   confirmationFor,
+  continuePc,
   getCommand,
   getControl,
   issueCommand,
   outcomeOf,
   type PcAction,
+  revokePc,
   wakePc,
   wakeStatus,
   wakeText,
@@ -71,6 +73,7 @@ import {
   tileKind,
   tileLabel,
   tileSub,
+  ticking,
   withLayout,
 } from '../map/model.js';
 import { OrganizeGrid } from '../map/OrganizeGrid.js';
@@ -324,15 +327,16 @@ function MapGrid({
           } else if (session.pause) {
             parts.push('ya cobra');
           }
-          const remaining = liveRemaining(session, pc.connected, now);
+          const remaining = liveRemaining(session, ticking(pc), now);
           parts.push(session.who, `quedan ${formatDuration(seconds(remaining))}`);
           if (!pc.connected) parts.push('sin conexión');
+          if (pc.hold) parts.push('sesión retenida');
         }
         return (
           <div key={pc.id} className="map-cell" style={{ gridRow: row + 1, gridColumn: col + 1 }}>
             <button
               type="button"
-              className={`tile tile-${kind}${session?.pause?.billing ? ' tile-billing' : ''}${session && !pc.connected ? ' tile-unlinked' : ''}`}
+              className={`tile tile-${kind}${session?.pause?.billing ? ' tile-billing' : ''}${session && !pc.connected ? ' tile-unlinked' : ''}${pc.hold ? ' tile-held' : ''}`}
               aria-label={parts.join(', ')}
               aria-pressed={pc.id === selectedId}
               onClick={() => {
@@ -406,6 +410,31 @@ function OrganizePanel({
 }
 
 /** Nota de una PC apagada: el encendido en curso, o el aviso de que no conectó (REQ-003-22). */
+/** La sesión retenida por una revocación (REQ-003-11): qué pasó y qué falta para continuar. */
+function HeldNote({
+  hold,
+  connected,
+}: {
+  hold: NonNullable<PcMapItem['hold']>;
+  connected: boolean;
+}) {
+  return (
+    <div className="pause-box" role="status">
+      <strong className="num">
+        Retenida desde las {formatLocalTime(new Date(hold.since))} por {hold.byName}
+      </strong>
+      <span style={{ color: 'var(--soft)', fontSize: 13 }}>
+        La sesión y el saldo se conservan y no se cobra mientras tanto.{' '}
+        {hold.relinked
+          ? connected
+            ? 'La PC ya tiene credencial nueva: puedes autorizar continuar.'
+            : 'La PC ya tiene credencial nueva; falta que conecte.'
+          : 'Genera un código de recuperación e introdúcelo en la PC.'}
+      </span>
+    </div>
+  );
+}
+
 function OfflineNote({ pc, now }: { pc: PcMapItem; now: Date }) {
   const wake = wakeStatus(pc, now);
   return (
@@ -432,7 +461,7 @@ const FOLLOW_UP_MS = 40_000;
  * rol, estado y confirmación de nuevo: aquí solo se ofrece lo que tiene sentido y se sigue el
  * resultado hasta el efecto, sin afirmar nunca que la PC se apagó.
  */
-function PcControls({ pc, now }: { pc: PcMapItem; now: Date }) {
+function PcControls({ pc, now, onRecovery }: { pc: PcMapItem; now: Date; onRecovery: () => void }) {
   const staff = useStaff();
   const { api } = useSession();
   const [confirming, setConfirming] = useState<{ action: PcAction; text: Confirmation } | null>(
@@ -464,7 +493,25 @@ function PcControls({ pc, now }: { pc: PcMapItem; now: Date }) {
         setProgress({ text: 'Paquete de encendido enviado.', ok: true, done: true });
         return;
       }
+      if (action === 'revoke') {
+        const revoked = await revokePc(api, pc.id, newId());
+        setProgress({
+          text: revoked.heldSessionId
+            ? 'PC revocada. Su sesión queda retenida, sin cobro.'
+            : 'PC revocada.',
+          ok: true,
+          done: true,
+        });
+        return;
+      }
+      if (action === 'continue') {
+        if (!pc.hold) throw new ApiError(409, 'La sesión ya no está retenida', [], 'pc_not_held');
+        await continuePc(api, pc.id, newId(), pc.hold.sessionId);
+        setProgress({ text: 'La sesión continúa.', ok: true, done: true });
+        return;
+      }
       const { context } = await getControl(api, pc.id);
+      if (action === 'recoveryCode') return;
       const request = buildRequest(action, context, newId(), text);
       if (!request) {
         setProgress({ text: commandErrorMessage('stale_context', ''), ok: false, done: true });
@@ -496,6 +543,10 @@ function PcControls({ pc, now }: { pc: PcMapItem; now: Date }) {
   const press = (state: ActionState) => {
     if (state.action === 'message') {
       setWriting(true);
+      return;
+    }
+    if (state.action === 'recoveryCode') {
+      onRecovery();
       return;
     }
     const confirmation = confirmationFor(state.action, pc, now);
@@ -708,7 +759,7 @@ function PcDetail({ pc, now, onReinstall }: { pc: PcMapItem; now: Date; onReinst
   }, []);
   const kind = tileKind(pc);
   const session = pc.session;
-  const remaining = session ? liveRemaining(session, pc.connected, now) : 0;
+  const remaining = session ? liveRemaining(session, ticking(pc), now) : 0;
   const ending = isEnding(pc, now);
   const canOperate = staff.role !== 'dueno';
 
@@ -763,6 +814,7 @@ function PcDetail({ pc, now, onReinstall }: { pc: PcMapItem; now: Date; onReinst
             : 'Libre y conectada. El cliente puede entrar con su cuenta desde la PC.'}
         </p>
       )}
+      {pc.hold && <HeldNote hold={pc.hold} connected={pc.connected} />}
       {kind === 'offline' && <OfflineNote pc={pc} now={now} />}
       {pc.maintenance && (
         <p className="detail-note" style={{ margin: 0 }}>
@@ -772,7 +824,7 @@ function PcDetail({ pc, now, onReinstall }: { pc: PcMapItem; now: Date; onReinst
           {!pc.connected && ' La PC no está conectada al nodo: el mantenimiento continúa.'}
         </p>
       )}
-      {canOperate && <PcControls pc={pc} now={now} />}
+      {canOperate && <PcControls pc={pc} now={now} onRecovery={onReinstall} />}
 
       <div style={{ flexGrow: 1 }} />
       {session?.pause && canOperate && <ResumeButton sessionId={session.sessionId} />}
@@ -781,7 +833,7 @@ function PcDetail({ pc, now, onReinstall }: { pc: PcMapItem; now: Date; onReinst
           paused={session.pause !== null}
           customerId={session.customerId}
           username={session.who}
-          balances={liveAccount(session, pc.connected, now)}
+          balances={liveAccount(session, ticking(pc), now)}
           what={charging?.sessionId === session.sessionId ? charging.what : null}
           onStart={(what) => {
             setCharging({ what, sessionId: session.sessionId });

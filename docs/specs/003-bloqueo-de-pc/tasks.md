@@ -446,7 +446,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T33b:** `WakeOnLanSender` (3 copias UDP, `POPE_WOL_ADDRESS`/`POPE_WOL_PORT`), falso para los tests y captura local.
   - [x] **T33c:** `POST /pcs/:pcId/wake`, limpieza al conectar y `wake` en el mapa.
 
-- [ ] **T34: Revocación conservando la sesión**
+- [x] **T34: Revocación conservando la sesión**
   - **Cubre:** REQ-003-11, REQ-003-63; REQ-002-33, CA-002-09.
   - **Hacer:** implementar la parte del nodo tras resolver confirmación temporal y desglosar el mecanismo de recuperación; preservar sesión, detener consumo durante bloqueo por revocación confirmado, revincular la misma PC con credencial nueva sin desbloquear hasta autorización del encargado/administrador (ADR-0020/0021), distinguir revocación autenticada de fallo TLS y coordinar bloqueo nativo de T21. Validar sesión/rol en las tres acciones: revocar, revincular y autorizar continuar.
   - **Verificar:** revocación en canal vivo y al reconectar, ausencia de consumo de saldo/tiempo durante bloqueo confirmado, misma PC/sesión tras revincular, credencial anterior rechazada y nueva credencial sin desbloqueo automático; jobs/reconcile no cierran sesión conservada y PC revocada no inicia una nueva. Encargado/administrador admitidos y dueño/cliente/peticiones sin sesión rechazados en cada acción; eventos con actor, recepción del bloqueo y acuse perdido/desconexión conforme al diseño que se apruebe.
@@ -465,7 +465,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T34f:** `POST /pcs/:pcId/continue` y cierre de la sesión retenida.
   - [x] **T34g:** agente y host conservan la sesión retenida.
   - [x] **T34h:** pantalla de PC retenida en el Shell.
-  - [ ] **T34i:** revocar, código de recuperación y autorizar continuar en el panel.
+  - [x] **T34i:** revocar, código de recuperación y autorizar continuar en el panel.
 
 - [x] **T35: Autorización técnica local y remota**
   - **Cubre:** REQ-003-40, REQ-003-41, REQ-003-43.

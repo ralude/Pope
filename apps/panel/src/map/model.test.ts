@@ -17,6 +17,7 @@ import {
   pauseMinutes,
   pausesUsedLine,
   tileSub,
+  ticking,
   parseCellId,
   placePcs,
   withLayout,
@@ -322,5 +323,33 @@ describe('mantenimiento y encendido en el mapa (T41, REQ-003-21, REQ-003-22)', (
     expect(tileSub(pc(1, { connected: true, wake: wake('2026-09-28T22:11:05.000Z') }), now)).toBe(
       '',
     );
+  });
+});
+
+describe('sesión retenida en el mapa (T34i, REQ-003-11)', () => {
+  const hold = {
+    sessionId: '01900000-0000-7000-8000-000000000123',
+    since: '2026-09-28T22:00:00.000Z',
+    byName: 'Ana',
+    relinked: false,
+  };
+  const now = new Date('2026-09-28T22:30:00Z');
+
+  it('la baldosa dice «Retenida» y su tiempo no corre aunque la PC esté conectada', () => {
+    const held = pc(1, { session: session({ remainingSeconds: seconds(1800) }), hold });
+    expect(tileSub(held, now)).toBe('Retenida');
+    expect(ticking(held)).toBe(false);
+    expect(ticking(pc(1))).toBe(true);
+    expect(ticking(pc(1, { connected: false }))).toBe(false);
+    // Sin retención, la misma PC cuenta el tiempo desde el último cobro.
+    expect(tileSub(pc(1, { session: session({ remainingSeconds: seconds(1800) }) }), now)).not.toBe(
+      'Retenida',
+    );
+  });
+
+  it('una sesión retenida no marca «quedan menos de 5 min» aunque le quede poco', () => {
+    const held = pc(1, { session: session({ remainingSeconds: seconds(100) }), hold });
+    expect(isEnding(held, now)).toBe(false);
+    expect(isEnding({ ...held, hold: null }, now)).toBe(true);
   });
 });
