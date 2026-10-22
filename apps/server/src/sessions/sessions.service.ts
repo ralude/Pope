@@ -625,6 +625,33 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       })
       .where(and(eq(sessionPauses.sessionId, closed.id), isNull(sessionPauses.endedAt)));
     await this.emitEnded(closed, reason, actor, tx, emit);
+    // T34: cerrar una sesión retenida (solo lo hace el personal) termina su retención. No se cobró
+    // nada durante ella: `checkpoint` no cobra con la retención abierta.
+    const hold = await openHoldOf(closed.id, tx);
+    if (hold) {
+      const endedAt = this.clock.now();
+      const endedBy = actor.kind === 'staff' ? actor : hold.startedBy;
+      await tx
+        .update(sessionHolds)
+        .set({ endedAt, endedBy, endReason: 'session_closed' })
+        .where(eq(sessionHolds.id, hold.id));
+      emit({
+        type: 'session.hold_ended',
+        version: 1,
+        actor: endedBy,
+        payload: {
+          holdId: hold.id,
+          sessionId: closed.id,
+          pc: { id: pc.id, name: pc.name },
+          startedAt: hold.startedAt.toISOString(),
+          endedAt: endedAt.toISOString(),
+          heldSeconds: seconds(
+            Math.max(0, Math.floor((endedAt.getTime() - hold.startedAt.getTime()) / 1_000)),
+          ),
+          reason: 'session_closed',
+        },
+      });
+    }
     const lock = await this.commands.insertAfterCloseIn(
       tx,
       emit,
@@ -638,6 +665,8 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
   /** Después del commit de `closeIn`: deja de vigilar la sesión y avisa a la PC. */
   afterClose({ row, reason, lock }: ClosedSession): void {
     this.unwatch(row.id);
+    // T34: si la sesión estaba retenida, la PC vuelve a recibir mensajes con normalidad.
+    this.connections.release(row.pcId);
     const endedId = row.id;
     this.ended.add(endedId);
     this.clock.schedule(ENDED_MEMORY_MS, () => {

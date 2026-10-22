@@ -313,6 +313,15 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
     return !pauseBilling(pause) && pauseExpired(pause.maxUntil, this.clock.now());
   }
 
+  /**
+   * Vuelve a programar el vencimiento de la pausa abierta de la sesión, si la hay: tras una
+   * retención por revocación su `max_until` se movió (T34, REQ-002-33).
+   */
+  async reschedule(sessionId: string): Promise<void> {
+    const pause = await openPauseOf(sessionId, this.db);
+    if (pause && !pauseBilling(pause)) this.schedule(sessionId, pause.maxUntil);
+  }
+
   /** Programa el vencimiento de la pausa de una sesión a su `max_until`. */
   private schedule(sessionId: string, maxUntil: Date): void {
     this.cancel(sessionId);

@@ -1,17 +1,23 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import {
+  type PcContinueRequest,
+  type PcContinueResponse,
+  pcContinueResponseSchema,
   type PcRevokeRequest,
   type PcRevokeResponse,
   pcRevocationErrorSchema,
   pcRevokeResponseSchema,
   newId,
+  seconds,
 } from '@pope/shared';
 import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { events, pcCredentials, sessionHolds, sessions } from '../db/schema.js';
+import { events, pcCredentials, sessionHolds, sessionPauses, sessions } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
+import { openHoldOf } from './hold-queries.js';
+import { PausesService } from './pauses.service.js';
 import { PcCommandsService, type StaffActor } from './pc-commands.service.js';
 import { PcControlService } from './pc-control.service.js';
 import { PcConnections } from './pc-connections.js';
@@ -41,6 +47,7 @@ export class PcRevocationService {
     private readonly commands: PcCommandsService,
     private readonly sessions: SessionsService,
     private readonly connections: PcConnections,
+    private readonly pauses: PausesService,
     private readonly clock: Clock,
   ) {}
 
@@ -149,5 +156,89 @@ export class PcRevocationService {
     // Tras confirmar: ningún estado activo llega ya a la PC retenida (T34d).
     if (response.heldSessionId) this.connections.hold(pcId, response.heldSessionId);
     return response;
+  }
+
+  /**
+   * Autoriza continuar una sesión retenida (REQ-003-11; ADR-0020/0021). Exige que la PC ya se haya
+   * revinculado con una credencial nueva y esté conectada. La sesión vuelve a como estaba: activa
+   * sigue activa y la pausa conserva el tiempo que le quedaba, porque se le suma lo que duró la
+   * retención (REQ-002-33); no se añade ninguna pausa a los contadores.
+   */
+  async authorizeContinue(
+    pcId: string,
+    request: PcContinueRequest,
+    actor: StaffActor,
+  ): Promise<PcContinueResponse> {
+    const result = await this.events.inTransaction(async (tx, emit) => {
+      const pc = await this.control.lockPc(tx, pcId);
+      if (!pc) throw new PcRevocationException('unknown_pc', 'No existe esa PC', 404);
+      const hold = await openHoldOf(request.sessionId, tx);
+      if (hold?.pcId !== pcId) {
+        throw new PcRevocationException(
+          'pc_not_held',
+          `La sesión de la ${pc.name} no está retenida`,
+        );
+      }
+      const [credential] = await tx
+        .select({ id: pcCredentials.id })
+        .from(pcCredentials)
+        .where(and(eq(pcCredentials.pcId, pcId), isNull(pcCredentials.revokedAt)));
+      if (!credential) {
+        throw new PcRevocationException(
+          'pc_not_relinked',
+          `La ${pc.name} aún no tiene una credencial nueva. Introduce el código de recuperación en la PC`,
+        );
+      }
+      if (!this.connections.isConnected(pcId)) {
+        throw new PcRevocationException('pc_disconnected', `La ${pc.name} no está conectada`);
+      }
+      const now = this.clock.now();
+      const heldMs = Math.max(0, now.getTime() - hold.startedAt.getTime());
+      const [session] = await tx
+        .select()
+        .from(sessions)
+        .where(and(eq(sessions.id, request.sessionId), eq(sessions.status, 'active')))
+        .for('update');
+      if (!session) throw new PcRevocationException('pc_not_held', 'La sesión ya no está abierta');
+      await tx
+        .update(sessionHolds)
+        .set({ endedAt: now, endedBy: actor, endReason: 'continued' })
+        .where(eq(sessionHolds.id, hold.id));
+      // Una pausa que no cobra conserva el tiempo que le quedaba: se le suma la retención.
+      const [pause] = await tx
+        .select()
+        .from(sessionPauses)
+        .where(and(eq(sessionPauses.sessionId, session.id), isNull(sessionPauses.endedAt)));
+      if (pause?.billingResumedAt === null) {
+        await tx
+          .update(sessionPauses)
+          .set({ maxUntil: new Date(pause.maxUntil.getTime() + heldMs) })
+          .where(eq(sessionPauses.id, pause.id));
+      }
+      // El cobro vuelve a contar desde ahora: nada de lo retenido se cobra.
+      await tx.update(sessions).set({ lastHeartbeatAt: now }).where(eq(sessions.id, session.id));
+      const heldSeconds = Math.floor(heldMs / 1_000);
+      emit({
+        type: 'session.hold_ended',
+        version: 1,
+        actor,
+        payload: {
+          holdId: hold.id,
+          sessionId: session.id,
+          pc,
+          startedAt: hold.startedAt.toISOString(),
+          endedAt: now.toISOString(),
+          heldSeconds: seconds(heldSeconds),
+          reason: 'continued',
+        },
+      });
+      return pcContinueResponseSchema.parse({ sessionId: session.id, heldSeconds });
+    });
+    // Tras confirmar: la PC vuelve a recibir su estado de verdad, y la pausa y los avisos vuelven a vigilarse.
+    this.connections.release(pcId);
+    await this.pauses.reschedule(result.sessionId);
+    const { state } = await this.sessions.review(eq(sessions.id, result.sessionId));
+    this.connections.send(pcId, state);
+    return result;
   }
 }
