@@ -187,4 +187,46 @@ describe('login técnico desde la PC (e2e, REQ-003-40, T35c)', () => {
       message: 'La PC ya está en mantenimiento',
     });
   });
+  it('REQ-003-45, CA-003-10: diez fallos desde dos PCs bloquean la cuenta y un acierto posterior espera 60 s', async () => {
+    const pc4 = await world.pc(4);
+    const pc5 = await world.pc(5);
+    for (let i = 0; i < 9; i++) {
+      const pc = i % 2 === 0 ? pc4 : pc5;
+      expect(await pc.request(technical('ana', 'mal'))).toMatchObject({
+        code: 'invalid_credentials',
+      });
+    }
+    const tenth = technical('ana', 'mal');
+    const locked = await pc5.request(tenth);
+    expect(locked).toMatchObject({
+      type: 'technicalError',
+      requestId: tenth.requestId,
+      code: 'technical_login_locked',
+      lockedUntil: new Date(world.clock.now().getTime() + 60_000).toISOString(),
+    });
+    expect(await eventsOf('staff.technical_login_locked')).toHaveLength(1);
+
+    // Con la contraseña buena, desde otra PC, sigue bloqueada y no se envía ninguna orden.
+    expect(await pc4.request(technical('ana'))).toMatchObject({ code: 'technical_login_locked' });
+    expect(pc4.commands).toEqual([]);
+
+    world.clock.advance(60_000);
+    pc4.send(technical('ana'));
+    expect(await orderReceived(pc4, 1)).toMatchObject({
+      action: { kind: 'startMaintenance', source: 'local' },
+    });
+  });
+
+  it('REQ-003-45: los intentos en una PC ocupada no cuentan como fallos', async () => {
+    const pc = await world.pc(4);
+    activeSession(await login(pc, 'juan'));
+    for (let i = 0; i < 12; i++) {
+      expect(await pc.request(technical('ana', 'mal'))).toMatchObject({ code: 'pc_unavailable' });
+    }
+    expect(await eventsOf('staff.technical_login_locked')).toEqual([]);
+    const free = await world.pc(5);
+    expect(await free.request(technical('ana', 'mal'))).toMatchObject({
+      code: 'invalid_credentials',
+    });
+  });
 });

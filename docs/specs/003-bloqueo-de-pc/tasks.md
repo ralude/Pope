@@ -483,7 +483,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** intentos desde varias PCs, concurrencia en décimo fallo, reinicio del nodo, éxito intermedio y un solo aviso; sin enumeración de cuentas ni contraseñas en logs.
   - **Commit:** `feat(server): limita los intentos del login técnico`.
   - **División (2026-10-22):** aviso a los paneles conectados y a los que se conectan durante el bloqueo. [Guía](guia-t33-t42.md#t36--diez-fallos-técnicos-y-aviso-al-panel).
-  - [ ] **T36a:** contador por cuenta, bloqueo de 60 s y evento único.
+  - [x] **T36a:** contador por cuenta, bloqueo de 60 s y evento único.
   - [ ] **T36b:** mensaje `technicalLoginLocked` del canal del panel.
 
 - [ ] **T37: Entrada administrativa nativa**

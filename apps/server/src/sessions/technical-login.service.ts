@@ -29,6 +29,8 @@ const SESSION_OPEN = 'Cierra antes la sesión del cliente';
 const IN_MAINTENANCE = 'La PC ya está en mantenimiento';
 const ORDER_IN_PROGRESS = 'La PC tiene una orden del encargado en curso';
 
+const LOCKED_MESSAGE = 'Demasiados intentos fallidos. Prueba de nuevo en 1 min';
+
 const AUTH_MESSAGES = {
   invalid_credentials: 'Usuario o contraseña incorrectos',
   staff_inactive: 'Tu usuario está desactivado',
@@ -58,18 +60,28 @@ export class TechnicalLoginService {
     pc: PcIdentity,
     message: TechnicalLoginMessage,
   ): Promise<NativeNodeToPcMessage | null> {
-    const refuse = (code: TechnicalErrorMessage['code'], text: string): NativeNodeToPcMessage => ({
+    const refuse = (
+      code: TechnicalErrorMessage['code'],
+      text: string,
+      lockedUntil?: Date,
+    ): NativeNodeToPcMessage => ({
       type: 'technicalError',
       requestId: message.requestId,
       code,
       message: text,
+      ...(lockedUntil && { lockedUntil: lockedUntil.toISOString() }),
     });
     // Antes de comprobar la contraseña: así un intento en una PC ocupada no cuenta (T36).
     const busy = await this.busy(pc.id);
     if (busy) return refuse('pc_unavailable', busy);
 
-    const auth = await this.technicalAuth.verify(message.username, message.password);
-    if (!auth.ok) return refuse(auth.reason, AUTH_MESSAGES[auth.reason]);
+    const auth = await this.technicalAuth.verify(message.username, message.password, pc);
+    if (!auth.ok) {
+      if (auth.reason === 'locked') {
+        return refuse('technical_login_locked', LOCKED_MESSAGE, auth.lockedUntil);
+      }
+      return refuse(auth.reason, AUTH_MESSAGES[auth.reason]);
+    }
 
     try {
       const row = await this.events.inTransaction(async (tx, emit) => {
