@@ -516,6 +516,47 @@ export const pcMaintenances = pgTable(
   ],
 );
 
+/**
+ * Sesión retenida por una revocación de su PC (spec 003, T34; REQ-003-11, REQ-002-33). Mientras
+ * está abierta no se cobra, no se cierra por falta de latidos y la pausa no vence; el instante de
+ * inicio es el de la revocación en el reloj del nodo. Una retención abierta por sesión.
+ */
+export const sessionHolds = pgTable(
+  'session_holds',
+  {
+    id: uuid('id').primaryKey(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => sessions.id),
+    pcId: uuid('pc_id')
+      .notNull()
+      .references(() => pcs.id),
+    revokedCredentialId: uuid('revoked_credential_id')
+      .notNull()
+      .references(() => pcCredentials.id),
+    startedAt: timestamp('started_at', { withTimezone: true }).notNull(),
+    startedBy: jsonb('started_by').$type<PcMaintenance['actor']>().notNull(),
+    endedAt: timestamp('ended_at', { withTimezone: true }),
+    endedBy: jsonb('ended_by').$type<PcMaintenance['actor']>(),
+    endReason: text('end_reason').$type<'continued' | 'session_closed'>(),
+  },
+  (t) => [
+    uniqueIndex('session_holds_open_idx')
+      .on(t.sessionId)
+      .where(sql`${t.endedAt} is null`),
+    index('session_holds_pc_idx').on(t.pcId, t.startedAt),
+    check('session_holds_actor_check', sql`coalesce(${t.startedBy}->>'kind' = 'staff', false)`),
+    check(
+      'session_holds_end_check',
+      sql`
+      (${t.endedAt} is null and ${t.endedBy} is null and ${t.endReason} is null) or
+      (${t.endedAt} is not null and ${t.endedBy} is not null and ${t.endReason} is not null
+        and ${t.endReason} in ('continued', 'session_closed')
+        and ${t.endedAt} >= ${t.startedAt} and coalesce(${t.endedBy}->>'kind' = 'staff', false))`,
+    ),
+  ],
+);
+
 /** Una fila por cuenta, independiente de cookies y de la PC (REQ-003-45). */
 export const staffTechnicalLoginAttempts = pgTable(
   'staff_technical_login_attempts',

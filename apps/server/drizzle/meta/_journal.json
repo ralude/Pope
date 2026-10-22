@@ -225,6 +225,13 @@
       "when": 1792696871241,
       "tag": "0031_pc_wake",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792703489603,
+      "tag": "0032_session_holds",
+      "breakpoints": true
     }
   ]
 }
