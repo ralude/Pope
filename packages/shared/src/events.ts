@@ -217,6 +217,18 @@ export const pcReservationReleasedEventSchema = event(
   }),
 ).extend({ actor: systemActorSchema });
 
+/** El personal pidió encender una PC: el nodo envió el paquete mágico (REQ-003-22). */
+export const pcWakeRequestedEventSchema = event(
+  'pc.wake_requested',
+  1,
+  z.strictObject({
+    requestId: idSchema,
+    pc: pcRefSchema,
+    macAddress: pcMacAddressSchema,
+    deadline: utcInstantSchema,
+  }),
+).extend({ actor: actorSchema.options[1] });
+
 // ─── Cuentas y saldo ────────────────────────────────────────────────────────────────────
 
 export const customerCreatedEventSchema = event(
@@ -920,6 +932,7 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   pcCommandAcknowledgedEventSchema,
   pcCommandExpiredEventSchema,
   pcReservationReleasedEventSchema,
+  pcWakeRequestedEventSchema,
   customerCreatedEventSchema,
   customerStatusChangedEventSchema,
   customerLoginLockedEventSchema,

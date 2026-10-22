@@ -97,6 +97,12 @@ const examples = {
     { commandId: id(40), pc: PC05, kind: 'powerOff', reason: 'reconnected' },
     { kind: 'system' },
   ),
+  'pc.wake_requested': envelope('pc.wake_requested', {
+    requestId: id(41),
+    pc: PC05,
+    macAddress: 'AA:BB:CC:DD:EE:FF',
+    deadline: '2026-09-25T22:32:00Z',
+  }),
   'staff.technical_login_locked': envelope(
     'staff.technical_login_locked',
     {

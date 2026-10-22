@@ -456,6 +456,9 @@ export const pcControlStates = pgTable(
     occupancy: text('occupancy'),
     reservedCommandId: uuid('reserved_command_id'),
     reservedAt: timestamp('reserved_at', { withTimezone: true }),
+    /** Última petición de encendido sin que la PC haya conectado (T33, REQ-003-22). */
+    wakeRequestId: uuid('wake_request_id'),
+    wakeRequestedAt: timestamp('wake_requested_at', { withTimezone: true }),
   },
   (t) => [
     foreignKey({
@@ -465,6 +468,10 @@ export const pcControlStates = pgTable(
     check(
       'pc_control_states_reservation_check',
       sql`(${t.reservedCommandId} is null) = (${t.reservedAt} is null)`,
+    ),
+    check(
+      'pc_control_states_wake_check',
+      sql`(${t.wakeRequestId} is null) = (${t.wakeRequestedAt} is null)`,
     ),
   ],
 );

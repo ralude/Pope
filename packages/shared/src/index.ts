@@ -25,6 +25,7 @@ export * from './pc-map.js';
 export * from './pc-registration.js';
 export * from './pc-maintenance.js';
 export * from './pc-control.js';
+export * from './pc-wake.js';
 export * from './native-protocol.js';
 export * from './shell-bridge.js';
 export * from './lock-background-image.js';

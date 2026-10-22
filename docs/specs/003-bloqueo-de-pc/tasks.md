@@ -442,7 +442,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** paquete/MAC correctos, dueño rechazado, temporizadores acotados y llegada tardía; no diagnosticar avería ni confirmar arranque por enviar UDP.
   - **Commit:** `feat(server): enciende PCs por Wake-on-LAN`.
   - **División (2026-10-22):** pasos, contratos y tests en la [guía T33–T42](guia-t33-t42.md#t33--wake-on-lan-y-aviso-de-dos-minutos). Aviso guardado en el nodo hasta que la PC conecte o se pulse otra vez Encender (mantenedor).
-  - [ ] **T33a:** contrato `pc-wake.ts`, evento `pc.wake_requested` y columnas de la petición en `pc_control_states`.
+  - [x] **T33a:** contrato `pc-wake.ts`, evento `pc.wake_requested` y columnas de la petición en `pc_control_states`.
   - [ ] **T33b:** `WakeOnLanSender` (3 copias UDP, `POPE_WOL_ADDRESS`/`POPE_WOL_PORT`), falso para los tests y captura local.
   - [ ] **T33c:** `POST /pcs/:pcId/wake`, limpieza al conectar y `wake` en el mapa.
 
