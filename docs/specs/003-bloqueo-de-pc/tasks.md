@@ -518,7 +518,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** LAN perdida conserva mantenimiento, salida funciona offline, reinicio durante cada etapa, ACK perdido/duplicado y cola acotada sin descartar auditoría pendiente.
   - **Commit:** `feat(native): conserva la salida del mantenimiento sin red`.
   - **División (2026-10-22):** solo lo independiente de T37; queda abierta hasta T37. [Guía](guia-t33-t42.md#t40--salida-técnica-nativa-durable).
-  - [ ] **T40a:** diario protegido de salidas (16 como mucho).
+  - [x] **T40a:** diario protegido de salidas (16 como mucho).
   - [ ] **T40b:** terminar y bloquear sin red, reenvío hasta el ACK.
 
 - [ ] **T41: Controles y mantenimiento en el mapa**

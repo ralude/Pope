@@ -61,6 +61,25 @@ internal static class AgentCustody
         finally { CryptographicOperations.ZeroMemory(plain); }
     }
 
+    // T40: salidas del mantenimiento pendientes de reconocer, protegidas como el diario de energía.
+    internal static void StoreExitJournal(string root, IReadOnlyList<ExitEntry> entries)
+    {
+        RequireSystem();
+        var plain = MaintenanceExitJournal.Serialize(entries);
+        try { StoreProtected(root, plain, "maintenance-exit-journal.bin", create: false); }
+        finally { CryptographicOperations.ZeroMemory(plain); }
+    }
+
+    internal static IReadOnlyList<ExitEntry> ReadExitJournal(string root)
+    {
+        RequireSystem();
+        Verify(new DirectoryInfo(Path.GetFullPath(root)));
+        if (!File.Exists(Path.Combine(root, "maintenance-exit-journal.bin"))) return [];
+        var plain = ReadProtected(root, "maintenance-exit-journal.bin");
+        try { return MaintenanceExitJournal.Parse(plain); }
+        finally { CryptographicOperations.ZeroMemory(plain); }
+    }
+
     internal static ClientScope? ReadScope(string root)
     {
         RequireSystem();
