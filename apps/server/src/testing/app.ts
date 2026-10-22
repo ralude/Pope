@@ -15,12 +15,16 @@ import type { AppConfig } from '../config.js';
 import type { DatabaseHandle } from '../db/database.js';
 import { createTestDatabase } from './database.js';
 import { createNodeAdapter } from '../transport.js';
+import { WakeOnLanSender } from '../sessions/wake-on-lan.js';
+import { RecordingWakeSender } from './wake.js';
 
 export interface TestApp {
   app: NestFastifyApplication;
   database: DatabaseHandle;
   /** Carpeta de datos del nodo, temporal: se borra al cerrar. */
   dataDir: string;
+  /** Emisor de Wake-on-LAN falso: guarda las MACs y nunca toca la red (T33). */
+  wake: RecordingWakeSender;
   close(): Promise<void>;
 }
 
@@ -51,11 +55,14 @@ export async function createTestApp(
     memoryLogMs: null,
     dataDir,
     tls: options.tls ?? null,
+    wakeOnLan: { address: '127.0.0.1', port: 9 },
   };
   const builder = Test.createTestingModule({
     imports: [AppModule.register(config, database)],
     controllers: extraControllers,
   });
+  const wake = new RecordingWakeSender();
+  builder.overrideProvider(WakeOnLanSender).useValue(wake);
   if (options.clock) {
     builder.overrideProvider(Clock).useValue(options.clock);
   }
@@ -70,6 +77,7 @@ export async function createTestApp(
     app,
     database,
     dataDir,
+    wake,
     // Al cerrar la aplicación se cierra también la base de datos (DatabaseModule).
     close: async () => {
       await app.close();

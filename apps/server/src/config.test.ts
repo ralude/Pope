@@ -15,6 +15,7 @@ describe('loadConfig (ADR-0003)', () => {
       databaseUrl: DATABASE_URL,
       memoryLogMs: null,
       tls: null,
+      wakeOnLan: { address: '255.255.255.255', port: 9 },
       dataDir: resolve(import.meta.dirname, '..', 'data'),
     });
   });
@@ -29,8 +30,21 @@ describe('loadConfig (ADR-0003)', () => {
       databaseUrl: DATABASE_URL,
       memoryLogMs: null,
       tls: null,
+      wakeOnLan: { address: '255.255.255.255', port: 9 },
       dataDir: resolve(import.meta.dirname, '..', 'data'),
     });
+  });
+
+  it('lee el destino de Wake-on-LAN y rechaza lo que no es una IPv4 o un puerto', () => {
+    const wake = (env: Record<string, string>) =>
+      loadConfig({ POPE_MODE: 'local', DATABASE_URL, ...env }).wakeOnLan;
+    expect(wake({})).toEqual({ address: '255.255.255.255', port: 9 });
+    expect(wake({ POPE_WOL_ADDRESS: '192.168.1.255', POPE_WOL_PORT: '7' })).toEqual({
+      address: '192.168.1.255',
+      port: 7,
+    });
+    expect(() => wake({ POPE_WOL_ADDRESS: 'lan' })).toThrow(/POPE_WOL_ADDRESS/);
+    expect(() => wake({ POPE_WOL_PORT: '70000' })).toThrow(/POPE_WOL_PORT/);
   });
 
   it('exige POPE_MODE y dice qué variable falla', () => {

@@ -21,6 +21,7 @@ import { PcMapController } from './pc-map.controller.js';
 import { PcLayoutService } from './pc-layout.service.js';
 import { PcMapService } from './pc-map.service.js';
 import { PcGateway } from './pc-gateway.js';
+import { WakeOnLanSender } from './wake-on-lan.js';
 import { PcProtocolService } from './pc-protocol.service.js';
 import { SessionsController } from './sessions.controller.js';
 import { SessionsService } from './sessions.service.js';
@@ -59,6 +60,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
     PcCommandsService,
     PcCommandRequestsService,
     PcMapService,
+    WakeOnLanSender,
     PcLayoutService,
     PanelHub,
     SessionsService,

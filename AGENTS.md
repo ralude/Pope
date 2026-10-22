@@ -182,7 +182,8 @@ Servidor (`apps/server`, NestJS sobre Fastify):
   `POPE_MEMORY_LOG_MS`, opcional, de 1000 como mínimo: cada ese tiempo registra una línea
   `Memoria: rss=… MB heapUsed=… MB`, para la prueba de carga; `POPE_DATA_DIR`, opcional:
   carpeta donde el nodo guarda sus archivos, como las fotos de los productos, por defecto
-  `apps/server/data/`, que no se sube al repo).
+  `apps/server/data/`, que no se sube al repo; `POPE_WOL_ADDRESS` y `POPE_WOL_PORT`, opcionales:
+  destino del paquete mágico de Wake-on-LAN, por defecto `255.255.255.255` y puerto 9).
   Al arrancar aplica las migraciones pendientes. Comprobar: `GET /health`.
   En modo local, HTTP solo permite `HOST=127.0.0.1` o `::1` para desarrollo. En la LAN
   configurar juntos `POPE_TLS_CERT_FILE` y `POPE_TLS_KEY_FILE` (PEM): sirve HTTPS/WSS

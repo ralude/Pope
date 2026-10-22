@@ -13,6 +13,7 @@ const config = (memoryLogMs: number | null): AppConfig => ({
   memoryLogMs,
   dataDir: '/tmp/pope-test',
   tls: null,
+  wakeOnLan: { address: '255.255.255.255', port: 9 },
 });
 
 describe('registro de memoria (ADR-0011)', () => {

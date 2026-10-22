@@ -30,6 +30,9 @@ const configSchema = z
     POPE_DATA_DIR: z.string().min(1).optional(),
     POPE_TLS_CERT_FILE: z.string().min(1).optional(),
     POPE_TLS_KEY_FILE: z.string().min(1).optional(),
+    // Wake-on-LAN (T33, REQ-003-22): dirección de difusión y puerto UDP del paquete mágico.
+    POPE_WOL_ADDRESS: z.ipv4().default('255.255.255.255'),
+    POPE_WOL_PORT: z.coerce.number().int().min(1).max(65_535).default(9),
   })
   .superRefine((config, context) => {
     if (Boolean(config.POPE_TLS_CERT_FILE) !== Boolean(config.POPE_TLS_KEY_FILE)) {
@@ -52,6 +55,8 @@ export interface AppConfig {
   dataDir: string;
   /** PEM del nodo (ADR-0017); null solo en HTTP de desarrollo o tras proxy cloud. */
   tls: { certFile: string; keyFile: string } | null;
+  /** Destino del paquete mágico de Wake-on-LAN (REQ-003-22). */
+  wakeOnLan: { address: string; port: number };
 }
 
 /** Token de inyección de la configuración. */
@@ -75,6 +80,8 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
     POPE_DATA_DIR,
     POPE_TLS_CERT_FILE,
     POPE_TLS_KEY_FILE,
+    POPE_WOL_ADDRESS,
+    POPE_WOL_PORT,
   } = result.data;
   return {
     mode: POPE_MODE,
@@ -88,5 +95,6 @@ export function loadConfig(env: NodeJS.ProcessEnv): AppConfig {
       POPE_TLS_CERT_FILE && POPE_TLS_KEY_FILE
         ? { certFile: resolve(POPE_TLS_CERT_FILE), keyFile: resolve(POPE_TLS_KEY_FILE) }
         : null,
+    wakeOnLan: { address: POPE_WOL_ADDRESS, port: POPE_WOL_PORT },
   };
 }
