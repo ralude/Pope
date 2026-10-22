@@ -473,7 +473,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** dueño/inactivo/contraseña errónea, carreras con login y entrada remota con activa/pausada; fallo de preparación no registra mantenimiento iniciado.
   - **Commit:** `feat(server): autoriza el mantenimiento de PCs`.
   - **División (2026-10-22):** solo el nodo; hasta T37 el agente real responde `invalid_action`. [Guía](guia-t33-t42.md#t35--autorización-técnica-local-y-remota).
-  - [ ] **T35a:** `TechnicalAuthService.verify` sin cookie (dueño, inactivo, contraseña).
+  - [x] **T35a:** `TechnicalAuthService.verify` sin cookie (dueño, inactivo, contraseña).
   - [ ] **T35b:** `PcMaintenanceService`, inicio registrado al confirmarse, `startMaintenance` desde el panel y `maintenanceState` tras `hello`.
   - [ ] **T35c:** `technicalLogin` local desde la PC, con la PC libre comprobada antes de la contraseña.
 

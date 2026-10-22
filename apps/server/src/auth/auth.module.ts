@@ -7,6 +7,7 @@ import { PasswordService } from './password.service.js';
 import { StaffAuthGuard } from './staff-auth.guard.js';
 import { StaffController } from './staff.controller.js';
 import { StaffService } from './staff.service.js';
+import { TechnicalAuthService } from './technical-auth.service.js';
 
 /**
  * Personal del local y sus sesiones en el panel (REQ-001-40). Registra `StaffAuthGuard`
@@ -18,8 +19,9 @@ import { StaffService } from './staff.service.js';
     PasswordService,
     StaffService,
     AuthService,
+    TechnicalAuthService,
     { provide: APP_GUARD, useClass: StaffAuthGuard },
   ],
-  exports: [PasswordService, StaffService, AuthService],
+  exports: [PasswordService, StaffService, AuthService, TechnicalAuthService],
 })
 export class AuthModule {}
