@@ -8,6 +8,8 @@ import { usePcChannel } from './channel/use-pc-channel.js';
 import { LockScreen } from './lock/LockScreen.js';
 import { TechnicalTab } from './maintenance/TechnicalTab.js';
 import { EndedScreen } from './session/EndedScreen.js';
+import { HeldScreen } from './session/HeldScreen.js';
+import { isHeld } from './session/held.js';
 import { PauseScreen } from './session/PauseScreen.js';
 import { SessionScreen } from './session/SessionScreen.js';
 
@@ -57,6 +59,8 @@ function screenFor(
     | 'closeEnded'
   >,
 ): ReactNode {
+  // Sesión retenida por una revocación (REQ-003-11): sin botones, antes que cualquier otra.
+  if (isHeld(feed)) return <HeldScreen pcName={displayPcName} />;
   // En pausa manda la pantalla de pausa, también al recargar (reinicio de la PC, REQ-002-31).
   if (
     feed.state?.status === 'active' &&

@@ -464,7 +464,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T34e:** revincular con código de recuperación sin soltar la retención.
   - [x] **T34f:** `POST /pcs/:pcId/continue` y cierre de la sesión retenida.
   - [x] **T34g:** agente y host conservan la sesión retenida.
-  - [ ] **T34h:** pantalla de PC retenida en el Shell.
+  - [x] **T34h:** pantalla de PC retenida en el Shell.
   - [ ] **T34i:** revocar, código de recuperación y autorizar continuar en el panel.
 
 - [x] **T35: Autorización técnica local y remota**
