@@ -194,6 +194,16 @@ export const stateMessageSchema = z.discriminatedUnion('status', [
     type: z.literal('state'),
     status: z.literal('locked'),
   }),
+  /**
+   * Sesión retenida por una revocación de la PC (REQ-003-11): bloqueada, sin cobro ni cierre y
+   * sin limpiar procesos, hasta que el personal autorice continuar (T34).
+   */
+  z.object({
+    type: z.literal('state'),
+    status: z.literal('held'),
+    sessionId: idSchema,
+    reason: z.literal('credential_revoked'),
+  }),
   z.object({
     type: z.literal('state'),
     status: z.literal('active'),

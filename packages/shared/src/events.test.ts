@@ -103,6 +103,21 @@ const examples = {
     macAddress: 'AA:BB:CC:DD:EE:FF',
     deadline: '2026-09-25T22:32:00Z',
   }),
+  'pc.credential_revoked': envelope('pc.credential_revoked', {
+    requestId: id(42),
+    pc: PC05,
+    credentialId: id(43),
+    heldSessionId: id(44),
+  }),
+  'session.hold_ended': envelope('session.hold_ended', {
+    holdId: id(45),
+    sessionId: id(44),
+    pc: PC05,
+    startedAt: '2026-09-25T22:30:00Z',
+    endedAt: '2026-09-25T22:50:00Z',
+    heldSeconds: 1200,
+    reason: 'continued',
+  }),
   'staff.technical_login_locked': envelope(
     'staff.technical_login_locked',
     {

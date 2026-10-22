@@ -612,34 +612,9 @@
     "valid": true,
     "input": {
       "type": "state",
-      "status": "active",
-      "session": {
-        "kind": "account",
-        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-        "startedAt": "2026-10-07T12:00:00.000Z",
-        "username": "Ana",
-        "ratePerHour": {
-          "micros": 1000000,
-          "currency": "USD"
-        },
-        "comboSeconds": 0,
-        "money": {
-          "micros": 1000000,
-          "currency": "USD"
-        },
-        "moneySeconds": 3600,
-        "remainingSeconds": 3600,
-        "pause": {
-          "startedAt": "2026-10-07T12:00:00.000Z",
-          "maxUntil": "2026-10-07T12:00:00.000Z",
-          "billing": false,
-          "secondsLeft": 0
-        },
-        "pausesLeft": 0,
-        "pauseLimit": "day",
-        "pauseMaxSeconds": 900
-      },
-      "vesRate": null
+      "status": "held",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "credential_revoked"
     }
   },
   {
@@ -649,34 +624,9 @@
     "valid": true,
     "input": {
       "type": "state",
-      "status": "active",
-      "session": {
-        "kind": "account",
-        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-        "startedAt": "2026-10-07T12:00:00.000Z",
-        "username": "Ana",
-        "ratePerHour": {
-          "micros": 1000000,
-          "currency": "USD"
-        },
-        "comboSeconds": 0,
-        "money": {
-          "micros": 1000000,
-          "currency": "USD"
-        },
-        "moneySeconds": 3600,
-        "remainingSeconds": 3600,
-        "pause": {
-          "startedAt": "2026-10-07T12:00:00.000Z",
-          "maxUntil": "2026-10-07T12:00:00.000Z",
-          "billing": false,
-          "secondsLeft": 0
-        },
-        "pausesLeft": 0,
-        "pauseLimit": "day",
-        "pauseMaxSeconds": 900
-      },
-      "vesRate": null
+      "status": "held",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "credential_revoked"
     }
   },
   {
@@ -686,34 +636,9 @@
     "valid": true,
     "input": {
       "type": "state",
-      "status": "active",
-      "session": {
-        "kind": "account",
-        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-        "startedAt": "2026-10-07T12:00:00.000Z",
-        "username": "Ana",
-        "ratePerHour": {
-          "micros": 1000000,
-          "currency": "USD"
-        },
-        "comboSeconds": 0,
-        "money": {
-          "micros": 1000000,
-          "currency": "USD"
-        },
-        "moneySeconds": 3600,
-        "remainingSeconds": 3600,
-        "pause": {
-          "startedAt": "2026-10-07T12:00:00.000Z",
-          "maxUntil": "2026-10-07T12:00:00.000Z",
-          "billing": false,
-          "secondsLeft": 0
-        },
-        "pausesLeft": 0,
-        "pauseLimit": "day",
-        "pauseMaxSeconds": 900
-      },
-      "vesRate": null
+      "status": "held",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "credential_revoked"
     }
   },
   {
@@ -725,14 +650,32 @@
       "type": "state",
       "status": "active",
       "session": {
-        "kind": "temporary",
+        "kind": "account",
         "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
         "startedAt": "2026-10-07T12:00:00.000Z",
-        "name": "Temporal",
-        "purchasedSeconds": 0,
-        "remainingSeconds": 0
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
       },
-      "vesRate": 40000000
+      "vesRate": null
     }
   },
   {
@@ -744,6 +687,80 @@
       "type": "state",
       "status": "active",
       "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-2",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "account",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "username": "Ana",
+        "ratePerHour": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "comboSeconds": 0,
+        "money": {
+          "micros": 1000000,
+          "currency": "USD"
+        },
+        "moneySeconds": 3600,
+        "remainingSeconds": 3600,
+        "pause": {
+          "startedAt": "2026-10-07T12:00:00.000Z",
+          "maxUntil": "2026-10-07T12:00:00.000Z",
+          "billing": false,
+          "secondsLeft": 0
+        },
+        "pausesLeft": 0,
+        "pauseLimit": "day",
+        "pauseMaxSeconds": 900
+      },
+      "vesRate": null
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-3",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
         "kind": "temporary",
         "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
         "startedAt": "2026-10-07T12:00:00.000Z",
@@ -755,7 +772,26 @@
     }
   },
   {
-    "id": "v2/shell-notification/message-2",
+    "id": "v2/node-to-pc/message-3",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "state",
+      "status": "active",
+      "session": {
+        "kind": "temporary",
+        "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+        "startedAt": "2026-10-07T12:00:00.000Z",
+        "name": "Temporal",
+        "purchasedSeconds": 0,
+        "remainingSeconds": 0
+      },
+      "vesRate": 40000000
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-3",
     "version": "v2",
     "contract": "shell-notification",
     "valid": true,
@@ -774,47 +810,14 @@
     }
   },
   {
-    "id": "v1/node-to-pc/message-3",
-    "version": "v1",
-    "contract": "node-to-pc",
-    "valid": true,
-    "input": {
-      "type": "warning",
-      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-      "minutesLeft": 1
-    }
-  },
-  {
-    "id": "v2/node-to-pc/message-3",
-    "version": "v2",
-    "contract": "node-to-pc",
-    "valid": true,
-    "input": {
-      "type": "warning",
-      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-      "minutesLeft": 1
-    }
-  },
-  {
-    "id": "v2/shell-notification/message-3",
-    "version": "v2",
-    "contract": "shell-notification",
-    "valid": true,
-    "input": {
-      "type": "warning",
-      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-      "minutesLeft": 1
-    }
-  },
-  {
     "id": "v1/node-to-pc/message-4",
     "version": "v1",
     "contract": "node-to-pc",
     "valid": true,
     "input": {
-      "type": "sessionEnded",
+      "type": "warning",
       "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-      "reason": "exhausted"
+      "minutesLeft": 1
     }
   },
   {
@@ -823,9 +826,9 @@
     "contract": "node-to-pc",
     "valid": true,
     "input": {
-      "type": "sessionEnded",
+      "type": "warning",
       "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
-      "reason": "exhausted"
+      "minutesLeft": 1
     }
   },
   {
@@ -834,13 +837,46 @@
     "contract": "shell-notification",
     "valid": true,
     "input": {
+      "type": "warning",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "minutesLeft": 1
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-5",
+    "version": "v1",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
       "type": "sessionEnded",
       "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
       "reason": "exhausted"
     }
   },
   {
-    "id": "v1/node-to-pc/message-5",
+    "id": "v2/node-to-pc/message-5",
+    "version": "v2",
+    "contract": "node-to-pc",
+    "valid": true,
+    "input": {
+      "type": "sessionEnded",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "exhausted"
+    }
+  },
+  {
+    "id": "v2/shell-notification/message-5",
+    "version": "v2",
+    "contract": "shell-notification",
+    "valid": true,
+    "input": {
+      "type": "sessionEnded",
+      "sessionId": "0199a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b",
+      "reason": "exhausted"
+    }
+  },
+  {
+    "id": "v1/node-to-pc/message-6",
     "version": "v1",
     "contract": "node-to-pc",
     "valid": true,
@@ -860,7 +896,7 @@
     }
   },
   {
-    "id": "v2/node-to-pc/message-5",
+    "id": "v2/node-to-pc/message-6",
     "version": "v2",
     "contract": "node-to-pc",
     "valid": true,
@@ -880,7 +916,7 @@
     }
   },
   {
-    "id": "v2/shell-notification/message-5",
+    "id": "v2/shell-notification/message-6",
     "version": "v2",
     "contract": "shell-notification",
     "valid": true,
@@ -900,7 +936,7 @@
     }
   },
   {
-    "id": "v1/node-to-pc/message-6",
+    "id": "v1/node-to-pc/message-7",
     "version": "v1",
     "contract": "node-to-pc",
     "valid": true,
@@ -911,7 +947,7 @@
     }
   },
   {
-    "id": "v2/node-to-pc/message-6",
+    "id": "v2/node-to-pc/message-7",
     "version": "v2",
     "contract": "node-to-pc",
     "valid": true,
@@ -922,7 +958,7 @@
     }
   },
   {
-    "id": "v2/shell-notification/message-6",
+    "id": "v2/shell-notification/message-7",
     "version": "v2",
     "contract": "shell-notification",
     "valid": true,

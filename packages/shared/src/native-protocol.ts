@@ -107,7 +107,8 @@ const nativeSessionState = z.discriminatedUnion('kind', [
 ]);
 export const nativeStateMessageSchema = z.discriminatedUnion('status', [
   stateMessageSchema.options[0].strict(),
-  stateMessageSchema.options[1].strict().extend({ session: nativeSessionState }),
+  stateMessageSchema.options[1].strict(),
+  stateMessageSchema.options[2].strict().extend({ session: nativeSessionState }),
 ]);
 export const nativeControlStateMessageSchema = z.strictObject({
   type: z.literal('controlState'),

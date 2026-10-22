@@ -229,6 +229,33 @@ export const pcWakeRequestedEventSchema = event(
   }),
 ).extend({ actor: actorSchema.options[1] });
 
+/** El personal revocó la credencial de una PC; su sesión, si la tenía, queda retenida (REQ-003-11). */
+export const pcCredentialRevokedEventSchema = event(
+  'pc.credential_revoked',
+  1,
+  z.strictObject({
+    requestId: idSchema,
+    pc: pcRefSchema,
+    credentialId: idSchema,
+    heldSessionId: idSchema.nullable(),
+  }),
+).extend({ actor: actorSchema.options[1] });
+
+/** Termina la retención de una sesión: se continuó o se cerró (REQ-003-11, REQ-002-33). */
+export const sessionHoldEndedEventSchema = event(
+  'session.hold_ended',
+  1,
+  z.strictObject({
+    holdId: idSchema,
+    sessionId: idSchema,
+    pc: pcRefSchema,
+    startedAt: utcInstantSchema,
+    endedAt: utcInstantSchema,
+    heldSeconds: nonNegativeSeconds,
+    reason: z.enum(['continued', 'session_closed']),
+  }),
+).extend({ actor: actorSchema.options[1] });
+
 // ─── Cuentas y saldo ────────────────────────────────────────────────────────────────────
 
 export const customerCreatedEventSchema = event(
@@ -933,6 +960,8 @@ export const domainEventSchema = z.discriminatedUnion('type', [
   pcCommandExpiredEventSchema,
   pcReservationReleasedEventSchema,
   pcWakeRequestedEventSchema,
+  pcCredentialRevokedEventSchema,
+  sessionHoldEndedEventSchema,
   customerCreatedEventSchema,
   customerStatusChangedEventSchema,
   customerLoginLockedEventSchema,

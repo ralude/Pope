@@ -184,6 +184,7 @@ export function protocolFixtures(): ProtocolFixture[] {
   };
   const messages = [
     { type: 'state', status: 'locked' },
+    { type: 'state', status: 'held', sessionId: id, reason: 'credential_revoked' },
     { type: 'state', status: 'active', session: account, vesRate: null },
     {
       type: 'state',

@@ -241,6 +241,34 @@
               },
               "status": {
                 "type": "string",
+                "const": "held"
+              },
+              "sessionId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-7[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$"
+              },
+              "reason": {
+                "type": "string",
+                "const": "credential_revoked"
+              }
+            },
+            "required": [
+              "type",
+              "status",
+              "sessionId",
+              "reason"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "state"
+              },
+              "status": {
+                "type": "string",
                 "const": "active"
               },
               "session": {

@@ -29,6 +29,9 @@ export function describeEvent(event: PcEvent): string | null {
       if (message.status === 'locked') {
         return 'bloqueada';
       }
+      if (message.status === 'held') {
+        return 'sesión retenida (revocada)';
+      }
       return message.session.kind === 'account'
         ? `${message.session.username} · ${formatDuration(message.session.remainingSeconds)} · ${formatMoney(message.session.money.micros)}`
         : `sesión temporal «${message.session.name}» · ${formatDuration(message.session.remainingSeconds)}`;

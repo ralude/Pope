@@ -457,7 +457,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Entrega confirmada (mantenedor, 2026-10-07):** opción A, código ligado a la PC revocada, un uso y 600 s, generado en panel e introducido físicamente en su asistente. El servicio obtiene/custodia la credencial por TLS con nodo verificado, sin desbloquear ni abrir mantenimiento (ADR-0022). Desglosar contratos/nodo/asistente antes de implementar; probar caducidad, consumo concurrente, asociación, respuesta perdida según diseño aprobado y secreto ausente de panel/JavaScript. T12 conserva sus condiciones.
   - **Estado previo confirmado (mantenedor, 2026-10-07):** opción A, activa vuelve activa; pausada vuelve pausada con el tiempo que le quedaba. Durante bloqueo confirmado no se gasta ese tiempo ni otra pausa por sesión/día. Implementar y verificar REQ-002-33/CA-002-09, también con política de cierre al vencer y contadores diarios, después de diseñar intervalos en el nodo. No reanudar una pausa ni reiniciar sus límites por recuperar identidad.
   - **Diseño aprobado (mantenedor, 2026-10-22):** [diseno-t34.md](diseno-t34.md). Apps abiertas y audio sin tocar durante la retención; el uso sin red no se cobra; no se revoca con mantenimiento u orden en curso. Se hace después de T42. Pasos en la [guía](guia-t33-t42.md#t34--revocación-conservando-la-sesión).
-  - [ ] **T34a:** contratos de revocar/continuar, eventos y `state: held`.
+  - [x] **T34a:** contratos de revocar/continuar, eventos y `state: held`.
   - [ ] **T34b:** tabla `session_holds`.
   - [ ] **T34c:** `POST /pcs/:pcId/revoke` y cierre de la conexión viva.
   - [ ] **T34d:** sin cobro, latidos ni vencimiento de pausa durante la retención.
