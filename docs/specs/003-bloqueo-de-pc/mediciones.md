@@ -644,3 +644,30 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
   que la custodia.
 - No probado: el reinicio y el apagado reales (VM o PC de pruebas), el agente como SYSTEM
   (SCM, T15c3) ni Wake-on-LAN tras el apagado (T33/T58).
+
+### T32 · mensaje del encargado en escritorios reales (2026-10-22)
+
+- `Pope.DesktopProbe --message-proof <carpeta nueva>`, con el usuario de desarrollo en el
+  Windows 11 de desarrollo (dos monitores). Cadena de producto: `AgentCommands` +
+  `AgentHostBridge` + host (`DesktopCoordinator`, hijo de bloqueo y `StaffMessageWindow`)
+  con el doble del nodo; escritorios de uso y de bloqueo propios del ensayo, restaurados al
+  terminar.
+- **PC libre (escritorio de bloqueo):** acuse `accepted` → `applied`; la ventana la crea el
+  hijo de bloqueo y se quita a los **5,16–5,19 s** desde el envío. Tras quitarse, la pantalla
+  de bloqueo sigue intacta.
+- **En sesión (escritorio de uso):** visible a los **61–62 ms**; la app de prueba conserva
+  el foco y recibe una tecla y un clic en el centro, debajo del mensaje; se quita a los
+  **5,05–5,11 s**. El texto `<b>negrita</b> & <script>alert(1)</script>` se lee tal cual
+  en las etiquetas de la ventana.
+- **Otra sesión:** un mensaje con el contexto del cliente anterior responde `failed:
+  stale_context` y no crea ninguna ventana.
+- **Sonido:** el mantenedor oyó el aviso de Windows durante los ensayos.
+- Cuatro ejecuciones correctas. En la primera, la captura del bloqueo mostró el título en
+  blanco: el host confirmaba al volver de `Show()`, antes de pintarse. Corregido en T32b
+  (la ventana se pinta entera antes de confirmar); las tres siguientes, bien. En ellas el
+  fondo del bloqueo aún no estaba dibujado al capturar: el ensayo envía el mensaje en
+  cuanto el hijo avisa de que está listo, antes del primer fotograma de WebView2.
+- Batería general: 1 776 tests sin fallos (462 servidor, 425 nativos).
+- No probado: juegos DirectX a pantalla completa exclusiva (puede no verse y solo sonar,
+  T56), la pausa (mismo camino que el bloqueo, con el sonido silenciado) y el nodo NestJS
+  real en la PC del local.

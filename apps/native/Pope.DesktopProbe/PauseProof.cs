@@ -26,6 +26,7 @@ internal static class PauseProof
         // El diario de audio del ensayo vive en su carpeta, no en el perfil del usuario.
         using var desktops = new DesktopCoordinator(bridge, Path.Combine(directory, "lock-profile"), journal);
         window.NativeDelivery = desktops.Apply;
+        desktops.ShowOnUse = window.ShowStaffMessage; // T32: mensajes del encargado en el escritorio de uso.
         window.ReadyReceived = () => File.WriteAllText(Path.Combine(directory, "parent-ready.json"), JsonSerializer.Serialize(new { LockName = desktops.LockName }));
         using var trigger = new System.Windows.Forms.Timer { Interval = 50 };
         var busy = false;
