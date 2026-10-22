@@ -15,6 +15,7 @@ import { DATABASE, type Database } from '../db/database.js';
 import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
 import { PcCommandsService } from './pc-commands.service.js';
+import { PcMaintenanceService } from './pc-maintenance.service.js';
 import { PcWakeService } from './pc-wake.service.js';
 import { PcControlService } from './pc-control.service.js';
 import { PausesService } from './pauses.service.js';
@@ -71,6 +72,7 @@ export class PcProtocolService {
     private readonly control: PcControlService,
     private readonly commands: PcCommandsService,
     private readonly wakes: PcWakeService,
+    private readonly maintenance: PcMaintenanceService,
     @Inject(DATABASE) private readonly db: Database,
   ) {}
 
@@ -163,6 +165,11 @@ export class PcProtocolService {
     if (message.recoveryState === 'known') await this.sessions.reconcile(pc.id, message);
     else this.sessions.touch(pc.id);
     connection.send(await this.sessions.stateFor(pc.id));
+    // T35: mantenimiento abierto, o `null`; la PC lo guarda aparte del estado de sesión.
+    connection.send({
+      type: 'maintenanceState',
+      maintenance: await this.maintenance.current(pc.id),
+    });
     await this.control.sync(pc.id, message.controlContext);
     await this.commands.reconnected(pc.id);
   }

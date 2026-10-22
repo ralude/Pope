@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { PcCommandRequest, PcCommandResponse } from '@pope/shared';
+import { newId, type PcCommandRequest, type PcCommandResponse } from '@pope/shared';
 
 import { EventsService } from '../events/events.service.js';
 import { PcConnections } from './pc-connections.js';
@@ -45,14 +45,11 @@ export class PcCommandRequestsService {
           return { row: existing, fresh: false };
         }
         if (!pc) throw new PcCommandException('unknown_pc', 'No existe esa PC', 404);
-        // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30), y mensajes
-        // (T32). Con un mantenimiento hace falta registrar antes su salida (T39/T40) y los
-        // mensajes se rechazan (REQ-003-20): aún no disponible.
-        if (
-          request.kind === 'startMaintenance' ||
-          request.kind === 'endMaintenance' ||
-          request.expected.kind === 'maintenance'
-        ) {
+        // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30), mensajes (T32)
+        // y entrar en mantenimiento con la PC libre (T35). Con un mantenimiento abierto hace
+        // falta registrar antes su salida (T39/T40) y los mensajes se rechazan (REQ-003-20):
+        // aún no disponible.
+        if (request.kind === 'endMaintenance' || request.expected.kind === 'maintenance') {
           throw new PcCommandException('invalid_command', 'Esta orden aún no está disponible', 400);
         }
         if (!this.connections.isConnected(pcId)) {
@@ -78,7 +75,6 @@ export class PcCommandRequestsService {
           });
           return { row, fresh: true };
         }
-        const kind = request.kind;
         const holder = await this.commands.holder(tx, pcId);
         if (holder && this.commands.inFlight(holder)) {
           throw new PcCommandException(
@@ -86,6 +82,19 @@ export class PcCommandRequestsService {
             `La ${pc.name} ya tiene una orden en curso`,
           );
         }
+        if (request.kind === 'startMaintenance') {
+          // REQ-003-43: la PC debe estar libre (el esquema y el contexto ya lo exigen). Reserva
+          // la PC como un bloqueo; el nodo registra la entrada cuando la PC la confirma.
+          const row = await this.commands.insertIn(tx, emit, {
+            pc,
+            actor,
+            request,
+            action: { kind: 'startMaintenance', maintenanceId: newId(), source: 'panel' },
+            context,
+          });
+          return { row, fresh: true };
+        }
+        const kind = request.kind;
         if (context.kind === 'session') {
           // REQ-003-20: Bloquear, reiniciar y apagar cierran antes la sesión con las reglas
           // existentes, también en pausa o temporal (REQ-001-69), y la orden que sigue al cierre

@@ -191,7 +191,7 @@ describe('órdenes del panel a las PCs (e2e, REQ-003-20, T28)', () => {
 
     const maintenance = await order(5, {
       id: newId(),
-      kind: 'startMaintenance',
+      kind: 'endMaintenance',
       expected: (await snapshot(5)).context,
     });
     expect(maintenance.statusCode).toBe(400);

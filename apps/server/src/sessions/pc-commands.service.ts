@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import {
   type Actor,
+  type NativeNodeToPcMessage,
   newId,
   PC_COMMAND_TTL_SECONDS,
   type PcCommand,
@@ -31,6 +32,7 @@ import { type Emit, EventsService, type Transaction } from '../events/events.ser
 import type { PcIdentity } from './pc-connections.js';
 import { PcConnections } from './pc-connections.js';
 import { PcControlService } from './pc-control.service.js';
+import { PcMaintenanceService } from './pc-maintenance.service.js';
 
 export type CommandRow = typeof pcCommands.$inferSelect;
 type CommandErrorCode = ReturnType<typeof pcCommandErrorSchema.parse>['code'];
@@ -62,6 +64,25 @@ const isPower = (kind: string) => kind === 'restart' || kind === 'powerOff';
 /** Reinicio o apagado que el personal confirmó con una sesión abierta, ya cerrada (T30). */
 const closedSession = (row: CommandRow) =>
   isPower(row.action.kind) && row.request.expected.kind === 'session';
+
+/** Qué hacer tras confirmar un acuse: bloqueo pendiente y mensajes para la PC. */
+interface Followup {
+  lock: CommandRow | null;
+  messages: NativeNodeToPcMessage[];
+  /** Empezó un mantenimiento: la PC debe recibir su contexto nuevo. */
+  started: boolean;
+}
+const NO_FOLLOWUP: Followup = { lock: null, messages: [], started: false };
+
+/** Respuesta al Shell cuando la PC no pudo preparar el mantenimiento (T35). */
+function maintenanceUnavailable(requestId: string): NativeNodeToPcMessage {
+  return {
+    type: 'technicalError',
+    requestId,
+    code: 'maintenance_unavailable',
+    message: 'No se pudo preparar el mantenimiento en esta PC',
+  };
+}
 
 /** Orden de las respuestas: un acuse nunca hace retroceder una orden. */
 function rank(status: CommandRow['status']): number {
@@ -151,6 +172,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
     private readonly control: PcControlService,
     private readonly connections: PcConnections,
     private readonly clock: Clock,
+    private readonly maintenance: PcMaintenanceService,
   ) {}
 
   /** Al arrancar el nodo, vence lo que caducó mientras estaba parado y vigila el resto. */
@@ -296,7 +318,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
    * o no corresponde a la orden; repetida no cambia nada y nunca hace retroceder una orden.
    */
   async acknowledge(pcId: string, ack: PcCommandAckMessage): Promise<void> {
-    const lock = await this.events.inTransaction(async (tx, emit): Promise<CommandRow | null> => {
+    const after = await this.events.inTransaction(async (tx, emit): Promise<Followup> => {
       const pc = await this.control.lockPc(tx, pcId);
       const [row] = await tx
         .select()
@@ -304,16 +326,16 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
         .where(and(eq(pcCommands.id, ack.commandId), eq(pcCommands.pcId, pcId)));
       if (!pc || !row || !matches(row, ack.result)) {
         this.logger.warn(`Acuse que no corresponde a una orden de ${pc?.name ?? 'una PC'}`);
-        return null;
+        return NO_FOLLOWUP;
       }
       const status = ack.result.status;
       if (rank(row.status) === 2) {
         if (canonical(row.lastResult) !== canonical(ack.result)) {
           this.logger.warn(`${pc.name} contradice el resultado de la orden ${row.id}`);
         }
-        return null;
+        return NO_FOLLOWUP;
       }
-      if (rank(status) <= rank(row.status)) return null;
+      if (rank(status) <= rank(row.status)) return NO_FOLLOWUP;
       const now = this.clock.now();
       await tx
         .update(pcCommands)
@@ -326,6 +348,22 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
           ack.result.status === 'failed' &&
           FAILURES_WITHOUT_EFFECT.has(ack.result.code));
       const reservationReleased = released && (await this.release(tx, pcId, row.id));
+      const messages: NativeNodeToPcMessage[] = [];
+      let started = false;
+      // T35: la entrada en mantenimiento se registra al confirmarla la PC, con la hora del nodo.
+      if (row.action.kind === 'startMaintenance' && status === 'applied') {
+        const entered = await this.maintenance.startIn(tx, emit, row, pc.name, now);
+        const requestId = this.maintenance.take(row.id);
+        messages.push({
+          type: 'maintenanceState',
+          maintenance: entered,
+          ...(requestId !== undefined && { requestId }),
+        });
+        started = true;
+      } else if (row.action.kind === 'startMaintenance' && status === 'failed') {
+        const requestId = this.maintenance.take(row.id);
+        if (requestId !== undefined) messages.push(maintenanceUnavailable(requestId));
+      }
       emit({
         type: 'pc.command_acknowledged',
         version: 1,
@@ -343,11 +381,15 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
       });
       // T30: si un reinicio o apagado que cerró una sesión no se ejecutó, la PC se bloquea
       // como tras cualquier cierre, para confirmar la limpieza de los procesos del cliente.
-      return ack.result.status === 'failed' && closedSession(row)
-        ? this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' })
-        : null;
+      const lock =
+        ack.result.status === 'failed' && closedSession(row)
+          ? await this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' })
+          : null;
+      return { lock, messages, started };
     });
-    if (lock) this.dispatch(lock);
+    for (const message of after.messages) this.connections.send(pcId, message);
+    if (after.started) await this.control.sync(pcId, null);
+    if (after.lock) this.dispatch(after.lock);
   }
 
   /**
@@ -410,23 +452,33 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
   /** Vence la orden si a los 30 s la PC no respondió (plan T02b). */
   async expire(commandId: string): Promise<void> {
     this.timers.delete(commandId);
-    await this.events.inTransaction(async (tx, emit) => {
+    const notify = await this.events.inTransaction(async (tx, emit) => {
       const [found] = await tx
         .select({ pcId: pcCommands.pcId })
         .from(pcCommands)
         .where(eq(pcCommands.id, commandId));
-      if (!found) return;
+      if (!found) return null;
       const pc = await this.control.lockPc(tx, found.pcId);
       const row = await this.find(tx, commandId);
-      if (!pc || row?.status !== 'requested' || row.expiresAt > this.clock.now()) return;
+      if (!pc || row?.status !== 'requested' || row.expiresAt > this.clock.now()) return null;
       await tx.update(pcCommands).set({ status: 'expired' }).where(eq(pcCommands.id, commandId));
+      // Un mantenimiento que la PC no confirmó no tuvo efecto: la PC vuelve a admitir clientes.
+      const isStart = row.action.kind === 'startMaintenance';
+      if (isStart) await this.release(tx, found.pcId, commandId);
       emit({
         type: 'pc.command_expired',
         version: 1,
         actor: { kind: 'system' },
         payload: { commandId, pc, kind: row.action.kind },
       });
+      return isStart ? { pcId: found.pcId } : null;
     });
+    if (notify) {
+      const requestId = this.maintenance.take(commandId);
+      if (requestId !== undefined) {
+        this.connections.send(notify.pcId, maintenanceUnavailable(requestId));
+      }
+    }
   }
 
   /** Quita la reserva si la tiene esta orden. Devuelve si la quitó. */

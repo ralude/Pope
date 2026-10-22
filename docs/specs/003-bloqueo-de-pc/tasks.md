@@ -474,7 +474,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(server): autoriza el mantenimiento de PCs`.
   - **División (2026-10-22):** solo el nodo; hasta T37 el agente real responde `invalid_action`. [Guía](guia-t33-t42.md#t35--autorización-técnica-local-y-remota).
   - [x] **T35a:** `TechnicalAuthService.verify` sin cookie (dueño, inactivo, contraseña).
-  - [ ] **T35b:** `PcMaintenanceService`, inicio registrado al confirmarse, `startMaintenance` desde el panel y `maintenanceState` tras `hello`.
+  - [x] **T35b:** `PcMaintenanceService`, inicio registrado al confirmarse, `startMaintenance` desde el panel y `maintenanceState` tras `hello`.
   - [ ] **T35c:** `technicalLogin` local desde la PC, con la PC libre comprobada antes de la contraseña.
 
 - [ ] **T36: Diez fallos técnicos y aviso al panel**
