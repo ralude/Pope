@@ -141,4 +141,36 @@ public sealed class DesktopAuthorizationTests
         public override long TimestampFrequency => 1000;
         public override long GetTimestamp() => Ticks;
     }
+
+    [Fact(DisplayName = "REQ-003-11/T34: tras revocar y revincular, el estado retenido sigue bloqueado y aislado; continuar lo libera")]
+    public void HeldKeepsIsolationAndContinueUnblocks()
+    {
+        var state = new DesktopAuthorization();
+        JsonElement Envelope(object message) => JsonSerializer.SerializeToElement(new { version = 1, kind = "message", elapsedSeconds = 0, message });
+        var session = "01900000-0000-7000-8000-000000000124";
+        var active = new
+        {
+            type = "state",
+            status = "active",
+            vesRate = (object?)null,
+            session = new { kind = "temporary", sessionId = session, startedAt = "2026-10-22T20:00:00Z", name = "Temporal", purchasedSeconds = 100, remainingSeconds = 100 }
+        };
+        state.Apply(Envelope(active));
+        Assert.False(state.Blocked);
+        state.Apply(Envelope(new { type = "pcAuthenticationError", code = "pc_credential_revoked", message = "Credencial revocada" }));
+        Assert.True(state.Blocked);
+        // Aunque llegara un estado activo con la revocación vigente, sigue bloqueada.
+        state.Apply(Envelope(active));
+        Assert.True(state.Blocked);
+
+        state.Apply(Envelope(new { type = "state", status = "held", sessionId = session, reason = "credential_revoked" }));
+        Assert.True(state.Blocked);
+        Assert.True(state.HasSession);
+        Assert.False(state.Paused);
+        Assert.Equal("held", state.Snapshot().GetProperty("message").GetProperty("status").GetString());
+
+        state.Apply(Envelope(active));
+        Assert.False(state.Blocked);
+        Assert.False(state.Paused);
+    }
 }

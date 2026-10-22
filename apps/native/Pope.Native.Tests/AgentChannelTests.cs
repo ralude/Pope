@@ -290,4 +290,40 @@ public sealed class AgentChannelTests(ITestOutputHelper output)
         }
         public void Dispose() { Listener.Stop(); Certificate.Dispose(); }
     }
+
+    [Fact(DisplayName = "REQ-003-11/T34: tras una revocación, una credencial nueva en la custodia reabre la conexión con ella")]
+    public async Task NewConfigurationResumesAfterRevocation()
+    {
+        using var peer = new Peer();
+        using var first = peer.Configuration();
+        using var second = peer.Configuration();
+        Assert.NotEqual(first.Authorization(), second.Authorization());
+        var root = Temporary();
+        using var cancel = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+        var offline = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var channel = new AgentChannel(first, new AgentLog(root)) { Delay = (_, t) => Task.Delay(10, t) };
+        channel.ConnectionChanged += online => { if (!online) offline.TrySetResult(); };
+        var run = channel.RunAsync(cancel.Token);
+        try
+        {
+            using (var revoked = await peer.Accept(first.Authorization(), cancel.Token))
+            {
+                await Read(revoked, cancel.Token);
+                await revoked.SendAsync("{\"type\":\"pcAuthenticationError\",\"code\":\"pc_credential_revoked\",\"message\":\"Credencial revocada\"}"u8.ToArray(), WebSocketMessageType.Text, true, cancel.Token);
+                await offline.Task.WaitAsync(cancel.Token);
+            }
+            await Task.Delay(100, cancel.Token);
+            Assert.True(channel.AwaitingConfiguration);
+            using (var noRetry = new CancellationTokenSource(TimeSpan.FromMilliseconds(200)))
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => { using var unexpected = await peer.Listener.AcceptTcpClientAsync(noRetry.Token); });
+
+            channel.UseConfiguration(second);
+            Assert.False(channel.AwaitingConfiguration);
+            // Reconecta enseguida y con la credencial nueva, nunca con la revocada.
+            using var again = await peer.Accept(second.Authorization(), cancel.Token);
+            var hello = await Read(again, cancel.Token);
+            Assert.Equal("hello", hello.GetProperty("type").GetString());
+        }
+        finally { cancel.Cancel(); try { await run; } catch (OperationCanceledException) { } Directory.Delete(root, true); }
+    }
 }

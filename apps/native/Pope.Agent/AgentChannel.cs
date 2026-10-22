@@ -15,6 +15,22 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
     private ClientWebSocket? connected;
     private int running;
     private bool authenticationRejected;
+    // T34: tras una revocación el canal espera una credencial nueva; esto lo despierta.
+    private readonly object wakeGate = new();
+    private TaskCompletionSource rejectedWake = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    internal bool AwaitingConfiguration { get { lock (wakeGate) return authenticationRejected; } }
+
+    // T34 · REQ-003-11: la PC se revinculó (credencial nueva en la custodia). Quien llama conserva la
+    // propiedad de las dos configuraciones y dispone de la anterior.
+    internal void UseConfiguration(AgentConfiguration fresh)
+    {
+        lock (wakeGate)
+        {
+            configuration = fresh;
+            authenticationRejected = false;
+            rejectedWake.TrySetResult();
+        }
+    }
     internal event Action<JsonElement>? Message;
     internal event Action<bool>? ConnectionChanged;
     internal Func<object> Hello { get; set; } = () => new
@@ -89,10 +105,21 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
                     ConnectionChanged?.Invoke(false);
                 }
                 log.Write(AgentLogCode.TransportDisconnected);
-                if (authenticationRejected)
+                Task? waitForConfiguration = null;
+                lock (wakeGate)
+                {
+                    if (authenticationRejected)
+                    {
+                        rejectedWake = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+                        waitForConfiguration = rejectedWake.Task;
+                    }
+                }
+                if (waitForConfiguration != null)
                 {
                     // Revocación autenticada: esperar nueva configuración, nunca confundir con fallo TLS.
-                    await Task.Delay(Timeout.InfiniteTimeSpan, token);
+                    await waitForConfiguration.WaitAsync(token);
+                    failures = 0;
+                    continue;
                 }
                 failures = Math.Min(failures + 1, 6);
                 await Delay(RetryDelay(failures), token);
@@ -173,7 +200,7 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
                 Message?.Invoke(message);
                 if (message.GetProperty("type").GetString() == "pcAuthenticationError")
                 {
-                    authenticationRejected = true;
+                    lock (wakeGate) authenticationRejected = true;
                     throw new InvalidDataException();
                 }
             }

@@ -29,6 +29,13 @@ internal sealed class DesktopAuthorization(TimeProvider? timeProvider = null)
             if (message.GetProperty("type").GetString() == "sessionEnded") { active = false; session = false; saved = null; return; }
             if (message.GetProperty("type").GetString() != "state") return;
             saved = envelope; at = clock.GetTimestamp(); age = envelope.GetProperty("elapsedSeconds").GetInt64();
+            if (message.GetProperty("status").GetString() == "held")
+            {
+                // T34: la PC se revinculó y el nodo retiene su sesión: sigue bloqueada, aislada como con la
+                // revocación (Alt+Tab no llega al juego) y sin silenciar el audio; el rechazo anterior ya no vale.
+                active = false; session = true; paused = false; remaining = 0; revoked = false;
+                return;
+            }
             active = !revoked && message.GetProperty("status").GetString() == "active";
             session = active || (revoked && session); paused = false; remaining = 0;
             if (active)
@@ -42,7 +49,7 @@ internal sealed class DesktopAuthorization(TimeProvider? timeProvider = null)
     {
         lock (gate)
         {
-            var message = saved is { } value && (active || value.GetProperty("message").GetProperty("status").GetString() == "locked")
+            var message = saved is { } value && (active || value.GetProperty("message").GetProperty("status").GetString() is "locked" or "held")
                 ? value.GetProperty("message") : JsonSerializer.SerializeToElement(new { type = "state", status = "locked" });
             return JsonSerializer.SerializeToElement(new { version = 1, kind = "message", message, elapsedSeconds = saved is null ? 0 : Age() });
         }

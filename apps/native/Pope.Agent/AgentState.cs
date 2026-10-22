@@ -20,6 +20,8 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
     private bool billing;
     private bool rejected;
     private bool authorized;
+    // T34 · REQ-003-11: sesión retenida por una revocación; bloquea sin cerrarla ni limpiar procesos.
+    private bool held;
     private bool heard;
     internal event Action<byte[]>? RecoveryChanged;
     // T40: primera salida del mantenimiento pendiente de reconocer; solo viaja en el hello.
@@ -51,6 +53,16 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
         switch (message.GetProperty("type").GetString())
         {
             case "state":
+                if (message.GetProperty("status").GetString() == "held")
+                {
+                    // La PC ya se revinculó y el nodo conserva su sesión: sigue bloqueada, con la misma
+                    // sesión (así no se interpreta como un fin de sesión) y sin cuenta atrás ni cobro.
+                    state = message; timestamp = clock.GetTimestamp(); authorized = false; held = true;
+                    sessionId = message.GetProperty("sessionId").GetString(); remaining = 0; paused = false; billing = false;
+                    PersistRecovery();
+                    break;
+                }
+                held = false;
                 state = message; timestamp = clock.GetTimestamp(); authorized = !rejected;
                 sessionId = null; remaining = 0; paused = false; billing = true;
                 if (message.GetProperty("status").GetString() == "active")
@@ -69,7 +81,7 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
                 nodeStamp = clock.GetTimestamp();
                 PersistRecovery(); break;
             case "sessionEnded":
-                state = null; sessionId = null; remaining = 0; paused = false; PersistRecovery(); break;
+                state = null; sessionId = null; remaining = 0; paused = false; held = false; PersistRecovery(); break;
             case "pcAuthenticationError":
                 rejected = true; authorized = false; break;
         }
@@ -95,6 +107,9 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
         SessionFinished?.Invoke(finished);
     }
 
+    // T34: la PC se revinculó con una credencial nueva; el rechazo anterior ya no vale.
+    internal void ClearRejection() { lock (gate) rejected = false; }
+
     internal long? RemainingSeconds
     {
         get { lock (gate) return Remaining(); }
@@ -118,6 +133,7 @@ internal sealed class AgentState(string pcId, TimeProvider? timeProvider = null)
     {
         lock (gate)
         {
+            if (held && state is { } heldState) return (heldState, Elapsed());
             if (!authorized || rejected || state is null || (!paused && sessionId != null && Remaining() <= 0))
                 return (JsonSerializer.SerializeToElement(new { type = "state", status = "locked" }), 0);
             return (state.Value, Elapsed());

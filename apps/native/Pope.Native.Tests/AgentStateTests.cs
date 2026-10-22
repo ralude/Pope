@@ -135,4 +135,60 @@ public sealed class AgentStateTests
         }
         finally { CryptographicOperations.ZeroMemory(restored); CryptographicOperations.ZeroMemory(encrypted!); }
     }
+
+    private static JsonElement Held() => Message(new { type = "state", status = "held", sessionId = Session, reason = "credential_revoked" });
+
+    [Fact(DisplayName = "REQ-003-11/T34: la sesión retenida bloquea sin terminarla, sin limpiar procesos y sin cuenta atrás")]
+    public void HeldSessionBlocksWithoutFinishing()
+    {
+        var clock = new Clock(); var state = new AgentState(Pc, clock);
+        var finished = new List<string>();
+        state.SessionFinished += finished.Add;
+        state.Apply(Active(100));
+        // La PC se revoca: bloqueada, pero la sesión sigue siendo la suya.
+        state.Apply(Message(new { type = "pcAuthenticationError", code = "pc_credential_revoked", message = "Credencial revocada" }));
+        Assert.True(state.Blocked);
+        // Se revincula con la credencial nueva y el nodo dice que la sesión está retenida.
+        state.ClearRejection();
+        state.Apply(Held());
+        Assert.True(state.Blocked);
+        Assert.Empty(finished);
+        Assert.Null(state.RemainingSeconds);
+        clock.Ticks += 500_000;
+        Assert.Null(state.RemainingSeconds);
+        Assert.Equal("held", state.Snapshot().Message.GetProperty("status").GetString());
+        Assert.Equal(Session, state.Snapshot().Message.GetProperty("sessionId").GetString());
+        Assert.Empty(finished);
+    }
+
+    [Fact(DisplayName = "REQ-003-11/T34: al autorizar continuar vuelve el estado activo; si el personal la cierra, ahí sí se limpia")]
+    public void HeldThenContinuedOrClosed()
+    {
+        var state = new AgentState(Pc);
+        var finished = new List<string>();
+        state.SessionFinished += finished.Add;
+        state.Apply(Active(100));
+        state.Apply(Message(new { type = "pcAuthenticationError", code = "pc_credential_revoked", message = "x" }));
+        state.ClearRejection();
+        state.Apply(Held());
+        state.Apply(Active(60));
+        Assert.False(state.Blocked);
+        Assert.Equal(60, state.RemainingSeconds);
+        Assert.Empty(finished);
+
+        state.Apply(Held());
+        state.Apply(Message(new { type = "sessionEnded", sessionId = Session, reason = "staff" }));
+        Assert.True(state.Blocked);
+        Assert.Equal([Session], finished);
+    }
+
+    [Fact(DisplayName = "REQ-003-11/T34: sin ClearRejection, una credencial nueva no desbloquea por sí sola")]
+    public void RejectionPersistsUntilRelinked()
+    {
+        var state = new AgentState(Pc);
+        state.Apply(Active(100));
+        state.Apply(Message(new { type = "pcAuthenticationError", code = "pc_credential_revoked", message = "x" }));
+        state.Apply(Active(100));
+        Assert.True(state.Blocked);
+    }
 }

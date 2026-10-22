@@ -5,10 +5,18 @@ namespace Pope.Agent;
 internal sealed class AgentRuntime
 {
     private readonly AgentChannel channel;
+    private readonly AgentState state;
+    private readonly AgentLog log;
+    private readonly string root;
+    private AgentConfiguration current;
+    private readonly AgentConfiguration initial;
+    private DateTime loadedStamp;
     internal AgentHostBridge Bridge { get; }
     internal AgentRuntime(string root, AgentConfiguration configuration, AgentLog log)
     {
-        var state = new AgentState(configuration.PcId);
+        this.root = root; this.log = log; current = configuration; initial = configuration;
+        loadedStamp = ConfigurationStamp();
+        state = new AgentState(configuration.PcId);
         byte[]? recovery = null;
         try { recovery = AgentCustody.ReadRecovery(root); if (recovery != null) state.Restore(recovery); }
         catch { log.Write(AgentLogCode.RecoveryRejected); }
@@ -57,9 +65,48 @@ internal sealed class AgentRuntime
             (id, text, token) => Bridge.ShowStaffMessageAsync(id, text, TimeSpan.FromSeconds(10), token), maintenance);
         channel.Message += commands.OnMessage;
     }
+    private DateTime ConfigurationStamp() => File.GetLastWriteTimeUtc(Path.Combine(root, "configuration.bin"));
+
+    // T34 · REQ-003-11: con la credencial revocada el canal espera. Cuando la custodia cambia (el asistente
+    // guardó la credencial nueva), se carga y el canal reintenta; el rechazo anterior deja de valer.
+    private async Task WatchConfigurationAsync(TimeSpan interval, CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            await Task.Delay(interval, token);
+            if (!channel.AwaitingConfiguration) continue;
+            var stamp = ConfigurationStamp();
+            if (stamp == loadedStamp) continue;
+            loadedStamp = stamp;
+            AgentConfiguration fresh;
+            try { fresh = AgentCustody.Read(root); }
+            catch { log.Write(AgentLogCode.ConfigurationRejected); continue; }
+            var previous = current;
+            current = fresh;
+            state.ClearRejection();
+            channel.UseConfiguration(fresh);
+            // La configuración inicial la dispone el ciclo de vida; solo las cargadas aquí.
+            if (!ReferenceEquals(previous, initial)) previous.Dispose();
+        }
+    }
+
     internal async Task RunAsync(CancellationToken token)
     {
         // T22 entregará a Bridge el proceso real del host que lance/supervise en la sesión cliente.
-        using (Bridge) { Bridge.Subscribe(); await channel.RunAsync(token); }
+        using (Bridge)
+        {
+            Bridge.Subscribe();
+            using var watching = CancellationTokenSource.CreateLinkedTokenSource(token);
+            var watcher = WatchConfigurationAsync(ConfigurationPoll, watching.Token);
+            try { await channel.RunAsync(token); }
+            finally
+            {
+                watching.Cancel();
+                try { await watcher; } catch (OperationCanceledException) { }
+                if (!ReferenceEquals(current, initial)) current.Dispose();
+            }
+        }
     }
+
+    internal TimeSpan ConfigurationPoll { get; init; } = TimeSpan.FromSeconds(5);
 }
