@@ -5,6 +5,8 @@ import { exchangeRateStatusSchema } from './exchange-rate.js';
 import { microsSchema } from './money.js';
 import { pausesUsedSchema, sessionPauseSchema } from './pause.js';
 import { idSchema, sessionKindSchema, utcInstantSchema } from './session.js';
+import { pcCommandKindSchema, pcCommandStatusSchema } from './pc-control.js';
+import { maintenanceSourceSchema } from './pc-maintenance.js';
 import { pcWakeSchema } from './pc-wake.js';
 
 const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
@@ -110,6 +112,21 @@ export const pcMapItemSchema = z.object({
   session: pcMapSessionSchema.nullable(),
   /** Encendido pedido y aún sin conexión de la PC; el panel avisa al pasar `deadline` (T33). */
   wake: pcWakeSchema.nullable(),
+  /** La PC está en mantenimiento: quién lo abrió, desde dónde y cuándo (T41, REQ-003-21). */
+  maintenance: z
+    .strictObject({
+      id: idSchema,
+      actorName: z.string(),
+      source: maintenanceSourceSchema,
+      startedAt: utcInstantSchema,
+    })
+    .nullable(),
+  /** Tiene la MAC registrada: se puede encender por Wake-on-LAN (T33, REQ-003-22). */
+  canWake: z.boolean(),
+  /** La orden del personal que reserva la PC y sigue en curso, o `null` (T41, REQ-003-20). */
+  order: z
+    .strictObject({ id: idSchema, kind: pcCommandKindSchema, status: pcCommandStatusSchema })
+    .nullable(),
 });
 export type PcMapItem = z.infer<typeof pcMapItemSchema>;
 

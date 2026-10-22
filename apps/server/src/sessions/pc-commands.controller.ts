@@ -64,6 +64,16 @@ export class PcCommandsController {
     return this.commands.snapshot(pcId);
   }
 
+  /** Estado de una orden: el panel la consulta hasta su resultado (T41). */
+  @Get('commands/:commandId')
+  @Header('Cache-Control', 'no-store')
+  command(
+    @Param('pcId', ParseUUIDPipe) pcId: string,
+    @Param('commandId', ParseUUIDPipe) commandId: string,
+  ) {
+    return this.commands.get(pcId, commandId);
+  }
+
   @Post('commands')
   @HttpCode(200)
   @Roles('encargado', 'administrador')

@@ -34,8 +34,30 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
     const map = {
       at: '2026-09-28T22:02:05.000Z',
       pcs: [
-        { id: PC, name: 'PC 05', row: null, col: null, connected: true, session, wake: null },
-        { id: PC, name: 'PC 06', row: 0, col: 1, connected: false, session: null, wake: null },
+        {
+          id: PC,
+          name: 'PC 05',
+          row: null,
+          col: null,
+          connected: true,
+          session,
+          wake: null,
+          maintenance: null,
+          canWake: false,
+          order: null,
+        },
+        {
+          id: PC,
+          name: 'PC 06',
+          row: 0,
+          col: 1,
+          connected: false,
+          session: null,
+          wake: null,
+          maintenance: null,
+          canWake: false,
+          order: null,
+        },
       ],
     };
     expect(pcMapSchema.parse(map)).toEqual(map);
@@ -100,7 +122,18 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
       pcMapSchema.safeParse({
         at: '2026-09-28T22:02:05.000Z',
         pcs: [
-          { id: PC, name: 'PC 05', row: null, col: null, connected: true, session: s, wake: null },
+          {
+            id: PC,
+            name: 'PC 05',
+            row: null,
+            col: null,
+            connected: true,
+            session: s,
+            wake: null,
+            maintenance: null,
+            canWake: false,
+            order: null,
+          },
         ],
       }).success;
     expect(bad({ ...session, remainingSeconds: -1 })).toBe(false);

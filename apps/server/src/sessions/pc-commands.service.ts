@@ -205,6 +205,16 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
     });
   }
 
+  /** Una orden de esta PC, para que el panel siga su resultado (T41). */
+  async get(pcId: string, commandId: string): Promise<PcCommandResponse> {
+    const [row] = await this.db
+      .select()
+      .from(pcCommands)
+      .where(and(eq(pcCommands.id, commandId), eq(pcCommands.pcId, pcId)));
+    if (!row) throw new PcCommandException('unknown_pc', 'No existe esa orden en esa PC', 404);
+    return responseOf(row);
+  }
+
   /** Orden ya guardada con ese ID, si existe. */
   async find(tx: Transaction, id: string): Promise<CommandRow | undefined> {
     const [row] = await tx.select().from(pcCommands).where(eq(pcCommands.id, id));

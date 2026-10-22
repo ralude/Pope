@@ -104,6 +104,9 @@ describe('PCs', () => {
     connected: true,
     session: null,
     wake: null,
+    maintenance: null,
+    canWake: false,
+    order: null,
     ...over,
   });
 

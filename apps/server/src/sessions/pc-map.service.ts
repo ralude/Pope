@@ -10,14 +10,16 @@ import {
   seconds,
   SECONDS_PER_MINUTE,
 } from '@pope/shared';
-import { asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
 import {
   customerBalances,
   customers,
+  pcCommands,
   pcControlStates,
+  pcMaintenances,
   pcs,
   sessions,
   sessionTopups,
@@ -113,6 +115,43 @@ export class PcMapService {
       wakes.flatMap(({ pcId, id, at }) => (id && at ? [[pcId, wakeOf(id, at)] as const] : [])),
     );
 
+    const maintenances = await this.db
+      .select()
+      .from(pcMaintenances)
+      .where(isNull(pcMaintenances.endedAt));
+    const maintenanceByPc = new Map(
+      maintenances.map((row) => [
+        row.pcId,
+        {
+          id: row.id,
+          actorName: actorName(row.actor),
+          source: row.source,
+          startedAt: row.startedAt.toISOString(),
+        },
+      ]),
+    );
+    // La orden que reserva la PC solo cuenta mientras puede producir su efecto: pedida y sin
+    // vencer, o aceptada a la espera de él.
+    const now = this.clock.now();
+    const orders = await this.db
+      .select({
+        pcId: pcCommands.pcId,
+        id: pcCommands.id,
+        action: pcCommands.action,
+        status: pcCommands.status,
+        expiresAt: pcCommands.expiresAt,
+      })
+      .from(pcControlStates)
+      .innerJoin(pcCommands, eq(pcCommands.id, pcControlStates.reservedCommandId))
+      .where(and(isNotNull(pcControlStates.reservedCommandId)));
+    const orderByPc = new Map(
+      orders
+        .filter(
+          (row) => row.status === 'accepted' || (row.status === 'requested' && row.expiresAt > now),
+        )
+        .map((row) => [row.pcId, { id: row.id, kind: row.action.kind, status: row.status }]),
+    );
+
     const items: PcMapItem[] = pcRows.map((pc) => ({
       id: pc.id,
       name: pc.name,
@@ -121,6 +160,9 @@ export class PcMapService {
       connected: this.connections.isConnected(pc.id),
       session: byPc.get(pc.id) ?? null,
       wake: wakeByPc.get(pc.id) ?? null,
+      maintenance: maintenanceByPc.get(pc.id) ?? null,
+      canWake: pc.macAddress !== null,
+      order: orderByPc.get(pc.id) ?? null,
     }));
     return { pcs: items, at: this.clock.now().toISOString() };
   }
