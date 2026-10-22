@@ -5,13 +5,17 @@
 import {
   nativeNodeToPcMessageSchema,
   nativePcToNodeMessageSchema,
-  nodeToPcMessageSchema,
   NATIVE_PC_PROTOCOL_VERSION,
   type NativeNodeToPcMessage,
   type PcControlContext,
 } from '@pope/shared';
 
-import type { ChannelEvent, PcChannel, ShellRequest } from './channel.js';
+import {
+  type ChannelEvent,
+  type PcChannel,
+  parseShellMessage,
+  type ShellRequest,
+} from './channel.js';
 
 /** Ruta del canal de las PCs en el nodo (`PC_CHANNEL_PATH` del servidor). */
 export const PC_CHANNEL_PATH = '/pc';
@@ -165,8 +169,8 @@ export class DevSocketChannel implements PcChannel {
     } else if (message.type === 'sessionEnded') {
       this.sessionId = null;
     }
-    const uiMessage = nodeToPcMessageSchema.safeParse(message);
-    if (uiMessage.success) this.emit({ kind: 'message', message: uiMessage.data });
+    const uiMessage = parseShellMessage(message);
+    if (uiMessage) this.emit({ kind: 'message', message: uiMessage });
   }
 
   private scheduleReconnect(): void {

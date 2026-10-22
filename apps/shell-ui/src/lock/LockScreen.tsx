@@ -5,6 +5,8 @@ import { type SyntheticEvent, useEffect, useRef, useState } from 'react';
 
 import type { PcFeed } from '../channel/feed.js';
 import { type LoginResult, missingField } from './login.js';
+import { TechnicalLogin } from './TechnicalLogin.js';
+import type { TechnicalResult } from './technical.js';
 import { Wallpaper } from './Wallpaper.js';
 
 // La hora del local, aunque el reloj de Windows de la PC esté en otra zona.
@@ -49,15 +51,19 @@ export function LockScreen({
   feed,
   pcName,
   login,
+  technicalLogin,
 }: {
   feed: PcFeed;
   pcName: string;
   login: (username: string, password: string) => Promise<LoginResult>;
+  technicalLogin: (username: string, password: string) => Promise<TechnicalResult>;
 }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // «Usuario técnico»: el formulario del personal ocupa el lugar del login del cliente.
+  const [technical, setTechnical] = useState(false);
   const usernameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -114,85 +120,104 @@ export function LockScreen({
           )}
         </section>
 
-        <form
-          className="glass login-card"
-          aria-labelledby="t-login"
-          onSubmit={(event) => {
-            void submit(event);
-          }}
-        >
-          <div className="login-head">
-            <div className="login-icon">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="10" cy="7" r="3.5" />
-                <path d="M3.5 17c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5" />
-              </svg>
+        {technical ? (
+          <TechnicalLogin
+            online={online}
+            technicalLogin={technicalLogin}
+            onCancel={() => {
+              setTechnical(false);
+            }}
+          />
+        ) : (
+          <form
+            className="glass login-card"
+            aria-labelledby="t-login"
+            onSubmit={(event) => {
+              void submit(event);
+            }}
+          >
+            <div className="login-head">
+              <div className="login-icon">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="10" cy="7" r="3.5" />
+                  <path d="M3.5 17c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5" />
+                </svg>
+              </div>
+              <h1 id="t-login">Iniciar sesión</h1>
             </div>
-            <h1 id="t-login">Iniciar sesión</h1>
-          </div>
 
-          {error && online && (
-            <div role="alert" className="notice notice-error">
-              {error}
-            </div>
-          )}
-          {!online && (
-            <div role="status" className="notice notice-warn">
-              {offlineText}
-            </div>
-          )}
+            {error && online && (
+              <div role="alert" className="notice notice-error">
+                {error}
+              </div>
+            )}
+            {!online && (
+              <div role="status" className="notice notice-warn">
+                {offlineText}
+              </div>
+            )}
 
-          <div className="field">
-            <label htmlFor="usuario">Usuario</label>
-            <input
-              id="usuario"
-              ref={usernameRef}
-              className="input"
-              type="text"
-              autoComplete="username"
-              placeholder="Tu usuario"
-              value={username}
-              disabled={!online || busy}
-              onChange={(event) => {
-                setUsername(event.target.value);
+            <div className="field">
+              <label htmlFor="usuario">Usuario</label>
+              <input
+                id="usuario"
+                ref={usernameRef}
+                className="input"
+                type="text"
+                autoComplete="username"
+                placeholder="Tu usuario"
+                value={username}
+                disabled={!online || busy}
+                onChange={(event) => {
+                  setUsername(event.target.value);
+                }}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor="clave">Contraseña</label>
+              <input
+                id="clave"
+                ref={passwordRef}
+                className="input"
+                type="password"
+                autoComplete="current-password"
+                placeholder="Tu contraseña"
+                value={password}
+                disabled={!online || busy}
+                onChange={(event) => {
+                  setPassword(event.target.value);
+                }}
+              />
+            </div>
+
+            <button type="submit" className="btn-primary" disabled={!online || busy}>
+              {!online ? 'Esperando al servidor…' : busy ? 'Entrando…' : 'Entrar'}
+            </button>
+            <p className="login-help">
+              ¿No tienes cuenta? Pídela en el mostrador. Tu saldo y tus horas de combo te esperan en
+              cualquier PC.
+            </p>
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => {
+                setTechnical(true);
               }}
-            />
-          </div>
-          <div className="field">
-            <label htmlFor="clave">Contraseña</label>
-            <input
-              id="clave"
-              ref={passwordRef}
-              className="input"
-              type="password"
-              autoComplete="current-password"
-              placeholder="Tu contraseña"
-              value={password}
-              disabled={!online || busy}
-              onChange={(event) => {
-                setPassword(event.target.value);
-              }}
-            />
-          </div>
-
-          <button type="submit" className="btn-primary" disabled={!online || busy}>
-            {!online ? 'Esperando al servidor…' : busy ? 'Entrando…' : 'Entrar'}
-          </button>
-          <p className="login-help">
-            ¿No tienes cuenta? Pídela en el mostrador. Tu saldo y tus horas de combo te esperan en
-            cualquier PC.
-          </p>
-        </form>
+            >
+              Usuario técnico
+            </button>
+          </form>
+        )}
       </main>
 
       <footer className="lock-footer">

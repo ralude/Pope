@@ -168,4 +168,55 @@ describe('REQ-003-03/04/63: canal WebView2', () => {
     expect(channel.send({ type: 'logout' })).toBe(false);
     channel.stop();
   });
+
+  it('REQ-003-40/T38: envía el login técnico y la salida, y recibe el mantenimiento y sus errores', () => {
+    const bridge = new FakeBridge();
+    const channel = new WebViewChannel(bridge);
+    const events: ChannelEvent[] = [];
+    channel.start((event) => events.push(event));
+    bridge.receive(status('online'));
+    const requestId = '01900000-0000-7000-8000-000000000001';
+    const login = {
+      type: 'technicalLogin',
+      requestId,
+      username: 'ana',
+      password: 'secreto',
+    } as const;
+    expect(channel.send(login)).toBe(true);
+    expect(bridge.sent.at(-1)).toEqual({ version: 1, kind: 'request', request: login });
+    const exit = {
+      type: 'endMaintenance',
+      requestId,
+      maintenanceId: '01900000-0000-7000-8000-0000000000aa',
+    } as const;
+    expect(channel.send(exit)).toBe(true);
+    // Una petición con campos de más no sale del Shell.
+    expect(channel.send({ ...login, actor: 'ana' } as never)).toBe(false);
+
+    const error = {
+      type: 'technicalError',
+      requestId,
+      code: 'invalid_credentials',
+      message: 'Usuario o contraseña incorrectos',
+    };
+    bridge.receive({ version: 1, kind: 'message', elapsedSeconds: 0, message: error });
+    expect(events.at(-1)).toMatchObject({ kind: 'message', message: error });
+    const state = { type: 'maintenanceState', maintenance: null, requestId };
+    bridge.receive({ version: 1, kind: 'message', elapsedSeconds: 0, message: state });
+    expect(events.at(-1)).toMatchObject({ kind: 'message', message: state });
+    // Las órdenes y los acuses del agente no llegan a las pantallas.
+    const before = events.length;
+    bridge.receive({
+      version: 1,
+      kind: 'message',
+      elapsedSeconds: 0,
+      message: {
+        type: 'controlState',
+        context: { kind: 'free', revision: requestId },
+        serverTime: '2026-10-22T20:00:00.000Z',
+      },
+    });
+    expect(events).toHaveLength(before);
+    channel.stop();
+  });
 });

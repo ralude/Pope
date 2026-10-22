@@ -8,8 +8,18 @@ import { PauseScreen } from './session/PauseScreen.js';
 import { SessionScreen } from './session/SessionScreen.js';
 
 export function App({ channel, pcName }: { channel: PcChannel; pcName: string }) {
-  const { feed, login, listCombos, buyCombo, logout, pause, resume, closeWarning, closeEnded } =
-    usePcChannel(channel);
+  const {
+    feed,
+    login,
+    technicalLogin,
+    listCombos,
+    buyCombo,
+    logout,
+    pause,
+    resume,
+    closeWarning,
+    closeEnded,
+  } = usePcChannel(channel);
   const displayPcName = feed.pcName ?? pcName;
   // En pausa manda la pantalla de pausa, también al recargar (reinicio de la PC, REQ-002-31).
   if (
@@ -50,5 +60,7 @@ export function App({ channel, pcName }: { channel: PcChannel; pcName: string })
   if (feed.ended) {
     return <EndedScreen pcName={displayPcName} onDone={closeEnded} />;
   }
-  return <LockScreen feed={feed} pcName={displayPcName} login={login} />;
+  return (
+    <LockScreen feed={feed} pcName={displayPcName} login={login} technicalLogin={technicalLogin} />
+  );
 }

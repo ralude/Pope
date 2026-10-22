@@ -1,11 +1,12 @@
 // REQ-003-03/04/63: React solo envía peticiones UI; el agente conserva conexión y latidos.
-import {
-  nativeBridgeEventSchema,
-  nativeBridgeRequestSchema,
-  nodeToPcMessageSchema,
-} from '@pope/shared';
+import { nativeBridgeEventSchema, nativeBridgeRequestSchema } from '@pope/shared';
 
-import type { ChannelEvent, PcChannel, ShellRequest } from './channel.js';
+import {
+  type ChannelEvent,
+  type PcChannel,
+  parseShellMessage,
+  type ShellRequest,
+} from './channel.js';
 
 export interface WebViewBridge {
   postMessage(message: unknown): void;
@@ -76,12 +77,12 @@ export class WebViewChannel implements PcChannel {
     }
     // T32: el mensaje del encargado lo muestra el host en una ventana nativa, no React.
     if (envelope.kind !== 'message') return;
-    // Las pantallas existentes consumen este subconjunto. Órdenes/ACK no son notificaciones UI.
-    const message = nodeToPcMessageSchema.safeParse(envelope.message);
-    if (message.success)
+    // Las pantallas consumen el protocolo de sesión y el de mantenimiento. Órdenes/ACK no son UI.
+    const message = parseShellMessage(envelope.message);
+    if (message)
       this.emit({
         kind: 'message',
-        message: message.data,
+        message,
         elapsedSeconds: envelope.elapsedSeconds,
       });
   };

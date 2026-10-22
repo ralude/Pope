@@ -84,6 +84,8 @@ export function applyEvent(feed: PcFeed, event: ChannelEvent, now: number): PcFe
     case 'error':
       return message.requestId === undefined ? { ...feed, problem: message.message } : feed;
     case 'combos':
+    case 'maintenanceState':
+    case 'technicalError':
       // Respuesta a una petición: la recoge quien la hizo, no cambia el estado de la PC.
       return feed;
   }

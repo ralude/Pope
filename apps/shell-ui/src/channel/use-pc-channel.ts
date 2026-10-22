@@ -13,13 +13,19 @@ import {
 import { type BuyResult, buyReply, type CombosResult, combosReply } from '../session/combos.js';
 import { type LogoutResult, logoutReply } from '../session/logout.js';
 import { type PauseResult, pauseReply, RESUME_FAILED_MESSAGE } from '../session/pause.js';
-import type { PcChannel, ShellRequest } from './channel.js';
+import {
+  TECHNICAL_NO_REPLY_MESSAGE,
+  TECHNICAL_TIMEOUT_MS,
+  technicalReply,
+  type TechnicalResult,
+} from '../lock/technical.js';
+import type { PcChannel, ShellMessage, ShellRequest } from './channel.js';
 import { applyEvent, dismissEnded, dismissWarning, INITIAL_FEED, type PcFeed } from './feed.js';
 
 /** Petición enviada al nodo que aún no tiene respuesta. */
 interface Pending {
   /** Prueba si el mensaje la responde; si es así, la resuelve y devuelve `true`. */
-  answer: (message: NodeToPcMessage) => boolean;
+  answer: (message: ShellMessage) => boolean;
   /** La resuelve como fallida con ese texto. */
   fail: (text: string) => void;
   timer: ReturnType<typeof setTimeout>;
@@ -31,9 +37,19 @@ interface Failure {
   message: string;
 }
 
+/** Las respuestas de sesión solo miran el protocolo de sesión; el de mantenimiento no las toca. */
+function forSession<T>(reply: (message: NodeToPcMessage, requestId: string) => T | null) {
+  return (message: ShellMessage, requestId: string): T | null =>
+    message.type === 'maintenanceState' || message.type === 'technicalError'
+      ? null
+      : reply(message, requestId);
+}
+
 export function usePcChannel(channel: PcChannel): {
   feed: PcFeed;
   login: (username: string, password: string) => Promise<LoginResult>;
+  /** Entrada en mantenimiento con usuario y contraseña del personal (T38, REQ-003-40). */
+  technicalLogin: (username: string, password: string) => Promise<TechnicalResult>;
   /** Pide al nodo los combos a la venta (T49). */
   listCombos: () => Promise<CombosResult>;
   /** Compra un combo con el saldo (T49, REQ-001-85). */
@@ -79,7 +95,8 @@ export function usePcChannel(channel: PcChannel): {
   const request = useCallback(
     <T>(
       build: (requestId: string) => ShellRequest,
-      match: (message: NodeToPcMessage, requestId: string) => T | null,
+      match: (message: ShellMessage, requestId: string) => T | null,
+      options: { timeoutMs?: number; noReply?: string } = {},
     ) =>
       new Promise<T | Failure>((resolve) => {
         const requestId = crypto.randomUUID();
@@ -102,8 +119,8 @@ export function usePcChannel(channel: PcChannel): {
             finish({ ok: false, message: text });
           },
           timer: setTimeout(() => {
-            finish({ ok: false, message: NO_REPLY_MESSAGE });
-          }, LOGIN_TIMEOUT_MS),
+            finish({ ok: false, message: options.noReply ?? NO_REPLY_MESSAGE });
+          }, options.timeoutMs ?? LOGIN_TIMEOUT_MS),
         });
         if (!channel.send(build(requestId)))
           finish({ ok: false, message: CONNECTION_LOST_MESSAGE });
@@ -115,21 +132,35 @@ export function usePcChannel(channel: PcChannel): {
     (username: string, password: string) =>
       request(
         (requestId) => ({ type: 'login', requestId, username: username.trim(), password }),
-        loginReply,
+        forSession(loginReply),
+      ),
+    [request],
+  );
+  const technicalLogin = useCallback(
+    (username: string, password: string) =>
+      request(
+        (requestId) => ({
+          type: 'technicalLogin',
+          requestId,
+          username: username.trim(),
+          password,
+        }),
+        technicalReply,
+        { timeoutMs: TECHNICAL_TIMEOUT_MS, noReply: TECHNICAL_NO_REPLY_MESSAGE },
       ),
     [request],
   );
   const listCombos = useCallback(
-    () => request((requestId) => ({ type: 'listCombos', requestId }), combosReply),
+    () => request((requestId) => ({ type: 'listCombos', requestId }), forSession(combosReply)),
     [request],
   );
   const buyCombo = useCallback(
     (comboId: string) =>
-      request((requestId) => ({ type: 'buyCombo', requestId, comboId }), buyReply),
+      request((requestId) => ({ type: 'buyCombo', requestId, comboId }), forSession(buyReply)),
     [request],
   );
   const logout = useCallback(
-    () => request((requestId) => ({ type: 'logout', requestId }), logoutReply),
+    () => request((requestId) => ({ type: 'logout', requestId }), forSession(logoutReply)),
     [request],
   );
 
@@ -137,7 +168,7 @@ export function usePcChannel(channel: PcChannel): {
     () =>
       request(
         (requestId) => ({ type: 'pause', requestId }),
-        (m, id) => pauseReply(m, id),
+        forSession((m, id) => pauseReply(m, id)),
       ),
     [request],
   );
@@ -145,7 +176,7 @@ export function usePcChannel(channel: PcChannel): {
     () =>
       request(
         (requestId) => ({ type: 'resume', requestId }),
-        (m, id) => pauseReply(m, id, RESUME_FAILED_MESSAGE),
+        forSession((m, id) => pauseReply(m, id, RESUME_FAILED_MESSAGE)),
       ),
     [request],
   );
@@ -157,5 +188,16 @@ export function usePcChannel(channel: PcChannel): {
     setFeed(dismissEnded);
   }, []);
 
-  return { feed, login, listCombos, buyCombo, logout, pause, resume, closeWarning, closeEnded };
+  return {
+    feed,
+    login,
+    technicalLogin,
+    listCombos,
+    buyCombo,
+    logout,
+    pause,
+    resume,
+    closeWarning,
+    closeEnded,
+  };
 }

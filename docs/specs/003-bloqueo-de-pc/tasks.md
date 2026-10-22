@@ -499,7 +499,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** roles/errores, paso del ratón, controles no tapados y salida local/remota; no introducir contraseñas Windows en React ni elevar WebView2.
   - **Commit:** `feat(shell-ui): muestra el acceso y los controles técnicos`.
   - **División (2026-10-22):** se hace después de T40; queda abierta hasta probarla en la sesión real (T37). [Guía](guia-t33-t42.md#t38--formulario-y-pestaña-técnica-shell).
-  - [ ] **T38a:** enlace y formulario «Usuario técnico» en la pantalla de bloqueo.
+  - [x] **T38a:** enlace y formulario «Usuario técnico» en la pantalla de bloqueo.
   - [ ] **T38b:** pestaña «Técnico» plegada con «Terminar y bloquear», sin tiempo.
 
 - [x] **T39: Conciliación de salida técnica en el nodo**
