@@ -24,6 +24,8 @@ import { PcGateway } from './pc-gateway.js';
 import { MaintenanceExitService } from './maintenance-exit.service.js';
 import { PcMaintenanceService } from './pc-maintenance.service.js';
 import { TechnicalLoginService } from './technical-login.service.js';
+import { PcRevocationController } from './pc-revocation.controller.js';
+import { PcRevocationService } from './pc-revocation.service.js';
 import { PcWakeService } from './pc-wake.service.js';
 import { WakeOnLanSender } from './wake-on-lan.js';
 import { PcProtocolService } from './pc-protocol.service.js';
@@ -57,6 +59,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
     ComboSalesController,
     PcMapController,
     PcCommandsController,
+    PcRevocationController,
   ],
   providers: [
     PcConnections,
@@ -66,6 +69,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
     PcMapService,
     WakeOnLanSender,
     PcWakeService,
+    PcRevocationService,
     PcMaintenanceService,
     MaintenanceExitService,
     TechnicalLoginService,

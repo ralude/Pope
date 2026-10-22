@@ -106,6 +106,19 @@ export class PcGateway implements OnApplicationBootstrap, BeforeApplicationShutd
   onApplicationBootstrap(): void {
     this.unsubscribe = this.events.subscribe((committed) => {
       for (const event of committed) {
+        // T34: una revocación corta la conexión viva de esa credencial; la PC se bloquea (REQ-003-11).
+        if (event.type === 'pc.credential_revoked') {
+          for (const connection of this.live.values()) {
+            if (connection.authentication.credentialId !== event.payload.credentialId) continue;
+            connection.send({
+              type: 'pcAuthenticationError',
+              code: 'pc_credential_revoked',
+              message: 'Credencial de PC revocada',
+            });
+            connection.close(1008, 'Credencial de PC revocada');
+          }
+          continue;
+        }
         if (event.type !== 'pc.registered' || !event.payload.recovery) continue;
         for (const connection of this.live.values()) {
           if (

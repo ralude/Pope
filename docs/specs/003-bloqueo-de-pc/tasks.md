@@ -459,7 +459,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Diseño aprobado (mantenedor, 2026-10-22):** [diseno-t34.md](diseno-t34.md). Apps abiertas y audio sin tocar durante la retención; el uso sin red no se cobra; no se revoca con mantenimiento u orden en curso. Se hace después de T42. Pasos en la [guía](guia-t33-t42.md#t34--revocación-conservando-la-sesión).
   - [x] **T34a:** contratos de revocar/continuar, eventos y `state: held`.
   - [x] **T34b:** tabla `session_holds`.
-  - [ ] **T34c:** `POST /pcs/:pcId/revoke` y cierre de la conexión viva.
+  - [x] **T34c:** `POST /pcs/:pcId/revoke` y cierre de la conexión viva.
   - [ ] **T34d:** sin cobro, latidos ni vencimiento de pausa durante la retención.
   - [ ] **T34e:** revincular con código de recuperación sin soltar la retención.
   - [ ] **T34f:** `POST /pcs/:pcId/continue` y cierre de la sesión retenida.
