@@ -181,6 +181,7 @@ describe('mapa de PCs (T39)', () => {
       free: 1,
       ending: 1,
       offline: 1,
+      maintenance: 0,
       pauseBilling: 0,
       occupied: 3,
       total: 5,
@@ -284,5 +285,41 @@ describe('detalle de una PC en pausa (T13, REQ-002-13, CA-002-08)', () => {
       'Pausas usadas: 1 de 3 en la sesión · 2 de 5 hoy',
     );
     expect(pausesUsedLine(used, null)).toBe('Pausas usadas: 1 en la sesión · 2 hoy');
+  });
+});
+
+describe('mantenimiento y encendido en el mapa (T41, REQ-003-21, REQ-003-22)', () => {
+  const maintenance = {
+    id: '01900000-0000-7000-8000-0000000000aa',
+    actorName: 'Luis',
+    source: 'panel' as const,
+    startedAt: '2026-09-28T22:00:00.000Z',
+  };
+  const now = new Date('2026-09-28T22:10:00Z');
+
+  it('en mantenimiento va en rojo, también sin conexión, y cuenta en su propia fila de la leyenda', () => {
+    expect(tileKind(pc(1, { maintenance }))).toBe('maintenance');
+    expect(tileKind(pc(1, { maintenance, connected: false }))).toBe('maintenance');
+    const legend = legendOf([pc(1, { maintenance }), pc(2), pc(3, { connected: false })], now);
+    expect(legend).toMatchObject({ maintenance: 1, free: 1, offline: 1, occupied: 0, total: 3 });
+  });
+
+  it('una PC apagada que se está encendiendo cuenta atrás y luego avisa; sin encendido, nada', () => {
+    const wake = (deadline: string) => ({
+      requestId: '01900000-0000-7000-8000-000000000050',
+      requestedAt: '2026-09-28T22:08:00.000Z',
+      deadline,
+    });
+    expect(tileSub(pc(1, { connected: false }), now)).toBe('');
+    expect(tileSub(pc(1, { connected: false, wake: wake('2026-09-28T22:11:05.000Z') }), now)).toBe(
+      '1:05',
+    );
+    expect(tileSub(pc(1, { connected: false, wake: wake('2026-09-28T22:09:00.000Z') }), now)).toBe(
+      'Sin respuesta',
+    );
+    // Si conectó, ya no hay nada que contar.
+    expect(tileSub(pc(1, { connected: true, wake: wake('2026-09-28T22:11:05.000Z') }), now)).toBe(
+      '',
+    );
   });
 });

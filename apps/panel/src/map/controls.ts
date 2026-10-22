@@ -16,7 +16,9 @@ import {
 } from '@pope/shared';
 
 import type { ApiClient } from '../api/client.js';
-import { liveRemaining } from './model.js';
+import { countdown, liveRemaining } from './model.js';
+
+export { countdown };
 
 export type PcAction =
   'wake' | 'lock' | 'message' | 'restart' | 'powerOff' | 'startMaintenance' | 'endMaintenance';
@@ -273,12 +275,6 @@ export function wakeStatus(item: PcMapItem, now: Date): WakeStatus {
   if (!item.wake) return null;
   const left = Math.ceil((Date.parse(item.wake.deadline) - now.getTime()) / 1000);
   return left > 0 ? { kind: 'starting', secondsLeft: left } : { kind: 'overdue' };
-}
-
-/** `1:05` para la cuenta atrás del encendido. */
-export function countdown(totalSeconds: number): string {
-  const minutes = Math.floor(totalSeconds / 60);
-  return `${String(minutes)}:${String(totalSeconds % 60).padStart(2, '0')}`;
 }
 
 /** Texto de la baldosa y del detalle durante el encendido; sin diagnosticar avería. */

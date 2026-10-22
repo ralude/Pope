@@ -82,6 +82,11 @@
   color: #ffffff;
 }
 
+.tile-maintenance {
+  background: var(--red);
+  color: #ffffff;
+}
+
 .tile-offline {
   background: var(--off);
   border-color: var(--off-line);
@@ -152,6 +157,10 @@
   background: var(--green);
 }
 
+.swatch-maintenance {
+  background: var(--red);
+}
+
 .swatch-offline {
   background: var(--off);
   border: 1px solid var(--off-line);
@@ -171,6 +180,10 @@
 
 .bar-free {
   background: var(--green-bar);
+}
+
+.bar-maintenance {
+  background: var(--red);
 }
 
 .bar-offline {
@@ -245,12 +258,17 @@
   color: var(--off-text);
 }
 
+.badge-maintenance {
+  background: var(--red);
+  color: #ffffff;
+}
+
 .badge-ending {
   background: var(--red);
   color: #ffffff;
 }
 
-/* Control de la PC (spec 003): de momento, desactivado. */
+/* Control de la PC (spec 003, T41). */
 .pc-controls {
   display: flex;
   flex-direction: column;
@@ -271,6 +289,22 @@
 /* «Iniciar como administrador» ocupa la fila entera. */
 .pc-controls-grid .btn:last-child {
   grid-column: 1 / -1;
+}
+
+/* Resultado de la última orden y aviso de encendido, bajo los botones. */
+.pc-controls-status {
+  margin: 0;
+  font-size: 13px;
+}
+.pc-controls-status.ok {
+  color: var(--soft);
+}
+
+/* Área de texto del mensaje al cliente. */
+.message-text {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
 }
 
 /* La pausa en el detalle de la PC (T13; diseño aprobado, T11). */

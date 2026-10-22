@@ -521,7 +521,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T40a:** diario protegido de salidas (16 como mucho).
   - [x] **T40b:** terminar y bloquear sin red, reenvío hasta el ACK.
 
-- [ ] **T41: Controles y mantenimiento en el mapa**
+- [x] **T41: Controles y mantenimiento en el mapa**
   - **Cubre:** REQ-003-20, REQ-003-21, REQ-003-22, REQ-003-43; CA-003-07.
   - **Hacer:** activar controles existentes en `apps/panel`, resultados/errores/confirmaciones y rojo técnico con actor; mantener gris, verde, celeste, ámbar y morado según estado aprobado.
   - **Verificar:** permisos, doble clic, estado cambiado, pérdida de tiempo temporal y desconexión; comprobación manual del mapa y tests de la lógica/ApiClient.
@@ -529,7 +529,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División (2026-10-22):** «Bloquear» pide confirmación siempre (mantenedor). [Guía](guia-t33-t42.md#t41--controles-y-mantenimiento-en-el-mapa-panel).
   - [x] **T41a:** `maintenance`, `canWake` y `order` en el mapa; `GET /pcs/:pcId/commands/:commandId`.
   - [x] **T41b:** lógica de acciones, confirmaciones, errores y encendido, con tests.
-  - [ ] **T41c:** controles, diálogos, baldosa roja y aviso de encendido; prueba manual.
+  - [x] **T41c:** controles, diálogos, baldosa roja y aviso de encendido; prueba manual.
 
 - [ ] **T42: Registro de PCs y alertas técnicas en panel**
   - **Cubre:** REQ-003-10, REQ-003-45.

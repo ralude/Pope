@@ -9,18 +9,43 @@ import {
   formatDuration,
   formatLocalTime,
   formatMoney,
+  newId,
   type PcMap,
   type PcMapItem,
   type PcMapSession,
   seconds,
   settingsSchema,
+  STAFF_MESSAGE_MAX_CHARACTERS,
 } from '@pope/shared';
-import { type ReactNode, type SyntheticEvent, useCallback, useEffect, useState } from 'react';
+import {
+  type ReactNode,
+  type SyntheticEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { ApiError } from '../api/client.js';
 import { ComboSaleDialog } from '../customers/ComboSaleDialog.js';
 import { RechargeDialog } from '../customers/RechargeDialog.js';
 import { useNodeNow, usePcMapFeed } from '../map/channel.js';
+import {
+  type ActionState,
+  availableActions,
+  buildRequest,
+  commandErrorMessage,
+  type Confirmation,
+  confirmationFor,
+  getCommand,
+  getControl,
+  issueCommand,
+  outcomeOf,
+  type PcAction,
+  wakePc,
+  wakeStatus,
+  wakeText,
+} from '../map/controls.js';
 import {
   type Cell,
   isEnding,
@@ -61,6 +86,7 @@ const KIND_LABEL: Record<TileKind, string> = {
   paused: 'En pausa',
   free: 'Libre',
   offline: 'Sin conexión',
+  maintenance: 'Mantenimiento',
 };
 
 type Mode = 'operate' | 'organize';
@@ -347,30 +373,240 @@ function OrganizePanel({
   );
 }
 
+/** Nota de una PC apagada: el encendido en curso, o el aviso de que no conectó (REQ-003-22). */
+function OfflineNote({ pc, now }: { pc: PcMapItem; now: Date }) {
+  const wake = wakeStatus(pc, now);
+  return (
+    <p className="detail-note" style={{ margin: 0 }} role={wake ? 'status' : undefined}>
+      {wake
+        ? wakeText(wake)
+        : 'La PC no está conectada al nodo. Revisa que esté encendida y con el cable de red puesto.'}
+    </p>
+  );
+}
+
+/** Orden en seguimiento: su texto y si ya terminó. */
+interface Progress {
+  text: string;
+  ok: boolean;
+  done: boolean;
+}
+
+/** Lo que se espera como mucho el resultado de una orden: vence a los 30 s (plan T02b). */
+const FOLLOW_UP_MS = 40_000;
+
 /**
- * Control de la PC desde el panel (spec 003: REQ-003-20, REQ-003-22, REQ-003-43). Necesita el
- * agente en cada PC, así que por ahora se ve desactivado (decisión del mantenedor).
+ * Control de la PC desde el panel (spec 003: REQ-003-20, REQ-003-22, REQ-003-43). El nodo valida
+ * rol, estado y confirmación de nuevo: aquí solo se ofrece lo que tiene sentido y se sigue el
+ * resultado hasta el efecto, sin afirmar nunca que la PC se apagó.
  */
-function PcControls() {
-  const actions = ['Encender', 'Reiniciar', 'Apagar', 'Iniciar como administrador'];
+function PcControls({ pc, now }: { pc: PcMapItem; now: Date }) {
+  const staff = useStaff();
+  const { api } = useSession();
+  const [confirming, setConfirming] = useState<{ action: PcAction; text: Confirmation } | null>(
+    null,
+  );
+  const [writing, setWriting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const mounted = useRef(true);
+  // Función aparte: tras un `await` el compilador no sabe que el valor pudo cambiar.
+  const isMounted = () => mounted.current;
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  const actions = availableActions(pc, staff.role);
+
+  /** Pide la orden con el contexto vigente y sigue su resultado cada segundo. */
+  const run = async (action: PcAction, text = '') => {
+    setBusy(true);
+    setProgress(null);
+    try {
+      if (action === 'wake') {
+        await wakePc(api, pc.id, newId());
+        // El aviso de los 2 min lo da el mapa; aquí solo se confirma que se envió.
+        setProgress({ text: 'Paquete de encendido enviado.', ok: true, done: true });
+        return;
+      }
+      const { context } = await getControl(api, pc.id);
+      const request = buildRequest(action, context, newId(), text);
+      if (!request) {
+        setProgress({ text: commandErrorMessage('stale_context', ''), ok: false, done: true });
+        return;
+      }
+      let response = await issueCommand(api, pc.id, request);
+      const limit = Date.now() + FOLLOW_UP_MS;
+      for (;;) {
+        const outcome = outcomeOf(response);
+        if (!isMounted()) return;
+        setProgress(outcome);
+        if (outcome.done || Date.now() > limit) return;
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        if (!isMounted()) return;
+        response = await getCommand(api, pc.id, response.command.id);
+      }
+    } catch (failure) {
+      if (!isMounted()) return;
+      const message =
+        failure instanceof ApiError
+          ? commandErrorMessage(failure.code, failure.message)
+          : String(failure);
+      setProgress({ text: message, ok: false, done: true });
+    } finally {
+      if (isMounted()) setBusy(false);
+    }
+  };
+
+  const press = (state: ActionState) => {
+    if (state.action === 'message') {
+      setWriting(true);
+      return;
+    }
+    const confirmation = confirmationFor(state.action, pc, now);
+    if (confirmation) {
+      setConfirming({ action: state.action, text: confirmation });
+      return;
+    }
+    void run(state.action);
+  };
+
   return (
     <div className="pc-controls" role="group" aria-label="Control de la PC">
       <div className="detail-label">Control de la PC</div>
       <div className="pc-controls-grid">
-        {actions.map((action) => (
+        {actions.map((state) => (
           <button
-            key={action}
+            key={state.action}
             type="button"
             className="btn btn-ghost"
-            disabled
-            title="Próximamente: necesita el programa de Pope en la PC"
+            disabled={!state.enabled || busy}
+            title={state.reason ?? undefined}
+            onClick={() => {
+              press(state);
+            }}
           >
-            {action}
+            {state.label}
           </button>
         ))}
       </div>
-      <div className="field-hint">Próximamente: necesitan el programa de Pope en cada PC.</div>
+      {progress && (
+        <p
+          role={progress.ok ? 'status' : 'alert'}
+          className={progress.ok ? 'pc-controls-status ok' : 'pc-controls-status alert-error'}
+        >
+          {progress.text}
+        </p>
+      )}
+      {confirming && (
+        <ConfirmDialog
+          confirmation={confirming.text}
+          onClose={() => {
+            setConfirming(null);
+          }}
+          onConfirm={() => {
+            const { action } = confirming;
+            setConfirming(null);
+            void run(action);
+          }}
+        />
+      )}
+      {writing && (
+        <MessageDialog
+          pcName={pc.name}
+          onClose={() => {
+            setWriting(false);
+          }}
+          onSend={(text) => {
+            setWriting(false);
+            void run('message', text);
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function ConfirmDialog({
+  confirmation,
+  onClose,
+  onConfirm,
+}: {
+  confirmation: Confirmation;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <Dialog
+      title={confirmation.title}
+      onClose={onClose}
+      onSubmit={(event) => {
+        event.preventDefault();
+        onConfirm();
+      }}
+    >
+      <p style={{ margin: 0 }}>{confirmation.body}</p>
+      <div className="dialog-actions">
+        <button type="button" className="btn btn-ghost" onClick={onClose}>
+          Cancelar
+        </button>
+        <button type="submit" className="btn btn-danger" autoFocus>
+          {confirmation.confirm}
+        </button>
+      </div>
+    </Dialog>
+  );
+}
+
+/** Mensaje del encargado a la PC: texto plano, hasta 1 000 caracteres (REQ-003-20). */
+function MessageDialog({
+  pcName,
+  onClose,
+  onSend,
+}: {
+  pcName: string;
+  onClose: () => void;
+  onSend: (text: string) => void;
+}) {
+  const [text, setText] = useState('');
+  const empty = text.trim() === '';
+  return (
+    <Dialog
+      title={`Mensaje para la ${pcName}`}
+      onClose={onClose}
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!empty) onSend(text.trim());
+      }}
+    >
+      <label className="detail-label" htmlFor="mensaje-pc">
+        Se muestra 5 segundos en la pantalla del cliente
+      </label>
+      <textarea
+        id="mensaje-pc"
+        className="input message-text"
+        maxLength={STAFF_MESSAGE_MAX_CHARACTERS}
+        value={text}
+        autoFocus
+        onChange={(event) => {
+          setText(event.target.value);
+        }}
+      />
+      <span className="muted num" style={{ fontSize: 12 }}>
+        {text.length}/{STAFF_MESSAGE_MAX_CHARACTERS}
+      </span>
+      <div className="dialog-actions">
+        <button type="button" className="btn btn-ghost" onClick={onClose}>
+          Cancelar
+        </button>
+        <button type="submit" className="btn btn-primary" disabled={empty}>
+          Enviar
+        </button>
+      </div>
+    </Dialog>
   );
 }
 
@@ -391,6 +627,7 @@ function LegendCard({ legend }: { legend: Legend }) {
       swatch: 'bar-ending',
       style: { height: 5, borderRadius: 3 },
     },
+    { label: KIND_LABEL.maintenance, count: legend.maintenance, swatch: 'swatch-maintenance' },
     { label: KIND_LABEL.offline, count: legend.offline, swatch: 'swatch-offline' },
   ];
   return (
@@ -494,12 +731,16 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
             : 'Libre y conectada. El cliente puede entrar con su cuenta desde la PC.'}
         </p>
       )}
-      {kind === 'offline' && (
+      {kind === 'offline' && <OfflineNote pc={pc} now={now} />}
+      {pc.maintenance && (
         <p className="detail-note" style={{ margin: 0 }}>
-          La PC no está conectada al nodo. Revisa que esté encendida y con el cable de red puesto.
+          En mantenimiento por {pc.maintenance.actorName} desde las{' '}
+          {formatLocalTime(new Date(pc.maintenance.startedAt))} (
+          {pc.maintenance.source === 'panel' ? 'iniciado desde el panel' : 'iniciado en la PC'}).
+          {!pc.connected && ' La PC no está conectada al nodo: el mantenimiento continúa.'}
         </p>
       )}
-      {canOperate && <PcControls />}
+      {canOperate && <PcControls pc={pc} now={now} />}
 
       <div style={{ flexGrow: 1 }} />
       {session?.pause && canOperate && <ResumeButton sessionId={session.sessionId} />}

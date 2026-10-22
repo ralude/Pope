@@ -18,13 +18,16 @@ import {
 export const MAP_COLUMNS = PC_MAP_COLUMNS;
 
 /** Estado que pinta la baldosa. */
-export type TileKind = 'account' | 'temporary' | 'paused' | 'free' | 'offline';
+export type TileKind = 'account' | 'temporary' | 'paused' | 'free' | 'offline' | 'maintenance';
 
 /**
- * Con sesión manda la sesión, aunque la PC esté desconectada: sigue abierta durante el tiempo
- * de gracia (REQ-001-27). Una sesión en pausa va en morado (REQ-002-14).
+ * En mantenimiento va en rojo (REQ-003-21), aunque la PC pierda la conexión: el modo técnico
+ * continúa sin red (REQ-003-44). Con sesión manda la sesión, aunque la PC esté desconectada:
+ * sigue abierta durante el tiempo de gracia (REQ-001-27). Una sesión en pausa va en morado
+ * (REQ-002-14).
  */
 export function tileKind(pc: PcMapItem): TileKind {
+  if (pc.maintenance) return 'maintenance';
   if (pc.session) {
     if (pc.session.pause) return 'paused';
     return pc.session.kind === 'account' ? 'account' : 'temporary';
@@ -80,9 +83,20 @@ export function pauseMinutes(totalSeconds: number): string {
  * Texto bajo la baldosa: el restante de la sesión (`1:58`); en pausa, lo que queda de pausa
  * (`12 min`), salvo si ya cobra, que vuelve a ser el restante, porque baja.
  */
+/** `1:05` para la cuenta atrás del encendido (minutos y segundos). */
+export function countdown(totalSeconds: number): string {
+  const minutes = Math.floor(totalSeconds / 60);
+  return `${String(minutes)}:${String(totalSeconds % 60).padStart(2, '0')}`;
+}
+
 export function tileSub(pc: PcMapItem, now: Date): string {
   const session = pc.session;
-  if (!session) return '';
+  if (!session) {
+    // Encendiendo por Wake-on-LAN (REQ-003-22): cuenta atrás de 2 min y, después, el aviso.
+    if (!pc.wake || pc.connected) return '';
+    const left = Math.ceil((Date.parse(pc.wake.deadline) - now.getTime()) / 1000);
+    return left > 0 ? countdown(left) : 'Sin respuesta';
+  }
   if (onHold(session)) return pauseMinutes(pauseLeft(session, now));
   return shortDuration(liveRemaining(session, pc.connected, now));
 }
@@ -276,6 +290,7 @@ export function legendOf(pcs: readonly PcMapItem[], now: Date): Legend {
     paused: 0,
     free: 0,
     offline: 0,
+    maintenance: 0,
     ending: 0,
     pauseBilling: 0,
     occupied: 0,

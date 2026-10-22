@@ -671,3 +671,16 @@ sigue **Propuesto**, sin prototipo T10 implementado ni prueba de elevación real
 - No probado: juegos DirectX a pantalla completa exclusiva (puede no verse y solo sonar,
   T56), la pausa (mismo camino que el bloqueo, con el sonido silenciado) y el nodo NestJS
   real en la PC del local.
+
+### T41 · controles y mantenimiento en el mapa (2026-10-22)
+
+- Nodo real en PostgreSQL temporal (`tmp/contracts003-pg`, puerto 55432, base `pope_manual`) con
+  tres PCs del simulador conectadas, una con mantenimiento abierto y otra con un encendido
+  pendiente, insertados en la base. `GET /pcs/map` devolvió `connected`, `canWake`,
+  `maintenance` (quién lo abrió) y `wake` (plazo) como espera el panel; `GET
+  /pcs/:pcId/commands/:commandId` existe tras compilar.
+- **No verificado visualmente:** la extensión de Chrome no estaba conectada, así que no se vio
+  la pantalla (baldosa roja, leyenda, botones, diálogos de confirmación y de mensaje, cuenta
+  atrás del encendido). Queda para la revisión manual del mantenedor, junto con doble clic,
+  cambio de estado entre abrir y confirmar, y dueño en solo lectura.
+- La lógica está cubierta por 23 tests de `controls.ts` y 2 de `model.ts` (135 del panel).
