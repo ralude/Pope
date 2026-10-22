@@ -103,6 +103,7 @@ describe('PCs', () => {
     col: null,
     connected: true,
     session: null,
+    wake: null,
     ...over,
   });
 

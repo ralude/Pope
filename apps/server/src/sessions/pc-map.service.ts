@@ -10,13 +10,21 @@ import {
   seconds,
   SECONDS_PER_MINUTE,
 } from '@pope/shared';
-import { asc, eq, inArray, sql } from 'drizzle-orm';
+import { asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import { DATABASE, type Database } from '../db/database.js';
-import { customerBalances, customers, pcs, sessions, sessionTopups } from '../db/schema.js';
+import {
+  customerBalances,
+  customers,
+  pcControlStates,
+  pcs,
+  sessions,
+  sessionTopups,
+} from '../db/schema.js';
 import { pausesOfSessions } from './pause-queries.js';
 import { PcConnections } from './pc-connections.js';
+import { wakeOf } from './pc-wake.service.js';
 import {
   accountBalances,
   actorName,
@@ -93,6 +101,18 @@ export class PcMapService {
       );
     }
 
+    const wakes = await this.db
+      .select({
+        pcId: pcControlStates.pcId,
+        id: pcControlStates.wakeRequestId,
+        at: pcControlStates.wakeRequestedAt,
+      })
+      .from(pcControlStates)
+      .where(isNotNull(pcControlStates.wakeRequestId));
+    const wakeByPc = new Map(
+      wakes.flatMap(({ pcId, id, at }) => (id && at ? [[pcId, wakeOf(id, at)] as const] : [])),
+    );
+
     const items: PcMapItem[] = pcRows.map((pc) => ({
       id: pc.id,
       name: pc.name,
@@ -100,6 +120,7 @@ export class PcMapService {
       col: pc.mapCol,
       connected: this.connections.isConnected(pc.id),
       session: byPc.get(pc.id) ?? null,
+      wake: wakeByPc.get(pc.id) ?? null,
     }));
     return { pcs: items, at: this.clock.now().toISOString() };
   }

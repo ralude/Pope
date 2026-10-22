@@ -436,7 +436,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T32b:** el agente valida el mensaje con su contexto, lo pasa al host y responde `applied` cuando el host confirma que lo mostró; ventana nativa con sonido, 5 s, sin foco ni bloquear la entrada, en el escritorio activo (uso o bloqueo). Hecho (2026-10-22): en el escritorio de uso lo muestra el host y en el de bloqueo su hijo, que lo confirma por el padre; la confirmación la crea solo el host (la de React se descarta) y nunca llega al nodo. Sin host, `pc_unavailable`; sin confirmación en 10 s, `native_failure`. La ventana se pinta entera antes de confirmar (una primera prueba vio el título en blanco). Texto en etiquetas, nunca HTML. 4 tests nuevos (425 nativos).
   - [x] **T32c:** ensayo real: foco y entrada intactos, duración, texto hostil como texto plano y descarte si cambia la sesión. Hecho (2026-10-22): `--message-proof` correcto cuatro veces en el Windows 11 de desarrollo; visible en 61 ms, 5 s en uso y en bloqueo, foco y entrada intactos, texto hostil literal y mensaje de otra sesión descartado (`stale_context`). Sonido oído por el mantenedor. Ver [mediciones](mediciones.md). Pendiente: revisión del diseño por el mantenedor y juegos exclusivos (T56).
 
-- [ ] **T33: Wake-on-LAN y aviso de dos minutos**
+- [x] **T33: Wake-on-LAN y aviso de dos minutos**
   - **Cubre:** REQ-003-22; CA-003-06.
   - **Hacer:** enviar paquete mágico desde el nodo a la NIC/MAC configurada; registrar actor y observar conexión, avisar a los 120 s y retirar aviso si conecta después.
   - **Verificar:** paquete/MAC correctos, dueño rechazado, temporizadores acotados y llegada tardía; no diagnosticar avería ni confirmar arranque por enviar UDP.
@@ -444,7 +444,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **División (2026-10-22):** pasos, contratos y tests en la [guía T33–T42](guia-t33-t42.md#t33--wake-on-lan-y-aviso-de-dos-minutos). Aviso guardado en el nodo hasta que la PC conecte o se pulse otra vez Encender (mantenedor).
   - [x] **T33a:** contrato `pc-wake.ts`, evento `pc.wake_requested` y columnas de la petición en `pc_control_states`.
   - [x] **T33b:** `WakeOnLanSender` (3 copias UDP, `POPE_WOL_ADDRESS`/`POPE_WOL_PORT`), falso para los tests y captura local.
-  - [ ] **T33c:** `POST /pcs/:pcId/wake`, limpieza al conectar y `wake` en el mapa.
+  - [x] **T33c:** `POST /pcs/:pcId/wake`, limpieza al conectar y `wake` en el mapa.
 
 - [ ] **T34: Revocación conservando la sesión**
   - **Cubre:** REQ-003-11, REQ-003-63; REQ-002-33, CA-002-09.

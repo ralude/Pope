@@ -51,6 +51,7 @@ const pc = (n: number, over: Partial<PcMapItem> = {}): PcMapItem => ({
   col: null,
   connected: true,
   session: null,
+  wake: null,
   ...over,
 });
 

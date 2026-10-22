@@ -5,6 +5,7 @@ import { exchangeRateStatusSchema } from './exchange-rate.js';
 import { microsSchema } from './money.js';
 import { pausesUsedSchema, sessionPauseSchema } from './pause.js';
 import { idSchema, sessionKindSchema, utcInstantSchema } from './session.js';
+import { pcWakeSchema } from './pc-wake.js';
 
 const nonNegativeSeconds = z.int().nonnegative().brand<'Seconds'>();
 
@@ -107,6 +108,8 @@ export const pcMapItemSchema = z.object({
   /** La PC tiene abierto el canal con el nodo. */
   connected: z.boolean(),
   session: pcMapSessionSchema.nullable(),
+  /** Encendido pedido y aún sin conexión de la PC; el panel avisa al pasar `deadline` (T33). */
+  wake: pcWakeSchema.nullable(),
 });
 export type PcMapItem = z.infer<typeof pcMapItemSchema>;
 

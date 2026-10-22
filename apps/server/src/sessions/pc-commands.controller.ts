@@ -8,12 +8,19 @@ import {
   ParseUUIDPipe,
   Post,
 } from '@nestjs/common';
-import { type PcCommandRequest, pcCommandRequestSchema, type StaffProfile } from '@pope/shared';
+import {
+  type PcCommandRequest,
+  pcCommandRequestSchema,
+  type PcWakeRequest,
+  pcWakeRequestSchema,
+  type StaffProfile,
+} from '@pope/shared';
 
 import { CurrentStaff, Roles } from '../auth/decorators.js';
 import { ZodValidationPipe } from '../common/zod-validation.pipe.js';
 import { PcCommandRequestsService } from './pc-command-requests.service.js';
 import { PcCommandException, PcCommandsService } from './pc-commands.service.js';
+import { PcWakeService } from './pc-wake.service.js';
 
 /** Una petición que no cumple el contrato responde con el error de órdenes (plan T02b). */
 class CommandRequestPipe extends ZodValidationPipe<typeof pcCommandRequestSchema> {
@@ -48,6 +55,7 @@ export class PcCommandsController {
   constructor(
     private readonly commands: PcCommandsService,
     private readonly requests: PcCommandRequestsService,
+    private readonly wakes: PcWakeService,
   ) {}
 
   @Get('control')
@@ -65,6 +73,22 @@ export class PcCommandsController {
     @CurrentStaff() member: StaffProfile,
   ) {
     return this.requests.issue(pcId, body, {
+      kind: 'staff',
+      staffId: member.id,
+      name: member.displayName,
+    });
+  }
+
+  /** Encender por Wake-on-LAN (REQ-003-22): el nodo envía el paquete, no hay orden a la PC. */
+  @Post('wake')
+  @HttpCode(200)
+  @Roles('encargado', 'administrador')
+  wake(
+    @Param('pcId', ParseUUIDPipe) pcId: string,
+    @Body(new ZodValidationPipe(pcWakeRequestSchema)) body: PcWakeRequest,
+    @CurrentStaff() member: StaffProfile,
+  ) {
+    return this.wakes.wake(pcId, body, {
       kind: 'staff',
       staffId: member.id,
       name: member.displayName,

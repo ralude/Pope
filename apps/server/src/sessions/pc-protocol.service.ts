@@ -15,6 +15,7 @@ import { DATABASE, type Database } from '../db/database.js';
 import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
 import { PcCommandsService } from './pc-commands.service.js';
+import { PcWakeService } from './pc-wake.service.js';
 import { PcControlService } from './pc-control.service.js';
 import { PausesService } from './pauses.service.js';
 import { customerInactiveMessage, PcRequestRefused } from './session-state.js';
@@ -69,6 +70,7 @@ export class PcProtocolService {
     private readonly authentication: PcAuthenticationService,
     private readonly control: PcControlService,
     private readonly commands: PcCommandsService,
+    private readonly wakes: PcWakeService,
     @Inject(DATABASE) private readonly db: Database,
   ) {}
 
@@ -155,6 +157,8 @@ export class PcProtocolService {
       connection.close(1008, 'hello repetido');
       return;
     }
+    // Antes de registrar la conexión: así el mapa que provoca ya no trae el aviso de encendido.
+    await this.wakes.connected(pc.id);
     this.connections.register(pc, connection);
     if (message.recoveryState === 'known') await this.sessions.reconcile(pc.id, message);
     else this.sessions.touch(pc.id);
