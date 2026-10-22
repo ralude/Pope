@@ -461,7 +461,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T34b:** tabla `session_holds`.
   - [x] **T34c:** `POST /pcs/:pcId/revoke` y cierre de la conexión viva.
   - [x] **T34d:** sin cobro, latidos ni vencimiento de pausa durante la retención.
-  - [ ] **T34e:** revincular con código de recuperación sin soltar la retención.
+  - [x] **T34e:** revincular con código de recuperación sin soltar la retención.
   - [ ] **T34f:** `POST /pcs/:pcId/continue` y cierre de la sesión retenida.
   - [ ] **T34g:** agente y host conservan la sesión retenida.
   - [ ] **T34h:** pantalla de PC retenida en el Shell.

@@ -19,8 +19,10 @@ import {
   customers,
   pcCommands,
   pcControlStates,
+  pcCredentials,
   pcMaintenances,
   pcs,
+  sessionHolds,
   sessions,
   sessionTopups,
 } from '../db/schema.js';
@@ -152,6 +154,33 @@ export class PcMapService {
         .map((row) => [row.pcId, { id: row.id, kind: row.action.kind, status: row.status }]),
     );
 
+    // Sesiones retenidas por revocación y si su PC ya tiene una credencial vigente posterior.
+    const holds = await this.db
+      .select({
+        pcId: sessionHolds.pcId,
+        sessionId: sessionHolds.sessionId,
+        startedAt: sessionHolds.startedAt,
+        startedBy: sessionHolds.startedBy,
+      })
+      .from(sessionHolds)
+      .where(isNull(sessionHolds.endedAt));
+    const credentials = await this.db
+      .select({ pcId: pcCredentials.pcId })
+      .from(pcCredentials)
+      .where(isNull(pcCredentials.revokedAt));
+    const holdByPc = new Map(
+      holds.map((hold) => [
+        hold.pcId,
+        {
+          sessionId: hold.sessionId,
+          since: hold.startedAt.toISOString(),
+          byName: actorName(hold.startedBy),
+          // Con la retención abierta la credencial anterior está revocada: una vigente es la nueva.
+          relinked: credentials.some((credential) => credential.pcId === hold.pcId),
+        },
+      ]),
+    );
+
     const items: PcMapItem[] = pcRows.map((pc) => ({
       id: pc.id,
       name: pc.name,
@@ -162,6 +191,7 @@ export class PcMapService {
       wake: wakeByPc.get(pc.id) ?? null,
       maintenance: maintenanceByPc.get(pc.id) ?? null,
       canWake: pc.macAddress !== null,
+      hold: holdByPc.get(pc.id) ?? null,
       order: orderByPc.get(pc.id) ?? null,
     }));
     return { pcs: items, at: this.clock.now().toISOString() };

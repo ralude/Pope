@@ -15,7 +15,7 @@ import {
   type PcRegistrationRequest,
   type PcRegistrationResponse,
 } from '@pope/shared';
-import { and, eq, isNull, isNotNull, sql } from 'drizzle-orm';
+import { and, eq, isNull, isNotNull, notExists, sql } from 'drizzle-orm';
 
 import { Clock } from '../common/clock.js';
 import {
@@ -24,6 +24,7 @@ import {
   pcInstallationCodes,
   pcMaintenances,
   pcs,
+  sessionHolds,
   sessions,
 } from '../db/schema.js';
 import { EventsService, type Emit, type Transaction } from '../events/events.service.js';
@@ -152,10 +153,23 @@ export class PcRegistrationService {
       .where(eq(pcs.id, id))
       .for('update');
     if (!pc) throw new PcRegistrationException('unknown_pc', 'PC desconocida', 404);
+    // T34: una PC con una sesión retenida por revocación se puede revincular (ADR-0020); con una
+    // sesión normal, no. La sesión y su retención se conservan al sustituir la credencial.
     const [session] = await tx
       .select({ id: sessions.id })
       .from(sessions)
-      .where(and(eq(sessions.pcId, id), eq(sessions.status, 'active')))
+      .where(
+        and(
+          eq(sessions.pcId, id),
+          eq(sessions.status, 'active'),
+          notExists(
+            tx
+              .select({ id: sessionHolds.id })
+              .from(sessionHolds)
+              .where(and(eq(sessionHolds.sessionId, sessions.id), isNull(sessionHolds.endedAt))),
+          ),
+        ),
+      )
       .limit(1);
     const [maintenance] = await tx
       .select({ id: pcMaintenances.id })

@@ -14,6 +14,11 @@ import { testPcCredentials } from './pc-credentials.js';
 
 const credentialsByUrl = new Map<string, Map<string, string>>();
 
+/** Cambia la credencial con la que las PCs de test conectan (p. ej. tras revincular una PC). */
+export function useCredential(url: string, pcId: string, credential: string): void {
+  credentialsByUrl.get(url)?.set(pcId, credential);
+}
+
 /** Pone a escuchar la app de test en un puerto libre y devuelve la URL del canal de PCs. */
 export async function listenForPcs(testApp: TestApp): Promise<string> {
   await testApp.app.listen(0, '127.0.0.1');

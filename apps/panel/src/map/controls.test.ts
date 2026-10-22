@@ -56,6 +56,7 @@ const pc = (over: Partial<PcMapItem> = {}): PcMapItem => ({
   wake: null,
   maintenance: null,
   canWake: true,
+  hold: null,
   order: null,
   ...over,
 });

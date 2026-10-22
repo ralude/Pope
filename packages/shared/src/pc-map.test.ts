@@ -44,6 +44,7 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
           wake: null,
           maintenance: null,
           canWake: false,
+          hold: null,
           order: null,
         },
         {
@@ -56,6 +57,7 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
           wake: null,
           maintenance: null,
           canWake: false,
+          hold: null,
           order: null,
         },
       ],
@@ -132,6 +134,7 @@ describe('mapa de PCs del panel (REQ-001-31)', () => {
             wake: null,
             maintenance: null,
             canWake: false,
+            hold: null,
             order: null,
           },
         ],

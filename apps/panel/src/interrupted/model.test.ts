@@ -106,6 +106,7 @@ describe('PCs', () => {
     wake: null,
     maintenance: null,
     canWake: false,
+    hold: null,
     order: null,
     ...over,
   });

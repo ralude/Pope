@@ -123,6 +123,18 @@ export const pcMapItemSchema = z.object({
     .nullable(),
   /** Tiene la MAC registrada: se puede encender por Wake-on-LAN (T33, REQ-003-22). */
   canWake: z.boolean(),
+  /**
+   * Sesión retenida por una revocación (T34, REQ-003-11): desde cuándo, quién revocó y si la PC ya
+   * se revinculó con una credencial nueva (entonces el personal puede autorizar continuar).
+   */
+  hold: z
+    .strictObject({
+      sessionId: idSchema,
+      since: utcInstantSchema,
+      byName: z.string(),
+      relinked: z.boolean(),
+    })
+    .nullable(),
   /** La orden del personal que reserva la PC y sigue en curso, o `null` (T41, REQ-003-20). */
   order: z
     .strictObject({ id: idSchema, kind: pcCommandKindSchema, status: pcCommandStatusSchema })
