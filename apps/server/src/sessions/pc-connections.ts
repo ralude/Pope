@@ -28,6 +28,18 @@ export class PcConnections {
   private readonly logger = new Logger('PcConnections');
   private readonly byPc = new Map<string, PcConnection>();
   private readonly listeners = new Set<() => void>();
+  /** PCs con una sesión retenida por revocación y esa sesión (T34, REQ-003-11). */
+  private readonly held = new Map<string, string>();
+
+  /** La PC tiene una sesión retenida: no se le envía estado activo ni avisos hasta soltarla. */
+  hold(pcId: string, sessionId: string): void {
+    this.held.set(pcId, sessionId);
+  }
+
+  /** Termina la retención de la PC (se autorizó continuar o se cerró la sesión). */
+  release(pcId: string): void {
+    this.held.delete(pcId);
+  }
 
   /** Avisa cuando una PC se conecta o se desconecta (el mapa del panel). */
   subscribe(listener: () => void): () => void {
@@ -78,6 +90,14 @@ export class PcConnections {
     const connection = this.byPc.get(pcId);
     if (!connection) {
       return false;
+    }
+    // Último recurso: ningún camino del nodo puede desbloquear una PC con la sesión retenida.
+    const held = this.held.get(pcId);
+    if (held !== undefined) {
+      if (message.type === 'warning') return false;
+      if (message.type === 'state' && message.status === 'active') {
+        message = { type: 'state', status: 'held', sessionId: held, reason: 'credential_revoked' };
+      }
     }
     connection.send(nativeNodeToPcMessageSchema.parse(message));
     return true;

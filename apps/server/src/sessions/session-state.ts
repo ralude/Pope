@@ -179,3 +179,11 @@ export function activeState(
 }
 
 export const LOCKED_STATE: NodeToPcMessage = { type: 'state', status: 'locked' };
+
+/** Sesión retenida por una revocación de la PC: bloqueada y sin cobro (T34, REQ-003-11). */
+export const heldState = (sessionId: string): NodeToPcMessage => ({
+  type: 'state',
+  status: 'held',
+  sessionId,
+  reason: 'credential_revoked',
+});

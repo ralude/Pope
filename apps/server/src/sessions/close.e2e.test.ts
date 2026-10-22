@@ -185,7 +185,7 @@ describe('cierre de sesiones (e2e, REQ-001-26, REQ-001-31)', () => {
     expect(await pc.next()).toMatchObject({ type: 'sessionEnded', reason: 'staff' });
 
     // Un cambio desde el panel que confirmó justo antes del cierre termina ahora.
-    world.testApp.app.get(SessionsService).announce(active);
+    await world.testApp.app.get(SessionsService).announce(active);
 
     // La PC no recibe nada más: lo siguiente es la respuesta a su latido, bloqueada.
     expect(await heartbeat(pc)).toEqual({ type: 'state', status: 'locked' });

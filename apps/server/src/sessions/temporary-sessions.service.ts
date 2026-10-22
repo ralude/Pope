@@ -176,7 +176,7 @@ export class TemporarySessionsService {
       });
       return created;
     });
-    this.sessions.announce(row);
+    await this.sessions.announce(row);
     const [described] = await this.describe([row]);
     if (!described) {
       throw new Error('No se pudo leer la sesión abierta');
@@ -260,7 +260,7 @@ export class TemporarySessionsService {
       });
       return updated;
     });
-    this.sessions.announce(row);
+    await this.sessions.announce(row);
     const [described] = await this.describe([row]);
     if (!described) {
       throw new Error('No se pudo leer la sesión');
@@ -367,7 +367,7 @@ export class TemporarySessionsService {
       });
       return created;
     });
-    this.sessions.announce(row);
+    await this.sessions.announce(row);
     const [described] = await this.describe([row]);
     if (!described) {
       throw new Error('No se pudo leer la sesión restaurada');

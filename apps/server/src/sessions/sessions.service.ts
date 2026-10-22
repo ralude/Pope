@@ -36,7 +36,14 @@ import {
   InactiveAccountError,
   UnknownComboError,
 } from '../combos/combo-sales.service.js';
-import { customers, type PauseEndReason, pcs, sessionPauses, sessions } from '../db/schema.js';
+import {
+  customers,
+  type PauseEndReason,
+  pcs,
+  sessionHolds,
+  sessionPauses,
+  sessions,
+} from '../db/schema.js';
 import { SettingsService } from '../settings/settings.service.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { ExchangeRatesService } from '../exchange-rates/exchange-rates.service.js';
@@ -49,6 +56,7 @@ import {
   accountBalances,
   activeState,
   customerInactiveMessage,
+  heldState,
   LOCKED_STATE,
   pauseBilling,
   type PauseRow,
@@ -59,6 +67,7 @@ import {
   temporaryUsageOf,
   usageOf,
 } from './session-state.js';
+import { openHoldOf } from './hold-queries.js';
 import { openPauseOf, pausesUsed } from './pause-queries.js';
 
 /** Saldo mínimo para abrir una sesión: el de 1 minuto (REQ-001-20). */
@@ -256,6 +265,8 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     if (!row) {
       return LOCKED_STATE;
     }
+    // T34: una sesión retenida solo se muestra como tal, sin saldo ni tiempo.
+    if (await openHoldOf(row.id, db)) return heldState(row.id);
     const status = await this.pauseStatus(row, await openPauseOf(row.id, db), db);
     return this.stateOf(row, await this.accountOf(row, db), status);
   }
@@ -760,6 +771,8 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     this.touch(pcId);
     await this.confirm(pcId, claimedId);
     const active = await this.activeOnPc(pcId);
+    // T34: una PC revocada que se revincula no nombra su sesión, y no por eso se cierra.
+    if (active && (await openHoldOf(active.id, this.db))) return;
     if (active && claimedId === null) {
       if (active.pcConfirmedAt && !(await openPauseOf(active.id, this.db))) {
         await this.close(active.id, 'no_heartbeat', { kind: 'system' }, { billToNow: false });
@@ -875,6 +888,13 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         and(
           eq(sessions.status, 'active'),
           lte(sessions.lastHeartbeatAt, lastBeatBefore),
+          // T34: una sesión retenida por revocación no se cierra por falta de latidos.
+          notExists(
+            this.db
+              .select({ id: sessionHolds.id })
+              .from(sessionHolds)
+              .where(and(eq(sessionHolds.sessionId, sessions.id), isNull(sessionHolds.endedAt))),
+          ),
           notExists(
             this.db
               .select({ id: sessionPauses.id })
@@ -919,7 +939,9 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     if (!checked) {
       return { state: LOCKED_STATE, closedId: null };
     }
-    const { row, account, pause } = checked;
+    const { row, account, pause, held } = checked;
+    // T34: con la sesión retenida no se cobra, no se avisa ni se agota.
+    if (held) return { state: heldState(row.id), closedId: null };
     const remaining = remainingSeconds(row, account?.balances ?? null);
     if (remaining === 0) {
       // Ya se cobró hasta ahora: el cierre no necesita cobrar otra vez.
@@ -1018,11 +1040,13 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
    * restaurar): la PC recibe su `state` al momento, y la sesión empieza a vigilarse o
    * reprograma sus avisos con el nuevo restante.
    */
-  announce(row: SessionRow): void {
+  async announce(row: SessionRow): Promise<void> {
     // Si la cerraron justo después, mandar su `state` desbloquearía la PC.
     if (this.ended.has(row.id)) {
       return;
     }
+    // T34: a una sesión retenida no se le manda su estado activo.
+    if (await openHoldOf(row.id, this.db)) return;
     const remaining = remainingSeconds(row, null);
     // Enviar no prueba que la PC esté viva (el socket puede estar medio cerrado): su último
     // contacto sigue siendo el que decide hasta dónde se cobra.
@@ -1038,8 +1062,14 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     this.warned.delete(sessionId);
   }
 
-  onApplicationBootstrap(): void {
+  async onApplicationBootstrap(): Promise<void> {
     this.stopRates = this.rates.subscribe(() => this.resendStates());
+    // T34: tras reiniciar el nodo, las PCs con una sesión retenida siguen sin recibir su estado activo.
+    const holds = await this.db
+      .select({ pcId: sessionHolds.pcId, sessionId: sessionHolds.sessionId })
+      .from(sessionHolds)
+      .where(isNull(sessionHolds.endedAt));
+    for (const { pcId, sessionId } of holds) this.connections.hold(pcId, sessionId);
   }
 
   onModuleDestroy(): void {
@@ -1070,8 +1100,23 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
     row: SessionRow;
     account: { username: string; balances: CustomerBalances } | null;
     pause: PauseRow | null;
+    /** La sesión está retenida por una revocación: no se cobró nada (T34). */
+    held: boolean;
   }> {
     const pause = row.kind === 'account' ? await openPauseOf(row.id, tx) : null;
+    // T34 · REQ-003-11: con una retención abierta no se cobra nada; la marca avanza hasta ahora
+    // sin cobrar, como en una pausa que no cobra, para que ningún cierre cobre ese intervalo.
+    if (await openHoldOf(row.id, tx)) {
+      const lastHeartbeatAt = new Date(
+        Math.max(row.lastHeartbeatAt.getTime(), this.clock.now().getTime()),
+      );
+      const [updated] = await tx
+        .update(sessions)
+        .set({ lastHeartbeatAt })
+        .where(eq(sessions.id, row.id))
+        .returning();
+      return { row: updated ?? row, account: await this.accountOf(row, tx), pause, held: true };
+    }
     if (onHold(pause) && pause) {
       const held = Math.min(this.clock.now().getTime(), pause.maxUntil.getTime());
       const lastHeartbeatAt = new Date(Math.max(row.lastHeartbeatAt.getTime(), held));
@@ -1080,7 +1125,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         .set({ lastHeartbeatAt })
         .where(eq(sessions.id, row.id))
         .returning();
-      return { row: updated ?? row, account: await this.accountOf(row, tx), pause };
+      return { row: updated ?? row, account: await this.accountOf(row, tx), pause, held: false };
     }
 
     const elapsed = seconds(
@@ -1101,7 +1146,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
         })
         .where(eq(sessions.id, row.id))
         .returning();
-      return { row: updated ?? row, account, pause };
+      return { row: updated ?? row, account, pause, held: false };
     }
 
     const usage = applyTemporaryCheckpoint(temporaryUsageOf(row), elapsed);
@@ -1110,7 +1155,7 @@ export class SessionsService implements OnApplicationBootstrap, OnModuleDestroy 
       .set({ usedSeconds: usage.usedSeconds, lastHeartbeatAt })
       .where(eq(sessions.id, row.id))
       .returning();
-    return { row: updated ?? row, account, pause };
+    return { row: updated ?? row, account, pause, held: false };
   }
 
   /** Usuario y saldos del cliente de una sesión con cuenta; `null` si es temporal. */

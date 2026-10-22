@@ -14,6 +14,7 @@ import { events, pcCredentials, sessionHolds, sessions } from '../db/schema.js';
 import { EventsService } from '../events/events.service.js';
 import { PcCommandsService, type StaffActor } from './pc-commands.service.js';
 import { PcControlService } from './pc-control.service.js';
+import { PcConnections } from './pc-connections.js';
 import { SessionsService } from './sessions.service.js';
 
 type RevocationErrorCode = ReturnType<typeof pcRevocationErrorSchema.parse>['code'];
@@ -39,6 +40,7 @@ export class PcRevocationService {
     private readonly control: PcControlService,
     private readonly commands: PcCommandsService,
     private readonly sessions: SessionsService,
+    private readonly connections: PcConnections,
     private readonly clock: Clock,
   ) {}
 
@@ -47,7 +49,7 @@ export class PcRevocationService {
     request: PcRevokeRequest,
     actor: StaffActor,
   ): Promise<PcRevokeResponse> {
-    return this.events.inTransaction(async (tx, emit) => {
+    const response = await this.events.inTransaction(async (tx, emit) => {
       const pc = await this.control.lockPc(tx, pcId);
       if (!pc) throw new PcRevocationException('unknown_pc', 'No existe esa PC', 404);
 
@@ -144,5 +146,8 @@ export class PcRevocationService {
       });
       return pcRevokeResponseSchema.parse({ pc, revokedAt: now.toISOString(), heldSessionId });
     });
+    // Tras confirmar: ningún estado activo llega ya a la PC retenida (T34d).
+    if (response.heldSessionId) this.connections.hold(pcId, response.heldSessionId);
+    return response;
   }
 }

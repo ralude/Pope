@@ -25,6 +25,7 @@ import { DATABASE, type Database } from '../db/database.js';
 import { customers, type PauseEndReason, pcs, sessionPauses, sessions } from '../db/schema.js';
 import { type Emit, EventsService, type Transaction } from '../events/events.service.js';
 import { SettingsService } from '../settings/settings.service.js';
+import { openHoldOf } from './hold-queries.js';
 import { openPauseOf, pausesUsed } from './pause-queries.js';
 import { PcConnections } from './pc-connections.js';
 import {
@@ -45,6 +46,9 @@ const EXPIRY_SLACK_MS = 20;
  * sesión no corre: eso lo aplica el cobro (`SessionsService.checkpoint`). Aquí se abren, se
  * cierran y vencen las pausas, siempre con la sesión bloqueada y con su evento (ADR-0008).
  */
+/** Texto cuando el cliente intenta pausar o reanudar una sesión retenida. */
+const HELD_MESSAGE = 'Tu sesión está retenida por el encargado';
+
 @Injectable()
 export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
   private readonly logger = new Logger('Pauses');
@@ -74,6 +78,9 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
         throw new PcRequestRefused('pause_unavailable', PAUSE_REFUSAL_MESSAGES.temporary);
       }
       const customerId = locked.customerId;
+      if (await openHoldOf(locked.id, tx)) {
+        throw new PcRequestRefused('pause_unavailable', HELD_MESSAGE);
+      }
       const { row, account, pause } = await this.sessions.checkpoint(locked, tx);
       const now = this.clock.now();
       const settings = await this.settings.get(tx);
@@ -132,6 +139,10 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
     if (!active) {
       throw new PcRequestRefused('no_active_session', 'No tienes una sesión abierta');
     }
+    // T34: con la sesión retenida la pausa ni se quita ni vence; continúa el personal.
+    if (await openHoldOf(active.id, this.db)) {
+      throw new PcRequestRefused('pause_unavailable', HELD_MESSAGE);
+    }
     await this.expireIfDue(active.id);
     const resumed = await this.events.inTransaction(async (tx, emit) => {
       const [locked] = await tx
@@ -178,6 +189,9 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
     if (!existing) {
       throw new NotFoundException('No existe esa sesión');
     }
+    if (await openHoldOf(sessionId, this.db)) {
+      throw new ConflictException('La sesión está retenida: autoriza antes continuar');
+    }
     await this.expireIfDue(sessionId);
     const outcome = await this.events.inTransaction(async (tx, emit) => {
       const [locked] = await tx
@@ -214,6 +228,12 @@ export class PausesService implements OnApplicationBootstrap, OnModuleDestroy {
    * vence: la llaman el temporizador, la reanudación y el arranque del nodo.
    */
   async expire(sessionId: string): Promise<void> {
+    // T34 · REQ-002-33: la pausa de una sesión retenida no vence ni gasta su tiempo; al continuar
+    // se le suma lo que duró la retención y se vuelve a programar.
+    if (await openHoldOf(sessionId, this.db)) {
+      this.cancel(sessionId);
+      return;
+    }
     const settings = await this.settings.get();
     if (settings.pauseOverrun === 'close') {
       await this.sessions.close(sessionId, 'pause_expired', SYSTEM, {
