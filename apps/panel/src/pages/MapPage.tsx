@@ -30,6 +30,7 @@ import { ApiError } from '../api/client.js';
 import { ComboSaleDialog } from '../customers/ComboSaleDialog.js';
 import { RechargeDialog } from '../customers/RechargeDialog.js';
 import { useNodeNow, usePcMapFeed } from '../map/channel.js';
+import { InstallationCodeDialog } from '../map/InstallationCodeDialog.js';
 import {
   type ActionState,
   availableActions,
@@ -111,6 +112,10 @@ export function MapPage() {
   const [edit, setEdit] = useState<Edit | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Código de instalación: PC nueva (`null`) o PC que se registra de nuevo.
+  const [installing, setInstalling] = useState<{ id: string; name: string } | null | undefined>(
+    undefined,
+  );
 
   const pcs = feed.map?.pcs ?? [];
   const legend = legendOf(pcs, now);
@@ -177,6 +182,17 @@ export function MapPage() {
       }
       actions={
         <>
+          {staff.role !== 'dueno' && (
+            <button
+              type="button"
+              className="btn btn-ghost"
+              onClick={() => {
+                setInstalling(null);
+              }}
+            >
+              Añadir PC
+            </button>
+          )}
           <button
             type="button"
             className="btn btn-ghost"
@@ -248,7 +264,14 @@ export function MapPage() {
               }}
             />
           ) : selected ? (
-            <PcDetail key={selected.id} pc={selected} now={now} />
+            <PcDetail
+              key={selected.id}
+              pc={selected}
+              now={now}
+              onReinstall={() => {
+                setInstalling({ id: selected.id, name: selected.name });
+              }}
+            />
           ) : (
             <p className="detail-note" style={{ margin: 0 }}>
               Elige una PC del mapa para ver quién la usa, cuánto le queda y qué puedes hacer.
@@ -256,6 +279,15 @@ export function MapPage() {
           )}
         </aside>
       </div>
+      {installing !== undefined && (
+        <InstallationCodeDialog
+          pc={installing}
+          now={now}
+          onClose={() => {
+            setInstalling(undefined);
+          }}
+        />
+      )}
     </Frame>
   );
 }
@@ -654,7 +686,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
+function PcDetail({ pc, now, onReinstall }: { pc: PcMapItem; now: Date; onReinstall: () => void }) {
   const staff = useStaff();
   // Sesión que se está cerrando: si termina sola y la PC abre otra, el diálogo no reaparece.
   const [closingId, setClosingId] = useState<string | null>(null);
@@ -756,6 +788,11 @@ function PcDetail({ pc, now }: { pc: PcMapItem; now: Date }) {
           }}
           onDone={stopCharging}
         />
+      )}
+      {kind === 'free' && canOperate && (
+        <button type="button" className="btn btn-ghost btn-lg" onClick={onReinstall}>
+          Volver a registrar
+        </button>
       )}
       {kind === 'free' && canOperate && (
         <button

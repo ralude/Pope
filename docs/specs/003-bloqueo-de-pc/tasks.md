@@ -537,7 +537,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Verificar:** dueño sin generación, caducidad de 10 min y una alerta por bloqueo; prueba manual de pantallas y validación de respuestas.
   - **Commit:** `feat(panel): registra PCs y avisa de bloqueos técnicos`.
   - **División (2026-10-22):** «Añadir PC» en el mapa y «Volver a registrar» en el detalle (mantenedor). [Guía](guia-t33-t42.md#t42--registro-de-pcs-y-alertas-técnicas-panel).
-  - [ ] **T42a:** diálogo del código de instalación con cuenta atrás.
+  - [x] **T42a:** diálogo del código de instalación con cuenta atrás.
   - [ ] **T42b:** aviso del bloqueo técnico.
 
 ### Fondo global

@@ -332,3 +332,16 @@
   line-height: 1.4;
   color: var(--amber-bar);
 }
+
+/* Código de instalación (T42a): grande y en monoespaciada, para leerlo y teclearlo. */
+.install-code {
+  padding: 14px 16px;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent-soft);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 20px;
+  letter-spacing: 0.06em;
+  word-break: break-all;
+  user-select: all;
+}
