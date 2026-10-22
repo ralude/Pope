@@ -46,10 +46,10 @@ export class PcCommandRequestsService {
         }
         if (!pc) throw new PcCommandException('unknown_pc', 'No existe esa PC', 404);
         // Bloquear, reiniciar y apagar, con la PC libre o con sesión (T29/T30), mensajes (T32)
-        // y entrar en mantenimiento con la PC libre (T35). Con un mantenimiento abierto hace
-        // falta registrar antes su salida (T39/T40) y los mensajes se rechazan (REQ-003-20):
-        // aún no disponible.
-        if (request.kind === 'endMaintenance' || request.expected.kind === 'maintenance') {
+        // entrar en mantenimiento con la PC libre (T35) y terminarlo (T39b). Reiniciar o apagar
+        // con un mantenimiento abierto necesita registrar antes su salida (T39c); los mensajes se
+        // rechazan en mantenimiento (REQ-003-20).
+        if (request.kind !== 'endMaintenance' && request.expected.kind === 'maintenance') {
           throw new PcCommandException('invalid_command', 'Esta orden aún no está disponible', 400);
         }
         if (!this.connections.isConnected(pcId)) {
@@ -81,6 +81,28 @@ export class PcCommandRequestsService {
             'pc_unavailable',
             `La ${pc.name} ya tiene una orden en curso`,
           );
+        }
+        if (request.kind === 'endMaintenance') {
+          // REQ-003-43: «Terminar» desde el panel. La PC cierra el entorno, se bloquea y acusa con
+          // la salida durable, que el nodo registra con el actor de esta orden (T39b).
+          if (context.kind !== 'maintenance') {
+            throw new PcCommandException(
+              'stale_context',
+              `La ${pc.name} ya no está en mantenimiento`,
+            );
+          }
+          const row = await this.commands.insertIn(tx, emit, {
+            pc,
+            actor,
+            request,
+            action: {
+              kind: 'endMaintenance',
+              maintenanceId: context.maintenanceId,
+              exitId: newId(),
+            },
+            context,
+          });
+          return { row, fresh: true };
         }
         if (request.kind === 'startMaintenance') {
           // REQ-003-43: la PC debe estar libre (el esquema y el contexto ya lo exigen). Reserva

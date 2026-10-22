@@ -69,7 +69,7 @@ const closedSession = (row: CommandRow) =>
 interface Followup {
   lock: CommandRow | null;
   messages: NativeNodeToPcMessage[];
-  /** Empezó un mantenimiento: la PC debe recibir su contexto nuevo. */
+  /** Empezó o terminó un mantenimiento: la PC debe recibir su contexto nuevo. */
   started: boolean;
 }
 const NO_FOLLOWUP: Followup = { lock: null, messages: [], started: false };
@@ -350,6 +350,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
       const reservationReleased = released && (await this.release(tx, pcId, row.id));
       const messages: NativeNodeToPcMessage[] = [];
       let started = false;
+      let ended = false;
       // T35: la entrada en mantenimiento se registra al confirmarla la PC, con la hora del nodo.
       if (row.action.kind === 'startMaintenance' && status === 'applied') {
         const entered = await this.maintenance.startIn(tx, emit, row, pc.name, now);
@@ -360,6 +361,20 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
           ...(requestId !== undefined && { requestId }),
         });
         started = true;
+      } else if (
+        row.action.kind === 'endMaintenance' &&
+        ack.result.status === 'applied' &&
+        ack.result.effect.kind === 'endMaintenance'
+      ) {
+        // T39b: la salida de una orden del panel se registra con el actor de esa orden.
+        const { exit } = ack.result.effect;
+        await this.maintenance.endIn(tx, emit, { pcId, pcName: pc.name, exit, now });
+        messages.push({
+          type: 'maintenanceExitAcknowledged',
+          exitId: exit.id,
+          maintenanceId: exit.maintenanceId,
+        });
+        ended = true;
       } else if (row.action.kind === 'startMaintenance' && status === 'failed') {
         const requestId = this.maintenance.take(row.id);
         if (requestId !== undefined) messages.push(maintenanceUnavailable(requestId));
@@ -385,7 +400,7 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
         ack.result.status === 'failed' && closedSession(row)
           ? await this.insertAfterCloseIn(tx, emit, pc, { kind: 'system' })
           : null;
-      return { lock, messages, started };
+      return { lock, messages, started: started || ended };
     });
     for (const message of after.messages) this.connections.send(pcId, message);
     if (after.started) await this.control.sync(pcId, null);
@@ -464,7 +479,9 @@ export class PcCommandsService implements OnApplicationBootstrap, OnModuleDestro
       await tx.update(pcCommands).set({ status: 'expired' }).where(eq(pcCommands.id, commandId));
       // Un mantenimiento que la PC no confirmó no tuvo efecto: la PC vuelve a admitir clientes.
       const isStart = row.action.kind === 'startMaintenance';
-      if (isStart) await this.release(tx, found.pcId, commandId);
+      if (isStart || row.action.kind === 'endMaintenance') {
+        await this.release(tx, found.pcId, commandId);
+      }
       emit({
         type: 'pc.command_expired',
         version: 1,

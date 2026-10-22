@@ -36,6 +36,8 @@ describe('salida del mantenimiento desde la PC (e2e, REQ-003-41, REQ-003-44, CA-
     await pc.request({ type: 'listCombos', requestId: 'sync' });
   }
 
+  const commandsPath = (n: number) => '/pcs/' + devPcId(n) + '/commands';
+
   async function snapshot(n: number) {
     return (await world.api('GET', `/pcs/${devPcId(n)}/control`, ana)).json<PcControlSnapshot>();
   }
@@ -185,5 +187,90 @@ describe('salida del mantenimiento desde la PC (e2e, REQ-003-41, REQ-003-44, CA-
     reconnected.send({ type: 'maintenanceExit', exit });
     expect(await reconnected.next()).toMatchObject({ exitId: exit.id });
     expect(await eventsOf('pc.maintenance_ended')).toHaveLength(1);
+  });
+
+  /** Beto pide «Terminar» desde el panel; devuelve la orden que recibe la PC. */
+  async function endFromPanel(pc: PcTestClient, n: number, cookie: string) {
+    const { context } = await snapshot(n);
+    const response = await world.api('POST', commandsPath(n), cookie, {
+      id: newId(),
+      kind: 'endMaintenance',
+      expected: context,
+    });
+    expect(response.statusCode).toBe(200);
+    await sync(pc);
+    const command = pc.commands.at(-1);
+    if (command?.action.kind !== 'endMaintenance') throw new Error('La PC no recibió la orden');
+    return { command, action: command.action };
+  }
+
+  it('REQ-003-43: terminar desde el panel registra la salida con el actor del panel y libera la PC', async () => {
+    const { pc, maintenanceId } = await inMaintenance(4);
+    const beto = await loginAsStaff(world.testApp, 'beto', 'encargado', 'Beto');
+    const { command, action } = await endFromPanel(pc, 4, beto);
+    expect(action.maintenanceId).toBe(maintenanceId);
+    expect((await snapshot(4)).reservation?.command.id).toBe(command.id);
+    world.clock.advance(90_000);
+    const exit = exitOf(maintenanceId, { id: action.exitId, durationSeconds: 90 });
+    pc.send({
+      type: 'commandAck',
+      commandId: command.id,
+      occurredAt: world.clock.now().toISOString(),
+      result: { status: 'applied', effect: { kind: 'endMaintenance', exit } },
+    });
+    expect(await pc.next()).toEqual({
+      type: 'maintenanceExitAcknowledged',
+      exitId: exit.id,
+      maintenanceId,
+    });
+    expect(await eventsOf('pc.maintenance_ended')).toMatchObject([
+      {
+        actor: { kind: 'staff', name: 'Beto' },
+        payload: { maintenanceId, exitId: exit.id, source: 'panel', durationSeconds: 90 },
+      },
+    ]);
+    await sync(pc);
+    const state = await snapshot(4);
+    expect(state.context.kind).toBe('free');
+    expect(state.reservation).toBeNull();
+    expect(pc.control?.context.kind).toBe('free');
+  });
+
+  it('CA-003-09: si el acuse se pierde y la orden vence, la salida que llega después sigue siendo del panel', async () => {
+    const { pc, maintenanceId } = await inMaintenance(4);
+    const beto = await loginAsStaff(world.testApp, 'beto', 'encargado', 'Beto');
+    const { action } = await endFromPanel(pc, 4, beto);
+    await world.clock.tick(31_000);
+    expect((await snapshot(4)).reservation).toBeNull();
+    const exit = exitOf(maintenanceId, { id: action.exitId, durationSeconds: 31 });
+    pc.send({ type: 'maintenanceExit', exit });
+    expect(await pc.next()).toMatchObject({ type: 'maintenanceExitAcknowledged', exitId: exit.id });
+    expect(await eventsOf('pc.maintenance_ended')).toMatchObject([
+      { actor: { kind: 'staff', name: 'Beto' }, payload: { source: 'panel' } },
+    ]);
+    // Es del panel, que ya tenía su orden: no se pide un bloqueo de sistema.
+    expect(pc.commands.at(-1)?.action.kind).toBe('endMaintenance');
+  });
+
+  it('REQ-003-43: solo con un mantenimiento abierto; dueño y quien no tiene sesión, no', async () => {
+    const free = await world.pc(4);
+    const { context } = await snapshot(4);
+    const stale = await world.api('POST', commandsPath(4), ana, {
+      id: newId(),
+      kind: 'endMaintenance',
+      expected: { kind: 'maintenance', revision: context.revision, maintenanceId: newId() },
+    });
+    expect(stale.statusCode).toBe(409);
+    expect(stale.json()).toMatchObject({ code: 'stale_context' });
+    const { maintenanceId } = await inMaintenance(5);
+    const owner = await loginAsStaff(world.testApp, 'eva', 'dueno', 'Eva');
+    const body = {
+      id: newId(),
+      kind: 'endMaintenance',
+      expected: { ...(await snapshot(5)).context, maintenanceId },
+    };
+    expect((await world.api('POST', commandsPath(5), owner, body)).statusCode).toBe(403);
+    expect((await world.api('POST', commandsPath(5), null, body)).statusCode).toBe(401);
+    expect(free.commands).toEqual([]);
   });
 });

@@ -509,7 +509,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(server): concilia la salida técnica pendiente`.
   - **División (2026-10-22):** incluye T30b. [Guía](guia-t33-t42.md#t39--conciliación-de-la-salida-técnica-en-el-nodo).
   - [x] **T39a:** `maintenanceExit` local: registro único, duración acotada, ACK y bloqueo de sistema.
-  - [ ] **T39b:** `endMaintenance` desde el panel.
+  - [x] **T39b:** `endMaintenance` desde el panel.
   - [ ] **T39c:** reiniciar o apagar con mantenimiento (cierra T30b).
 
 - [ ] **T40: Salida técnica nativa durable**
