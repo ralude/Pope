@@ -1280,3 +1280,46 @@ input {
 .resume-actions {
   justify-content: center;
 }
+
+/* Pestaña «Técnico» (T38b): plegada arriba en el centro; se despliega con el ratón o el teclado. */
+.tech-tab {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 1000;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tech-tab-handle {
+  padding: 2px 14px;
+  border-radius: 0 0 10px 10px;
+  background: rgba(20, 21, 28, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: default;
+}
+.tech-tab-panel {
+  display: none;
+  min-width: 260px;
+  gap: 10px;
+  flex-direction: column;
+  padding: 12px 14px;
+  border-radius: 0 0 14px 14px;
+  background: rgba(20, 21, 28, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 0;
+  font-size: 14px;
+}
+.tech-tab:hover .tech-tab-panel,
+.tech-tab:focus-within .tech-tab-panel {
+  display: flex;
+}
+.tech-tab-summary {
+  font-weight: 600;
+  color: var(--text);
+}

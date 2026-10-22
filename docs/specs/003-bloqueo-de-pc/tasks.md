@@ -500,7 +500,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(shell-ui): muestra el acceso y los controles técnicos`.
   - **División (2026-10-22):** se hace después de T40; queda abierta hasta probarla en la sesión real (T37). [Guía](guia-t33-t42.md#t38--formulario-y-pestaña-técnica-shell).
   - [x] **T38a:** enlace y formulario «Usuario técnico» en la pantalla de bloqueo.
-  - [ ] **T38b:** pestaña «Técnico» plegada con «Terminar y bloquear», sin tiempo.
+  - [x] **T38b:** pestaña «Técnico» plegada con «Terminar y bloquear», sin tiempo.
 
 - [x] **T39: Conciliación de salida técnica en el nodo**
   - **Cubre:** REQ-003-41, REQ-003-43, REQ-003-44; CA-003-09.

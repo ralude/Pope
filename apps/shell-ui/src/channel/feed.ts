@@ -1,7 +1,7 @@
 // Estado de la PC tal como lo cuenta el nodo, para las pantallas del Shell. La PC obedece
 // (ADR-0007): bloqueada o en sesión según el último `state`. Función pura, para poder
 // probar qué hace el Shell con cada mensaje sin React.
-import type { NodeToPcMessage, WarningMinutes } from '@pope/shared';
+import type { NodeToPcMessage, PcMaintenance, WarningMinutes } from '@pope/shared';
 
 import type { ChannelEvent, ChannelStatus } from './channel.js';
 
@@ -24,6 +24,8 @@ export interface PcFeed {
   /** Error del nodo que no responde a ninguna petición (p. ej. PC no registrada). */
   problem: string | null;
   warning: Warning | null;
+  /** Mantenimiento abierto en esta PC, o `null` (T38, REQ-003-42). Sobrevive a perder la red. */
+  maintenance: PcMaintenance | null;
   /**
    * La sesión acaba de terminar y se muestra "Tu sesión terminó" antes del bloqueo
    * (REQ-001-25). No si la cerró el propio cliente (decisión del mantenedor).
@@ -37,6 +39,7 @@ export const INITIAL_FEED: PcFeed = {
   stateAt: 0,
   problem: null,
   warning: null,
+  maintenance: null,
   ended: false,
 };
 
@@ -83,8 +86,9 @@ export function applyEvent(feed: PcFeed, event: ChannelEvent, now: number): PcFe
       };
     case 'error':
       return message.requestId === undefined ? { ...feed, problem: message.message } : feed;
-    case 'combos':
     case 'maintenanceState':
+      return { ...feed, maintenance: message.maintenance };
+    case 'combos':
     case 'technicalError':
       // Respuesta a una petición: la recoge quien la hizo, no cambia el estado de la PC.
       return feed;

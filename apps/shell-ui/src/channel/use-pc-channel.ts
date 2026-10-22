@@ -19,6 +19,12 @@ import {
   technicalReply,
   type TechnicalResult,
 } from '../lock/technical.js';
+import {
+  END_NO_REPLY_MESSAGE,
+  END_TIMEOUT_MS,
+  endReply,
+  endRequest,
+} from '../maintenance/maintenance.js';
 import type { PcChannel, ShellMessage, ShellRequest } from './channel.js';
 import { applyEvent, dismissEnded, dismissWarning, INITIAL_FEED, type PcFeed } from './feed.js';
 
@@ -50,6 +56,8 @@ export function usePcChannel(channel: PcChannel): {
   login: (username: string, password: string) => Promise<LoginResult>;
   /** Entrada en mantenimiento con usuario y contraseña del personal (T38, REQ-003-40). */
   technicalLogin: (username: string, password: string) => Promise<TechnicalResult>;
+  /** «Terminar y bloquear»: el agente cierra el entorno y guarda la salida, con o sin red. */
+  endMaintenance: (maintenanceId: string) => Promise<TechnicalResult>;
   /** Pide al nodo los combos a la venta (T49). */
   listCombos: () => Promise<CombosResult>;
   /** Compra un combo con el saldo (T49, REQ-001-85). */
@@ -150,6 +158,14 @@ export function usePcChannel(channel: PcChannel): {
       ),
     [request],
   );
+  const endMaintenance = useCallback(
+    (maintenanceId: string) =>
+      request((requestId) => endRequest(maintenanceId, requestId), endReply, {
+        timeoutMs: END_TIMEOUT_MS,
+        noReply: END_NO_REPLY_MESSAGE,
+      }),
+    [request],
+  );
   const listCombos = useCallback(
     () => request((requestId) => ({ type: 'listCombos', requestId }), forSession(combosReply)),
     [request],
@@ -192,6 +208,7 @@ export function usePcChannel(channel: PcChannel): {
     feed,
     login,
     technicalLogin,
+    endMaintenance,
     listCombos,
     buyCombo,
     logout,
