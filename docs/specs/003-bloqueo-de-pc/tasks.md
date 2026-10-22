@@ -528,7 +528,7 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - **Commit:** `feat(panel): controla las PCs y muestra el mantenimiento`.
   - **División (2026-10-22):** «Bloquear» pide confirmación siempre (mantenedor). [Guía](guia-t33-t42.md#t41--controles-y-mantenimiento-en-el-mapa-panel).
   - [x] **T41a:** `maintenance`, `canWake` y `order` en el mapa; `GET /pcs/:pcId/commands/:commandId`.
-  - [ ] **T41b:** lógica de acciones, confirmaciones, errores y encendido, con tests.
+  - [x] **T41b:** lógica de acciones, confirmaciones, errores y encendido, con tests.
   - [ ] **T41c:** controles, diálogos, baldosa roja y aviso de encendido; prueba manual.
 
 - [ ] **T42: Registro de PCs y alertas técnicas en panel**

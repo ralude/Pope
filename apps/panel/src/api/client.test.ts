@@ -161,3 +161,20 @@ describe('listOf', () => {
     expect(schema.safeParse(ANA).success).toBe(false);
   });
 });
+
+describe('código de error del nodo (T41)', () => {
+  it('conserva el code junto al mensaje del nodo', async () => {
+    const { fn } = fakeFetch(409, { code: 'stale_context', message: 'La PC 04 cambió de estado' });
+    const error = await caught(new ApiClient({ fetch: fn }).send('POST', '/x', {}));
+    expect(error).toMatchObject({
+      status: 409,
+      message: 'La PC 04 cambió de estado',
+      code: 'stale_context',
+    });
+  });
+
+  it('sin code en la respuesta, es null', async () => {
+    const { fn } = fakeFetch(409, { message: 'Algo' });
+    expect((await caught(new ApiClient({ fetch: fn }).send('POST', '/x', {}))).code).toBeNull();
+  });
+});

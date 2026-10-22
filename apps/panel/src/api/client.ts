@@ -49,6 +49,8 @@ export class ApiError extends Error {
     readonly status: number,
     message: string,
     readonly issues: FieldIssue[] = [],
+    /** Código de error del nodo (`stale_context`, `pc_disconnected`…), si lo trae. */
+    readonly code: string | null = null,
   ) {
     super(message);
   }
@@ -160,7 +162,7 @@ async function errorFrom(response: Response): Promise<ApiError> {
   if (typeof detail !== 'object' || detail === null) {
     return new ApiError(response.status, fallback);
   }
-  const record = detail as { message?: unknown; issues?: unknown };
+  const record = detail as { message?: unknown; issues?: unknown; code?: unknown };
   let message = fallback;
   if (typeof record.message === 'string' && record.message.trim()) {
     message = record.message;
@@ -176,5 +178,10 @@ async function errorFrom(response: Response): Promise<ApiError> {
           typeof (i as FieldIssue).message === 'string',
       )
     : [];
-  return new ApiError(response.status, message, issues);
+  return new ApiError(
+    response.status,
+    message,
+    issues,
+    typeof record.code === 'string' ? record.code : null,
+  );
 }
