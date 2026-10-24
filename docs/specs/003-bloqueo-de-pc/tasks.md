@@ -1,6 +1,6 @@
 # Tareas 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Continuación T28–T42 autorizada (mantenedor, 2026-10-21), con sus verificaciones funcionales; T22 aplazada, T34 pendiente de aprobar su diseño y T37 hasta demostrar T10. T10 y SCM de T15 abiertas. ADR-0018 aceptado. T43–T59 en Borrador.
+- **Estado:** Continuación T28–T42 autorizada (mantenedor, 2026-10-21), con sus verificaciones funcionales; T22 aplazada, T34 pendiente de aprobar su diseño y T37 hasta demostrar T10. T10 y SCM de T15 abiertas. ADR-0018 aceptado. T43–T46 autorizadas (mantenedor, 2026-10-24) como historias verticales; T47–T59 en Borrador.
 - **Plan:** [plan.md](plan.md), autorizado hasta T42 con esas salvedades; decisiones técnicas ajenas al bloque y verificaciones previas pendientes.
 
 Reglas: una tarea = un commit. Marca `[x]` en el mismo commit que la implementa y
@@ -541,6 +541,12 @@ alterar el Windows cotidiano quedan pendientes, sin declararlas realizadas.
   - [x] **T42b:** aviso del bloqueo técnico.
 
 ### Fondo global
+
+**Autorización (mantenedor, 2026-10-24):** T43–T46 se implementan como cinco historias
+verticales (subir y mostrar; quitar; progreso sin bloquear el login; sesión abierta;
+reconexión y fallos), con un commit por capa dentro de cada historia, según el
+[diseño del fondo](diseno-fondo.md). Cada tarea se marca cuando todas las historias han
+cubierto lo suyo. T47 queda para después, todavía en Borrador.
 
 - [ ] **T43: Almacenamiento y endpoints del fondo**
   - **Cubre:** REQ-003-70, REQ-003-71, REQ-003-72, REQ-003-75, REQ-003-76.

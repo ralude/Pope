@@ -1,6 +1,6 @@
 # Plan 003: Arranque y bloqueo de la PC cliente
 
-- **Estado:** Aprobado para T01–T27 (bloques anteriores) y continuación T28–T42 por el mantenedor (2026-10-21), salvo T22, T34 y T37, aplazadas o pendientes de diseño. T43–T59 y mecanismos ajenos al bloque siguen pendientes.
+- **Estado:** Aprobado para T01–T27 (bloques anteriores) y continuación T28–T42 por el mantenedor (2026-10-21), salvo T22, T34 y T37, aplazadas o pendientes de diseño. T43–T46 aprobadas (2026-10-24) con el [diseño del fondo](diseno-fondo.md). T47–T59 y mecanismos ajenos al bloque siguen pendientes.
 - **Spec:** [spec.md](spec.md), aprobada para este bloque; resto pendiente.
 - **ADRs que aplican:** ADR-0001, ADR-0002, ADR-0005, ADR-0006, ADR-0007, ADR-0008,
   ADR-0009, ADR-0015 y ADR-0016. ADR-0010 sigue Propuesto y pertenece a la spec 004.
@@ -362,7 +362,7 @@ no modifica servicios preexistentes, cuentas, shell, autologin, UAC ni directiva
 
 Límites exactos: original **10 000 000 bytes** y **40 000 000 píxeles** (confirmados
 2026-10-04), WebP enviado **2 000 000 bytes**, ancho ≤ 1920 y alto ≤ 1080.
-Los encabezados se comprobarán antes de decodificar en el panel (T45); estos contratos
+Los encabezados se comprobarán antes de decodificar en el panel (T44); estos contratos
 no decodifican imágenes ni comprueban bytes reales. JPG/PNG/WebP originales, solo WebP
 en el nodo. Sin multipart ni nuevas dependencias; T43 conservará el límite de 512 KB
 de fotos de productos al preparar el parser del fondo.
@@ -621,6 +621,9 @@ Conservar el anterior ante un fallo; con sesión activa, aplicar el nuevo al vol
 bloqueo. El tratamiento de imagen se hace en el panel, sin procesador pesado en el nodo.
 El formato binario y los cuerpos/respuestas exactos se revisan al aprobar el plan;
 la propuesta anterior de multipart no es un contrato vigente.
+**Aprobado (mantenedor, 2026-10-24):** cuerpo binario `image/webp`; el agente entrega la
+imagen al Shell según el [diseño del fondo](diseno-fondo.md) (carpeta de solo lectura para
+Usuarios, servida por el host), y T43–T46 se implementan como historias verticales.
 
 ### Concreción T33–T42 (2026-10-22)
 
