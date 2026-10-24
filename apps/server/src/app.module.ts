@@ -12,6 +12,7 @@ import { DatabaseModule } from './db/database.module.js';
 import { EventsModule } from './events/events.module.js';
 import { ExchangeRatesModule } from './exchange-rates/exchange-rates.module.js';
 import { HealthModule } from './health/health.module.js';
+import { LockBackgroundModule } from './lock-background/lock-background.module.js';
 import { ProductsModule } from './products/products.module.js';
 import { PcsModule } from './pcs/pcs.module.js';
 import { SalesModule } from './sales/sales.module.js';
@@ -41,6 +42,7 @@ const MODULES_BY_MODE: Record<PopeMode, DynamicModule['imports']> = {
     SalesModule,
     PcsModule,
     SessionsModule,
+    LockBackgroundModule,
   ],
   cloud: [],
 };
