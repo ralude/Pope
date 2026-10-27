@@ -189,7 +189,7 @@ internal static class AgentCustody
             throw new UnauthorizedAccessException("Custodia del agente no válida.");
     }
 
-    private static void RejectLinks(FileSystemInfo item)
+    internal static void RejectLinks(FileSystemInfo item)
     {
         for (FileSystemInfo? current = item; current != null; current = current is DirectoryInfo d ? d.Parent : ((FileInfo)current).Directory)
             if (current.Exists && (current.Attributes & FileAttributes.ReparsePoint) != 0)
