@@ -7,6 +7,7 @@ import type { PcFeed } from '../channel/feed.js';
 import { type LoginResult, missingField } from './login.js';
 import { TechnicalLogin } from './TechnicalLogin.js';
 import type { TechnicalResult } from './technical.js';
+import { backgroundUrl } from './background.js';
 import { Wallpaper } from './Wallpaper.js';
 
 // La hora del local, aunque el reloj de Windows de la PC esté en otra zona.
@@ -100,7 +101,7 @@ export function LockScreen({
 
   return (
     <div className="screen">
-      <Wallpaper />
+      <Wallpaper image={backgroundUrl(feed.background)} />
       <div className="lock-brand">POPE</div>
       <Clock />
 

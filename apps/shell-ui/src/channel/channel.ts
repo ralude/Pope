@@ -3,6 +3,8 @@
 // WebView2 con la spec 003, donde la conexión la mantiene el agente (REQ-003-63). Así el paso
 // a la spec 003 no toca las pantallas.
 import {
+  type LockBackgroundMessage,
+  lockBackgroundMessageSchema,
   maintenanceStateMessageSchema,
   type NativeShellNotification,
   type NativeShellRequest,
@@ -34,8 +36,11 @@ export type MaintenanceMessage = Extract<
   { type: 'maintenanceState' | 'technicalError' }
 >;
 
-/** Lo que el Shell recibe del nodo: el protocolo de sesión y el del mantenimiento. */
-export type ShellMessage = NodeToPcMessage | MaintenanceMessage;
+/**
+ * Lo que el Shell recibe: el protocolo de sesión, el del mantenimiento y el aviso del agente de que
+ * el fondo de bloqueo ya está en esta PC (REQ-003-73): solo metadatos, nunca la imagen.
+ */
+export type ShellMessage = NodeToPcMessage | MaintenanceMessage | LockBackgroundMessage;
 
 /** Un mensaje de la interfaz, o `null` si no es de las pantallas del Shell. */
 export function parseShellMessage(value: unknown): ShellMessage | null {
@@ -43,6 +48,8 @@ export function parseShellMessage(value: unknown): ShellMessage | null {
   if (session.success) return session.data;
   const maintenance = maintenanceStateMessageSchema.safeParse(value);
   if (maintenance.success) return maintenance.data;
+  const background = lockBackgroundMessageSchema.safeParse(value);
+  if (background.success) return background.data;
   const technical = technicalErrorMessageSchema.safeParse(value);
   return technical.success ? technical.data : null;
 }

@@ -1,7 +1,12 @@
 // Estado de la PC tal como lo cuenta el nodo, para las pantallas del Shell. La PC obedece
 // (ADR-0007): bloqueada o en sesión según el último `state`. Función pura, para poder
 // probar qué hace el Shell con cada mensaje sin React.
-import type { NodeToPcMessage, PcMaintenance, WarningMinutes } from '@pope/shared';
+import type {
+  LockBackgroundImage,
+  NodeToPcMessage,
+  PcMaintenance,
+  WarningMinutes,
+} from '@pope/shared';
 
 import type { ChannelEvent, ChannelStatus } from './channel.js';
 
@@ -31,6 +36,11 @@ export interface PcFeed {
    * (REQ-001-25). No si la cerró el propio cliente (decisión del mantenedor).
    */
   ended: boolean;
+  /**
+   * Imagen del fondo de bloqueo que el agente ya verificó en esta PC, o `null` para el fondo de
+   * Pope (REQ-003-73). El host repite el último aviso, así que sobrevive a recargar la página.
+   */
+  background: LockBackgroundImage | null;
 }
 
 export const INITIAL_FEED: PcFeed = {
@@ -41,6 +51,7 @@ export const INITIAL_FEED: PcFeed = {
   warning: null,
   maintenance: null,
   ended: false,
+  background: null,
 };
 
 const LOCKED: StateMessage = { type: 'state', status: 'locked' };
@@ -88,6 +99,8 @@ export function applyEvent(feed: PcFeed, event: ChannelEvent, now: number): PcFe
       return message.requestId === undefined ? { ...feed, problem: message.message } : feed;
     case 'maintenanceState':
       return { ...feed, maintenance: message.maintenance };
+    case 'lockBackground':
+      return { ...feed, background: message.background };
     case 'combos':
     case 'technicalError':
       // Respuesta a una petición: la recoge quien la hizo, no cambia el estado de la PC.

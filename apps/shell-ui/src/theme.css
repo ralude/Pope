@@ -84,6 +84,16 @@ input {
   inset: 0;
 }
 
+/* Fondo personalizado: cubre toda la pantalla sin deformarse; el panel ya la dejó a 1920×1080 como mucho. */
+.wp-photo {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .wallpaper-blurred .wp-shapes {
   inset: -80px;
   filter: blur(70px);

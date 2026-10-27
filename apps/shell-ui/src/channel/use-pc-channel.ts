@@ -46,7 +46,9 @@ interface Failure {
 /** Las respuestas de sesión solo miran el protocolo de sesión; el de mantenimiento no las toca. */
 function forSession<T>(reply: (message: NodeToPcMessage, requestId: string) => T | null) {
   return (message: ShellMessage, requestId: string): T | null =>
-    message.type === 'maintenanceState' || message.type === 'technicalError'
+    message.type === 'maintenanceState' ||
+    message.type === 'technicalError' ||
+    message.type === 'lockBackground'
       ? null
       : reply(message, requestId);
 }

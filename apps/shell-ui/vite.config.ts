@@ -24,7 +24,9 @@ export default defineConfig(async ({ command, isPreview }) => {
               attrs: {
                 'http-equiv': 'Content-Security-Policy',
                 content:
-                  "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'",
+                  // img-src admite además el host de fondos del host nativo (REQ-003-73): carpeta de solo
+                  // lectura con imágenes que el agente verificó. Ningún otro origen puede cargar imágenes.
+                  "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://background.pope.invalid; connect-src 'none'; frame-src 'none'; object-src 'none'; form-action 'none'; base-uri 'none'",
               },
               injectTo: 'head-prepend',
             },

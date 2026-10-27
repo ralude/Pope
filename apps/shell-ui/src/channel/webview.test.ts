@@ -80,6 +80,47 @@ describe('REQ-003-03/04/63: canal WebView2', () => {
     channel.stop();
   });
 
+  it('REQ-003-73: deja pasar el aviso de fondo del agente, con y sin imagen, y descarta el que rompe el contrato', () => {
+    const bridge = new FakeBridge();
+    const channel = new WebViewChannel(bridge);
+    const events: ChannelEvent[] = [];
+    channel.start((event) => events.push(event));
+    bridge.receive(status('online'));
+    const message = {
+      type: 'lockBackground',
+      revision: 3,
+      background: {
+        sha256: 'a'.repeat(64),
+        size: 1234,
+        mimeType: 'image/webp',
+        width: 1280,
+        height: 720,
+      },
+    };
+
+    bridge.receive({ version: 1, kind: 'message', elapsedSeconds: 0, message });
+    expect(events.at(-1)).toEqual({ kind: 'message', message, elapsedSeconds: 0 });
+    // Sin imagen (valor inicial o fondo quitado): también llega, para volver al fondo de Pope.
+    bridge.receive({
+      version: 1,
+      kind: 'message',
+      elapsedSeconds: 0,
+      message: { type: 'lockBackground', revision: 4, background: null },
+    });
+    expect(events.at(-1)).toMatchObject({ message: { revision: 4, background: null } });
+
+    // Una huella que no es una huella nunca llega a las pantallas, ni como parte de una URL.
+    const before = events.length;
+    bridge.receive({
+      version: 1,
+      kind: 'message',
+      elapsedSeconds: 0,
+      message: { ...message, background: { ...message.background, sha256: '../x' } },
+    });
+    expect(events).toHaveLength(before);
+    channel.stop();
+  });
+
   it('offline impide solicitudes y una nueva conexión no reenvía la anterior', () => {
     const bridge = new FakeBridge();
     const channel = new WebViewChannel(bridge);

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import type { NodeToPcMessage } from '@pope/shared';
+import type { LockBackgroundImage, NodeToPcMessage } from '@pope/shared';
 
+import type { ShellMessage } from './channel.js';
 import { applyEvent, dismissEnded, dismissWarning, INITIAL_FEED, type PcFeed } from './feed.js';
 
 const SESSION = '01900000-0000-7000-8000-0000000000aa';
@@ -28,6 +29,42 @@ const ACTIVE = active(1500);
 function receive(feed: PcFeed, message: NodeToPcMessage, now = 0): PcFeed {
   return applyEvent(feed, { kind: 'message', message }, now);
 }
+
+describe('fondo de bloqueo (REQ-003-73)', () => {
+  const image: LockBackgroundImage = {
+    sha256: 'a'.repeat(64),
+    size: 1234,
+    mimeType: 'image/webp',
+    width: 1280,
+    height: 720,
+  };
+  const background = (revision: number, value: LockBackgroundImage | null): ShellMessage => ({
+    type: 'lockBackground',
+    revision,
+    background: value,
+  });
+  const received = (feed: PcFeed, message: ShellMessage): PcFeed =>
+    applyEvent(feed, { kind: 'message', message }, 0);
+
+  it('empieza con el fondo de Pope, recuerda el que avisa el agente y vuelve al de Pope sin imagen', () => {
+    expect(INITIAL_FEED.background).toBeNull();
+    const custom = received(INITIAL_FEED, background(1, image));
+    expect(custom.background).toEqual(image);
+    expect(received(custom, background(2, null)).background).toBeNull();
+  });
+
+  it('el estado de la sesión, su fin y la pérdida de conexión no cambian el fondo', () => {
+    const custom = received(INITIAL_FEED, background(1, image));
+    expect(receive(custom, ACTIVE).background).toEqual(image);
+    expect(
+      receive(receive(custom, ACTIVE), { type: 'state', status: 'locked' }).background,
+    ).toEqual(image);
+    expect(
+      receive(custom, { type: 'sessionEnded', sessionId: SESSION, reason: 'exhausted' }).background,
+    ).toEqual(image);
+    expect(applyEvent(custom, { kind: 'status', status: 'offline' }, 0).background).toEqual(image);
+  });
+});
 
 describe('avisos de fin de tiempo (T48, REQ-001-24)', () => {
   const warned = receive(receive(INITIAL_FEED, active(300)), {
