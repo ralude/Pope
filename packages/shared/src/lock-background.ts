@@ -60,3 +60,4 @@ export const lockBackgroundErrorSchema = z.strictObject({
   ]),
   message: z.string().min(1),
 });
+export type LockBackgroundError = z.infer<typeof lockBackgroundErrorSchema>;

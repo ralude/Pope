@@ -7,9 +7,10 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  PayloadTooLargeException,
   UnsupportedMediaTypeException,
 } from '@nestjs/common';
-import { type Actor, type Product } from '@pope/shared';
+import { type Actor, PRODUCT_PHOTO_MAX_BYTES, type Product } from '@pope/shared';
 import { eq } from 'drizzle-orm';
 
 import { APP_CONFIG, type AppConfig } from '../config.js';
@@ -50,6 +51,10 @@ export class ProductPhotosService {
   async set(id: string, body: Buffer, actor: Actor): Promise<Product> {
     if (!isWebp(body)) {
       throw new UnsupportedMediaTypeException('La foto debe ser una imagen WebP');
+    }
+    // El parser de `bootstrap.ts` deja pasar hasta 2 MB (el fondo de bloqueo); las fotos, 512 KB.
+    if (body.length > PRODUCT_PHOTO_MAX_BYTES) {
+      throw new PayloadTooLargeException('La foto pesa demasiado');
     }
     const [existing] = await this.db.select().from(products).where(eq(products.id, id));
     if (!existing) {

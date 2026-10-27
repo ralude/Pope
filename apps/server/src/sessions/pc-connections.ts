@@ -82,6 +82,13 @@ export class PcConnections {
     return this.byPc.has(pcId);
   }
 
+  /** Envía el mismo mensaje a todas las PCs conectadas ahora mismo (p. ej. el fondo nuevo). */
+  broadcast(message: NativeNodeToPcMessage): void {
+    for (const pcId of this.byPc.keys()) {
+      this.send(pcId, message);
+    }
+  }
+
   /**
    * Envía un mensaje a la PC si está conectada; devuelve si se envió. Los mensajes se
    * validan con el protocolo antes de salir: un error aquí es un fallo del nodo.

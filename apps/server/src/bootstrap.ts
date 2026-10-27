@@ -4,7 +4,7 @@ import { isAbsolute, relative, resolve } from 'node:path';
 import fastifyCookie from '@fastify/cookie';
 import fastifyStatic from '@fastify/static';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { PRODUCT_PHOTO_MAX_BYTES, PRODUCT_PHOTO_TYPE } from '@pope/shared';
+import { MAX_BACKGROUND_BYTES, PRODUCT_PHOTO_TYPE } from '@pope/shared';
 
 export interface AppOptions {
   /**
@@ -24,15 +24,17 @@ export async function configureApp(
 ): Promise<void> {
   // Lee y escribe cookies: la sesión del personal va en una (REQ-001-40).
   await app.register(fastifyCookie);
-  // Fotos de los productos (REQ-005-03): llegan como cuerpo binario WebP, ya reducidas por el
-  // panel. Sin `@fastify/multipart`: el cuerpo entero es la foto. Más de 512 KB responde 413
+  // Fotos de los productos (REQ-005-03) y fondo de bloqueo (REQ-003-76): llegan como cuerpo
+  // binario WebP, ya reducidas por el panel. Sin `@fastify/multipart`: el cuerpo entero es la
+  // imagen. Fastify admite un solo parser por tipo, así que su límite es el mayor de los dos
+  // (2 MB); el de las fotos, 512 KB, lo vigila `ProductPhotosService`. Más de 2 MB responde 413
   // y otro tipo, 415, sin llegar al controlador.
   app
     .getHttpAdapter()
     .getInstance()
     .addContentTypeParser(
       PRODUCT_PHOTO_TYPE,
-      { parseAs: 'buffer', bodyLimit: PRODUCT_PHOTO_MAX_BYTES },
+      { parseAs: 'buffer', bodyLimit: MAX_BACKGROUND_BYTES },
       (_request, body, done) => {
         done(null, body);
       },

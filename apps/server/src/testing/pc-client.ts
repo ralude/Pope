@@ -52,6 +52,8 @@ export class PcTestClient {
   readonly commands: Extract<NodeToPcMessage, { type: 'command' }>['command'][] = [];
   /** `maintenanceState` recibidos, en orden; aparte, como los consume el agente (T35). */
   readonly maintenance: Extract<NodeToPcMessage, { type: 'maintenanceState' }>[] = [];
+  /** `lockBackground` recibidos, en orden; también aparte, como los consume el agente (fondo). */
+  readonly backgrounds: Extract<NodeToPcMessage, { type: 'lockBackground' }>[] = [];
   /**
    * Como el agente tras limpiar los procesos del cliente (T29): responde enseguida que el
    * bloqueo se aplicó, para que la PC vuelva a admitir clientes. Los tests del bloqueo lo
@@ -79,6 +81,10 @@ export class PcTestClient {
       }
       if (message.type === 'maintenanceState') {
         this.maintenance.push(message);
+        return;
+      }
+      if (message.type === 'lockBackground') {
+        this.backgrounds.push(message);
         return;
       }
       if (message.type === 'command') {

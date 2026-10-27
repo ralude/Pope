@@ -5,11 +5,13 @@ import { CashModule } from '../cash/cash.module.js';
 import { CombosModule } from '../combos/combos.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module.js';
+import { LockBackgroundModule } from '../lock-background/lock-background.module.js';
 import { SettingsModule } from '../settings/settings.module.js';
 import { TariffsModule } from '../tariffs/tariffs.module.js';
 import { WalletModule } from '../wallet/wallet.module.js';
 import { PcsModule } from '../pcs/pcs.module.js';
 import { ComboSalesController } from './combo-sales.controller.js';
+import { LockBackgroundNotifier } from './lock-background-notifier.js';
 import { PanelHub } from './panel-hub.js';
 import { PausesService } from './pauses.service.js';
 import { PcConnections } from './pc-connections.js';
@@ -51,6 +53,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
     TariffsModule,
     WalletModule,
     PcsModule,
+    LockBackgroundModule,
   ],
   controllers: [
     SessionsController,
@@ -81,6 +84,7 @@ import { TemporarySessionsService } from './temporary-sessions.service.js';
     StaleSessionsJob,
     PcProtocolService,
     PcGateway,
+    LockBackgroundNotifier,
   ],
   exports: [PcConnections, PcControlService, SessionsService, TemporarySessionsService],
 })

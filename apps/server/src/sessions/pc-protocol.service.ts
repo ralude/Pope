@@ -12,6 +12,7 @@ import { CombosService } from '../combos/combos.service.js';
 import { Clock } from '../common/clock.js';
 import { CustomerAuthService } from '../customers/customer-auth.service.js';
 import { DATABASE, type Database } from '../db/database.js';
+import { LockBackgroundService } from '../lock-background/lock-background.service.js';
 import { PcAuthenticationService } from '../pcs/pc-authentication.service.js';
 import { type PcConnection, PcConnections, type PcIdentity } from './pc-connections.js';
 import { PcCommandsService } from './pc-commands.service.js';
@@ -77,6 +78,7 @@ export class PcProtocolService {
     private readonly maintenance: PcMaintenanceService,
     private readonly technicalLogin: TechnicalLoginService,
     private readonly maintenanceExit: MaintenanceExitService,
+    private readonly lockBackground: LockBackgroundService,
     @Inject(DATABASE) private readonly db: Database,
   ) {}
 
@@ -174,6 +176,9 @@ export class PcProtocolService {
       type: 'maintenanceState',
       maintenance: await this.maintenance.current(pc.id),
     });
+    // REQ-003-72: la PC que estaba apagada se entera aquí del fondo que le toca (solo metadatos).
+    const { revision, background } = await this.lockBackground.get();
+    connection.send({ type: 'lockBackground', revision, background });
     await this.control.sync(pc.id, message.controlContext);
     await this.commands.reconnected(pc.id);
   }
