@@ -35,6 +35,10 @@ internal static class Program
         if (args is ["--agent-service-denial", var denialAgentId]) return AgentScmProbe.Denial(denialAgentId);
         if (args is ["--pipe-peer", var pipeName, var serverPid, var pipeMode]) return PipePeer.Run(pipeName, serverPid, pipeMode);
         if (args is ["--shell-host-proof", var hostProofDirectory] && Path.IsPathFullyQualified(hostProofDirectory)) return ShellHostProof.Run(hostProofDirectory);
+        if (args is ["--lock-background-proof", var backgroundProofDirectory] && Path.IsPathFullyQualified(backgroundProofDirectory)) return LockBackgroundProof.Run(backgroundProofDirectory);
+        if (args is ["--background-view", var viewDirectory, var viewImage, var viewWidth, var viewHeight, var viewSeconds]
+            && Path.IsPathFullyQualified(viewDirectory) && Path.IsPathFullyQualified(viewImage))
+            return ShellHostProof.View(viewDirectory, viewImage, int.Parse(viewWidth), int.Parse(viewHeight), int.Parse(viewSeconds));
         if (args is ["--shell-channel-proof", var channelProofDirectory, var channelPipe, var channelParent]
             && Path.IsPathFullyQualified(channelProofDirectory)) return ShellChannelProof.Run(channelProofDirectory, channelPipe, channelParent);
         if (args is ["--session-window", var sessionId, "client" or "admin" or "elevated"])

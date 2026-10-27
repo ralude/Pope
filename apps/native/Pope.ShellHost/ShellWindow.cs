@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 using System.ComponentModel;
+using Pope.Bridge;
 
 namespace Pope.ShellHost;
 
@@ -10,7 +11,7 @@ namespace Pope.ShellHost;
 internal sealed class ShellWindow : Form
 {
     private readonly WebView2 view = new() { Dock = DockStyle.Fill };
-    private readonly string assets, profile;
+    private readonly string assets, profile, backgroundDirectory;
     private readonly HostBridge? bridge;
     private readonly CancellationTokenSource closing = new();
     private Task? bridgeTask;
@@ -18,6 +19,8 @@ internal sealed class ShellWindow : Form
     private JsonElement status = HostBridge.Offline();
     private JsonElement? state;
     private long stateAt;
+    // REQ-003-73: último aviso de fondo que el agente verificó; se repite al recargar la página.
+    private JsonElement? background;
     private StaffMessageWindow? staffMessage;
     internal bool Failed { get; private set; }
     internal int? InitializationHResult { get; private set; }
@@ -27,9 +30,10 @@ internal sealed class ShellWindow : Form
     internal Action? ReadyReceived { get; set; }
     internal TaskCompletionSource<CoreWebView2> Initialized { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    internal ShellWindow(string assets, string profile, HostBridge? bridge = null, bool fullscreen = true)
+    internal ShellWindow(string assets, string profile, HostBridge? bridge = null, bool fullscreen = true, string? backgroundDirectory = null)
     {
         this.assets = assets; this.profile = profile; this.bridge = bridge;
+        this.backgroundDirectory = backgroundDirectory ?? BackgroundFiles.DefaultDirectory;
         Text = "Pope"; BackColor = Color.FromArgb(20, 24, 36);
         if (fullscreen) { FormBorderStyle = FormBorderStyle.None; StartPosition = FormStartPosition.Manual; Bounds = SystemInformation.VirtualScreen; }
         else { Size = new Size(1280, 800); StartPosition = FormStartPosition.CenterScreen; }
@@ -69,6 +73,11 @@ internal sealed class ShellWindow : Form
             };
             core.WebMessageReceived += Message;
             core.SetVirtualHostNameToFolderMapping(HostBoundary.HostName, assets, CoreWebView2HostResourceAccessKind.DenyCors);
+            // REQ-003-73: los fondos que el agente verificó se sirven desde su carpeta, en solo lectura y sin CORS.
+            // WebView2 lanza si la carpeta no existe: la crea el agente antes de lanzar el host; sin ella, no hay fondo
+            // personalizado y el Shell usa el de Pope.
+            if (Directory.Exists(backgroundDirectory))
+                core.SetVirtualHostNameToFolderMapping(HostBoundary.BackgroundHost, backgroundDirectory, CoreWebView2HostResourceAccessKind.DenyCors);
             core.Navigate(HostBoundary.Home);
             if (bridge != null) bridgeTask = bridge.RunAsync(Deliver, closing.Token);
             Initialized.TrySetResult(core);
@@ -90,7 +99,7 @@ internal sealed class ShellWindow : Form
             var envelope = HostBoundary.ReadRequest(e.Source, e.WebMessageAsJson);
             if (envelope.GetProperty("kind").GetString() == "ready")
             {
-                ready = true; Post(status); ReplayState(); ReadyReceived?.Invoke(); return;
+                ready = true; Post(status); ReplayState(); ReplayBackground(); ReadyReceived?.Invoke(); return;
             }
             var request = envelope.GetProperty("request");
             // T32: solo el host confirma que mostró un mensaje del encargado; nunca la interfaz.
@@ -113,6 +122,7 @@ internal sealed class ShellWindow : Form
         if (envelope.GetProperty("kind").GetString() == "status") status = envelope.Clone();
         else if (envelope.GetProperty("message").GetProperty("type").GetString() == "state")
         { state = envelope.Clone(); stateAt = Stopwatch.GetTimestamp(); }
+        else if (envelope.GetProperty("message").GetProperty("type").GetString() == "lockBackground") background = envelope.Clone();
         Post(envelope);
     }, token);
     }
@@ -137,6 +147,8 @@ internal sealed class ShellWindow : Form
         var age = saved.GetProperty("elapsedSeconds").GetInt64() + (long)Stopwatch.GetElapsedTime(stateAt).TotalSeconds;
         Post(JsonSerializer.SerializeToElement(new { version = 1, kind = "message", message = saved.GetProperty("message"), elapsedSeconds = age }));
     }
+    // El fondo no envejece como el estado: se repite tal cual.
+    private void ReplayBackground() { if (background is { } saved) Post(saved); }
     private void Post(JsonElement envelope)
     {
         if (ready && !closing.IsCancellationRequested && HostBoundary.Allows(view.CoreWebView2.Source))

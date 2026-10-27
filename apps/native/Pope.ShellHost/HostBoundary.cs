@@ -12,6 +12,10 @@ internal static class HostBoundary
 {
     internal const string HostName = "shell.pope.invalid";
     internal const string Home = "https://shell.pope.invalid/index.html";
+    // REQ-003-73: host aparte, mapeado en solo lectura a la carpeta de fondos del agente. WebView2 no lanza
+    // WebResourceRequested para los hosts mapeados, así que aquí no hay nada que filtrar: solo se puede cargar
+    // como imagen (DenyCors) y `Allows` lo rechaza, así que no se navega a él ni acepta mensajes.
+    internal const string BackgroundHost = "background.pope.invalid";
     internal static bool Allows(string source) => Uri.TryCreate(source, UriKind.Absolute, out var uri)
         && uri.Scheme == "https" && uri.Host == HostName && uri.IsDefaultPort && uri.UserInfo.Length == 0;
 
