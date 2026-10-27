@@ -1,5 +1,6 @@
 import { Redirect, Route, Switch } from 'wouter';
 
+import { BackgroundPage } from './pages/BackgroundPage.js';
 import { CajaPage } from './pages/CajaPage.js';
 import { ClosingsPage } from './pages/ClosingsPage.js';
 import { CombosPage } from './pages/CombosPage.js';
@@ -43,6 +44,9 @@ function Routes() {
           {state.staff.role === 'administrador' && <Route path="/personal" component={StaffPage} />}
           {state.staff.role === 'administrador' && (
             <Route path="/ajustes" component={SettingsPage} />
+          )}
+          {state.staff.role === 'administrador' && (
+            <Route path="/fondo-de-bloqueo" component={BackgroundPage} />
           )}
           <Route>
             <Redirect to="/" />

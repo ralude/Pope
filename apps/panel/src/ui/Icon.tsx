@@ -69,6 +69,13 @@ const PATHS = {
       <path d="M13 4.5a3 3 0 0 1 0 6M15.5 12.8c1.5.6 2.5 2 2.5 4.2" />
     </>
   ),
+  fondo: (
+    <>
+      <rect x="3" y="4" width="14" height="12" rx="2" />
+      <circle cx="7.5" cy="8.5" r="1.3" />
+      <path d="M3.5 14.5 8 10.5l3 2.5 2-1.5 3.5 3" />
+    </>
+  ),
   turno: (
     <>
       <rect x="2.5" y="6" width="15" height="10" rx="2" />

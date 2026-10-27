@@ -1,0 +1,39 @@
+/* Fondo de bloqueo (spec 003, T44). Colores planos, sin desenfoques ni animaciones. */
+.background-page {
+  max-width: 720px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.background-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.background-preview {
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-2);
+  border-radius: 12px;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+/* Sin deformar: la imagen se ve entera dentro del recuadro, con la proporción que tendrá. */
+.background-preview img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.background-actions {
+  display: flex;
+  gap: 10px;
+}

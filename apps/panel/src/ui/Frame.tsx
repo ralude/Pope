@@ -28,6 +28,12 @@ const SECTIONS: { href: string; label: string; icon: IconName; roles?: StaffRole
   { href: '/tarifas', label: 'Tarifas', icon: 'tarifas' },
   { href: '/personal', label: 'Personal', icon: 'personal', roles: ['administrador'] },
   { href: '/ajustes', label: 'Ajustes del local', icon: 'ajustes', roles: ['administrador'] },
+  {
+    href: '/fondo-de-bloqueo',
+    label: 'Fondo de bloqueo',
+    icon: 'fondo',
+    roles: ['administrador'],
+  },
 ];
 
 const ROLE_LABEL: Record<StaffRole, string> = {

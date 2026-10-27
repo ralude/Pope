@@ -22,6 +22,8 @@ const API = [
   '/exchange-rate',
   '/products',
   '/sales',
+  // Spec 003: fondo de la pantalla de bloqueo (la pantalla del panel es `/fondo-de-bloqueo`).
+  '/lock-background',
 ];
 
 export default defineConfig({
