@@ -61,6 +61,11 @@ internal sealed class AgentRuntime
         channel.Message += maintenance.OnMessage;
         // Al reconectar se reenvían las salidas pendientes hasta que el nodo las reconozca.
         channel.ConnectionChanged += online => { if (online) _ = maintenance.ResendPendingAsync(CancellationToken.None); };
+        // REQ-003-73: la carpeta de fondos debe existir, con sus permisos, antes de que se lance el host.
+        // Si no es la esperada no hay fondo personalizado: el Shell usa el de Pope.
+        var background = BackgroundSetup.Create(BackgroundSetup.DirectoryFor(root),
+            directory => BackgroundFolder.Prepare(directory, requireSystemOwner: true), () => current, Bridge.PublishBackground, log);
+        if (background != null) channel.Message += background.OnMessage;
         var commands = new AgentCommands(state, cleanup, channel.SendMessageAsync, log, power,
             (id, text, token) => Bridge.ShowStaffMessageAsync(id, text, TimeSpan.FromSeconds(10), token), maintenance);
         channel.Message += commands.OnMessage;

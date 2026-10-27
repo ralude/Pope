@@ -67,6 +67,45 @@ public sealed class AgentHostBridgeTests
         finally { stop.Cancel(); try { await running; } catch (OperationCanceledException) { } }
     }
 
+    private static JsonElement Background(int revision) => JsonSerializer.SerializeToElement(new
+    {
+        type = "lockBackground",
+        revision,
+        background = new { sha256 = new string('a', 64), size = 3, mimeType = "image/webp", width = 1, height = 1 }
+    });
+
+    [Fact(DisplayName = "REQ-003-73: un host que se conecta después recibe el último fondo ya verificado, y solo ese")]
+    public async Task LateHostReceivesLastBackground()
+    {
+        using var configuration = AgentConfiguration.Parse(JsonSerializer.SerializeToUtf8Bytes(AgentConfigurationTests.Fixture()));
+        var channel = new AgentChannel(configuration, new AgentLog(Path.GetTempPath()));
+        using var bridge = new AgentHostBridge(channel, new AgentState(configuration.PcId), configuration.PcName); bridge.Subscribe();
+        using var process = Process.GetCurrentProcess(); using var retained = new RetainedProcess(process);
+        var name = PipeEndpoints.NewName(); using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        // El fondo se verifica antes de que haya ningún host conectado.
+        bridge.PublishBackground(Background(1));
+        var running = bridge.RunForHostAsync(process, name, stop.Token);
+        try
+        {
+            using (var client = await PipeEndpoints.Connect(name, retained, stop.Token))
+            {
+                Assert.Equal("status", ProtocolValidation.Parse(await PipeFrames.ReadAsync(client, "bridge-event", stop.Token), "bridge-event").GetProperty("kind").GetString());
+                var replay = ProtocolValidation.Parse(await PipeFrames.ReadAsync(client, "bridge-event", stop.Token), "bridge-event");
+                Assert.Equal("message", replay.GetProperty("kind").GetString());
+                Assert.Equal("lockBackground", replay.GetProperty("message").GetProperty("type").GetString());
+                Assert.Equal(1, replay.GetProperty("message").GetProperty("revision").GetInt32());
+            }
+
+            // El host se reinicia y mientras tanto el fondo cambia: al volver recibe solo el último.
+            bridge.PublishBackground(Background(2));
+            using var again = await PipeEndpoints.Connect(name, retained, stop.Token);
+            await PipeFrames.ReadAsync(again, "bridge-event", stop.Token); // estado offline
+            var latest = ProtocolValidation.Parse(await PipeFrames.ReadAsync(again, "bridge-event", stop.Token), "bridge-event");
+            Assert.Equal(2, latest.GetProperty("message").GetProperty("revision").GetInt32());
+        }
+        finally { stop.Cancel(); try { await running; } catch (OperationCanceledException) { } }
+    }
+
     [Theory(DisplayName = "REQ-003-44/T40: «Terminar y bloquear» del host se atiende en el agente sin pasar por el nodo")]
     [InlineData(true, "maintenanceState")]
     [InlineData(false, "error")]

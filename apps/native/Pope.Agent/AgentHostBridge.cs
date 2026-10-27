@@ -11,6 +11,9 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
     private ClientHost? client;
     private bool online;
     private int attached;
+    // Último fondo verificado en esta PC; solo metadatos (la imagen está en la carpeta de fondos).
+    private readonly object backgroundGate = new();
+    private JsonElement? lastBackground;
     private readonly Dictionary<string, TaskCompletionSource> pendingMessages = [];
     // T40: «Terminar y bloquear» pulsado en la PC. Lo cablea el runtime; sin él no hay acción nativa.
     internal Func<string, CancellationToken, Task<bool>>? EndMaintenance { get; set; }
@@ -36,7 +39,7 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
                 if (!PipeEndpoints.IsHost(pipe, host)) { pipe.Disconnect(); await Task.Delay(100, token); continue; }
                 using var session = new PipeSession(pipe, "shell-request", "bridge-event", () => PipeEndpoints.IsHost(pipe, host), Dispatch);
                 Volatile.Write(ref current, session);
-                PublishStatus(); PublishSnapshot();
+                PublishStatus(); PublishSnapshot(); PublishLastBackground();
                 try { await session.RunAsync(token); }
                 catch (OperationCanceledException) when (token.IsCancellationRequested) { break; }
                 catch { /* Rechazo local sin datos ni excepciones en logs. */ }
@@ -96,9 +99,26 @@ internal sealed class AgentHostBridge(AgentChannel channel, AgentState state, st
         PublishMessage(JsonSerializer.SerializeToElement(error), 0);
     }
     private void OnConnection(bool connected) { online = connected; PublishStatus(); }
-    private void OnMessage(JsonElement message)
+    // REQ-003-73: el agente avisa al host de que el fondo ya está en esta PC (imagen verificada).
+    internal void PublishBackground(JsonElement message)
+    {
+        ProtocolValidation.Parse(JsonSerializer.SerializeToUtf8Bytes(message), "shell-notification");
+        // Se recuerda el último: un host que se conecte después (o tras reiniciarse) lo recibe al entrar.
+        lock (backgroundGate) lastBackground = message.Clone();
+        PublishMessage(message, 0);
+    }
+    private void PublishLastBackground()
+    {
+        JsonElement? saved;
+        lock (backgroundGate) saved = lastBackground;
+        if (saved is { } message) PublishMessage(message, 0);
+    }
+    internal void OnMessage(JsonElement message)
     {
         var type = message.GetProperty("type").GetString();
+        // REQ-003-73: el fondo del nodo solo trae metadatos; lo consume BackgroundSync, que avisa al host
+        // cuando la imagen ya está verificada aquí. El aviso crudo nunca llega al host ni al Shell.
+        if (type == "lockBackground") return;
         // Conservar existencia de sesión para Alt+Tab aislado antes del snapshot de revocación.
         if (type == "pcAuthenticationError") { PublishMessage(message, 0); PublishSnapshot(); return; }
         if (type is "state" or "sessionEnded" or "pcAuthenticationError") PublishSnapshot();

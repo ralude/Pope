@@ -2,7 +2,7 @@ using System.Text;
 
 namespace Pope.Agent;
 
-internal enum AgentLogCode { Started, Stopped, ConfigurationRejected, TransportDisconnected, TransportConnected, RuntimeFailed, RecoveryRejected, ClientScopeRejected, ClientProcessesClosed, ClientProcessesRemaining, CommandRejected, LockApplied, LockFailed, PowerAccepted, PowerFailed, PowerJournalRejected, MessageShown, ExitJournalRejected, ExitRecorded, ExitJournalFull }
+internal enum AgentLogCode { Started, Stopped, ConfigurationRejected, TransportDisconnected, TransportConnected, RuntimeFailed, RecoveryRejected, ClientScopeRejected, ClientProcessesClosed, ClientProcessesRemaining, CommandRejected, LockApplied, LockFailed, PowerAccepted, PowerFailed, PowerJournalRejected, MessageShown, ExitJournalRejected, ExitRecorded, ExitJournalFull, BackgroundFolderRejected }
 
 // REQ-003-63: códigos cerrados, nunca cuerpo, excepción, cabecera o contraseña.
 internal sealed class AgentLog(string directory)
