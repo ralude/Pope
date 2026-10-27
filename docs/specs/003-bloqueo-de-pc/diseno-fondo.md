@@ -1,6 +1,9 @@
 # Diseño del fondo: del agente al Shell
 
 - **Estado:** Aprobado por el mantenedor (2026-10-24), con lectura para `BUILTIN\Users`.
+  **Revisado y aprobado de nuevo el 2026-10-26** tras la prueba acotada: la imagen se sirve desde un
+  segundo host mapeado a la carpeta de fondos, no desde `WebResourceRequested` (frase 4, alternativas
+  descartadas, seguridad y verificación).
 - **Cubre:** REQ-003-63, REQ-003-72, REQ-003-73, REQ-003-74, REQ-003-75; CA-003-04, CA-003-05.
 - **Parte de:** T45 y T46 de [tasks](tasks.md); completa la sección «Fondo» del [plan](plan.md),
   que deja abierto cómo llega la imagen a la interfaz.
@@ -49,20 +52,38 @@ Tres restricciones del código actual impiden el camino obvio:
    nodo lo consume el agente y no lo reenvía tal cual: en la tubería, `lockBackground` pasa a
    significar «este fondo ya está en esta PC». Mientras descarga, envía `backgroundProgress`
    (historia 3).
-4. El **host** sirve la imagen a WebView2 en
-   `https://shell.pope.invalid/lock-background/<sha256>.webp` desde el `WebResourceRequested`
-   que ya tiene: acepta solo un nombre de 64 caracteres hexadecimales en minúscula, abre ese
-   único archivo de la carpeta y responde `image/webp`; cualquier otra ruta bajo
-   `/lock-background/` da 404. No hay otro nombre de host, así que `HostBoundary` no cambia.
-5. El **Shell** pone esa URL de fondo en la pantalla de bloqueo; si no carga, usa el fondo por
-   defecto de Pope. Como ya hace con `state`, el host repite el último `lockBackground` cuando
-   el Shell envía `ready` (por ejemplo, tras recargar la página).
+4. El **host** mapea `https://background.pope.invalid/` a esa carpeta con
+   `SetVirtualHostNameToFolderMapping` (`DenyCors`, solo lectura), igual que ya mapea el host del
+   Shell a sus archivos. Solo la mapea si existe (WebView2 lanza si no): la crea el agente al
+   arrancar, antes de lanzar el host. No hay código del host que sirva archivos ni construya
+   rutas. `HostBoundary.Allows` sigue aceptando solo el host del Shell, así que a ese otro host
+   no se puede navegar ni se aceptan mensajes suyos; solo se carga como imagen.
+5. El **Shell** pone `https://background.pope.invalid/<sha256>.webp` de fondo en la pantalla de
+   bloqueo; si no carga, usa el fondo por defecto de Pope. Su CSP añade exactamente ese host a
+   `img-src`. Como ya hace con `state`, el host repite el último `lockBackground` cuando el
+   Shell envía `ready` (por ejemplo, tras recargar la página).
+
+## Cambio tras la prueba acotada (2026-10-26)
+
+La versión aprobada el 2026-10-24 servía la imagen desde el `WebResourceRequested` del host
+mapeado del Shell. La sonda `--lock-background-proof` (WebView2 155.0.4283.62, Windows 11
+10.0.26300) lo descartó:
+
+| Pregunta | Resultado |
+|---|---|
+| ¿`WebResourceRequested` se lanza para un host con `SetVirtualHostNameToFolderMapping`? | **No.** El manejador solo vio `handler.pope.invalid` (sin mapear); nunca los hosts mapeados, ni la carga de `index.html` |
+| ¿Funciona el manejador con un host sin mapear? | Sí |
+| ¿Un segundo host mapeado a una carpeta aparte sirve la imagen a un `<img>`? | Sí; un archivo inexistente falla limpio (`onerror`) |
+| ¿Se puede mapear una carpeta que no existe? | **No:** lanza `DirectoryNotFoundException` |
+
+Con la ventana real del Shell (`--shell-host-proof`) apareció además que la CSP del Shell
+(`img-src 'self' data:`) bloqueaba la imagen; por eso se añade el host de fondos a `img-src`.
 
 ## Qué entra en cada historia
 
 | Historia | Parte de este diseño |
 |---|---|
-| 1 | Descarga, verificación, carpeta con sus permisos, aviso por la tubería, ruta del host y fondo en el Shell. Al sustituir el fondo, borra el archivo anterior: queda uno como mucho |
+| 1 | Descarga, verificación, carpeta con sus permisos, aviso por la tubería, mapeo del host de fondos y fondo en el Shell. Al sustituir el fondo, borra el archivo anterior: queda uno como mucho |
 | 2 | `lockBackground` con `background: null`: el Shell vuelve al fondo por defecto y el agente borra el archivo |
 | 3 | `backgroundProgress` durante la descarga, sin bloquear el login |
 | 4 | Distinguir revisión descargada y aplicada: como mucho dos archivos (el aplicado y el último descargado) |
@@ -76,14 +97,19 @@ Tres restricciones del código actual impiden el camino obvio:
 | Enviar la imagen troceada por la tubería | Unos 125 frames por imagen en una cola de 32, la imagen entera en memoria del host y más C# |
 | Pasarla al Shell como `data:` por `PostWebMessage` | 2,7 MB de JSON en base64, copiados varias veces; supera de largo el límite de los mensajes |
 | Copiarla en la carpeta `shell` de la instalación | Mezcla datos con binarios instalados; complica actualizar y desinstalar (T48–T52) |
-| Mapear la carpeta a otro nombre de host virtual | Cambia `HostBoundary` y expone la carpeta entera; `WebResourceRequested` ya filtra todo |
+| Servir la imagen desde `WebResourceRequested` del host mapeado del Shell | WebView2 no lanza ese evento para los hosts mapeados (prueba acotada, 2026-10-26) |
+| Un host sin mapear servido por `WebResourceRequested` | Habría que cambiar `HostBoundary` y escribir en C# el código que sirve archivos y valida rutas; el mapeo hace lo mismo sin código |
 
 ## Seguridad
 
 - El usuario cliente puede leer el fondo (ya lo ve en pantalla), pero no escribirlo, borrarlo
   ni crear archivos en la carpeta.
-- El host nunca construye una ruta con texto del Shell sin validarlo: solo acepta el patrón de
-  64 caracteres hexadecimales y resuelve el archivo dentro de la carpeta fija.
+- El host no construye ninguna ruta con texto del Shell: el mapeo de WebView2 resuelve los
+  nombres dentro de la carpeta fija. La huella que llega del nodo sí se usa como nombre de
+  archivo, y la valida el agente (`BackgroundFiles.IsHash`: 64 hexadecimales ASCII en minúscula).
+- Al host de fondos solo se le piden imágenes: `DenyCors` impide leerlo con `fetch`, y
+  `HostBoundary.Allows` lo rechaza, así que `NavigationStarting` cancela cualquier navegación a él.
+  La CSP del Shell añade ese único host a `img-src` y no abre ningún otro origen.
 - Los permisos se fijan con `DirectorySecurity` de .NET, sin P/Invoke nuevo. El agente
   comprueba los permisos de la carpeta antes de usarla, como ya hace la custodia, y rechaza
   enlaces simbólicos o de unión.
@@ -92,14 +118,15 @@ Tres restricciones del código actual impiden el camino obvio:
 
 ## Verificación
 
-- **Primero, una prueba acotada** (incertidumbre técnica principal): comprobar que
-  `WebResourceRequested` atiende una ruta del host mapeado con
-  `SetVirtualHostNameToFolderMapping` y que su respuesta sustituye a la del mapeo. Si no, la
-  alternativa es atender `/lock-background/` antes de que llegue al mapeo o revisar este diseño
-  contigo.
-- Tests C#: validación del nombre (traversal, mayúsculas, longitud), huella errónea sin renombrar,
-  sustitución atómica y descriptor de seguridad de la carpeta (en una carpeta temporal, sin
-  tocar `ProgramData`).
+- **Prueba acotada (hecha, 2026-10-26):** `WebResourceRequested` no se lanza para un host mapeado;
+  de ahí el segundo host mapeado. Queda en la sonda `--lock-background-proof` y en la etapa
+  «fondo» de `--shell-host-proof`, que usa la ventana real del Shell: repite el aviso al enviar
+  `ready`, la imagen carga del host de fondos, un archivo inexistente falla limpio y navegar a
+  ese host se cancela.
+- Tests C#: validación del nombre (traversal, mayúsculas, dígitos no ASCII, longitud), huella o
+  tamaño erróneos sin renombrar, sustitución atómica, descriptor de seguridad de la carpeta y
+  rechazo de enlaces (en una carpeta temporal, sin tocar `ProgramData`), descarga con la
+  credencial por TLS fijado, y que `HostBoundary` no admite el host de fondos.
 - A mano en WebView2 (T46) en el Windows de desarrollo.
 - En la VM, con la cuenta cliente estándar: lee el fondo y no puede escribir en la carpeta.
 
@@ -109,3 +136,12 @@ Tres restricciones del código actual impiden el camino obvio:
 2. Lectura para todos los usuarios locales (`BUILTIN\Users`), no solo para la cuenta cliente,
    mientras no exista el instalador.
 3. T43–T46 autorizadas como las cinco historias de arriba, empezando por la 1.
+
+## Decisiones del mantenedor (2026-10-26)
+
+4. Tras la prueba acotada, el host sirve el fondo desde un segundo host mapeado,
+   `background.pope.invalid`, y no desde `WebResourceRequested`. Se amplía el `img-src` de la CSP
+   del Shell solo con ese host.
+5. La carpeta de fondos es `%ProgramData%\Pope\Background` para el servicio de producción; los
+   servicios de prueba del SCM usan una subcarpeta `Background` de su raíz. El agente la prepara
+   con propietario SYSTEM antes de lanzar el host; el host la mapea solo si existe.

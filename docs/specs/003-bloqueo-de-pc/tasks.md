@@ -553,24 +553,28 @@ cubierto lo suyo. T47 queda para después, todavía en Borrador.
   - **Hacer:** subir WebP binario, validar contenido/dimensiones/límite, guardar por hash y emitir cambio; servir descarga autenticada y metadatos al conectar, con archivos/streaming acotados.
   - **Verificar:** roles, archivo falso/corrupto, hash, cambio/eliminación transaccionales y rollback sin evento huérfano; no duplicar parser WebP ni ampliar límite de 512 KB de productos.
   - **Commit:** `feat(server): distribuye el fondo global de bloqueo`.
+  - **Historia 1 implementada (2026-10-26):** `PUT`/`GET /lock-background` (WebP de hasta 2 MB, cabecera leída sin decodificar, huella como nombre, revisión y evento con actor en una transacción, sin huérfanos si falla, el anterior se borra), descarga por huella con la credencial de la PC, aviso en vivo a las conectadas y tras el `hello`; 13 pruebas e2e en PGlite. Falta: quitar el fondo (historia 2) y probar contra PostgreSQL real antes de entregar al local.
 
 - [ ] **T44: Editor de fondo en el panel**
   - **Cubre:** REQ-003-70, REQ-003-76.
   - **Hacer:** crear `/fondo-de-bloqueo`, aceptar JPG/PNG/WebP hasta 10 MB, reducir sin deformar a 1920×1080 y WebP hasta 2 MB; vista previa y volver al fondo por defecto.
   - **Verificar:** administrador únicamente, formatos/límites, imágenes verticales/grandes y error de compresión; no procesar imágenes en el nodo.
   - **Commit:** `feat(panel): configura el fondo global de bloqueo`.
+  - **Historia 1 implementada (2026-10-26):** pantalla `/fondo-de-bloqueo` solo para el administrador: lee la cabecera (10 MB, 40 Mpx, formato) antes de decodificar, reduce a 1920×1080 sin deformar ni ampliar, comprime a WebP de 2 MB, vista previa y subida; 14 pruebas de lógica y pantalla verificada en Chrome (formatos, vertical, pequeña y los cuatro errores). Falta: «volver al fondo por defecto» (historia 2). La vista previa muestra la imagen entera y el Shell la recorta para cubrir la pantalla (`object-fit: cover`): decidir si la vista previa debe mostrar el recorte.
 
 - [ ] **T45: Descarga y caché nativa del fondo**
   - **Cubre:** REQ-003-72, REQ-003-73, REQ-003-74, REQ-003-75.
   - **Hacer:** descargar con credencial del agente, progreso y reintentos acotados; comprobar SHA-256, guardar temporal y sustituir atómicamente, distinguiendo revisión descargada/aplicada.
   - **Verificar:** corte, hash erróneo, disco lleno, nueva revisión durante descarga y reinicio; conservar copia anterior y funcionamiento offline.
   - **Commit:** `feat(native): descarga y conserva el fondo de bloqueo`.
+  - **Historia 1 implementada (2026-10-26):** almacén con huella y tamaño verificados (temporal y renombrado atómico, el anterior se borra después), carpeta `%ProgramData%\Pope\Background` con SYSTEM y administradores en control total y `Users` solo lectura, sin enlaces, descarga con la credencial por el transporte fijado, aviso al host solo con la imagen verificada, repetición al host que llega después y cableado en `AgentRuntime`; el host sirve la carpeta desde `background.pope.invalid` y no desde `WebResourceRequested` (la prueba acotada lo descartó, [diseño](diseno-fondo.md)); 486 pruebas nativas. Falta: borrar al quitar (2), progreso (3), revisión descargada y aplicada (4), reintentos, disco lleno, reinicio y carrera de revisiones (5), tolerar un fallo al borrar el anterior, y la prueba en la VM con SYSTEM real y la cuenta cliente estándar.
 
 - [ ] **T46: Fondo y progreso en el Shell**
   - **Cubre:** REQ-003-73, REQ-003-74, REQ-003-75; CA-003-04, CA-003-05.
   - **Hacer:** mostrar fondo local y progreso por el puente; mantener imagen durante uso y aplicar revisión al volver al bloqueo; retirada restaura el fondo por defecto.
   - **Verificar:** login disponible durante descarga, sesión sin interrupción, eliminación y nodo ausente; comprobación manual en WebView2.
   - **Commit:** `feat(shell-ui): aplica el fondo local sin interrumpir sesiones`.
+  - **Historia 1 implementada (2026-10-26):** el Shell acepta el aviso del agente, el feed recuerda la imagen, la pantalla de bloqueo la pinta desde `background.pope.invalid` y vuelve al fondo de Pope si no hay imagen o no carga (la CSP admite solo ese host en `img-src`); comprobado con la ventana real de WebView2 (`--shell-host-proof` y `--background-view`, con una imagen real de 1440×1080); 82 pruebas del Shell. Falta: quitar (2), progreso sin bloquear el login (3), sesión abierta (4) y la revisión visual del mantenedor.
 
 - [ ] **T47: Simulación de control y fallos del protocolo**
   - **Cubre:** REQ-003-20, REQ-003-41, REQ-003-44, REQ-003-72.
