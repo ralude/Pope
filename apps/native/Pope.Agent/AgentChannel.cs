@@ -1,9 +1,6 @@
 using Pope.Bridge;
-using System.Net.Security;
 using System.Net.WebSockets;
-using System.Security.Authentication;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 
 namespace Pope.Agent;
@@ -66,11 +63,7 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
             {
                 using var socket = new ClientWebSocket();
                 using var connection = CancellationTokenSource.CreateLinkedTokenSource(token);
-                using var handler = new SocketsHttpHandler();
-                handler.SslOptions.EnabledSslProtocols = SslProtocols.Tls12 | SslProtocols.Tls13;
-                handler.SslOptions.RemoteCertificateValidationCallback = (_, certificate, _, errors) => Trusted(certificate, errors);
-                handler.AllowAutoRedirect = false;
-                handler.UseProxy = false;
+                using var handler = NodeTransport.CreateHandler(() => configuration);
                 using var invoker = new HttpMessageInvoker(handler, disposeHandler: false);
                 socket.Options.SetRequestHeader("Authorization", configuration.Authorization());
                 // No segundo latido implícito; el protocolo tiene su único temporizador de 10 s.
@@ -126,16 +119,6 @@ internal sealed class AgentChannel(AgentConfiguration configuration, AgentLog lo
             }
         }
         finally { Volatile.Write(ref running, 0); }
-    }
-
-    private bool Trusted(X509Certificate? certificate, SslPolicyErrors errors)
-    {
-        if (certificate is null || (errors & (SslPolicyErrors.RemoteCertificateNotAvailable | SslPolicyErrors.RemoteCertificateNameMismatch)) != 0) return false;
-        using var received = X509CertificateLoader.LoadCertificate(certificate.GetRawCertData());
-        return CryptographicOperations.FixedTimeEquals(received.RawData, configuration.NodeCertificate)
-            && received.MatchesHostname(configuration.NodeUrl.DnsSafeHost, allowWildcards: false, allowCommonName: false)
-            && DateTime.UtcNow >= received.NotBefore.ToUniversalTime() && DateTime.UtcNow < received.NotAfter.ToUniversalTime();
-        // La cadena autofirmada solo se admite para el certificado fijado por medio confiable.
     }
 
     internal Task<bool> SendRequestAsync(ReadOnlyMemory<byte> bytes, CancellationToken token)
